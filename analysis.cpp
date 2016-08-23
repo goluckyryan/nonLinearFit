@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
   //####################### fitting
   //for ( int i = 0; i < sizeY; i++){
 	int col = 140, startX = 195, endX = 1000;
-	printf("------ Y : %f  \n", valY[col]);
+	printf("------ Y(%d) : %f  \n", col, valY[col]);
 	double *par = fitX( valX, data[col], startX, endX);
 	
 	printf("(a, Ta, b, Tb): %6f, %4f, %6f, %4f | chi : %.7f\n", 

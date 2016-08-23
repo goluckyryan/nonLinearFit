@@ -181,8 +181,8 @@ double* fitX(const double * xVal, const double yVal[], int start, int end){
 	double mina, minTa, minb, minTb;
 	
 	double maxa = 50.;
-	double stepa = 4;
-	double stepT = 4;
+	double stepa = 2;
+	double stepT = 2;
 	
 	printf(" start: %d (%f), end: %d (%f)\n", start, xVal[start], end, xVal[end]); 
 	
