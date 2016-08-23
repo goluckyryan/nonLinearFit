@@ -30,9 +30,9 @@ int main(int argc, char *argv[]){
  
   //####################### fitting
   //for ( int i = 0; i < sizeY; i++){
-	int i = 280;
-	printf(" Y : %f , ", valY[i]);
-	fitX( valX, data[i]);
+	int col = 100;
+	printf(" Y : %f , ", valY[col]);
+	fitX( valX, data[col]);
   //}
   
   //TODO linearize the non-linear fit, get the fitting ANOVA
@@ -49,7 +49,12 @@ int main(int argc, char *argv[]){
   time_t Tend=time(0); 
   //TODO call external program to plot result.
 
-  //system("gnuplot plot.gp -p");
+  char plot_cmd[100];
+  
+  //for( int i = 1 ; i <= sizeY; i++){
+  sprintf(plot_cmd, "gnuplot -e \"Col=%d\" plot.gp", col);
+  system(plot_cmd);
+  //}
   
   printf("------------------------------------------------------\n"); 
    
