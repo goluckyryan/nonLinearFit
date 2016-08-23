@@ -9,7 +9,6 @@
 #include <math.h> 
 #include <cstring> 
 #include "anaLibrary.h"
-//#include "gnuplot_i.hpp"
  
 using namespace std; 
  
@@ -30,9 +29,13 @@ int main(int argc, char *argv[]){
  
   //####################### fitting
   //for ( int i = 0; i < sizeY; i++){
-	int col = 100;
-	printf(" Y : %f , ", valY[col]);
-	fitX( valX, data[col]);
+	int col = 140, startX = 195, endX = 1000;
+	printf("------ Y : %f  \n", valY[col]);
+	double *par = fitX( valX, data[col], startX, endX);
+	
+	printf("(a, Ta, b, Tb): %6f, %4f, %6f, %4f | chi : %.7f\n", 
+		par[0], par[1], par[2], par[3], par[4]);
+	
   //}
   
   //TODO linearize the non-linear fit, get the fitting ANOVA
@@ -52,7 +55,8 @@ int main(int argc, char *argv[]){
   char plot_cmd[100];
   
   //for( int i = 1 ; i <= sizeY; i++){
-  sprintf(plot_cmd, "gnuplot -e \"Col=%d\" plot.gp", col);
+  sprintf(plot_cmd, "gnuplot -e \"Col=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d;endX=%d\" plot.gp",
+                    col, par[0],par[1],par[2],par[3], startX, endX);
   system(plot_cmd);
   //}
   

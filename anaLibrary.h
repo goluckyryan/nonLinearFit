@@ -10,6 +10,8 @@ int sizeX, sizeY;
 
 int getData(char* filename){
 	
+  int multi = 3; //multiply the zval by 10^(multi)
+	
   string val;
   ifstream file;
   
@@ -64,6 +66,9 @@ int getData(char* filename){
   if( file.good()) getline(file, val); // skip the 1st line by getline
   
   int numRow = 0, count = 0, iY = 0; 
+  double maxZ = 0;
+  double minZ = 0;
+  
   while (file.good()){
    count ++; 
 
@@ -71,21 +76,20 @@ int getData(char* filename){
 	   getline (file, val, ',');  
    }else{
 	   getline (file, val); 
-	   
    }
 
    //get valX
    if( count % numCol == 1){
-	    
 		valX[numRow] = atof(val.c_str())*1e6; // in us
 		//printf("%10d, %3d, %2d|  %s , %f \n", count, numCol, count % numCol , val.c_str(), valX[numRow]); 
    }
    
-   
    // get data
    if( count % 2 == 0){
-
-	   data[iY][numRow] = atof(val.c_str())*1e6; // multiplied by 10^6 times
+	   double Zval = atof(val.c_str())*pow(10,multi); // multiplied by 10^6 times
+	   data[iY][numRow] = Zval;
+	   if( Zval > maxZ) maxZ = Zval;
+	   if( Zval < minZ) minZ = Zval;
 	   //printf("*%10d, %3d, %3d, %s, %f\n", count, count% numCol, iY, val.c_str(), data[iY][numRow]);
 	   iY ++;
    }
@@ -103,7 +107,7 @@ int getData(char* filename){
   double stepX = valX[1]-valX[0];
   
   printf(" X : (%.3f, %.3f), step : %.3f , numX : %d \n", valX[0], valX[numX-1], stepX , numX); 
-  
+  printf(" Z : (%.5f, %.5f)\n", minZ, maxZ);
   // check
   /*
   printf("--------------\n");
@@ -128,24 +132,23 @@ double funcX(double x, double x_off, double a, double Ta, double b, double Tb){
 	}
 }
 
-double leastsq(const double * x, const double * y, double x_off, double a, double Ta, double b, double Tb){
+double leastsq(const double * x, const double * y, double y_off, double x_off, double a, double Ta, double b, double Tb, int start, int end){
 	double chisq = 0;
 	
-	int start = 180, end = 600;
 	int DF = end - start + 1 - 2;
 	
 	for( int i = start ; i < end; i++){
 		double val = funcX(x[i], 0, a, Ta, b, Tb);	
-		double diff = y[i] - val;
+		double diff = y[i] - y_off - val;
 		chisq += pow(diff,2);
 		//printf(" %4d, (%10.3f, %10.6f), %10.3f, %10.6f \n", i,  x[i], y[i], val, diff);
 	}
 	//printf(" chi-squared : %f \n", chisq);
 	
-	return chisq;
+	return pow(chisq/DF,0.5);
 }
 
-double* fitX(const double * xVal, const double yVal[]){
+double* fitX(const double * xVal, const double yVal[], int start, int end){
 	
 	double * output = new double [5]; //0 = a, 1 = Ta, 2 = b, 3 = Tb, 4 = chi-squared
 	
@@ -153,33 +156,63 @@ double* fitX(const double * xVal, const double yVal[]){
 	for (int i = 0; i <= 5 ; i++){
 		output[i] = 0.0;
 	}
+		
+	//get the mean, variance x < 0	
+	double mean = 0;
+	for ( int i = 0; i < start-20; i++){
+		mean += yVal[i];
+	}
+	mean = mean / (start-20);
 	
-	//check input
-	//for( int i = 0 ; i < sizeX; i++) printf(" (%10.3f, %10.3f) \n", xVal[i], yVal[i]*1e6);
+	double sigma =0 ;
+	for ( int i = 0; i < start-20; i++){
+		sigma += pow(yVal[i]-mean,2);
+	}
+	sigma = pow(sigma/(start-20),0.5);
 	
-	double chisq = 0;
+	printf("noise mean: %f, sigma:%f \n", mean, sigma);
+	
 	//find fit by seraching
-	double a, Ta, b, Tb;
+	double chisq=0, a, Ta, b, Tb;
 	b = 0;
 	Tb = 10;
 	
-	double minChisq = 1e10;
+	double minChisq = 1e7;
 	double mina, minTa, minb, minTb;
 	
-	for ( a = 0 ; a < 1e5 ; a += 1e3){
-		for (Ta = 100; Ta > 0; Ta -= 5){
-			chisq = leastsq(xVal, yVal, 0, a, Ta, b, Tb);
-			if( chisq < minChisq) {
-				minChisq = chisq;
-				mina = a;
-				minTa = Ta;
+	double maxa = 50.;
+	double stepa = 4;
+	double stepT = 4;
+	
+	printf(" start: %d (%f), end: %d (%f)\n", start, xVal[start], end, xVal[end]); 
+	
+	for ( a = 0 ; a < 50 ; a += stepa){
+		for (Ta = 50; Ta > 0; Ta -= stepT){
+			for ( b = 0 ; b < maxa ; b += stepa){
+				for (Tb = 100; Tb > Ta; Tb -= stepT){
+					chisq = leastsq(xVal, yVal, mean, 0, a, Ta, b, Tb, start, end);
+					if( chisq < minChisq) {
+						minChisq = chisq;
+						mina  = a;
+						minTa = Ta;
+						minb  = b;
+						minTb = Tb;
+					}
+					//printf("(a, Ta, b, Tb): %4f, %4f, %6f, %4f | chi^2 : %.7f \n", a, Ta, b, Tb, chisq);
+				}
 			}
-			//printf(" a : %f, Ta : %f, chi-squared : %f \n", a, Ta, chisq);
 		}
 	}
 	
-	printf(" a : %10f, Ta : %3.0f, chi^2 : %.7f \n", mina, minTa, minChisq);
+	//printf("(a, Ta, b, Tb): %6f, %4f, %6f, %4f | chi^2 : %.7f \n", mina, minTa, minb, minTb, minChisq);
 
+	//TODO add timer
+
+	output[0] = mina;
+	output[1] = minTa;
+	output[2] = minb;
+	output[3] = minTb;
+	output[4] = minChisq/sigma;
 	
 	return output;
 	
