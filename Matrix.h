@@ -58,6 +58,7 @@ class Matrix;
 double Det(const Matrix& a);
 Matrix Diag(const int n);
 Matrix Diag(const Matrix& v);
+Matrix Transpose(const Matrix& a);
 Matrix Inv(const Matrix& a);
 Matrix Ones(const int rows, const int cols);
 int Size(const Matrix& a, const int i);
@@ -661,6 +662,25 @@ void Swap(double& a, double& b)
   b = temp;
 }
 
+/*
+ * transpose of Matrix a
+ */
+Matrix Transpose(const Matrix& a){
+	
+  int rows = a.GetRows();
+  int cols = a.GetCols();
+	
+	Matrix v;
+	v = Matrix(cols, rows);
+	
+	for ( int i = 1; i <= rows; i++){
+		for ( int j = 1; j <= cols; j++){
+			v(j,i) = a.get(i,j);
+		}
+	}
+	
+	return v;
+}
 /*
  * returns the inverse of Matrix a
  */

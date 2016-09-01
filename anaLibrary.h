@@ -1,6 +1,9 @@
 #ifndef AnaLibrary_H
 #define AnaLibrary_H
 
+#include "Matrix.h"
+#include <random>
+
 using namespace std; 
 
 double valX [1024];      // val of X or time
@@ -123,22 +126,22 @@ int getData(char* filename){
 }
 
 
-double funcX(double x, double x_off, double a, double Ta, double b, double Tb){
+double funcX(double x, double a, double Ta, double b, double Tb){
 	
 	if ( x < 0){
 		return 0;
 	}else{
-		return a * exp(-(x-x_off)/Ta) - b * exp(-(x-x_off)/Tb);
+		return a * exp(-(x)/Ta) + b * exp(-(x)/Tb);
 	}
 }
 
-double leastsq(const double * x, const double * y, double y_off, double x_off, double a, double Ta, double b, double Tb, int start, int end){
+double leastsq(const double * x, const double * y, double y_off, double a, double Ta, double b, double Tb, int start, int end){
 	double chisq = 0;
 	
 	int DF = end - start + 1 - 2;
 	
 	for( int i = start ; i < end; i++){
-		double val = funcX(x[i], 0, a, Ta, b, Tb);	
+		double val = funcX(x[i], a, Ta, b, Tb);	
 		double diff = y[i] - y_off - val;
 		chisq += pow(diff,2);
 		//printf(" %4d, (%10.3f, %10.6f), %10.3f, %10.6f \n", i,  x[i], y[i], val, diff);
@@ -190,7 +193,7 @@ double* fitX(const double * xVal, const double yVal[], int start, int end){
 		for (Ta = 50; Ta > 0; Ta -= stepT){
 			for ( b = 0 ; b < maxa ; b += stepa){
 				for (Tb = 100; Tb > Ta; Tb -= stepT){
-					chisq = leastsq(xVal, yVal, mean, 0, a, Ta, b, Tb, start, end);
+					chisq = leastsq(xVal, yVal, mean, a, Ta, b, Tb, start, end);
 					if( chisq < minChisq) {
 						minChisq = chisq;
 						mina  = a;
@@ -245,5 +248,92 @@ int output(char* filename){
 	return 0;
 }
 
-
+Matrix regression(double a, double Ta, double b, double Tb){
+	
+	int yIndex = 139;
+	int xStart = 195;
+	int xEnd = 1000;
+	
+	double Yvalue = valY[yIndex];
+	printf(" --- B field : %f \n", Yvalue);
+	
+	int n = xEnd - xStart ;
+	
+	printf(" --- forming Y. dim(Y) = %d \n", n);
+	Matrix Y(n,1);
+	for(int i = 1; i <= n ; i++) {
+		Y(i,1) = data[yIndex][i - 1 + xStart];
+	}
+	printf(" --- forming f(i) = funcX( x_i, a, b, c, d) \n");
+	Matrix f(n,1);
+	for(int i = 1; i <= n ; i++) {
+		f(i,1) = funcX(valX[i - 1 +xStart], a, Ta, b, Tb);
+	}
+	
+	printf(" --- forming F(i) = grad(f(i)) \n");
+	//printf(" --- forming F(i) = { exp(-x/Ta) , a * x * exp(-x/Ta)/ Ta/Ta , exp(-x/Tb) , b * x * exp(-x/Tb)/ Tb/Tb } \n");
+	Matrix F(n,4);
+	for(int i = 1; i <= n ; i++) {
+		double x = valX[i - 1 +xStart];
+		F(i,1) = exp(-x/Ta);
+		F(i,2) = a * x * exp(-x/Ta)/Ta/Ta;
+		F(i,3) = exp(-x/Tb);
+		F(i,4) = b * x * exp(-x/Tb)/Tb/Tb;
+	}
+	
+	printf(" --- cal. new parameters\n");
+	Matrix Ft = Transpose(F); printf("    Ft(%d,%d)\n", Ft.GetRows(), Ft.GetCols());
+	Matrix FtF = Ft*F;        printf("   FtF(%d,%d)\n", FtF.GetRows(), FtF.GetCols());
+	Matrix CoVar = Inv(FtF);  printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
+	
+	CoVar.Print();
+	
+	Matrix dY = Y - f;    printf("    dY(%d,%d)\n", dY.GetRows(), dY.GetCols());
+	Matrix FtdY = Ft*dY;  printf("  FtdY(%d,%d)\n", FtdY.GetRows(), FtdY.GetCols());
+	
+	Matrix par_old(4,1);
+	par_old(1,1) = a;
+	par_old(2,1) = Ta;
+	par_old(3,1) = b;
+	par_old(4,1) = Tb;
+	
+	Matrix dpar = CoVar * FtdY;  printf("  dpar(%d,%d)\n", dpar.GetRows(), dpar.GetCols());
+	
+	Matrix par = par_old + dpar;
+	
+	printf(" old par : "); Transpose(par_old).Print();
+	printf(" new par : "); Transpose(par).Print();
+	
+	Matrix SSR = Transpose(dY)*dY;
+	printf(" SSR = %f \n", SSR(1,1));
+	
+	double var = SSR(1,1) / (n - 4);
+	
+	Matrix sigma(4,1);
+	sigma(1,1) = sqrt(var * CoVar(1,1));
+	sigma(2,1) = sqrt(var * CoVar(2,2));
+	sigma(3,1) = sqrt(var * CoVar(3,3));
+	sigma(4,1) = sqrt(var * CoVar(4,4));
+	
+	printf(" sigma : "); Transpose(sigma).Print();
+	
+	Matrix tDis(4,1);
+	tDis(1,1) = par(1,1)/sigma(1,1);
+	tDis(2,1) = par(2,1)/sigma(2,1);
+	tDis(3,1) = par(3,1)/sigma(3,1);
+	tDis(4,1) = par(4,1)/sigma(4,1);
+	
+	printf(" t-dis : "); Transpose(tDis).Print();
+	
+	// The p-value could be defined by ourself
+	//std::default_random_engine generator;
+	//std::student_t_distribution<double> distribution(n-4);
+	//
+	//printf(" p-value : %f \n", distribution(tDis(1,1)));
+	
+	printf("-------------------------------------\n");
+	
+	return par;
+	
+}
 #endif
