@@ -372,7 +372,7 @@ Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 
 }
 
-void SaveFitResult(char* filename, char* mode, int yIndex, Matrix * output){
+void SaveFitResult(char* filename, int yIndex, Matrix * output){
 
 	//output of data
 	Matrix par = output[0];
@@ -397,7 +397,7 @@ void SaveFitResult(char* filename, char* mode, int yIndex, Matrix * output){
 	FILE * file;
 
 	if( std::abs(a[0]) < 1e+3 && a[1]>0 && a[1] < 1000){ 
-		file = fopen (filename, mode);	
+		file = fopen (filename, "a+");	
 		//output of B-field
 		fprintf(file, "%3d, %7.3f, ", yIndex, valY[yIndex]);
 		//output of data

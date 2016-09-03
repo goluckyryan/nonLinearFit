@@ -34,6 +34,10 @@ int main(int argc, char *argv[]){
 	printf("------------------------------\n");
 	printf(" %s \n", filename);
 	getData(filename);
+	
+	///======================= save in dat file
+	//char outfile[100] = "test.dat";
+	//output(outfile);
 
 	///====================== fitting 
 	char savefile[100] = "FitResult.txt";
@@ -46,13 +50,11 @@ int main(int argc, char *argv[]){
 		system("rm FitResult.txt");
 		for( int i = 0; i < sizeY; i++){
 			output = Fitting(i, 0, a, Ta, b, Tb);
-			char mode[5] = "a+";
-			SaveFitResult(savefile, mode, i, output);
+			SaveFitResult(savefile, i, output);
 		}
 	}else{
 		output = Fitting(yIndex,3, a, Ta, b, Tb);
-		char mode[5] = "w+";
-		SaveFitResult(savefile_single, mode,yIndex, output);
+		SaveFitResult(savefile_single, yIndex, output);
 	}
 	
 	///====================== gnuplot
