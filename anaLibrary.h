@@ -24,7 +24,7 @@ int sizeX, sizeY;
 
 int getData(char* filename){
 	
-  int multi = 3; //multiply the zval by 10^(multi)
+  int multi_Z = 3; //multiply the zval by 10^(multi_Z)
 	
   string val;
   ifstream file;
@@ -100,7 +100,7 @@ int getData(char* filename){
    
    // get data
    if( count % 2 == 0){
-	   double Zval = atof(val.c_str())*pow(10,multi); // multiplied by 10^6 times
+	   double Zval = atof(val.c_str())*pow(10,multi_Z); // multiplied by 10^6 times
 	   data[iY][numRow] = Zval;
 	   if( Zval > maxZ) maxZ = Zval;
 	   if( Zval < minZ) minZ = Zval;
@@ -302,15 +302,17 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	Matrix* output = regression(1, yIndex, a, Ta, b, Tb, info); 
 	Matrix sol = output[0];
 	Matrix dpar = output[1];
+	sol = output[0]; 
 
 	int count = 2;
-
-	while( std::abs(dpar(1,1)) > 0.01 && 
+		
+	while( sol(1,1) != ERROR &&
+		   std::abs(dpar(1,1)) > 0.01 && 
 		   std::abs(dpar(2,1)) > 0.01 &&
 		   std::abs(dpar(3,1)) > 0.01 && 
 		   std::abs(dpar(4,1)) > 0.01 ){
 
-		if( info == 3) printf(" %d  ", count ++ );
+		if( info >= 3) printf(" %d  ", count ++ );
 		output = regression(1, yIndex, sol(1,1), sol(2,1), sol(3,1), sol(4,1), info); 
 		sol = output[0]; 
 		dpar = output[1];
@@ -318,6 +320,7 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 			break;
 		} 
 	}
+
 	
 	if( info >= 3) if(sol(1,1) != ERROR ) printf("| End.\n");
 	//printf("         sol  : "); Transpose(sol).Print();
@@ -339,8 +342,10 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 		sol = output[0]; 
 		dpar = output[1];
 
+		
 		while( std::abs(dpar(1,1)) > 0.01 && 
-			   std::abs(dpar(2,1)) > 0.01 ){
+			   std::abs(dpar(2,1)) > 0.01 &&
+			   sol(1,1) != ERROR ){
 			count ++ ;
 			if( info >= 3) printf(" %d  ", count);
 			output = regression(0, yIndex, sol(1,1), sol(2,1), 0, 100, info); 
