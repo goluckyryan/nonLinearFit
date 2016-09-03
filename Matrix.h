@@ -3,7 +3,8 @@ A simple matrix class
 c++ code
 Author: Jos de Jong, Nov 2007. Updated March 2010
 
-http://www.speqmath.com/tutorials/matrix/matrix.html
+modifier : Ryan Tang, Sept 2016
+modified from : http://www.speqmath.com/tutorials/matrix/matrix.html
 
 With this class you can:
   - create a 2D matrix with custom size
@@ -774,14 +775,15 @@ Matrix Inv(const Matrix& a)
   }
   else
   {
-    if (rows == cols)
-    {
-      throw Exception("Matrix must be square");
-    }
-    else
-    {
-      throw Exception("Determinant of matrix is zero");
-    }
+	throw Exception(" fail to calculate inverse");
+    //if (rows == cols)
+    //{
+    //  throw Exception("Matrix must be square");
+    //}
+    //else
+    //{
+    //  throw Exception("Determinant of matrix is zero");
+    //}
   }
   return res;
 }

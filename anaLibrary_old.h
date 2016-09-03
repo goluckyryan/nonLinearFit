@@ -1,19 +1,7 @@
 #ifndef AnaLibrary_H
 #define AnaLibrary_H
 
-#include <istream> 
-#include <fstream> 
-#include <string> 
-#include <sstream> 
-#include <cstdlib> 
-#include <cmath> 
-#include <ctime> 
-#include <stdio.h> 
-#include <math.h> 
-#include <cstring> 
 #include "Matrix.h"
-
-double ERROR = 999.;
 
 using namespace std; 
 
@@ -136,6 +124,102 @@ int getData(char* filename){
   return 0;
 }
 
+
+double funcX(double x, double a, double Ta, double b, double Tb){
+	
+	if ( x < 0){
+		return 0;
+	}else{
+		return a * exp(-(x)/Ta) + b * exp(-(x)/Tb);
+	}
+}
+
+double leastsq(const double * x, const double * y, double y_off, double a, double Ta, double b, double Tb, int start, int end){
+	double chisq = 0;
+	
+	int DF = end - start + 1 - 2;
+	
+	for( int i = start ; i < end; i++){
+		double val = funcX(x[i], a, Ta, b, Tb);	
+		double diff = y[i] - y_off - val;
+		chisq += pow(diff,2);
+		//printf(" %4d, (%10.3f, %10.6f), %10.3f, %10.6f \n", i,  x[i], y[i], val, diff);
+	}
+	//printf(" chi-squared : %f \n", chisq);
+	
+	return pow(chisq/DF,0.5);
+}
+
+double* fitX(const double * xVal, const double yVal[], int start, int end){
+	
+	double * output = new double [5]; //0 = a, 1 = Ta, 2 = b, 3 = Tb, 4 = chi-squared
+	
+	//initailized
+	for (int i = 0; i <= 5 ; i++){
+		output[i] = 0.0;
+	}
+		
+	//get the mean, variance x < 0	
+	double mean = 0;
+	for ( int i = 0; i < start-20; i++){
+		mean += yVal[i];
+	}
+	mean = mean / (start-20);
+	
+	double sigma =0 ;
+	for ( int i = 0; i < start-20; i++){
+		sigma += pow(yVal[i]-mean,2);
+	}
+	sigma = pow(sigma/(start-20),0.5);
+	
+	printf("noise mean: %f, sigma:%f \n", mean, sigma);
+	
+	//find fit by seraching
+	double chisq=0, a, Ta, b, Tb;
+	b = 0;
+	Tb = 10;
+	
+	double minChisq = 1e7;
+	double mina, minTa, minb, minTb;
+	
+	double maxa = 50.;
+	double stepa = 2;
+	double stepT = 2;
+	
+	printf(" start: %d (%f), end: %d (%f)\n", start, xVal[start], end, xVal[end]); 
+	
+	for ( a = 0 ; a < 50 ; a += stepa){
+		for (Ta = 50; Ta > 0; Ta -= stepT){
+			for ( b = 0 ; b < maxa ; b += stepa){
+				for (Tb = 100; Tb > Ta; Tb -= stepT){
+					chisq = leastsq(xVal, yVal, mean, a, Ta, b, Tb, start, end);
+					if( chisq < minChisq) {
+						minChisq = chisq;
+						mina  = a;
+						minTa = Ta;
+						minb  = b;
+						minTb = Tb;
+					}
+					//printf("(a, Ta, b, Tb): %4f, %4f, %6f, %4f | chi^2 : %.7f \n", a, Ta, b, Tb, chisq);
+				}
+			}
+		}
+	}
+	
+	//printf("(a, Ta, b, Tb): %6f, %4f, %6f, %4f | chi^2 : %.7f \n", mina, minTa, minb, minTb, minChisq);
+
+	//TODO add timer
+
+	output[0] = mina;
+	output[1] = minTa;
+	output[2] = minb;
+	output[3] = minTb;
+	output[4] = minChisq/sigma;
+	
+	return output;
+	
+}
+
 int output(char* filename){
 	FILE * file;
 	file = fopen (filename, "w+");
@@ -167,20 +251,14 @@ double cum_tDis30(double x){
 		return 1/(1+exp(-x/0.6));
 }
 
-Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb, int info){
+Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb){
 	
+
 	int xStart = 195;
 	int xEnd = 1000;
 	
 	int p = 2; // number of parameters
 	if( tag ) p = 4;
-	
-	Matrix * output = new Matrix[5]; // 0 = par; 1 = dpar; 2 = sigma ; 3 = t-dis, 4 = p-value;
-	output[0] = Ones(p, 1);
-	output[1] = Ones(p, 1);
-	output[2] = Ones(p, 1);
-	output[3] = Ones(p, 1);
-	output[4] = Ones(p, 1);
 	
 	int n = xEnd - xStart ;
 	
@@ -213,16 +291,7 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	//printf(" --- cal. new parameters\n");
 	Matrix Ft = Transpose(F); //printf("    Ft(%d,%d)\n", Ft.GetRows(), Ft.GetCols());
 	Matrix FtF = Ft*F;        //printf("   FtF(%d,%d)\n", FtF.GetRows(), FtF.GetCols());
-	
-	Matrix CoVar;
-	try{
-		CoVar = Inv(FtF);  //printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
-	}catch( Exception err){
-		if( info >= 1) printf("%s. #par=%d | Terminated.\n", err.msg, p);
-		//FtF.Print();
-		(output[0])(1,1) = ERROR;
-		return output;
-	}
+	Matrix CoVar = Inv(FtF);  //printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
 	
 	//CoVar.Print();
 	
@@ -276,6 +345,8 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	
 	//printf("-------------------------------------\n");
 	
+	Matrix * output = new Matrix[5]; // 0 = par; 1 = dpar; 2 = sigma ; 3 = t-dis, 4 = p-value;
+	
 	output[0] = par;
 	output[1] = dpar;
 	output[2] = sigma;
@@ -286,20 +357,18 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	
 }
 
-int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
+void Fitting(int yIndex){
 	
-	//info < 0; mo msg;
-	//info = 0; only B-field and sol;
-	//info = 1; + sigma 
-	//info = 2; + p-value;
-	//info = 3; + Regression;
+	double  a = 40;
+	double Ta = 35;
+	double  b = -30;
+	double Tb = 60;
 
 	double Yvalue = valY[yIndex];
-	if( info >= 0) printf("=============== index : %3d, B field : %f ", yIndex, Yvalue);
-	if( info >= 1) printf("\n");
+	printf(" --- B field : %f \n", Yvalue);
 
-	if( info >= 3) printf(" Regression of 4 parameters %d  ", 1 );
-	Matrix* output = regression(1, yIndex, a, Ta, b, Tb, info); 
+	printf(" Regression of 4 parameters %d  ", 1 );
+	Matrix* output = regression(1, yIndex, a, Ta, b, Tb); 
 	Matrix sol = output[0];
 	Matrix dpar = output[1];
 
@@ -310,16 +379,13 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 		   std::abs(dpar(3,1)) > 0.01 && 
 		   std::abs(dpar(4,1)) > 0.01 ){
 
-		if( info == 3) printf(" %d  ", count ++ );
-		output = regression(1, yIndex, sol(1,1), sol(2,1), sol(3,1), sol(4,1), info); 
+		printf(" %d  ", count ++ );
+		output = regression(1, yIndex, sol(1,1), sol(2,1), sol(3,1), sol(4,1)); 
 		sol = output[0]; 
 		dpar = output[1];
-		if( sol(1,1) == ERROR ) {
-			break;
-		} 
 	}
 	
-	if( info >= 3) if(sol(1,1) != ERROR ) printf("| End.\n");
+	printf("| End.\n");
 	//printf("         sol  : "); Transpose(sol).Print();
 	//printf("        sigma : "); Transpose(output[2]).Print();
 	//printf("        t-dis : "); Transpose(output[3]).Print();
@@ -332,36 +398,30 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 		ApValue(3,1) > 0.05 ||
 		ApValue(4,1) > 0.05 ){ //95% confident level
 
-		if( info >= 3) {printf(" ******************** Result rejected, Appr. p-Value : "); Transpose(output[4]).Print();}
+		printf(" ******************** Result rejected, Appr. p-Value : "); Transpose(output[4]).Print();
 		count = 1;
-		if( info >= 3) printf(" Regression of 2 parameters %d  ", count);
-		output = regression(0, yIndex, a, Ta, 0, 100, info); 
+		printf(" Regression of 2 parameters %d  ", count);
+		output = regression(0, yIndex, a, Ta, b, Tb); 
 		sol = output[0]; 
 		dpar = output[1];
 
 		while( std::abs(dpar(1,1)) > 0.01 && 
 			   std::abs(dpar(2,1)) > 0.01 ){
 			count ++ ;
-			if( info >= 3) printf(" %d  ", count);
-			output = regression(0, yIndex, sol(1,1), sol(2,1), 0, 100, info); 
+			printf(" %d  ", count);
+			output = regression(0, yIndex, sol(1,1), sol(2,1), 0, 0); 
 			sol = output[0]; 
 			dpar = output[1];
-			if( sol(1,1) == ERROR ) {
-				break;
-			} 
 		}
-		if( info >= 3) printf("| End.\n");
+		printf("| End.\n");
 	}
 
 
-	if( info >= 3) printf("############# \n");
-	if( info >= 0) {printf("         sol  : "); Transpose(sol).Print();}
-	if( info >= 1) {printf("        sigma : "); Transpose(output[2]).Print();}
-	//if( info >= 0) {printf("        t-dis : "); Transpose(output[3]).Print();}
-	if( info >= 2) {printf("Appr. p-Value : "); Transpose(output[4]).Print();}
-
-	
-	return 0;
+	printf("############# \n");
+	printf("         sol  : "); Transpose(sol).Print();
+	printf("        sigma : "); Transpose(output[2]).Print();
+	printf("        t-dis : "); Transpose(output[3]).Print();
+	printf("Appr. p-Value : "); Transpose(output[4]).Print();
 
 }
 

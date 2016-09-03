@@ -1,39 +1,35 @@
-#include <istream> 
-#include <fstream> 
-#include <string> 
-#include <sstream> 
-#include <cstdlib> 
-#include <cmath> 
-#include <ctime> 
-#include <stdio.h> 
-#include <math.h> 
-#include <cstring> 
-#include "anaLibrary.h"
 
+#include "anaLibrary.h"
  
 using namespace std; 
  
 int main(int argc, char *argv[]){ 
-  
+	
+	if( argc != 2){
+		printf("usage: ./test.o yindex\n");
+		return 1;
+	}
 
-  char filename[100] = "20160725pentacene_pterphenyl.csv";
-  printf("------------------------------\n");
-  printf(" %s \n", filename);
-  
-  getData(filename);
-  
-  printf("------------------------------------------------------\n"); 
-  Matrix temp = regression(60, 35, -30, 60);
-  temp = regression(temp(1,1), temp(2,1), temp(3,1), temp(4,1));
-  temp = regression(temp(1,1), temp(2,1), temp(3,1), temp(4,1));
-  temp = regression(temp(1,1), temp(2,1), temp(3,1), temp(4,1));
-  temp = regression(temp(1,1), temp(2,1), temp(3,1), temp(4,1));
-  temp = regression(temp(1,1), temp(2,1), temp(3,1), temp(4,1));
-  temp = regression(temp(1,1), temp(2,1), temp(3,1), temp(4,1));
-  temp = regression(temp(1,1), temp(2,1), temp(3,1), temp(4,1));
-   
-  return 0; 
- 
+	int yIndex = atoi(argv[1]);
+
+
+	char filename[100] = "20160725pentacene_pterphenyl.csv";
+	printf("------------------------------\n");
+	printf(" %s \n", filename);
+
+	getData(filename);
+
+	if( yIndex == -1){
+		for( int i = 120; i <= 150; i++){
+			Fitting(i);
+		}
+	}else{
+		Fitting(yIndex);
+	}
+	//for( int i = 20; i <= 30; i++){
+	//	Fitting(i);
+	//}
+	
+	return 0; 
 } 
 
-/*========================================*/
