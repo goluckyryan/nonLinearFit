@@ -15,9 +15,9 @@ int main(int argc, char *argv[]){
 	int yIndex = atoi(argv[1]);
 	
 	///defual initial guess value, since the algorithm converge quickly, 1 guess is usually OK.
-	double  a =  40;
-	double Ta =  35;
-	double  b = -30;
+	double  a =  20;
+	double Ta =  20;
+	double  b = -20;
 	double Tb =  60;
 	
 	if( argc >= 4){
@@ -36,19 +36,47 @@ int main(int argc, char *argv[]){
 	getData(filename);
 
 	///====================== fitting 
+	char savefile[100] = "FitResult.txt";
+	
+	Matrix * output;
+	
 	printf ("init guess (a, Ta, b, Tb) = (%3.0f, %3.0f, %3.0f, %3.0f) \n", a, Ta, b, Tb);
 	if( yIndex == -1){
-		for( int i = 120; i <= 150; i++){
-			Fitting(i, 0, a, Ta, b, Tb);
+		system("rm FitResult.txt");
+		for( int i = 0; i < sizeY; i++){
+			output = Fitting(i, 0, a, Ta, b, Tb);
+			char mode[5] = "a+";
+			SaveFitResult(savefile, mode, i, output);
 		}
 	}else{
-		Fitting(yIndex,4, a, Ta, b, Tb);
+		output = Fitting(yIndex,3, a, Ta, b, Tb);
+		char mode[5] = "w+";
+		SaveFitResult(savefile, mode,yIndex, output);
 	}
 	
-	///====================== save fit result
-	
-	
 	///====================== gnuplot
+	char plot_cmd[100];
+	if( yIndex == -1 ){
+		
+		sprintf(plot_cmd, "gnuplot -e \"plot '%s' u 1:2 w lp \" -p", savefile );
+		system(plot_cmd);
+	}else{
+		
+		Matrix sol = output[0];
+		
+		double a, Ta, b, Tb;
+		a  = sol(1,1);
+		Ta = sol(2,1);
+		b  = 0;
+		Tb = 100;
+		if( sol.GetRows() == 4){
+			b  = sol(3,1);
+			Tb = sol(4,1);
+		}
+		sprintf(plot_cmd, "gnuplot -e \"Col=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d;endX=%d\" plot.gp -p",
+                    yIndex, a, Ta, b, Tb, 195, 1000);
+		system(plot_cmd);
+	}
 	
 	
 	return 0; 

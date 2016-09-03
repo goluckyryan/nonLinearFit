@@ -15,6 +15,7 @@
 
 double ERROR = 999.;
 
+
 using namespace std; 
 
 double valX [1024];      // val of X or time
@@ -176,11 +177,11 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	if( tag ) p = 4;
 	
 	Matrix * output = new Matrix[5]; // 0 = par; 1 = dpar; 2 = sigma ; 3 = t-dis, 4 = p-value;
-	output[0] = Ones(p, 1);
-	output[1] = Ones(p, 1);
-	output[2] = Ones(p, 1);
-	output[3] = Ones(p, 1);
-	output[4] = Ones(p, 1);
+	output[0] = Zeros(p, 1);
+	output[1] = Zeros(p, 1);
+	output[2] = Zeros(p, 1);
+	output[3] = Zeros(p, 1);
+	output[4] = Zeros(p, 1);
 	
 	int n = xEnd - xStart ;
 	
@@ -220,7 +221,7 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	}catch( Exception err){
 		if( info >= 1) printf("%s. #par=%d | Terminated.\n", err.msg, p);
 		//FtF.Print();
-		(output[0])(1,1) = ERROR;
+		(output[4])(1,1) = ERROR;
 		return output;
 	}
 	
@@ -286,13 +287,14 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	
 }
 
-int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
+Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	
 	//info < 0; mo msg;
 	//info = 0; only B-field and sol;
 	//info = 1; + sigma 
 	//info = 2; + p-value;
 	//info = 3; + Regression;
+	//info = 4; + Reg4
 
 	double Yvalue = valY[yIndex];
 	if( info >= 0) printf("=============== index : %3d, B field : %f ", yIndex, Yvalue);
@@ -303,10 +305,12 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	Matrix sol = output[0];
 	Matrix dpar = output[1];
 	sol = output[0]; 
+	
+	double errFlag = (output[4])(1,1);
 
 	int count = 2;
 		
-	while( sol(1,1) != ERROR &&
+	while( errFlag != ERROR &&
 		   std::abs(dpar(1,1)) > 0.01 && 
 		   std::abs(dpar(2,1)) > 0.01 &&
 		   std::abs(dpar(3,1)) > 0.01 && 
@@ -316,17 +320,16 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 		output = regression(1, yIndex, sol(1,1), sol(2,1), sol(3,1), sol(4,1), info); 
 		sol = output[0]; 
 		dpar = output[1];
-		if( sol(1,1) == ERROR ) {
-			break;
-		} 
+		errFlag = (output[4])(1,1);
+		if( errFlag == ERROR ) break;
 	}
 
 	
-	if( info >= 3) if(sol(1,1) != ERROR ) printf("| End.\n");
-	//printf("         sol  : "); Transpose(sol).Print();
-	//printf("        sigma : "); Transpose(output[2]).Print();
-	//printf("        t-dis : "); Transpose(output[3]).Print();
-	//printf("Appr. p-Value : "); Transpose(output[4]).Print();
+	if( info >= 3) if( errFlag != ERROR ) printf("| End.\n");
+	if( info >= 4) {printf("         sol  : "); Transpose(sol).Print(); }
+	if( info >= 4) {printf("        sigma : "); Transpose(output[2]).Print();}
+	if( info >= 4) {printf("        t-dis : "); Transpose(output[3]).Print();}
+	if( info >= 4) {printf("Appr. p-Value : "); Transpose(output[4]).Print();}
 
 	Matrix ApValue = output[4];
 
@@ -342,18 +345,18 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 		sol = output[0]; 
 		dpar = output[1];
 
+		errFlag = (output[4])(1,1);
 		
 		while( std::abs(dpar(1,1)) > 0.01 && 
 			   std::abs(dpar(2,1)) > 0.01 &&
-			   sol(1,1) != ERROR ){
+			   errFlag != ERROR ){
 			count ++ ;
 			if( info >= 3) printf(" %d  ", count);
 			output = regression(0, yIndex, sol(1,1), sol(2,1), 0, 100, info); 
 			sol = output[0]; 
 			dpar = output[1];
-			if( sol(1,1) == ERROR ) {
-				break;
-			} 
+			errFlag = (output[4])(1,1);
+			if( errFlag == ERROR ) break;
 		}
 		if( info >= 3) printf("| End.\n");
 	}
@@ -364,10 +367,50 @@ int Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	if( info >= 1) {printf("        sigma : "); Transpose(output[2]).Print();}
 	//if( info >= 0) {printf("        t-dis : "); Transpose(output[3]).Print();}
 	if( info >= 2) {printf("Appr. p-Value : "); Transpose(output[4]).Print();}
-
 	
-	return 0;
+	return output;
 
+}
+
+void SaveFitResult(char* filename, char* mode, int yIndex, Matrix * output){
+
+	//output of data
+	Matrix par = output[0];
+	Matrix sigma = output[2];
+	Matrix pValue = output[4];
+	
+	int p = par.GetRows();
+	
+	double a[4], s[4], pV[4];
+
+	a[0] = par(1,1); s[0] = sigma(1,1); pV[0] = pValue(1,1);
+	a[1] = par(2,1); s[1] = sigma(2,1); pV[1] = pValue(2,1);
+	a[2] = 0       ; s[2] = 0         ; pV[2] = 0;
+	a[3] = 0       ; s[3] = 0         ; pV[3] = 0;
+	
+	if( p == 4){
+		a[2] = par(3,1); s[2] = sigma(3,1); pV[2] = pValue(3,1);
+		a[3] = par(4,1); s[3] = sigma(4,1); pV[3] = pValue(4,1);
+	}
+	
+	
+	FILE * file;
+
+	if( std::abs(a[0]) < 1e+3 && a[1]>0 && a[1] < 1000){ 
+		file = fopen (filename, mode);	
+		//output of B-field
+		fprintf(file, "%7.3f, ", valY[yIndex]);
+		//output of data
+		for ( int i = 0; i < 4 ; i++) fprintf(file, "%12.3f, ", a[i]);
+		for ( int i = 0; i < 4 ; i++) fprintf(file, "%12.3f, ", s[i]);
+		for ( int i = 0; i < 4 ; i++) fprintf(file, "%12.3f, ", pV[i]);
+		fprintf(file, "\n");
+	
+		fclose(file);	
+	}
+	
+	//delete file;
+		
 }
 
 
