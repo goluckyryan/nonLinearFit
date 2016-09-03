@@ -399,11 +399,11 @@ void SaveFitResult(char* filename, char* mode, int yIndex, Matrix * output){
 	if( std::abs(a[0]) < 1e+3 && a[1]>0 && a[1] < 1000){ 
 		file = fopen (filename, mode);	
 		//output of B-field
-		fprintf(file, "%7.3f, ", valY[yIndex]);
+		fprintf(file, "%3d, %7.3f, ", yIndex, valY[yIndex]);
 		//output of data
-		for ( int i = 0; i < 4 ; i++) fprintf(file, "%12.3f, ", a[i]);
-		for ( int i = 0; i < 4 ; i++) fprintf(file, "%12.3f, ", s[i]);
-		for ( int i = 0; i < 4 ; i++) fprintf(file, "%12.3f, ", pV[i]);
+		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", a[i]);
+		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", s[i]);
+		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", pV[i]);
 		fprintf(file, "\n");
 	
 		fclose(file);	

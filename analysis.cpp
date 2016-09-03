@@ -37,6 +37,7 @@ int main(int argc, char *argv[]){
 
 	///====================== fitting 
 	char savefile[100] = "FitResult.txt";
+	char savefile_single[100] = "FitResult_single.txt";
 	
 	Matrix * output;
 	
@@ -51,15 +52,16 @@ int main(int argc, char *argv[]){
 	}else{
 		output = Fitting(yIndex,3, a, Ta, b, Tb);
 		char mode[5] = "w+";
-		SaveFitResult(savefile, mode,yIndex, output);
+		SaveFitResult(savefile_single, mode,yIndex, output);
 	}
 	
 	///====================== gnuplot
 	char plot_cmd[100];
 	if( yIndex == -1 ){
 		
-		sprintf(plot_cmd, "gnuplot -e \"plot '%s' u 1:2 w lp \" -p", savefile );
-		system(plot_cmd);
+		//sprintf(plot_cmd, "gnuplot -e \"plot '%s' u 2:3 w lp \" -p", savefile );
+		//system(plot_cmd);
+		system("gnuplot \"plot_Loop.gp\" -p");
 	}else{
 		
 		Matrix sol = output[0];
