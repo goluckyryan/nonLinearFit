@@ -31,8 +31,6 @@ int main(int argc, char *argv[]){
 
 	///======================= get data
 	char filename[100] = "20160725pentacene_pterphenyl.csv";
-	printf("------------------------------\n");
-	printf(" %s \n", filename);
 	getData(filename);
 	
 	///======================= save in dat file

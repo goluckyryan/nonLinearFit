@@ -15,7 +15,6 @@
 
 double ERROR = 999.;
 
-
 using namespace std; 
 
 double valX [1024];      // val of X or time
@@ -30,6 +29,8 @@ int getData(char* filename){
   string val;
   ifstream file;
   
+  printf("------------------------------\n");
+  printf(" %s \n", filename);
   //------------ get 1st line, determine how many set of data, get valY
   file.open(filename);
   
@@ -133,7 +134,7 @@ int getData(char* filename){
   }
   */
   
-  printf("-------------------------\n");
+  printf("------------------------------\n");
   return 0;
 }
 
@@ -168,6 +169,34 @@ double cum_tDis30(double x){
 		return 1/(1+exp(-x/0.6));
 }
 
+double mean(int yIndex){
+	int xStart = 195-20; // start for fitting, end of finding variance 
+	
+	//find mean
+	double mean = 0;
+	for( int i = 0; i < xStart ; i++){
+		mean += data[yIndex][i];
+	} 
+	mean = mean/xStart;
+	
+	return mean;
+}
+
+double variance(int yIndex){ // finding variance T < ~3 ns
+	int xStart = 195-20; // start for fitting, end of finding variance 
+	
+	const double m = mean(yIndex);
+	
+	//find variance;
+	double var = 0;
+	for( int i = 0; i < xStart ; i++){
+		var += pow(data[yIndex][i] - m,2);
+	} 
+	var = var/(xStart-1);
+	
+	return var;
+}
+
 Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb, int info){
 	
 	int xStart = 195;
@@ -176,12 +205,13 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	int p = 2; // number of parameters
 	if( tag ) p = 4;
 	
-	Matrix * output = new Matrix[5]; // 0 = par; 1 = dpar; 2 = sigma ; 3 = t-dis, 4 = p-value;
+	Matrix * output = new Matrix[6]; // 0 = par; 1 = dpar; 2 = sigma ; 3 = t-dis, 4 = p-value, 5 = SSR
 	output[0] = Zeros(p, 1);
 	output[1] = Zeros(p, 1);
 	output[2] = Zeros(p, 1);
 	output[3] = Zeros(p, 1);
 	output[4] = Zeros(p, 1);
+	output[5] = Zeros(1,1);
 	
 	int n = xEnd - xStart ;
 	
@@ -282,6 +312,7 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	output[2] = sigma;
 	output[3] = tDis;
 	output[4] = ApValue;
+	output[5] = SSR/DF;
 	
 	return output;
 	
@@ -297,10 +328,10 @@ Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	//info = 4; + Reg4
 
 	double Yvalue = valY[yIndex];
-	if( info >= 0) printf("=============== index : %3d, B field : %f ", yIndex, Yvalue);
+	if( info >= 0) printf("========================= index : %3d, B field : %f ", yIndex, Yvalue);
 	if( info >= 1) printf("\n");
 
-	if( info >= 3) printf(" Regression of 4 parameters %d  ", 1 );
+	if( info >= 3) printf(" Regression of 4-parameters: %d ", 1 );
 	Matrix* output = regression(1, yIndex, a, Ta, b, Tb, info); 
 	Matrix sol = output[0];
 	Matrix dpar = output[1];
@@ -316,7 +347,7 @@ Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 		   std::abs(dpar(3,1)) > 0.01 && 
 		   std::abs(dpar(4,1)) > 0.01 ){
 
-		if( info >= 3) printf(" %d  ", count ++ );
+		if( info >= 3) printf("%d ", count ++ );
 		output = regression(1, yIndex, sol(1,1), sol(2,1), sol(3,1), sol(4,1), info); 
 		sol = output[0]; 
 		dpar = output[1];
@@ -333,14 +364,28 @@ Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 
 	Matrix ApValue = output[4];
 
-	if( ApValue(1,1) > 0.05 ||
+	int failFlag = 0;
+	if( ApValue(1,1) != 999 && 
+	   (ApValue(1,1) > 0.05 ||
 		ApValue(2,1) > 0.05 ||
 		ApValue(3,1) > 0.05 ||
-		ApValue(4,1) > 0.05 ){ //95% confident level
+		ApValue(4,1) > 0.05 )
+	   ){ //95% confident level
 
-		if( info >= 3) {printf(" ******************** Result rejected, Appr. p-Value : "); Transpose(output[4]).Print();}
+		if( info >= 3) {printf(" *********** Result rejected, Appr. p-Value : "); Transpose(output[4]).Print();}
+		
+		failFlag = 1;
+	}
+	
+	if( ApValue(1,1) == 999 ) {
+		if( info >= 3) printf(" ********** 4-parameters fit fail to converge, try 2-parameters fit.\n"); 
+		
+		failFlag = 2;
+	}
+	
+	if( failFlag){
 		count = 1;
-		if( info >= 3) printf(" Regression of 2 parameters %d  ", count);
+		if( info >= 3) printf(" Regression of 2-parameters: %d ", count);
 		output = regression(0, yIndex, a, Ta, 0, 100, info); 
 		sol = output[0]; 
 		dpar = output[1];
@@ -351,7 +396,7 @@ Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 			   std::abs(dpar(2,1)) > 0.01 &&
 			   errFlag != ERROR ){
 			count ++ ;
-			if( info >= 3) printf(" %d  ", count);
+			if( info >= 3) printf("%d ", count);
 			output = regression(0, yIndex, sol(1,1), sol(2,1), 0, 100, info); 
 			sol = output[0]; 
 			dpar = output[1];
@@ -361,8 +406,12 @@ Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 		if( info >= 3) printf("| End.\n");
 	}
 
+	double SampleMean = mean(yIndex);
+	double SampleVar = variance(yIndex);
+	double fitVar = output[5](1,1);
+	double redchisq = fitVar/SampleVar;
 
-	if( info >= 3) printf("############# \n");
+	if( info >= 3) printf("####### red-chi^2: %f | FitSigma: %f, SampleSigma(Mean): %f(%f) \n", redchisq, sqrt(fitVar), sqrt(SampleVar), SampleMean);
 	if( info >= 0) {printf("         sol  : "); Transpose(sol).Print();}
 	if( info >= 1) {printf("        sigma : "); Transpose(output[2]).Print();}
 	//if( info >= 0) {printf("        t-dis : "); Transpose(output[3]).Print();}
@@ -378,6 +427,10 @@ void SaveFitResult(char* filename, int yIndex, Matrix * output){
 	Matrix par = output[0];
 	Matrix sigma = output[2];
 	Matrix pValue = output[4];
+	double fitvar = output[5](1,1);
+	
+	double SampleVar = variance(yIndex);
+	double redchisq = fitvar/SampleVar;
 	
 	int p = par.GetRows();
 	
@@ -404,7 +457,7 @@ void SaveFitResult(char* filename, int yIndex, Matrix * output){
 		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", a[i]);
 		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", s[i]);
 		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", pV[i]);
-		fprintf(file, "\n");
+		fprintf(file, "%8.4f\n", redchisq);
 	
 		fclose(file);	
 	}
