@@ -7,8 +7,8 @@ int main(int argc, char *argv[]){
 	
 	if( argc != 2 && argc != 4 && argc != 6){
 		printf("usage: ./analaysis.o yindex (a Ta b Tb)\n");
-		printf("         yIndex = -1 ; loop from 120 to 150 \n");
-		printf("      a Ta b Tb = are optional initial guess \n");
+		printf("         yIndex = -1 ; loop all, minimum massage. \n");
+		printf("      a Ta b Tb = are optional initial guesses. \n");
 		return 1;
 	}
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
 			SaveFitResult(savefile, i, output);
 		}
 	}else{
-		output = Fitting(yIndex,3, a, Ta, b, Tb);
+		output = Fitting(yIndex,4, a, Ta, b, Tb);
 		SaveFitResult(savefile_single, yIndex, output);
 	}
 	
