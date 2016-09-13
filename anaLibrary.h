@@ -196,7 +196,7 @@ double variance(int yIndex){ // finding variance T < ~3 ns
 	return var;
 }
 
-Matrix* regression(bool fitMode, int yIndex,double a, double Ta, double b, double Tb, int info){
+Matrix* regression(bool fit4par, int yIndex,double a, double Ta, double b, double Tb, int info){
 	
 	errFlag = 0;
 	
@@ -204,7 +204,7 @@ Matrix* regression(bool fitMode, int yIndex,double a, double Ta, double b, doubl
 	int xEnd = 1000;
 	
 	int p = 2; // number of parameters
-	if( fitMode ) p = 4;
+	if( fit4par ) p = 4;
 	
 	Matrix * output = new Matrix[6]; // 0 = par; 1 = dpar; 2 = sigma ; 3 = t-dis, 4 = p-value, 5 = SSR
 	output[0] = Zeros(p, 1);
@@ -216,33 +216,29 @@ Matrix* regression(bool fitMode, int yIndex,double a, double Ta, double b, doubl
 	
 	int n = xEnd - xStart ;
 	
-	//printf(" --- forming Y. dim(Y) = %d \n", n);
 	Matrix Y(n,1);
 	for(int i = 1; i <= n ; i++) {
 		Y(i,1) = data[yIndex][i - 1 + xStart];
 	}
-	//if( fitMode ) printf(" --- forming f(i) = a * exp(-t/Ta) - b * exp(-t/Tb)\n");
-	//if (!fitMode) printf(" --- forming f(i) = a * exp(-t/Ta)\n");
+	
 	Matrix f(n,1);
 	for(int i = 1; i <= n ; i++) {
 		//f(i,1) = funcX(valX[i - 1 +xStart], a, Ta, b, Tb);
 		double x = valX[i - 1 +xStart];
 		
 		f(i,1) = a * exp(-x/Ta); 
-		if(  fitMode ) f(i,1) += b * exp(-x/Tb);  
+		if(  fit4par ) f(i,1) += b * exp(-x/Tb);  
 	}
 	
-	//printf(" --- forming F(i) = grad(f(i)) \n");
 	Matrix F(n,p);
 	for(int i = 1; i <= n ; i++) {
 		double x = valX[i - 1 +xStart];
 		F(i,1) = exp(-x/Ta);
 		F(i,2) = a * x * exp(-x/Ta)/Ta/Ta;
-		if( fitMode ) F(i,3) = exp(-x/Tb);
-		if( fitMode ) F(i,4) = b * x * exp(-x/Tb)/Tb/Tb;
+		if( fit4par ) F(i,3) = exp(-x/Tb);
+		if( fit4par ) F(i,4) = b * x * exp(-x/Tb)/Tb/Tb;
 	}
 	
-	//printf(" --- cal. new parameters\n");
 	Matrix Ft = Transpose(F); //printf("    Ft(%d,%d)\n", Ft.GetRows(), Ft.GetCols());
 	Matrix FtF = Ft*F;        //printf("   FtF(%d,%d)\n", FtF.GetRows(), FtF.GetCols());
 	
@@ -250,7 +246,7 @@ Matrix* regression(bool fitMode, int yIndex,double a, double Ta, double b, doubl
 	try{
 		CoVar = Inv(FtF);  //printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
 	}catch( Exception err){
-		if( info >= 1) printf("%s. #par=%d | Terminated.\n", err.msg, p);
+		//if( info >= 1) printf("%s. #par=%d | Terminated.\n", err.msg, p);
 		//FtF.Print();
 		errFlag = 1;
 		return output;
@@ -258,14 +254,19 @@ Matrix* regression(bool fitMode, int yIndex,double a, double Ta, double b, doubl
 	
 	//CoVar.Print();
 	
+	if( isnan(CoVar(1,1)) ) {
+		errFlag = 1;
+		return output;
+	}
+	
 	Matrix dY = Y - f;    //printf("    dY(%d,%d)\n", dY.GetRows(), dY.GetCols());
 	Matrix FtdY = Ft*dY;  //printf("  FtdY(%d,%d)\n", FtdY.GetRows(), FtdY.GetCols());
 	
 	Matrix par_old(p,1);
 	par_old(1,1) = a;
 	par_old(2,1) = Ta;
-	if( fitMode ) par_old(3,1) = b;
-	if( fitMode ) par_old(4,1) = Tb;
+	if( fit4par ) par_old(3,1) = b;
+	if( fit4par ) par_old(4,1) = Tb;
 	
 	Matrix dpar = CoVar * FtdY;  //printf("  dpar(%d,%d)\n", dpar.GetRows(), dpar.GetCols());
 	
@@ -279,8 +280,8 @@ Matrix* regression(bool fitMode, int yIndex,double a, double Ta, double b, doubl
 	
 	int DF = n - p;
 	
-	//if( !fitMode) printf(" sqrt(SSR/DF) = %f \n", sqrt(SSR(1,1)/DF));
-	//if(  fitMode) printf(" sqrt(SSR/DF) = %f \n", sqrt(SSR(1,1)/DF));
+	//if( !fit4par) printf(" sqrt(SSR/DF) = %f \n", sqrt(SSR(1,1)/DF));
+	//if(  fit4par) printf(" sqrt(SSR/DF) = %f \n", sqrt(SSR(1,1)/DF));
 	
 	
 	double var = SSR(1,1) / DF;
@@ -319,7 +320,7 @@ Matrix* regression(bool fitMode, int yIndex,double a, double Ta, double b, doubl
 	
 }
 
-Matrix* GaussNewton(int yIndex, bool fitMode, int info, double a, double Ta, double b, double Tb){
+Matrix* GaussNewton(int yIndex, bool fit4par, int info, double a, double Ta, double b, double Tb){
 	//info < 0; mo msg;
 	//info = 0; only B-field and sol;
 	//info = 1; + sigma 
@@ -327,56 +328,58 @@ Matrix* GaussNewton(int yIndex, bool fitMode, int info, double a, double Ta, dou
 	//info = 3; + Regression;
 	//info = 4; + Reg4
 
-	double Yvalue = valY[yIndex];
-	if( info >= 0) printf("========================= index : %3d, B field : %f ", yIndex, Yvalue);
-	if( info >= 1) printf("\n");
-
-	if( info >= 3) if( fitMode == 1 )printf(" Regression of 4-parameters: %d ", 1 );
-	if( info >= 3) if( fitMode == 0 )printf(" Regression of 2-parameters: %d ", 1 );
+	if( info >= 3) if( fit4par == 1 )printf(" Regression of 4-parameters: ");
+	if( info >= 3) if( fit4par == 0 )printf(" Regression of 2-parameters: ");
 	Matrix* output = NULL;
-	Matrix sol, dpar;
+	Matrix dpar;
 	
 	int count = 0;
 	
 	bool checkdpar = 1;
 	
-	
-	
-	if( fitMode == 1) {
-		sol = Matrix(4,1);
-		sol(1,1) = a; 
-		sol(2,1) = Ta; 
-		sol(3,1) = b; 
-		sol(4,1) = Tb; 
+	double  a1 =  a;
+	double Ta1 = Ta;
+	double  b1 =  b;
+	double Tb1 = Tb;
+	if(fit4par == 0){
+		b1 = 0;
+		Tb = 0;
 	}
-	if( fitMode == 0) {
-		sol = Matrix(2,1);
-		sol(1,1) = a;
-		sol(2,1) = Tb;
-	}
+	
 	do{
 		count ++ ;
 		if( count > 50){
 			errFlag = 2;
 			break;
 		}
-		output = regression(fitMode, yIndex, sol(1,1), sol(2,1), sol(3,1), sol(4,1), info);
-		sol  = output[0];
+		output = regression(fit4par, yIndex, a1, Ta1, b1, Tb1, info);
+		a1  = output[0](1,1);
+		Ta1 = output[0](2,1);
+		b1  = 0;
+		Tb1 = 0;
+		if( fit4par){
+			b1  = output[1](3,1);
+			Tb1 = output[1](4,1);
+		}
+
 		dpar = output[1];
-		printf("dpar: ");Transpose(dpar).Print();
-		
-		if( fitMode == 1) checkdpar = (std::abs(dpar(1,1)) > 0.01 || 
+		//printf("sol : ");Transpose(output[0]).Print();
+		//printf("dpar: ");Transpose(dpar).Print();
+		//printf("sigma: ");Transpose(output[2]).Print();
+		printf("%d ", count);
+		if( fit4par == 1) checkdpar = (std::abs(dpar(1,1)) > 0.01 || 
 										std::abs(dpar(2,1)) > 0.01 ||
 										std::abs(dpar(3,1)) > 0.01 || 
 										std::abs(dpar(4,1)) > 0.01 ) ;
 		
-		if( fitMode == 0) checkdpar = (std::abs(dpar(1,1)) > 0.01 || 
+		if( fit4par == 0) checkdpar = (std::abs(dpar(1,1)) > 0.01 || 
 										std::abs(dpar(2,1)) > 0.01 ) ;
 		
 	}while(errFlag == 0  && checkdpar); //iterate when no err and any of the dpar > 0.01;
 	
 	
 	if( info >= 3) if( errFlag == 0 ) printf("| End.\n");
+	if( info >= 3) if( errFlag == 1 ) printf("| fail to cal. Covaraince. Terminated. \n");
 	if( info >= 3) if( errFlag == 2 ) printf("| fail to converge in 50 trials. Terminated.\n");
 	if( info >= 4) {printf("         sol  : "); Transpose(output[0]).Print(); }
 	if( info >= 4) {printf("           d  : "); Transpose(output[1]).Print(); }
@@ -391,6 +394,9 @@ Matrix* GaussNewton(int yIndex, bool fitMode, int info, double a, double Ta, dou
 
 Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	
+	double Yvalue = valY[yIndex];
+	if( info >= 0) printf("========================= index : %3d, B field : %f ", yIndex, Yvalue);
+	if( info >= 1) printf("\n");
 	
 	double a1, Ta1, b1, Tb1;
 	a1  = a;
