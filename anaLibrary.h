@@ -13,14 +13,13 @@
 #include <cstring> 
 #include "Matrix.h"
 
-double ERROR = 999.;
-
 using namespace std; 
 
 double valX [1024];      // val of X or time
 double valY [500];       // val of Y or B-field
 double data [500][1024]; // val of data
 int sizeX, sizeY;
+int errFlag;  //err
 
 int getData(char* filename){
 	
@@ -197,13 +196,15 @@ double variance(int yIndex){ // finding variance T < ~3 ns
 	return var;
 }
 
-Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb, int info){
+Matrix* regression(bool fitMode, int yIndex,double a, double Ta, double b, double Tb, int info){
+	
+	errFlag = 0;
 	
 	int xStart = 195;
 	int xEnd = 1000;
 	
 	int p = 2; // number of parameters
-	if( tag ) p = 4;
+	if( fitMode ) p = 4;
 	
 	Matrix * output = new Matrix[6]; // 0 = par; 1 = dpar; 2 = sigma ; 3 = t-dis, 4 = p-value, 5 = SSR
 	output[0] = Zeros(p, 1);
@@ -220,15 +221,15 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	for(int i = 1; i <= n ; i++) {
 		Y(i,1) = data[yIndex][i - 1 + xStart];
 	}
-	//if( tag ) printf(" --- forming f(i) = a * exp(-t/Ta) - b * exp(-t/Tb)\n");
-	//if (!tag) printf(" --- forming f(i) = a * exp(-t/Ta)\n");
+	//if( fitMode ) printf(" --- forming f(i) = a * exp(-t/Ta) - b * exp(-t/Tb)\n");
+	//if (!fitMode) printf(" --- forming f(i) = a * exp(-t/Ta)\n");
 	Matrix f(n,1);
 	for(int i = 1; i <= n ; i++) {
 		//f(i,1) = funcX(valX[i - 1 +xStart], a, Ta, b, Tb);
 		double x = valX[i - 1 +xStart];
 		
 		f(i,1) = a * exp(-x/Ta); 
-		if(  tag ) f(i,1) += b * exp(-x/Tb);  
+		if(  fitMode ) f(i,1) += b * exp(-x/Tb);  
 	}
 	
 	//printf(" --- forming F(i) = grad(f(i)) \n");
@@ -237,8 +238,8 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 		double x = valX[i - 1 +xStart];
 		F(i,1) = exp(-x/Ta);
 		F(i,2) = a * x * exp(-x/Ta)/Ta/Ta;
-		if( tag ) F(i,3) = exp(-x/Tb);
-		if( tag ) F(i,4) = b * x * exp(-x/Tb)/Tb/Tb;
+		if( fitMode ) F(i,3) = exp(-x/Tb);
+		if( fitMode ) F(i,4) = b * x * exp(-x/Tb)/Tb/Tb;
 	}
 	
 	//printf(" --- cal. new parameters\n");
@@ -251,7 +252,7 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	}catch( Exception err){
 		if( info >= 1) printf("%s. #par=%d | Terminated.\n", err.msg, p);
 		//FtF.Print();
-		(output[4])(1,1) = ERROR;
+		errFlag = 1;
 		return output;
 	}
 	
@@ -263,8 +264,8 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	Matrix par_old(p,1);
 	par_old(1,1) = a;
 	par_old(2,1) = Ta;
-	if( tag ) par_old(3,1) = b;
-	if( tag ) par_old(4,1) = Tb;
+	if( fitMode ) par_old(3,1) = b;
+	if( fitMode ) par_old(4,1) = Tb;
 	
 	Matrix dpar = CoVar * FtdY;  //printf("  dpar(%d,%d)\n", dpar.GetRows(), dpar.GetCols());
 	
@@ -278,8 +279,8 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	
 	int DF = n - p;
 	
-	//if( !tag) printf(" sqrt(SSR/DF) = %f \n", sqrt(SSR(1,1)/DF));
-	//if(  tag) printf(" sqrt(SSR/DF) = %f \n", sqrt(SSR(1,1)/DF));
+	//if( !fitMode) printf(" sqrt(SSR/DF) = %f \n", sqrt(SSR(1,1)/DF));
+	//if(  fitMode) printf(" sqrt(SSR/DF) = %f \n", sqrt(SSR(1,1)/DF));
 	
 	
 	double var = SSR(1,1) / DF;
@@ -318,8 +319,7 @@ Matrix* regression(bool tag, int yIndex,double a, double Ta, double b, double Tb
 	
 }
 
-Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
-	
+Matrix* GaussNewton(int yIndex, bool fitMode, int info, double a, double Ta, double b, double Tb){
 	//info < 0; mo msg;
 	//info = 0; only B-field and sol;
 	//info = 1; + sigma 
@@ -331,41 +331,89 @@ Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	if( info >= 0) printf("========================= index : %3d, B field : %f ", yIndex, Yvalue);
 	if( info >= 1) printf("\n");
 
-	if( info >= 3) printf(" Regression of 4-parameters: %d ", 1 );
-	Matrix* output = regression(1, yIndex, a, Ta, b, Tb, info); 
-	Matrix sol = output[0];
-	Matrix dpar = output[1];
-	sol = output[0]; 
+	if( info >= 3) if( fitMode == 1 )printf(" Regression of 4-parameters: %d ", 1 );
+	if( info >= 3) if( fitMode == 0 )printf(" Regression of 2-parameters: %d ", 1 );
+	Matrix* output = NULL;
+	Matrix sol, dpar;
 	
-	double errFlag = (output[4])(1,1);
-
-	int count = 2;
-		
-	while( errFlag != ERROR &&
-		   std::abs(dpar(1,1)) > 0.01 && 
-		   std::abs(dpar(2,1)) > 0.01 &&
-		   std::abs(dpar(3,1)) > 0.01 && 
-		   std::abs(dpar(4,1)) > 0.01 ){
-
-		if( info >= 3) printf("%d ", count ++ );
-		output = regression(1, yIndex, sol(1,1), sol(2,1), sol(3,1), sol(4,1), info); 
-		sol = output[0]; 
-		dpar = output[1];
-		errFlag = (output[4])(1,1);
-		if( errFlag == ERROR ) break;
+	int count = 0;
+	
+	bool checkdpar = 1;
+	
+	
+	
+	if( fitMode == 1) {
+		sol = Matrix(4,1);
+		sol(1,1) = a; 
+		sol(2,1) = Ta; 
+		sol(3,1) = b; 
+		sol(4,1) = Tb; 
 	}
-
+	if( fitMode == 0) {
+		sol = Matrix(2,1);
+		sol(1,1) = a;
+		sol(2,1) = Tb;
+	}
+	do{
+		count ++ ;
+		if( count > 50){
+			errFlag = 2;
+			break;
+		}
+		output = regression(fitMode, yIndex, sol(1,1), sol(2,1), sol(3,1), sol(4,1), info);
+		sol  = output[0];
+		dpar = output[1];
+		printf("dpar: ");Transpose(dpar).Print();
+		
+		if( fitMode == 1) checkdpar = (std::abs(dpar(1,1)) > 0.01 || 
+										std::abs(dpar(2,1)) > 0.01 ||
+										std::abs(dpar(3,1)) > 0.01 || 
+										std::abs(dpar(4,1)) > 0.01 ) ;
+		
+		if( fitMode == 0) checkdpar = (std::abs(dpar(1,1)) > 0.01 || 
+										std::abs(dpar(2,1)) > 0.01 ) ;
+		
+	}while(errFlag == 0  && checkdpar); //iterate when no err and any of the dpar > 0.01;
 	
-	if( info >= 3) if( errFlag != ERROR ) printf("| End.\n");
-	if( info >= 4) {printf("         sol  : "); Transpose(sol).Print(); }
+	
+	if( info >= 3) if( errFlag == 0 ) printf("| End.\n");
+	if( info >= 3) if( errFlag == 2 ) printf("| fail to converge in 50 trials. Terminated.\n");
+	if( info >= 4) {printf("         sol  : "); Transpose(output[0]).Print(); }
+	if( info >= 4) {printf("           d  : "); Transpose(output[1]).Print(); }
 	if( info >= 4) {printf("        sigma : "); Transpose(output[2]).Print();}
 	if( info >= 4) {printf("        t-dis : "); Transpose(output[3]).Print();}
 	if( info >= 4) {printf("Appr. p-Value : "); Transpose(output[4]).Print();}
+	
+	return output;
+
+}
+
+
+Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
+	
+	
+	double a1, Ta1, b1, Tb1;
+	a1  = a;
+	Ta1 = Ta;
+	b1  = b;
+	Tb1 = Tb;
+
+	Matrix * output = NULL;
+		
+	//int count = 0;
+	//do{
+		output = GaussNewton(yIndex, 1, info, a1, Ta1, b1, Tb1);
+	//	a1 += 5;
+	//	Ta1 += 10;
+	//	b1 += 5;
+	//	Tb1 += 10;
+	//}while{errFlag} //do while fail to cal. covaraince, or too many trials
 
 	Matrix ApValue = output[4];
 
+	/// Check the fit
 	int failFlag = 0;
-	if( ApValue(1,1) != 999 && 
+	if( errFlag == 0 && 
 	   (ApValue(1,1) > 0.05 ||
 		ApValue(2,1) > 0.05 ||
 		ApValue(3,1) > 0.05 ||
@@ -376,43 +424,18 @@ Matrix* Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 		
 		failFlag = 1;
 	}
-	
-	if( ApValue(1,1) == 999 ) {
-		if( info >= 3) printf(" ********** 4-parameters fit fail to converge, try 2-parameters fit.\n"); 
-		
-		failFlag = 2;
-	}
-	
-	if( failFlag){
-		count = 1;
-		if( info >= 3) printf(" Regression of 2-parameters: %d ", count);
-		output = regression(0, yIndex, a, Ta, 0, 100, info); 
-		sol = output[0]; 
-		dpar = output[1];
 
-		errFlag = (output[4])(1,1);
-		
-		while( std::abs(dpar(1,1)) > 0.01 && 
-			   std::abs(dpar(2,1)) > 0.01 &&
-			   errFlag != ERROR ){
-			count ++ ;
-			if( info >= 3) printf("%d ", count);
-			output = regression(0, yIndex, sol(1,1), sol(2,1), 0, 100, info); 
-			sol = output[0]; 
-			dpar = output[1];
-			errFlag = (output[4])(1,1);
-			if( errFlag == ERROR ) break;
-		}
-		if( info >= 3) printf("| End.\n");
+	if( failFlag || errFlag){
+		output = GaussNewton(yIndex, 0, info, a1, Ta1, b1, Tb1);
 	}
 
 	double SampleMean = mean(yIndex);
 	double SampleVar = variance(yIndex);
 	double fitVar = output[5](1,1);
 	double redchisq = fitVar/SampleVar;
-
+	
 	if( info >= 3) printf("####### red-chi^2: %f | FitSigma: %f, SampleSigma(Mean): %f(%f) \n", redchisq, sqrt(fitVar), sqrt(SampleVar), SampleMean);
-	if( info >= 0) {printf("         sol  : "); Transpose(sol).Print();}
+	if( info >= 0) {printf("         sol  : "); Transpose(output[0]).Print();}
 	if( info >= 1) {printf("        sigma : "); Transpose(output[2]).Print();}
 	//if( info >= 0) {printf("        t-dis : "); Transpose(output[3]).Print();}
 	if( info >= 2) {printf("Appr. p-Value : "); Transpose(output[4]).Print();}

@@ -1,10 +1,10 @@
 CC=g++
 #CFLAGS = -Wno-write-strings
 
-all: analysis.o
+all: analysis
 
-analysis.o: analysis.cpp anaLibrary.h Matrix.h
-	$(CC) analysis.cpp -o analysis.o
+analysis: analysis.cpp anaLibrary.h Matrix.h
+	$(CC) analysis.cpp -o analysis
 
 clean:
 	rm -rfv *.o 
