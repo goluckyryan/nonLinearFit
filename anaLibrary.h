@@ -327,11 +327,19 @@ Matrix* GaussNewton(int yIndex, bool fit4par, int info, double a, double Ta, dou
 	//info = 2; + p-value;
 	//info = 3; + Regression;
 	//info = 4; + Reg4
+	
+	Matrix* output = new Matrix[6];
+	Matrix dpar;
+	
+	if( fit4par && ( a == 0 || b == 0) ){
+		 errFlag = 3;
+		 printf("a or b = 0 result ill Covariance. abort 4-parameters fit.\n");
+		 return output;
+	}
 
 	if( info >= 3) if( fit4par == 1 )printf(" Regression of 4-parameters: ");
 	if( info >= 3) if( fit4par == 0 )printf(" Regression of 2-parameters: ");
-	Matrix* output = NULL;
-	Matrix dpar;
+
 	
 	int count = 0;
 	
@@ -382,9 +390,9 @@ Matrix* GaussNewton(int yIndex, bool fit4par, int info, double a, double Ta, dou
 	if( info >= 3) if( errFlag == 1 ) printf("| fail to cal. Covaraince. Terminated. \n");
 	if( info >= 3) if( errFlag == 2 ) printf("| fail to converge in 50 trials. Terminated.\n");
 	if( info >= 4) {printf("         sol  : "); Transpose(output[0]).Print(); }
-	if( info >= 4) {printf("           d  : "); Transpose(output[1]).Print(); }
+	//if( info >= 4) {printf("           d  : "); Transpose(output[1]).Print(); }
 	if( info >= 4) {printf("        sigma : "); Transpose(output[2]).Print();}
-	if( info >= 4) {printf("        t-dis : "); Transpose(output[3]).Print();}
+	//if( info >= 4) {printf("        t-dis : "); Transpose(output[3]).Print();}
 	if( info >= 4) {printf("Appr. p-Value : "); Transpose(output[4]).Print();}
 	
 	return output;
