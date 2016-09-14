@@ -47,12 +47,12 @@ int main(int argc, char *argv[]){
 	if( yIndex == -1){
 		system("rm FitResult.txt");
 		for( int i = 0; i < sizeY; i++){
-			output = Fitting(i, 0, a, Ta, b, Tb);
-			SaveFitResult(savefile, i, output);
+			Fitting(i, 0, a, Ta, b, Tb);
+			SaveFitResult(savefile, i);
 		}
 	}else{
-		output = Fitting(yIndex,4, a, Ta, b, Tb);
-		SaveFitResult(savefile_single, yIndex, output);
+		Fitting(yIndex,4, a, Ta, b, Tb);
+		SaveFitResult(savefile_single, yIndex);
 	}
 	
 	///====================== gnuplot
@@ -64,7 +64,6 @@ int main(int argc, char *argv[]){
 		system("gnuplot \"plot_Loop.gp\" -p");
 	}else{
 		
-		Matrix sol = output[0];
 		
 		double a, Ta, b, Tb;
 		a  = sol(1,1);

@@ -485,15 +485,15 @@ public:
         }
         for (int c = 0; c < cols-1; c++)
         {
-          printf("%.2f, ", p[r][c]);
+          printf("%+.3e, ", p[r][c]);
         }
         if (r < rows-1)
         {
-          printf("%.2f;\n", p[r][cols-1]);
+          printf("%+.3e;\n", p[r][cols-1]);
         }
         else
         {
-          printf("%.2f]\n", p[r][cols-1]);
+          printf("%+.3e]\n", p[r][cols-1]);
         }
       }
     }
