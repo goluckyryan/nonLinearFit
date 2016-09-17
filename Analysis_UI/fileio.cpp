@@ -10,9 +10,7 @@ FileIO::FileIO()
 FileIO::FileIO(QString filePath){
     this->filePath = filePath;
     myfile = new QFile(filePath);
-
-    openStatus = myfile->open(QIODevice::ReadOnly);
-
+    myfile->open(QIODevice::ReadOnly);
 }
 
 FileIO::~FileIO(){
@@ -64,11 +62,11 @@ void FileIO::OpenCSVData(){
                 }
             }
         }else{
-            xData.push_back( (lineList[0]).toDouble() );
+            xData.push_back( (lineList[0]).toDouble() * 1e6);
             int yCount = 0;
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1){
-                    z[yCount][rows-2] = (lineList[i]).toDouble() ;
+                    z[yCount][rows-2] = (lineList[i]).toDouble() * 1000;
                     yCount ++;
                 }
             }
@@ -76,9 +74,13 @@ void FileIO::OpenCSVData(){
     }
 
     //transpose the zData
+    zMin = z[0][0];
+    zMax = z[0][0];
     for( int j = 0; j < ySize ; j ++){
         for(int i = 0; i < xSize ; i++){
             zData[j].push_back(z[j][i]);
+            if( z[j][i] > zMax) zMax = z[j][i];
+            if( z[j][i] < zMin) zMin = z[j][i];
         }
     }
 
@@ -87,6 +89,12 @@ void FileIO::OpenCSVData(){
     //check
     qDebug("X: %d , %d", xData.size(), xSize);
     qDebug("Y: %d , %d", yData.size(), ySize);
+
+    xMin = FindMin(xData);
+    xMax = FindMax(xData);
+
+    yMin = FindMin(yData);
+    yMax = FindMax(yData);
 
 }
 
@@ -99,4 +107,22 @@ double FileIO::GetYValue(QString str){
     QString strY = str.mid(pos+1, 5);
     //qDebug() << str << ", " << pos << ", " << strY;
     return strY.toDouble();
+}
+
+double FileIO::FindMax(QVector<double> vec)
+{
+    double max = vec[0];
+    for( int i = 1; i < vec.size(); i++){
+        if( vec[i] > max) max = vec[i];
+    }
+    return max;
+}
+
+double FileIO::FindMin(QVector<double> vec)
+{
+    double min = vec[0];
+    for( int i = 1; i < vec.size(); i++){
+        if( vec[i] < min) min = vec[i];
+    }
+    return min;
 }

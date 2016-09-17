@@ -7,6 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    plot = ui->customPlot;
+
     /*
     QVector<double> x;
     x.push_back(0);
@@ -28,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete plot;
 }
 
 void MainWindow::Write2Log(QString str){
@@ -40,10 +43,23 @@ void MainWindow::on_pushButton_clicked(){
                                             "Open File",
                                             "/Users/mobileryan/Triplet-ESR");
 
-    qDebug()<< fileName;
+    //qDebug()<< fileName;
 
     FileIO file(fileName);
     file.OpenCSVData();
+
+    plot->addGraph();
+    plot->graph(0)->addData(file.GetDataSetX(), file.GetDataSetZ(105));
+    plot->xAxis->setLabel("time");
+    plot->yAxis->setLabel("a.u.");
+    plot->xAxis->setRange(file.GetXMin(), file.GetXMax());
+    plot->yAxis->setRange(file.GetZMin(), file.GetZMax());
+    plot->replot();
+
+
+    //Analysis ana(file.GetDataSetX(), file.GetDataSetZ(0));
+    //QVector<double> par = {20, 20, -20, 100};
+    //ana.Regression(1, par);
 
     //qDebug() << file.GetDataY(0);
     //for( int i = 0; i < 10; i++){

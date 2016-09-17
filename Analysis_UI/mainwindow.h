@@ -31,6 +31,8 @@ private:
 
     QString Msg;
 
+    QCustomPlot *plot;
+
 };
 
 #endif // MAINWINDOW_H
