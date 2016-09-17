@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QDebug>
+#include <QVector>
 #include "matrix.h"
 #include "analysis.h"
 #include "qcustomplot.h"
@@ -21,6 +22,9 @@ public:
     ~MainWindow();
 
     void Write2Log(QString str);
+
+private slots:
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    /*
     QVector<double> x;
     x.push_back(0);
     x.push_back(1);
@@ -21,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ana.MeanAndvariance(0, x.size()-1);
 
     ana.Print();
-
+    */
 }
 
 MainWindow::~MainWindow()
@@ -31,4 +32,19 @@ MainWindow::~MainWindow()
 
 void MainWindow::Write2Log(QString str){
     ui->plainTextEdit->appendPlainText(str);
+}
+
+void MainWindow::on_pushButton_clicked(){
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this,
+                                            "Open File",
+                                            "/Users/mobileryan/Triplet-ESR");
+
+    qDebug()<< fileName;
+
+    FileIO file(fileName);
+
+    file.FileStructure(1);
+    file.StoreCSVData();
+
 }
