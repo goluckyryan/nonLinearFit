@@ -16,12 +16,15 @@ public:
 
     explicit Analysis();
     explicit Analysis(const QVector<double> x, const QVector<double> y);
+    ~Analysis();
+
+    void Initialize();
 
     void SetData(const QVector<double> x, const QVector<double> y);
+    void SetStartFitIndex(int index){ this->startIndex = index;}
+    void MeanAndvariance(int index_1, int index_2);
 
-    double Mean(int index_1, int index_2);
-    double Variance(int index_1, int index_2);
-    void Regression(bool fitType, QVector<double> par);
+    int Regression(bool fitType, QVector<double> par);
     Matrix *NonLinearFit(int startFitIndex, QVector<double> iniPar);
 
 signals:
@@ -29,16 +32,30 @@ signals:
     void SendMsg(QString msg);
 
 public slots:
+    bool IsWellFit(){return fitFlag;}
     int GetDataSize(){ return n;}
+    int GetStartFitIndex(){return startIndex;}
+    int GetStart_x(){return xdata[startIndex];}
     int GetParametersSize() {return p;}
     int GetDegreeOfFreedom() {return DF;}
     QVector<double> GetData_x() {return xdata;}
     QVector<double> GetData_y() {return ydata;}
+    double GetData_x(int i) {return xdata[i-1];}
+    double GetData_y(int i) {return ydata[i-1];}
+
+    double GetSSR() {return SSR;}
+    double GetFitVariance() {return SSR/DF;}
+
     Matrix GetParameters() {return sol;}
     Matrix GetParError() {return error;}
     Matrix GetParPValue() {return pValue;}
-    double GetSSR() {return SSR;}
-    double GetFitSigma() {return sigma;}
+
+    double GetParameters(int i) {return sol.Get(i,1);}
+    double GetParError(int i) {return error.Get(i,1);}
+    double GetParPValue(int i) {return pValue.Get(i,1);}
+
+    void Print();
+
     void MsgConnector(QString msg){
         emit SendMsg(msg);
     }
@@ -51,20 +68,32 @@ private:
     Matrix tDis;
     Matrix pValue;
     double SSR;
-    double sigma; //fit sigma
     int n, p, DF;
     int startIndex;
-    bool errFlag;
+    bool fitFlag;
+    double mean, var; // sample
 
     double cum_tDis30(double x){
         return 1/(1+exp(-x/0.6));
     }
 
-    double fitFunction(bool fitType, double x, QVector<double> par){
+    double FitFunc(bool fitType, double x, QVector<double> par){
         double fit = 0;
         if(fitType == 1 ) fit = par[0] * exp(-x/par[1]) + par[2] * exp(-x/par[3]);
         if(fitType == 0 ) fit = par[0] * exp(-x/par[1]);
         return fit;
+    }
+
+    QVector<double> GradFitFunc(bool fitType, double x, QVector<double> par){
+        QVector<double> gradFit;
+
+        gradFit.push_back(exp(-x/par[1]));
+        gradFit.push_back(par[0] * x* exp(-x/par[1])/par[1]/par[1]);
+        if(fitType == 1){
+            gradFit.push_back(exp(-x/par[3]));
+            gradFit.push_back(par[2] * x* exp(-x/par[3])/par[3]/par[3]);
+        }
+        return gradFit;
     }
 
     QVector<double> RowVector2QVector(Matrix m){
@@ -74,6 +103,7 @@ private:
         }
         return out;
     }
+
 };
 
 #endif // ANALYSIS_H

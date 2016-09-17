@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QVector>
 
 class Exception
 {
@@ -16,7 +17,7 @@ class Matrix : public QObject
     Q_OBJECT
 public:
 
-    explicit Matrix(QObject *parent = 0);
+    explicit Matrix();
     explicit Matrix(const int row, const int col);
     Matrix(const Matrix& a);
     Matrix(int row, int col,  double v);
@@ -71,6 +72,7 @@ public:
     double Det();
     int GetRows(){return rows;}
     int GetCols(){return cols;}
+    double Get(int r, int c){return p[r-1][c-1];}
 
 signals:
 
@@ -80,6 +82,7 @@ public slots:
 
     void PrintM();
     void PrintM(QString str);
+    void PrintVector(QString str);
 
 private:
     double **p;

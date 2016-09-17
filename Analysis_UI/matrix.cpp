@@ -1,6 +1,6 @@
 #include "matrix.h"
 
-Matrix::Matrix(QObject *parent) : QObject(parent)
+Matrix::Matrix()
 {
     p = NULL;
     rows = 0;
@@ -146,9 +146,9 @@ Matrix Matrix::operator * (const Matrix &a)
         Matrix res(rows, a.cols);
 
         for (int r = 0; r < rows; r++){
-            for (int c_res = 0; c_res < a.cols; c_res++){
+            for (int c = 0; c < a.cols; c++){
                 for (int k = 0; k < cols; k++){
-                    res.p[r][c_res] += p[r][k] * a.p[k][c_res];
+                    res.p[r][c] += p[r][k] * a.p[k][c];
                 }
             }
         }
@@ -368,5 +368,34 @@ void Matrix::PrintM(QString str)
     qDebug()<< msg;
     SendMsg(msg);
     PrintM();
+}
+
+void Matrix::PrintVector(QString str)
+{
+    /// only for single row or single col matrix
+    QString msg, tmp;
+    msg.sprintf("%s(%d,%d) = ", str.toStdString().c_str(), this->rows, this->cols);
+
+    int n;
+    if(this->rows == 1) n = this->cols;
+    if(this->cols == 1) n = this->rows;
+
+    if( p != NULL){
+        msg += "[" ;
+        for (int j = 0 ; j < n; j++){
+            if(this->rows == 1) tmp.sprintf("%7.3f, ",p[0][j]);
+            if(this->cols == 1) tmp.sprintf("%7.3f, ",p[j][0]);
+            msg += tmp;
+        }
+        tmp.sprintf("]");
+        msg += tmp;
+        qDebug().noquote() << msg;
+        SendMsg(msg);
+    }else{
+        msg += "[]";
+        qDebug() << msg;
+        SendMsg(msg);
+    }
+
 }
 

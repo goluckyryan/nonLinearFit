@@ -1,5 +1,10 @@
+*
 *.o
 *.exe
+
+#Qt
+*.pro.user
+*build-*
 
 # Windows image file caches
 Thumbs.db

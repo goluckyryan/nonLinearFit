@@ -1,38 +1,42 @@
 #include "analysis.h"
 
 Analysis::Analysis(){
+    Initialize();
+}
 
+Analysis::Analysis(const QVector<double> x, const QVector<double> y)
+{
+    Initialize();
+    SetData(x,y);
+}
+
+Analysis::~Analysis(){
+
+}
+
+void Analysis::Initialize(){
     this->SSR = 999;
-    this->sigma = 999;
-    this->p = -1;
-    this->DF = -1;
-    this->startIndex = 0;
-    this->errFlag = 0;
+    this->n = 0;
+    this->p = 0;
+    this->DF = 0;
+    this->fitFlag = 0;
+    this->mean = 0;
+    this->var = 0;
 
     connect(&sol, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
     connect(&dpar, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
     connect(&error, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
     connect(&tDis, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
     connect(&pValue, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
-
-}
-
-Analysis::Analysis(const QVector<double> x, const QVector<double> y)
-{
-    SetData(x,y);
-
-    this->SSR = 999;
-    this->sigma = 999;
-    this->p = -1;
-    this->DF = -1;
-    this->startIndex = 0;
-    this->errFlag = 0;
-
 }
 
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
 {
     // assume x.size() == y.size()
+    if( x.size() != y.size() ){
+        printf("The sizes of input data x and y are not match. Size(x) = %d, Size(y) = %d", x.size(), y.size());
+        return;
+    }
     this->xdata = x;
     this->ydata = y;
 
@@ -42,21 +46,21 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
 
 }
 
-double Analysis::Mean(int index_1, int index_2)
+void Analysis::MeanAndvariance(int index_1, int index_2)
 {
     if( this->n == 0 ||
-            index_1 < 0 ||
-            index_2 < 0 ||
+        index_1 < 0 ||
+        index_2 < 0 ||
         index_1 > this->n ||
         index_1 >= index_2 ||
         index_2 > this->n){
-        Msg.sprintf("index Error. n = %d", n);
+        Msg.sprintf("index Error. n = %d, range = (%d, %d)", n, index_1, index_2);
         emit SendMsg(Msg);
-        return 0;
+        return;
     }
 
     int size = index_2 - index_1 + 1;
-    double mean = 0;
+    mean = 0;
     for( int i = index_1 ; i <= index_2 ; i++){
         mean += (this->ydata)[i];
     }
@@ -65,15 +69,7 @@ double Analysis::Mean(int index_1, int index_2)
     Msg.sprintf("Mean from index %d to %d of y-data (%d data) = %f", index_1, index_2, size, mean);
     emit SendMsg(Msg);
 
-    return mean;
-}
-
-double Analysis::Variance(int index_1, int index_2)
-{
-    const double mean = Mean(index_1, index_2);
-
-    int size = index_2 - index_1 + 1;
-    double var = 0;
+    var = 0;
     for( int i = index_1 ; i <= index_2 ; i++){
         var += pow((this->ydata)[i]-mean,2);
     }
@@ -82,11 +78,9 @@ double Analysis::Variance(int index_1, int index_2)
     Msg.sprintf("Variance from index %d to %d of y-data (%d data) = %f, sigma = %f", index_1, index_2, size, var, sqrt(var));
     emit SendMsg(Msg);
 
-    return var;
-
 }
 
-void Analysis::Regression(bool fitType, QVector<double> par)
+int Analysis::Regression(bool fitType, QVector<double> par)
 {
     int xStart = this->startIndex;
     int xEnd = this->n - 1;
@@ -108,11 +102,10 @@ void Analysis::Regression(bool fitType, QVector<double> par)
     qDebug("Y : %d %d", Y.GetRows(), Y.GetCols());
     qDebug("Y : %f ... %f" , Y(1,1), Y(fitSize, 1));
 
-
     Matrix f(fitSize,1);
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i + xStart - 1];
-        f(i,1) = fitFunction(fitType, x, par);
+        f(i,1) = FitFunc(fitType, x, par);
     }
 
     qDebug("f : %d %d", f.GetRows(), f.GetCols());
@@ -122,10 +115,18 @@ void Analysis::Regression(bool fitType, QVector<double> par)
     Matrix F(fitSize,p); // F = grad(f)
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i - 1 + xStart];
-        F(i,1) = exp(-x/par[1]);
-        F(i,2) = par[0] * x * exp(-x/par[1])/par[1]/par[1];
-        if( fitType ) F(i,3) = exp(-x/par[3]);
-        if( fitType ) F(i,4) = par[2] * x * exp(-x/par[3])/par[3]/par[3];
+
+        QVector<double> gradf = GradFitFunc(fitType, x, par);
+
+        for(int j = 1; j <= p; j++){
+            F(i,j) = gradf[j-1];
+        }
+
+
+        //F(i,1) = exp(-x/par[1]);
+        //F(i,2) = par[0] * x * exp(-x/par[1])/par[1]/par[1];
+        //if( fitType ) F(i,3) = exp(-x/par[3]);
+        //if( fitType ) F(i,4) = par[2] * x * exp(-x/par[3])/par[3]/par[3];
     }
 
     qDebug("F  : %d %d", F.GetRows(), F.GetCols());
@@ -146,8 +147,8 @@ void Analysis::Regression(bool fitType, QVector<double> par)
     try{
         CoVar = FtF.Inverse();  //printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
     }catch( Exception err){
-        errFlag = 1; // set the p-Value to be 9999;
-        return;
+        fitFlag = 1; // set the p-Value to be 9999;
+        return 1;
     }
 
     CoVar.PrintM("CoVar");
@@ -165,16 +166,34 @@ void Analysis::Regression(bool fitType, QVector<double> par)
     this->dpar = (CoVar * FtdY).Transpose();  //printf("  dpar(%d,%d)\n", dpar.GetRows(), dpar.GetCols());
     this->sol = par_old + this->dpar;
     this->SSR = (dY.Transpose() * dY)(1,1);
-    this->sigma = this->SSR / this->DF;
+    double fitVar = this->SSR / this->DF;
 
-    this->error  = Matrix(1,p); for( int i = 1; i <= p ; i++){ error(1,i)  = sqrt(this->sigma * CoVar(i,i)); }
+    this->error  = Matrix(1,p); for( int i = 1; i <= p ; i++){ error(1,i)  = sqrt(fitVar * CoVar(i,i)); }
     this->tDis   = Matrix(1,p); for( int i = 1; i <= p ; i++){ tDis(1,i)   = this->sol(1,i)/this->error(1,i); }
     this->pValue = Matrix(1,p); for( int i = 1; i <= p ; i++){ pValue(1,i) = cum_tDis30(- std::abs(this->tDis(1,i)));}
 
-    this->sol.PrintM("sol");
+    this->sol.PrintVector("sol");
 }
 
 Matrix *Analysis::NonLinearFit(int startFitIndex, QVector<double> iniPar)
 {
 
+}
+
+void Analysis::Print()
+{
+    qDebug("Data size : %d", n);
+    qDebug("par size : %d", p);
+    qDebug("DF : %d", DF);
+    qDebug("Start Fit Index : %d", startIndex);
+    qDebug("mean : %f", mean);
+    qDebug("variance : %f", var);
+    qDebug("SSR : %f", SSR);
+    qDebug("Is fit ? %d", fitFlag);
+
+    sol.PrintVector("sol:");
+    dpar.PrintVector("dpar:");
+    error.PrintVector("error:");
+    tDis.PrintVector("tDis:");
+    pValue.PrintVector("p-Value:");
 }
