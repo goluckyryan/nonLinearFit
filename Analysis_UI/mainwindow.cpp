@@ -43,8 +43,11 @@ void MainWindow::on_pushButton_clicked(){
     qDebug()<< fileName;
 
     FileIO file(fileName);
+    file.OpenCSVData();
 
-    file.FileStructure(1);
-    file.StoreCSVData();
+    //qDebug() << file.GetDataY(0);
+    //for( int i = 0; i < 10; i++){
+    //    qDebug("%d, %d : %f, %f", i, 0, file.GetDataX(i), file.GetData(i,0));
+    //}
 
 }

@@ -20,47 +20,7 @@ FileIO::~FileIO(){
     //delete zData;
 }
 
-void FileIO::FileStructure(bool colwise){
-
-    this->colwise = colwise;
-
-    myfile->seek(0);
-    QTextStream stream(myfile);
-    QString line;
-
-    int cols = 0;
-    int rows = 0;
-    while(stream.readLineInto(&line)){
-        rows++;
-        if( rows == 1){
-            QStringList lineList = line.split(",");
-            cols = lineList.size()-1;
-        }
-    }
-    rows --;
-
-    //qDebug() << rows << "," << cols;
-
-    if( colwise){
-        ySize = cols;
-        xSize = rows;
-    }else{
-        xSize = cols;
-        ySize = rows;
-    }
-
-
-    this->zData = new QVector<double> [ySize];
-
-    qDebug("X %d, Y %d", xSize, ySize);
-
-    if( this->zData == NULL){
-        qDebug() << "jjjjj";
-    }
-
-}
-
-void FileIO::StoreCSVData(){
+void FileIO::OpenCSVData(){
 
     this->colwise = 1;
 
@@ -69,65 +29,74 @@ void FileIO::StoreCSVData(){
     QTextStream stream(myfile);
     QString line;
 
+
+    // get number of rows;
+    xSize = 0;
+    while(stream.readLineInto(&line)){
+        xSize ++;
+        QStringList lineList = line.split(",");
+
+        if( xSize == 1){ // get yDatax
+            ySize = lineList.size()/2;
+        }
+    }
+    xSize --;
+
+    zData = new QVector<double> [xSize];
+    double ** z ;
+    z = new double *[ySize];
+    for(int i = 0; i < ySize; i++){
+        z[i] = new double [xSize];
+    }
+
+    //get data
+    myfile->seek(0);
     int rows = 0;
     while(stream.readLineInto(&line)){
         rows ++;
         QStringList lineList = line.split(",");
 
-        if( rows == 1){ // get yData
+        if( rows == 1){ // get yDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                yData.push_back(0) ; // get data from string.
+                if( i % 2 == 1) {
+                    double temp = GetYValue(lineList[i]);
+                    yData.push_back(temp) ; // get data from string.
+                }
             }
         }else{
             xData.push_back( (lineList[0]).toDouble() );
+            int yCount = 0;
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                zData[rows-1].push_back( (lineList[i]).toDouble() ); ; // get data from string.
+                if( i % 2 == 1){
+                    z[yCount][rows-2] = (lineList[i]).toDouble() ;
+                    yCount ++;
+                }
             }
         }
-
     }
 
     //transpose the zData
-    for( int i = 0; i < xSize ; i ++){
-        for(int j = 0; j < ySize ; j++){
-            double temp = zData[i][j];
-            zData[i][j] = zData[j][i];
-            zData[j][i] = temp;
+    for( int j = 0; j < ySize ; j ++){
+        for(int i = 0; i < xSize ; i++){
+            zData[j].push_back(z[j][i]);
         }
     }
 
+    delete z;
+
     //check
-    qDebug("X: %d , %d, %d", xSize, xData.size(), zData[0].size());
-    qDebug("Y: %d , %d, %d", ySize, yData.size(), zData->size());
+    qDebug("X: %d , %d", xData.size(), xSize);
+    qDebug("Y: %d , %d", yData.size(), ySize);
 
 }
 
-void FileIO::StoreTxtData(){
-    this->colwise = 0;
-    myfile->seek(0);
+void FileIO::OpenTxtData_row(){
 
-    QTextStream stream(myfile);
-    QString line;
+}
 
-    int rows = 0;
-    while(stream.readLineInto(&line)){
-        QStringList lineList = line.split(",");
-        rows ++;
-        if( rows == 1){ // get xData
-            for( int i = 1 ; i < lineList.size() ; i++ ){
-                xData.push_back((lineList[i]).toDouble()) ;
-            }
-        }else{
-            yData.push_back(0);
-            for( int i = 1 ; i < lineList.size() ; i++ ){
-                zData[rows-1].push_back((lineList[i]).toDouble() ); ; // get data from string.
-            }
-        }
-
-    }
-
-    //check
-    qDebug("X: %d , %d, %d", xSize, xData.size(), zData[0].size());
-    qDebug("Y: %d , %d, %d", ySize, yData.size(), zData->size());
-
+double FileIO::GetYValue(QString str){
+    int pos = str.lastIndexOf("_") ;
+    QString strY = str.mid(pos+1, 5);
+    //qDebug() << str << ", " << pos << ", " << strY;
+    return strY.toDouble();
 }
