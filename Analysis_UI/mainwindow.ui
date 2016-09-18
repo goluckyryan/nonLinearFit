@@ -100,28 +100,15 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>90</y>
+      <y>80</y>
       <width>131</width>
-      <height>251</height>
+      <height>281</height>
      </rect>
     </property>
     <property name="title">
      <string>Fit</string>
     </property>
     <widget class="QLineEdit" name="lineEdit_a">
-     <property name="geometry">
-      <rect>
-       <x>50</x>
-       <y>100</y>
-       <width>71</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>20</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_Ta">
      <property name="geometry">
       <rect>
        <x>50</x>
@@ -134,11 +121,24 @@
       <string>20</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEdit_b">
+    <widget class="QLineEdit" name="lineEdit_Ta">
      <property name="geometry">
       <rect>
        <x>50</x>
        <y>160</y>
+       <width>71</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>20</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_b">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>190</y>
        <width>71</width>
        <height>24</height>
       </rect>
@@ -151,7 +151,7 @@
      <property name="geometry">
       <rect>
        <x>50</x>
-       <y>190</y>
+       <y>220</y>
        <width>71</width>
        <height>24</height>
       </rect>
@@ -164,7 +164,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>220</y>
+       <y>250</y>
        <width>111</width>
        <height>24</height>
       </rect>
@@ -197,6 +197,19 @@
        <width>71</width>
        <height>25</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_reset">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>111</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reset Par.</string>
      </property>
     </widget>
    </widget>

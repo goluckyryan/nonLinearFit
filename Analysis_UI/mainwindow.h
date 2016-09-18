@@ -39,6 +39,7 @@ private slots:
     void on_lineEdit_Tb_returnPressed();
 
     void on_pushButton_Fit_clicked();
+    void on_pushButton_reset_clicked();
 
 private:
     Ui::MainWindow *ui;

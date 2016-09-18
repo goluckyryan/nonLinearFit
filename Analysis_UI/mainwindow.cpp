@@ -80,7 +80,7 @@ void MainWindow::on_pushButton_clicked(){
     ui->spinBox_x->setMinimum(0);
     ui->spinBox_x->setMaximum(file->GetDataSize()-1);
 
-    ui->spinBox_y->setValue(105);
+    ui->spinBox_y->setValue(104);
     ui->spinBox_x->setValue(195);
 
 }
@@ -102,6 +102,9 @@ void MainWindow::on_spinBox_x_valueChanged(int arg1){
 }
 
 void MainWindow::PlotFitFunc(){ // also initialize ana
+
+    if( file == NULL) return;
+
     QVector<double> par;
     par.push_back(ui->lineEdit_a->text().toDouble());
     par.push_back(ui->lineEdit_Ta->text().toDouble());
@@ -163,14 +166,37 @@ void MainWindow::on_pushButton_Fit_clicked(){
     par.push_back(ui->lineEdit_b->text().toDouble());
     par.push_back(ui->lineEdit_Tb->text().toDouble());
 
-    ana->Regression(1, par);
+    //ana->Regression(1, par);
 
-    QVector<double> sol = ana->GetParameters().Matrix2QVec();
+    //ana->Print();
+
+    ana->MeanAndvariance(0, ana->GetStartFitIndex()-20);
+    ana->NonLinearFit(par);
+
+    ana->PrintVector(ana->GetParameters(), "sol");
+    ana->PrintVector(ana->GetParError(), "error");
+    ana->PrintVector(ana->GetParPValue(), "p-Value");
+
+    qDebug() << " Fit Variance :" << ana->GetFitVariance();
+    qDebug() << " Sample Variance :"<< ana->GetSampleVariance();
+    qDebug() << " Reduced Chi-squared :" << ana->GetFitVariance()/ana->GetSampleVariance();
+
+    QVector<double> sol = ana->GetParameters();
     int sol_size = sol.size();
     ui->lineEdit_a->setText(QString::number(sol[0]));
     ui->lineEdit_Ta->setText(QString::number(sol[1]));
     if( sol_size == 4) ui->lineEdit_b->setText(QString::number(sol[2]));
     if( sol_size == 4) ui->lineEdit_Tb->setText(QString::number(sol[3]));
+
+    PlotFitFunc();
+}
+
+void MainWindow::on_pushButton_reset_clicked()
+{
+    ui->lineEdit_a->setText("20");
+    ui->lineEdit_Ta->setText("20");
+    ui->lineEdit_b->setText("-10");
+    ui->lineEdit_Tb->setText("80");
 
     PlotFitFunc();
 }

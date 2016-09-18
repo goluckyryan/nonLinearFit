@@ -25,7 +25,7 @@ public:
     void MeanAndvariance(int index_1, int index_2);
 
     int Regression(bool fitType, QVector<double> par);
-    Matrix *NonLinearFit(int startFitIndex, QVector<double> iniPar);
+    int NonLinearFit(QVector<double> iniPar);
 
     void CalFitData(QVector<double> par);
 
@@ -34,7 +34,7 @@ signals:
     void SendMsg(QString msg);
 
 public slots:
-    bool IsWellFit(){return fitFlag;}
+    int GetFitFlag(){return fitFlag;}
     int GetDataSize(){ return n;}
     int GetStartFitIndex(){return startIndex;}
     int GetStart_x(){return xdata[startIndex];}
@@ -50,15 +50,19 @@ public slots:
     double GetSSR() {return SSR;}
     double GetFitVariance() {return SSR/DF;}
 
-    Matrix GetParameters() {return sol;}
-    Matrix GetParError() {return error;}
-    Matrix GetParPValue() {return pValue;}
+    QVector<double> GetParameters() {return sol;}
+    QVector<double> GetParError() {return error;}
+    QVector<double> GetParPValue() {return pValue;}
 
-    double GetParameters(int i) {return sol.Get(i,1);}
-    double GetParError(int i) {return error.Get(i,1);}
-    double GetParPValue(int i) {return pValue.Get(i,1);}
+    double GetParameters(int i) {return sol[i];}
+    double GetParError(int i) {return error[i];}
+    double GetParPValue(int i) {return pValue[i];}
+
+    double GetSampleVariance(){return var;}
+    double GetSampleMean(){return mean;}
 
     void Print();
+    void PrintVector(QVector<double> vec, QString str);
 
     void MsgConnector(QString msg){
         emit SendMsg(msg);
@@ -67,15 +71,15 @@ public slots:
 private:
     QVector<double> xdata, ydata;
     QVector<double> fydata;
-    Matrix sol;
-    Matrix dpar;
-    Matrix error;
-    Matrix tDis;
-    Matrix pValue;
+    QVector<double> sol;
+    QVector<double> dpar;
+    QVector<double> error;
+    QVector<double> tDis;
+    QVector<double> pValue;
     double SSR;
     int n, p, DF;
     int startIndex;
-    bool fitFlag;
+    int fitFlag;
     double mean, var; // sample
 
     double cum_tDis30(double x){

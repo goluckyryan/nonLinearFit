@@ -1,6 +1,8 @@
 *
 *.o
 *.exe
+FitResult_single.txt
+FitResult.txt
 
 #Qt
 *.pro.user
