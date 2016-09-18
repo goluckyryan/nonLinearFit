@@ -5,17 +5,26 @@ FileIO::FileIO()
     myfile = NULL;
     zData = NULL;
     colwise = 0;
+    xMax = 0;
+    xMin = 0;
+    yMax = 0;
+    yMin = 0;
+    zMax = 0;
+    zMin = 0;
+
+    xSize = 0;
+    ySize = 0;
 }
 
 FileIO::FileIO(QString filePath){
     this->filePath = filePath;
     myfile = new QFile(filePath);
-    myfile->open(QIODevice::ReadOnly);
+    openState = myfile->open(QIODevice::ReadOnly);
 }
 
 FileIO::~FileIO(){
     delete myfile;
-    //delete zData;
+    //if( zData != NULL ) delete zData;
 }
 
 void FileIO::OpenCSVData(){

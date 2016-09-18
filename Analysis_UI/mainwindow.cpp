@@ -3,67 +3,174 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    file(NULL),
+    ana(NULL)
 {
     ui->setupUi(this);
 
     plot = ui->customPlot;
 
-    /*
-    QVector<double> x;
-    x.push_back(0);
-    x.push_back(1);
-    x.push_back(2);
-    x.push_back(3);
-    x.push_back(4);
-    x.push_back(5);
-    x.push_back(6);
-
-    Analysis ana(x,x);
-
-    ana.MeanAndvariance(0, x.size()-1);
-
-    ana.Print();
-    */
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow(){
     delete ui;
     delete plot;
+    if( file != NULL) delete file;
+    if( ana != NULL) delete ana;
 }
+
+void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y, double xMin, double xMax, double yMin, double yMax){
+
+    while( plot->graphCount() < graphID+1){
+        plot->addGraph();
+        if( plot->graphCount() == 1){
+            plot->xAxis->setLabel("time [us]");
+            plot->yAxis->setLabel("a.u.");
+        }
+    }
+
+    switch (graphID) {
+    case 0: plot->graph(graphID)->setPen(QPen(Qt::blue)); break;
+    case 1: plot->graph(graphID)->setPen(QPen(Qt::red)); break;
+    case 2: plot->graph(graphID)->setPen(QPen(Qt::green)); break;
+    case 3: plot->graph(graphID)->setPen(QPen(Qt::magenta)); break;
+    case 4: plot->graph(graphID)->setPen(QPen(Qt::black)); break;
+    }
+
+    plot->graph(graphID)->clearData();
+
+    plot->graph(graphID)->addData(x, y);
+    plot->xAxis->setRange(xMin, xMax);
+    plot->yAxis->setRange(yMin, yMax);
+    plot->replot();
+
+}
+
 
 void MainWindow::Write2Log(QString str){
     ui->plainTextEdit->appendPlainText(str);
+    qDebug()<< str;
 }
 
 void MainWindow::on_pushButton_clicked(){
     QString fileName;
     fileName = QFileDialog::getOpenFileName(this,
                                             "Open File",
-                                            "/Users/mobileryan/Triplet-ESR");
+                                            "/Users/mobileryan/Triplet-ESR",
+                                            tr("Col-wise (*.csv *.txt *.dat);; Row-wise (*txt *dat)"));
 
-    //qDebug()<< fileName;
+    ui->lineEdit->setText(fileName);
 
-    FileIO file(fileName);
-    file.OpenCSVData();
+    if(fileName == "") return;
 
-    plot->addGraph();
-    plot->graph(0)->addData(file.GetDataSetX(), file.GetDataSetZ(105));
-    plot->xAxis->setLabel("time");
-    plot->yAxis->setLabel("a.u.");
-    plot->xAxis->setRange(file.GetXMin(), file.GetXMax());
-    plot->yAxis->setRange(file.GetZMin(), file.GetZMax());
-    plot->replot();
+    file = new FileIO(fileName);
+    connect(file, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
+    if(fileName.right(3)=="csv"){
+        file->OpenCSVData();
+    }
+
+    if(!file->IsOpen()) return;
+
+    qDebug("X: (%f %f)", file->GetXMin(), file->GetXMax());
+    qDebug("Y: (%f %f)", file->GetYMin(), file->GetYMax());
+
+    ui->spinBox_y->setMinimum(0);
+    ui->spinBox_y->setMaximum(file->GetDataSetSize()-1);
+    ui->spinBox_x->setMinimum(0);
+    ui->spinBox_x->setMaximum(file->GetDataSize()-1);
+
+    ui->spinBox_y->setValue(105);
+    ui->spinBox_x->setValue(195);
+
+}
 
 
-    //Analysis ana(file.GetDataSetX(), file.GetDataSetZ(0));
-    //QVector<double> par = {20, 20, -20, 100};
-    //ana.Regression(1, par);
+void MainWindow::on_spinBox_y_valueChanged(int arg1){
+    Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1),
+         file->GetXMin(), file->GetXMax(),
+         file->GetZMin(), file->GetZMax());
 
-    //qDebug() << file.GetDataY(0);
-    //for( int i = 0; i < 10; i++){
-    //    qDebug("%d, %d : %f, %f", i, 0, file.GetDataX(i), file.GetData(i,0));
-    //}
+    ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1)));
 
+    PlotFitFunc();
+}
+
+void MainWindow::on_spinBox_x_valueChanged(int arg1){
+    ui->lineEdit_x->setText(QString::number(file->GetDataX(arg1)));
+    PlotFitFunc();
+}
+
+void MainWindow::PlotFitFunc(){ // also initialize ana
+    QVector<double> par;
+    par.push_back(ui->lineEdit_a->text().toDouble());
+    par.push_back(ui->lineEdit_Ta->text().toDouble());
+    par.push_back(ui->lineEdit_b->text().toDouble());
+    par.push_back(ui->lineEdit_Tb->text().toDouble());
+
+    int yIndex = ui->spinBox_y->value();
+
+    if(ana != NULL) delete ana;
+    ana = new Analysis(file->GetDataSetX(), file->GetDataSetZ(yIndex));
+    connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
+    ana->CalFitData(par);
+
+    Plot(1, ana->GetData_x(), ana->GetFitData_y(),
+         file->GetXMin(), file->GetXMax(),
+         file->GetZMin(), file->GetZMax());
+
+
+    int xIndex = ui->spinBox_x->value();
+    double x = file->GetDataX(xIndex);
+
+    QVector<double> xline_y, xline_x;
+    double yMin = file->GetZMin();
+    double yMax = file->GetZMax();
+    int size = ana->GetDataSize();
+    for(int i = 0; i < size; i++){
+        double y = yMin + (yMax-yMin)*i/size;
+        xline_y.push_back(y);
+        xline_x.push_back(x);
+    }
+    Plot(2, xline_x, xline_y,
+         file->GetXMin(), file->GetXMax(), yMin, yMax);
+
+    ana->SetStartFitIndex(xIndex);
+}
+
+void MainWindow::on_lineEdit_a_returnPressed(){
+    PlotFitFunc();
+}
+
+void MainWindow::on_lineEdit_Ta_returnPressed(){
+    PlotFitFunc();
+}
+
+void MainWindow::on_lineEdit_b_returnPressed(){
+    PlotFitFunc();
+}
+
+void MainWindow::on_lineEdit_Tb_returnPressed(){
+    PlotFitFunc();
+}
+
+
+
+void MainWindow::on_pushButton_Fit_clicked(){
+    QVector<double> par;
+    par.push_back(ui->lineEdit_a->text().toDouble());
+    par.push_back(ui->lineEdit_Ta->text().toDouble());
+    par.push_back(ui->lineEdit_b->text().toDouble());
+    par.push_back(ui->lineEdit_Tb->text().toDouble());
+
+    ana->Regression(1, par);
+
+    QVector<double> sol = ana->GetParameters().Matrix2QVec();
+    int sol_size = sol.size();
+    ui->lineEdit_a->setText(QString::number(sol[0]));
+    ui->lineEdit_Ta->setText(QString::number(sol[1]));
+    if( sol_size == 4) ui->lineEdit_b->setText(QString::number(sol[2]));
+    if( sol_size == 4) ui->lineEdit_Tb->setText(QString::number(sol[3]));
+
+    PlotFitFunc();
 }

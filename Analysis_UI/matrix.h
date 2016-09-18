@@ -74,6 +74,19 @@ public:
     int GetCols(){return cols;}
     double Get(int r, int c){return p[r-1][c-1];}
 
+    QVector<double> Matrix2QVec(){
+        QVector<double> vec;
+        int n = 0;
+        if( rows == 1) n = cols;
+        if( cols == 1) n = rows;
+
+        for( int i = 1; i <= n; i++){
+           if( rows==1) vec.push_back(this->Get(1,i));
+           if( cols==1) vec.push_back(this->Get(i,1));
+        }
+        return vec;
+    }
+
 signals:
 
     void SendMsg(QString msg);

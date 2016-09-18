@@ -27,6 +27,8 @@ public:
     int Regression(bool fitType, QVector<double> par);
     Matrix *NonLinearFit(int startFitIndex, QVector<double> iniPar);
 
+    void CalFitData(QVector<double> par);
+
 signals:
 
     void SendMsg(QString msg);
@@ -42,6 +44,8 @@ public slots:
     QVector<double> GetData_y() {return ydata;}
     double GetData_x(int i) {return xdata[i-1];}
     double GetData_y(int i) {return ydata[i-1];}
+
+    QVector<double> GetFitData_y() {return fydata;}
 
     double GetSSR() {return SSR;}
     double GetFitVariance() {return SSR/DF;}
@@ -62,6 +66,7 @@ public slots:
 
 private:
     QVector<double> xdata, ydata;
+    QVector<double> fydata;
     Matrix sol;
     Matrix dpar;
     Matrix error;

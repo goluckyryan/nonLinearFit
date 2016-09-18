@@ -42,6 +42,8 @@ public slots:
     double GetZMax(){return zMax;}
     double GetZMin(){return zMin;}
 
+    bool IsOpen(){return openState;}
+
 private:
     QVector<double> xData; // time data
     QVector<double> yData; // B-field
@@ -52,6 +54,7 @@ private:
     double yMin, yMax;
     double zMin, zMax;
     bool colwise; // 0 = data store as row, 1 = data store as col
+    bool openState;
 
     QFile * myfile;
     QString filePath;

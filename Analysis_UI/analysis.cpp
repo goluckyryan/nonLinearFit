@@ -34,7 +34,8 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
 {
     // assume x.size() == y.size()
     if( x.size() != y.size() ){
-        printf("The sizes of input data x and y are not match. Size(x) = %d, Size(y) = %d", x.size(), y.size());
+        Msg.sprintf("The sizes of input data x and y are not match. Size(x) = %d, Size(y) = %d", x.size(), y.size());
+        SendMsg(Msg);
         return;
     }
     this->xdata = x;
@@ -42,7 +43,7 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
 
     this->n = this->xdata.size();
     Msg.sprintf("Input Data, size = %d", this->n);
-    emit SendMsg(Msg);
+    SendMsg(Msg);
 
 }
 
@@ -86,7 +87,8 @@ int Analysis::Regression(bool fitType, QVector<double> par)
     int xEnd = this->n - 1;
     int fitSize = xEnd - xStart + 1;
 
-    qDebug("%d, %d, %d", xStart, xEnd, fitSize);
+    Msg.sprintf("%d, %d, %d", xStart, xEnd, fitSize);
+    SendMsg(Msg);
 
     this->p = 2;//default is 2 parameters fit
     if (fitType) this->p = 4;
@@ -99,8 +101,8 @@ int Analysis::Regression(bool fitType, QVector<double> par)
         Y(i,1) = ydata[i + xStart - 1];
     }
 
-    qDebug("Y : %d %d", Y.GetRows(), Y.GetCols());
-    qDebug("Y : %f ... %f" , Y(1,1), Y(fitSize, 1));
+    ///qDebug("Y : %d %d", Y.GetRows(), Y.GetCols());
+    ///qDebug("Y : %f ... %f" , Y(1,1), Y(fitSize, 1));
 
     Matrix f(fitSize,1);
     for(int i = 1; i <= fitSize ; i++) {
@@ -108,8 +110,8 @@ int Analysis::Regression(bool fitType, QVector<double> par)
         f(i,1) = FitFunc(fitType, x, par);
     }
 
-    qDebug("f : %d %d", f.GetRows(), f.GetCols());
-    qDebug("f : %f ... %f" , f(1,1), f(fitSize, 1));
+    ///qDebug("f : %d %d", f.GetRows(), f.GetCols());
+    ///qDebug("f : %f ... %f" , f(1,1), f(fitSize, 1));
 
 
     Matrix F(fitSize,p); // F = grad(f)
@@ -129,19 +131,19 @@ int Analysis::Regression(bool fitType, QVector<double> par)
         //if( fitType ) F(i,4) = par[2] * x * exp(-x/par[3])/par[3]/par[3];
     }
 
-    qDebug("F  : %d %d", F.GetRows(), F.GetCols());
-    qDebug("F1 : %f ... %f" , F(1,1), F(fitSize, 1));
-    qDebug("F2 : %f ... %f" , F(1,2), F(fitSize, 2));
+    ///qDebug("F  : %d %d", F.GetRows(), F.GetCols());
+    ///qDebug("F1 : %f ... %f" , F(1,1), F(fitSize, 1));
+    ///qDebug("F2 : %f ... %f" , F(1,2), F(fitSize, 2));
 
     Matrix Ft = F.Transpose();
 
-    qDebug("Ft : %d %d", Ft.GetRows(), Ft.GetCols());
-    qDebug("F1 : %f ... %f" , Ft(1,1), Ft(1,fitSize));
-    qDebug("F2 : %f ... %f" , Ft(2,1), Ft(2,fitSize));
+    ///qDebug("Ft : %d %d", Ft.GetRows(), Ft.GetCols());
+    ///qDebug("F1 : %f ... %f" , Ft(1,1), Ft(1,fitSize));
+    ///qDebug("F2 : %f ... %f" , Ft(2,1), Ft(2,fitSize));
 
     Matrix FtF = Ft*F;
 
-    FtF.PrintM("FtF");
+    ///FtF.PrintM("FtF");
 
     Matrix CoVar;
     try{
@@ -172,12 +174,23 @@ int Analysis::Regression(bool fitType, QVector<double> par)
     this->tDis   = Matrix(1,p); for( int i = 1; i <= p ; i++){ tDis(1,i)   = this->sol(1,i)/this->error(1,i); }
     this->pValue = Matrix(1,p); for( int i = 1; i <= p ; i++){ pValue(1,i) = cum_tDis30(- std::abs(this->tDis(1,i)));}
 
+    par_old.PrintVector("in(par)");
+    this->dpar.PrintVector("dpar");
     this->sol.PrintVector("sol");
+
+    qDebug()<< "======================================";
 }
 
 Matrix *Analysis::NonLinearFit(int startFitIndex, QVector<double> iniPar)
 {
 
+}
+
+void Analysis::CalFitData(QVector<double> par){
+    for ( int i = 0; i < this->n; i++){
+        double x = xdata[i];
+        fydata.push_back( FitFunc(1,x, par) );
+    }
 }
 
 void Analysis::Print()
