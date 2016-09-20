@@ -428,7 +428,7 @@ void LMA(int yIndex, int info, double a, double Ta, double b, double Tb){
 			}
 		}
 		
-		FtF.Print();
+		FtdY.Print();
 		
 		printf("%d ", count);
 		printf("lambda : %f, rho :%f, lim :%f , dSSR: %f\n", lambda, rho, lim, SSR-SSR_old);
