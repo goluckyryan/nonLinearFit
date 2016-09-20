@@ -1,5 +1,12 @@
+*
 *.o
 *.exe
+FitResult_single.txt
+FitResult.txt
+
+#Qt
+*.pro.user
+*build-*
 
 # Windows image file caches
 Thumbs.db

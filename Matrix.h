@@ -155,10 +155,10 @@ public:
     }
   }
 
-  // index operator. You can use this class like myMatrix.get(col, row)
+  // index operator. You can use this class like myMatrix.Get(col, row)
   // the indexes are one-based, not zero based.
   // use this function get if you want to read from a const Matrix
-  double get(const int r, const int c) const
+  double Get(const int r, const int c) const
   {
     if (p != NULL && r > 0 && r <= rows && c > 0 && c <= cols)
     {
@@ -592,7 +592,7 @@ Matrix Diag(const Matrix& v)
     // copy the values of the vector to the matrix
     for (int r=1; r <= rows; r++)
     {
-      res(r, r) = v.get(r, 1);
+      res(r, r) = v.Get(r, 1);
     }
   }
   else if (v.GetRows() == 1)
@@ -604,7 +604,7 @@ Matrix Diag(const Matrix& v)
     // copy the values of the vector to the matrix
     for (int c=1; c <= cols; c++)
     {
-      res(c, c) = v.get(1, c);
+      res(c, c) = v.Get(1, c);
     }
   }
   else
@@ -629,13 +629,13 @@ double Det(const Matrix& a)
     if (rows == 1)
     {
       // this is a 1 x 1 matrix
-      d = a.get(1, 1);
+      d = a.Get(1, 1);
     }
     else if (rows == 2)
     {
       // this is a 2 x 2 matrix
       // the determinant of [a11,a12;a21,a22] is det = a11*a22-a21*a12
-      d = a.get(1, 1) * a.get(2, 2) - a.get(2, 1) * a.get(1, 2);
+      d = a.Get(1, 1) * a.Get(2, 2) - a.Get(2, 1) * a.Get(1, 2);
     }
     else
     {
@@ -644,7 +644,7 @@ double Det(const Matrix& a)
       {
         Matrix M = a.Minor(1, c);
         //d += pow(-1, 1+c) * a(1, c) * Det(M);
-        d += (c%2 + c%2 - 1) * a.get(1, c) * Det(M); // faster than with pow()
+        d += (c%2 + c%2 - 1) * a.Get(1, c) * Det(M); // faster than with pow()
       }
     }
   }
@@ -676,7 +676,7 @@ Matrix Transpose(const Matrix& a){
 	
 	for ( int i = 1; i <= rows; i++){
 		for ( int j = 1; j <= cols; j++){
-			v(j,i) = a.get(i,j);
+			v(j,i) = a.Get(i,j);
 		}
 	}
 	
@@ -700,16 +700,16 @@ Matrix Inv(const Matrix& a)
     {
       // this is a 1 x 1 matrix
       res = Matrix(rows, cols);
-      res(1, 1) = 1 / a.get(1, 1);
+      res(1, 1) = 1 / a.Get(1, 1);
     }
     else if (rows == 2)
     {
       // this is a 2 x 2 matrix
       res = Matrix(rows, cols);
-      res(1, 1) = a.get(2, 2);
-      res(1, 2) = -a.get(1, 2);
-      res(2, 1) = -a.get(2, 1);
-      res(2, 2) = a.get(1, 1);
+      res(1, 1) = a.Get(2, 2);
+      res(1, 2) = -a.Get(1, 2);
+      res(2, 1) = -a.Get(2, 1);
+      res(2, 2) = a.Get(1, 1);
       res = (1/d) * res;
     }
     else
