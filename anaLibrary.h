@@ -40,106 +40,94 @@ int getData(char* filename){
   //------------ get 1st line, determine how many set of data, get valY
   file.open(filename);
   
-  int numCol = 0, numY = -1;
+  int numCol = 0, yIndex = -1;
   int strLen = 0;
   while (file.good()){
 	getline(file, val, ','); //get it cell by cell
 	if( numCol == 0) {
 		strLen = val.length();
-		//printf(" %d \n", strLen);
-		
+		///printf(" %d \n", strLen);
 	}
 
 	// get the Y data
 	if( numCol % 2 == 0){
 		size_t pos = val.find_last_of("_"); //get the last "_"
 		string strY = val.substr(pos+1, 5);
-		numY ++;
-		valY[numY] = atof(strY.c_str());
-		//printf(" %s, %f \n", strY.c_str(), valY[colID]);
+		yIndex ++;
+		valY[yIndex] = atof(strY.c_str());
+		///printf(" %s, %f \n", strY.c_str(), valY[yIndex]);
 	}
 	
 	numCol ++;
 	if ( strLen != val.length()) break; // the last val is data
   }
-  file.close();
  
   double stepY = valY[1]-valY[0];
-  numY ++;
-  
-  printf(" Y : (%.3f, %.3f), step : %.3f , numY : %d \n", valY[0], valY[numY-1], stepY , numY); 
-  //printf(" total number of col : %d \n", numCol);
-  sizeY = numY;
-  
+  sizeY = yIndex + 1 ;
+
   //------------ get number of Row
-  file.open(filename);
-  int numX = 0;
+  file.seekg(0);
+  sizeX = 0;
   while (file.good()){
-   numX ++;
+   sizeX ++;
    getline (file, val);
   }
+  sizeX = sizeX - 2 ;
   file.close();
-  numX = numX - 2;
-  //printf(" total number of X : %d \n", numX);
-  sizeX = numX;
+  
   
   //------------ get data 
   file.open(filename);
   if( file.good()) getline(file, val); // skip the 1st line by getline
   
-  int numRow = 0, count = 0, iY = 0; 
+  int xIndex = 0, cols = 0;
+  yIndex = 0; 
   double maxZ = 0;
   double minZ = 0;
   
+  ///printf(" numCol : %d, IsEnd : %d, IsGood : %d\n", numCol, file.eof(), file.good());
+  
   while (file.good()){
-   count ++; 
+   cols ++; 
 
-   if( count % numCol !=0 ){
+   if( cols % numCol !=0 ){
 	   getline (file, val, ',');  
    }else{
 	   getline (file, val); 
    }
 
    //get valX
-   if( count % numCol == 1){
-		valX[numRow] = atof(val.c_str())*1e6; // in us
-		//printf("%10d, %3d, %2d|  %s , %f \n", count, numCol, count % numCol , val.c_str(), valX[numRow]); 
+   if( cols % numCol == 1){
+		valX[xIndex] = atof(val.c_str())*1e6; // in us
+		///printf("%10d, %3d, %2d|  %s , %f \n", cols, numCol, cols % numCol , val.c_str(), valX[xIndex]); 
    }
    
    // get data
-   if( count % 2 == 0){
+   if( cols % 2 == 0){
 	   double Zval = atof(val.c_str())*pow(10,multi_Z); // multiplied by 10^6 times
-	   data[iY][numRow] = Zval;
+	   data[yIndex][xIndex] = Zval;
 	   if( Zval > maxZ) maxZ = Zval;
 	   if( Zval < minZ) minZ = Zval;
-	   //printf("*%10d, %3d, %3d, %s, %f\n", count, count% numCol, iY, val.c_str(), data[iY][numRow]);
-	   iY ++;
+	   ///printf("*%10d, %3d, %3d, %s, %f\n", cols, cols% numCol, yIndex, val.c_str(), data[yIndex][xIndex]);
+	   yIndex ++;
    }
    
-   if( count % numCol == 0) {
-	   numRow ++ ;
-	   iY = 0;
+   if( cols % numCol == 0) {
+	   xIndex ++ ;
+	   yIndex = 0;
+	   cols = 0;
    }
    
-   if( numRow > numX ) break;
+   if( xIndex > sizeX ) break;
   }
   
   file.close();
   
   double stepX = valX[1]-valX[0];
   
-  printf(" X : (%.3f, %.3f), step : %.3f , numX : %d \n", valX[0], valX[numX-1], stepX , numX); 
+  printf(" Y : (%.3f, %.3f), step : %.3f , sizeY : %d \n", valY[0], valY[sizeY-1], stepY , sizeY); 
+  printf(" X : (%.3f, %.3f), step : %.3f , sizeX : %d \n", valX[0], valX[sizeX-1], stepX , sizeX); 
   printf(" Z : (%.5f, %.5f)\n", minZ, maxZ);
-  // check
-  /*
-  printf("--------------\n");
-  int idY = 349;
-  printf(" Y = %f \n", valY[idY]);
-  for (int idX = 0 ; idX <=3 ; idX ++){
-	printf(" row: %d, X : %f, data : %f \n", idX, valX[idX], data[idY][idX]);
-  }
-  */
-  
   printf("------------------------------\n");
   return 0;
 }
@@ -149,17 +137,17 @@ int output(char* filename){
 	file = fopen (filename, "w+");
 	
 	//output of valY
-	fprintf(file, "%*s", 10, "");
+	fprintf(file, "%*s,", 10, "");
 	for (int i = 0; i < sizeY; i++){
-		fprintf(file, "%10.5f", valY[i]);
+		fprintf(file, "%10.5f,", valY[i]);
 	} 
 	fprintf(file, "\n");
 	
 	//output of data
 	for (int i = 0; i < sizeX; i++){
-		fprintf(file, "%10.3f", valX[i]);
+		fprintf(file, "%10.3f,", valX[i]);
 		for (int j = 0; j < sizeY; j++){
-			fprintf(file, "%10.2f", data[j][i]);
+			fprintf(file, "%10.2f,", data[j][i]);
 		} 
 		fprintf(file, "\n");
 	}

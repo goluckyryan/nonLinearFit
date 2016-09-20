@@ -63,8 +63,6 @@ int main(int argc, char *argv[]){
 		//system(plot_cmd);
 		system("gnuplot \"plot_Loop.gp\" -p");
 	}else{
-		
-		
 		double a, Ta, b, Tb;
 		a  = sol(1,1);
 		Ta = sol(2,1);
