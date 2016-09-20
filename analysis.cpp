@@ -73,7 +73,7 @@ int main(int argc, char *argv[]){
 			Tb = sol(4,1);
 		}
 		sprintf(plot_cmd, "gnuplot -e \"Col=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d;endX=%d\" plot.gp -p",
-                    yIndex, a, Ta, b, Tb, 195, 1000);
+                    yIndex, a, Ta, b, Tb, 195, sizeX);
 		system(plot_cmd);
 	}
 	

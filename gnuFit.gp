@@ -1,15 +1,30 @@
 set key autotitle columnhead
 
-set title sprintf("Col = %d, (a, Ta, b, Tb) = (%4.2f, %4.2f, %4.2f, %4.2f) \n X(%d, %d)", Col, a, Ta, b, Tb, startX, endX)
 
-col = Col + 2
+yIndex = 140
+startX = 195
 
+
+col = yIndex + 2
 set grid
-
 stats "test.dat" u 1:col nooutput
+
+!del fit.log
 
 set xrange [-40:160]
 set yrange [STATS_min_y*1.1:STATS_max_y*1.1]
+
+f(x) = a*exp(-x/Ta) + b*exp(-x/Tb)
+FIT_LIMIT = 1e-3;
+a = 40
+Ta = 20
+b = -5
+Tb = 80
+
+fit f(x) "test.dat" u 1:col every ::(startX+2) via a, Ta, b, Tb
+
+set title sprintf("Col = %d, (a, Ta, b, Tb) = (%4.2f, %4.2f, %4.2f, %4.2f) \n X(%d, %d)", yIndex, a, Ta, b, Tb, startX, 1002)
+
 
 plot "test.dat" u 1:col every ::2 w l,\
 	 "test.dat" u 1:col every ::(startX+2) w l  title "fit data" lt rgb "#FF00FF",\
