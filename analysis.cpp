@@ -5,8 +5,8 @@ using namespace std;
  
 int main(int argc, char *argv[]){ 
 	
-	if( argc != 2 && argc != 4 && argc != 6){
-		printf("usage: ./analaysis.o yindex (a Ta b Tb)\n");
+	if( argc != 2 && argc != 4 && argc != 6 && argc != 7){
+		printf("usage: ./analaysis.o yindex (a Ta b Tb) lambda\n");
 		printf("         yIndex = -1 ; loop all, minimum massage. \n");
 		printf("      a Ta b Tb = are optional initial guesses. \n");
 		return 1;
@@ -28,7 +28,10 @@ int main(int argc, char *argv[]){
 		b  = atof(argv[4]);
 		Tb = atof(argv[5]);
 	}
-
+	if( argc >= 7){
+		lambda = atof(argv[6]);
+	}
+	
 	///======================= get data
 	char filename[100] = "20160725pentacene_pterphenyl.csv";
 	getData(filename);

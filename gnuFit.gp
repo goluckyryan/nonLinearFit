@@ -1,7 +1,7 @@
 set key autotitle columnhead
 
 
-yIndex = 140
+yIndex = 11
 startX = 195
 
 
