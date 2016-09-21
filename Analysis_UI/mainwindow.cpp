@@ -177,10 +177,11 @@ void MainWindow::on_pushButton_Fit_clicked(){
     ana->PrintVector(ana->GetParPValue(), "p-Value");
     ana->PrintVector(ana->GetSSRgrad(), "SSR grad");
 
-    qDebug() << " DF :" << ana->GetNDF();
-    qDebug() << " Fit Variance :" << ana->GetFitVariance();
-    qDebug() << " Sample Variance :"<< ana->GetSampleVariance();
-    qDebug() << " Reduced Chi-squared :" << ana->GetFitVariance()/ana->GetSampleVariance();
+    Msg.sprintf("DF : %d, SSR: %f, delta: %e", ana->GetNDF(), ana->GetSSR(), ana->GetDelta() );
+    Write2Log(Msg);
+    double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
+    Msg.sprintf("Fit Variance : %f, Sample Variance : %f, Reduced Chi-squared : %f", ana->GetFitVariance(), ana->GetSampleVariance(), chisq);
+    Write2Log(Msg);
 
     QVector<double> sol = ana->GetParameters();
     ui->lineEdit_a->setText(QString::number(sol[0]));

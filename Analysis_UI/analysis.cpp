@@ -148,11 +148,11 @@ int Analysis::Regression(QVector<double> par0)
 
     this->delta = SSRn - this->SSR;
 
-    qDebug()<< "lambda : " << lambda;
-    qDebug("SSRn : %f, SSR: %f, delta : %e", SSRn, SSR, delta);
-    par_old.PrintVector("par0");
-    dpar.PrintVector("dpar");
-    sol.PrintVector("parN");
+    //Msg.sprintf("lambda : %f, SSRn : %f, SSR: %f, delta : %e", lambda, SSRn, SSR, delta);
+    //qDebug() << Msg;
+    //par_old.PrintVector("par0");
+    //dpar.PrintVector("dpar");
+    //sol.PrintVector("parN");
 
     if( this->delta > 0){
         this->lambda = this->lambda / 10;
@@ -195,6 +195,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     this->lambda = lambda0;
     const int MaxIter = 200;
     const double torr = 1e-6;
+    const double torrGrad = 1e-4;
     QString tmp;
     PrintVector(par0, "ini. par:");
 
@@ -208,18 +209,17 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         int reg = Regression(par);
         par = this->sol;
         count ++;
-        tmp.sprintf(" %d", count);
-        Msg += tmp;
-        if( count > MaxIter ) {
+
+        if( count >= MaxIter ) {
             fitFlag = 2; // fitFlag = 2 when iteration too many
             break;
         }
-        if( reg == 0) qDebug() << "*====== stay unchnage";
+        //if( reg == 0) qDebug() << "*====== stay unchnage";
         bool converge = 0;
         //since this is 4-parameter fit
         converge = std::abs(this->delta) <  torr;
         for(int i = 0; i < p; i++){
-            converge &= std::abs(this->gradSSR[i]) < 1e-4;
+            converge &= std::abs(this->gradSSR[i]) < torrGrad;
         }
         // if lambda to small or too big, reset
         if( this->lambda < 1e-5) this->lambda = 1e+5;
@@ -227,6 +227,8 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         contFlag = fitFlag == 0 && ( !converge );
     }while(contFlag);
 
+    tmp.sprintf(" %d", count);
+    Msg += tmp;
     if( fitFlag == 0) {
         Msg += "| End Normally.";
     }else if(fitFlag == 1){
@@ -235,7 +237,8 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         tmp.sprintf("| Terminated. Fail to converge in %d trials.", MaxIter);
         Msg += tmp;
     }
-    qDebug() << Msg;
+    //qDebug() << Msg;
+    SendMsg(Msg);
 
     //===== cal error
     double fitVar = this->SSR / this->DF;
@@ -310,5 +313,6 @@ void Analysis::PrintVector(QVector<double> vec, QString str)
     }
     tmp.sprintf(" %7.3f]", vec[vec.size()-1]);
     Msg += tmp;
-    qDebug() << Msg;
+    //qDebug() << Msg;
+    SendMsg(Msg);
 }
