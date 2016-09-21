@@ -2,7 +2,21 @@
 
 FileIO::FileIO()
 {
+    Initialize();
+}
+
+FileIO::FileIO(QString filePath){
+    Initialize();
+
+    this->filePath = filePath;
+    myfile = new QFile(filePath);
+    myfile->open(QIODevice::ReadOnly);
+
+}
+
+void FileIO::Initialize(){
     myfile = NULL;
+    outfile = NULL;
     zData = NULL;
     colwise = 0;
     xMax = 0;
@@ -11,20 +25,25 @@ FileIO::FileIO()
     yMin = 0;
     zMax = 0;
     zMin = 0;
+    openState = 0;
 
     xSize = 0;
     ySize = 0;
 }
 
-FileIO::FileIO(QString filePath){
-    this->filePath = filePath;
-    myfile = new QFile(filePath);
-    openState = myfile->open(QIODevice::ReadOnly);
-}
-
 FileIO::~FileIO(){
     delete myfile;
     //if( zData != NULL ) delete zData;
+}
+
+void FileIO::OpenSaveFile(){
+    if( openState == 0 ) return;
+    int lenght = filePath.length();
+    QString outfilePath = filePath.left(lenght -4);
+    outfilePath += "_fit.txt";
+    qDebug() << outfilePath;
+    outfile = new QFile(outfilePath);
+    outfile->open(QIODevice::Append );
 }
 
 void FileIO::OpenCSVData(){
@@ -48,6 +67,13 @@ void FileIO::OpenCSVData(){
         }
     }
     xSize --;
+
+    qDebug() << xSize << "," << ySize;
+
+    if( ySize < 1) {
+        SendMsg("!!!! Invalide file structure.");
+        return;
+    }
 
     zData = new QVector<double> [xSize];
     double ** z ;
@@ -105,9 +131,43 @@ void FileIO::OpenCSVData(){
     yMin = FindMin(yData);
     yMax = FindMax(yData);
 
+    openState = 1;
+
 }
 
 void FileIO::OpenTxtData_row(){
+
+}
+
+void FileIO::SaveFitResult(Analysis *ana)
+{
+    QTextStream stream(outfile);
+    QString text, tmp;
+
+    tmp.sprintf("%5d, %8.4f, ", ana->GetYIndex(), ana->GetBValue());
+    text = tmp;
+
+    int p = ana->GetParametersSize();
+    qDebug() << p;
+
+    QVector<double> sol = ana->GetParameters();
+
+    for( int i = 0; i < p ; i++){
+        tmp.sprintf("%8.4f, ", sol[i]);
+        text += tmp;
+    }
+
+    QVector<double> error = ana->GetParError();
+    for( int i = 0; i < p ; i++){
+        tmp.sprintf("%8.4f, ", error[i]);
+        text += tmp;
+    }
+    text += "\n";
+
+    qDebug() << text;
+    SendMsg("fit saved.");
+    stream << text;
+
 
 }
 

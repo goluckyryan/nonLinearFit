@@ -20,6 +20,7 @@ public:
 
     void Initialize();
 
+    void SetY(int yIndex, double Bfield){ this->yIndex = yIndex; this->yValue = Bfield;}
     void SetData(const QVector<double> x, const QVector<double> y);
     void SetStartFitIndex(int index){ this->startIndex = index;}
     void Setlambda(double l){this->lambda = l;}
@@ -69,6 +70,9 @@ public slots:
     double GetDelta(){return delta;}
     double GetLambda(){return lambda;}
 
+    int GetYIndex() {return yIndex;}
+    double GetBValue() {return yValue;}
+
     void Print();
     void PrintVector(QVector<double> vec, QString str);
 
@@ -94,6 +98,9 @@ private:
     double delta; // SSR(p+h) - SSR(p)
     double mean, var; // sample
     double lambda;
+
+    int yIndex;
+    double yValue;
 
     double cum_tDis30(double x){
         return 1/(1+exp(-x/0.6));

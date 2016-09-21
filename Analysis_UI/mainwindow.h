@@ -22,7 +22,6 @@ public:
     ~MainWindow();
 
     void Plot(int graphID, QVector<double> x, QVector<double> y, double xMin, double xMax, double yMin, double yMax);
-
     void PlotFitFunc();// also initialize ana
 
 private slots:
@@ -40,6 +39,8 @@ private slots:
 
     void on_pushButton_Fit_clicked();
     void on_pushButton_reset_clicked();
+
+    void on_pushButton_save_clicked();
 
 private:
     Ui::MainWindow *ui;

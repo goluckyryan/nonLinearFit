@@ -4,12 +4,14 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    file(NULL),
-    ana(NULL)
+    file(NULL)
 {
     ui->setupUi(this);
 
     plot = ui->customPlot;
+
+    ana = new Analysis();
+    connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
 }
 
@@ -70,10 +72,13 @@ void MainWindow::on_pushButton_clicked(){
         file->OpenCSVData();
     }
 
-    if(!file->IsOpen()) return;
+    qDebug() << file->IsOpen();
+    if(file->IsOpen() == 0) return;
 
     qDebug("X: (%f %f)", file->GetXMin(), file->GetXMax());
     qDebug("Y: (%f %f)", file->GetYMin(), file->GetYMax());
+
+    file->OpenSaveFile();
 
     ui->spinBox_y->setMinimum(0);
     ui->spinBox_y->setMaximum(file->GetDataSetSize()-1);
@@ -82,6 +87,9 @@ void MainWindow::on_pushButton_clicked(){
 
     ui->spinBox_y->setValue(104);
     ui->spinBox_x->setValue(195);
+
+    ana->SetData(file->GetDataSetX(), file->GetDataSetZ(104));
+    ana->SetY(104, file->GetDataY(104));
 
 }
 
@@ -92,7 +100,8 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
          file->GetZMin(), file->GetZMax());
 
     ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1)));
-
+    ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
+    ana->SetY(arg1, file->GetDataY(arg1));
     PlotFitFunc();
 }
 
@@ -111,17 +120,10 @@ void MainWindow::PlotFitFunc(){ // also initialize ana
     par.push_back(ui->lineEdit_b->text().toDouble());
     par.push_back(ui->lineEdit_Tb->text().toDouble());
 
-    int yIndex = ui->spinBox_y->value();
-
-    if(ana != NULL) delete ana;
-    ana = new Analysis(file->GetDataSetX(), file->GetDataSetZ(yIndex));
-    connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
     ana->CalFitData(par);
-
     Plot(1, ana->GetData_x(), ana->GetFitData_y(),
          file->GetXMin(), file->GetXMax(),
          file->GetZMin(), file->GetZMax());
-
 
     int xIndex = ui->spinBox_x->value();
     double x = file->GetDataX(xIndex);
@@ -136,7 +138,7 @@ void MainWindow::PlotFitFunc(){ // also initialize ana
         xline_x.push_back(x);
     }
     Plot(2, xline_x, xline_y,
-         file->GetXMin(), file->GetXMax(), yMin, yMax);
+    file->GetXMin(), file->GetXMax(), yMin, yMax);
 
     ana->SetStartFitIndex(xIndex);
 }
@@ -190,6 +192,9 @@ void MainWindow::on_pushButton_Fit_clicked(){
     ui->lineEdit_Tb->setText(QString::number(sol[3]));
 
     PlotFitFunc();
+
+    ana->Print();
+
 }
 
 void MainWindow::on_pushButton_reset_clicked()
@@ -200,4 +205,9 @@ void MainWindow::on_pushButton_reset_clicked()
     ui->lineEdit_Tb->setText("80");
 
     PlotFitFunc();
+}
+
+void MainWindow::on_pushButton_save_clicked()
+{
+    file->SaveFitResult(ana);
 }

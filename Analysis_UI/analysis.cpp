@@ -15,13 +15,19 @@ Analysis::~Analysis(){
 }
 
 void Analysis::Initialize(){
-    this->SSR = 999;
-    this->n = 0;
-    this->p = 0;
-    this->DF = 0;
-    this->fitFlag = 0;
-    this->mean = 0;
-    this->var = 0;
+    SSR = 999;
+    n = 0;
+    p = 0;
+    DF = 0;
+    fitFlag = 0;
+    mean = 0;
+    var = 0;
+
+    delta = 0;
+    lambda = 0;
+
+    yIndex = 0;
+    yValue = 0;
 
     /*
     connect(&sol, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
@@ -93,7 +99,7 @@ int Analysis::Regression(QVector<double> par0)
     //Msg.sprintf("%d, %d, %d", xStart, xEnd, fitSize);
     //SendMsg(Msg);
 
-    this->p = 4;
+    this->p = par0.size();
     this->DF = fitSize - this->p;
     Matrix par_old(p,1); for(int i = 0; i < p; i++){ par_old(i+1,1) = par0[i];}
 
