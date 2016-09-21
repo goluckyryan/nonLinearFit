@@ -41,7 +41,6 @@ void FileIO::OpenSaveFile(){
     int lenght = filePath.length();
     QString outfilePath = filePath.left(lenght -4);
     outfilePath += "_fit.txt";
-    qDebug() << outfilePath;
     outfile = new QFile(outfilePath);
     outfile->open(QIODevice::Append );
 }
@@ -148,7 +147,6 @@ void FileIO::SaveFitResult(Analysis *ana)
     text = tmp;
 
     int p = ana->GetParametersSize();
-    qDebug() << p;
 
     QVector<double> sol = ana->GetParameters();
 
@@ -162,13 +160,12 @@ void FileIO::SaveFitResult(Analysis *ana)
         tmp.sprintf("%8.4f, ", error[i]);
         text += tmp;
     }
-    text += "\n";
+    tmp.sprintf("%8.4f, %5d \n", ana->GetSSR(), ana->GetNDF());
+    text += tmp;
 
-    qDebug() << text;
-    SendMsg("fit saved.");
+    SendMsg("fit result saved.");
+    SendMsg(text);
     stream << text;
-
-
 }
 
 double FileIO::ExtractYValue(QString str){

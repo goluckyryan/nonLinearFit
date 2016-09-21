@@ -50,8 +50,8 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
     this->ydata = y;
 
     this->n = this->xdata.size();
-    Msg.sprintf("Input Data, size = %d", this->n);
-    SendMsg(Msg);
+    //Msg.sprintf("Input Data, size = %d", this->n);
+    //SendMsg(Msg);
 
 }
 
@@ -75,8 +75,7 @@ void Analysis::MeanAndvariance(int index_1, int index_2)
     }
     mean = mean / size;
 
-    Msg.sprintf("Mean from index %d to %d of y-data (%d data) = %f", index_1, index_2, size, mean);
-    emit SendMsg(Msg);
+
 
     var = 0;
     for( int i = index_1 ; i <= index_2 ; i++){
@@ -84,14 +83,15 @@ void Analysis::MeanAndvariance(int index_1, int index_2)
     }
     var = var / (size-1);
 
-    Msg.sprintf("Variance from index %d to %d of y-data (%d data) = %f, sigma = %f", index_1, index_2, size, var, sqrt(var));
-    emit SendMsg(Msg);
+    Msg.sprintf("From index %d to %d (%d data)\nMean = %f, Variance = %f, sigma = %f", index_1, index_2, size, mean, var, sqrt(var));
+    SendMsg(Msg);
 
 }
 
 int Analysis::Regression(QVector<double> par0)
 {
     //Levenberg-Marquardt Algorithm
+    fitFlag = 0;
     int xStart = this->startIndex;
     int xEnd = this->n - 1;
     int fitSize = xEnd - xStart + 1;
@@ -231,6 +231,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         if( this->lambda < 1e-5) this->lambda = 1e+5;
         if( this->lambda > 1e+10) this->lambda = 1e-4;
         contFlag = fitFlag == 0 && ( !converge );
+
     }while(contFlag);
 
     tmp.sprintf(" %d", count);
@@ -276,12 +277,13 @@ int Analysis::GnuFit(QVector<double> par0)
 int Analysis::NonLinearFit(QVector<double> par0)
 {
 
-    LMA(par0);
+    LMA(par0, this->lambda);
 
     return 0;
 }
 
 void Analysis::CalFitData(QVector<double> par){
+    fydata.clear();
     for ( int i = 0; i < this->n; i++){
         double x = xdata[i];
         fydata.push_back( FitFunc(x, par) );

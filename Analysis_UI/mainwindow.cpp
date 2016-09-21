@@ -72,7 +72,6 @@ void MainWindow::on_pushButton_clicked(){
         file->OpenCSVData();
     }
 
-    qDebug() << file->IsOpen();
     if(file->IsOpen() == 0) return;
 
     qDebug("X: (%f %f)", file->GetXMin(), file->GetXMax());
@@ -88,8 +87,8 @@ void MainWindow::on_pushButton_clicked(){
     ui->spinBox_y->setValue(104);
     ui->spinBox_x->setValue(195);
 
-    ana->SetData(file->GetDataSetX(), file->GetDataSetZ(104));
-    ana->SetY(104, file->GetDataY(104));
+    //ana->SetData(file->GetDataSetX(), file->GetDataSetZ(104));
+    //ana->SetY(104, file->GetDataY(104));
 
 }
 
@@ -169,8 +168,10 @@ void MainWindow::on_pushButton_Fit_clicked(){
     par.push_back(ui->lineEdit_Tb->text().toDouble());
 
 
-    //ana->Print();
+    double lambda = ui->lineEdit_lambda->text().toDouble();
 
+    //ana->Print();
+    ana->Setlambda(lambda);
     ana->MeanAndvariance(0, ana->GetStartFitIndex()-20);
     ana->NonLinearFit(par);
 
@@ -193,7 +194,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     PlotFitFunc();
 
-    ana->Print();
+    //ana->Print();
 
 }
 
