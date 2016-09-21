@@ -59,7 +59,7 @@ private:
     QFile * myfile;
     QString filePath;
 
-    double GetYValue(QString str);
+    double ExtractYValue(QString str);
 
     double FindMax(QVector<double> vec);
     double FindMin(QVector<double> vec);

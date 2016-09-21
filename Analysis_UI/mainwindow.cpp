@@ -166,7 +166,6 @@ void MainWindow::on_pushButton_Fit_clicked(){
     par.push_back(ui->lineEdit_b->text().toDouble());
     par.push_back(ui->lineEdit_Tb->text().toDouble());
 
-    //ana->Regression(1, par);
 
     //ana->Print();
 
@@ -176,17 +175,18 @@ void MainWindow::on_pushButton_Fit_clicked(){
     ana->PrintVector(ana->GetParameters(), "sol");
     ana->PrintVector(ana->GetParError(), "error");
     ana->PrintVector(ana->GetParPValue(), "p-Value");
+    ana->PrintVector(ana->GetSSRgrad(), "SSR grad");
 
+    qDebug() << " DF :" << ana->GetNDF();
     qDebug() << " Fit Variance :" << ana->GetFitVariance();
     qDebug() << " Sample Variance :"<< ana->GetSampleVariance();
     qDebug() << " Reduced Chi-squared :" << ana->GetFitVariance()/ana->GetSampleVariance();
 
     QVector<double> sol = ana->GetParameters();
-    int sol_size = sol.size();
     ui->lineEdit_a->setText(QString::number(sol[0]));
     ui->lineEdit_Ta->setText(QString::number(sol[1]));
-    if( sol_size == 4) ui->lineEdit_b->setText(QString::number(sol[2]));
-    if( sol_size == 4) ui->lineEdit_Tb->setText(QString::number(sol[3]));
+    ui->lineEdit_b->setText(QString::number(sol[2]));
+    ui->lineEdit_Tb->setText(QString::number(sol[3]));
 
     PlotFitFunc();
 }

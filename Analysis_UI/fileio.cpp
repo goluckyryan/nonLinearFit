@@ -66,7 +66,7 @@ void FileIO::OpenCSVData(){
         if( rows == 1){ // get yDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1) {
-                    double temp = GetYValue(lineList[i]);
+                    double temp = ExtractYValue(lineList[i]);
                     yData.push_back(temp) ; // get data from string.
                 }
             }
@@ -111,7 +111,7 @@ void FileIO::OpenTxtData_row(){
 
 }
 
-double FileIO::GetYValue(QString str){
+double FileIO::ExtractYValue(QString str){
     int pos = str.lastIndexOf("_") ;
     QString strY = str.mid(pos+1, 5);
     //qDebug() << str << ", " << pos << ", " << strY;
