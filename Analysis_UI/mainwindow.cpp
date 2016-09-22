@@ -51,15 +51,16 @@ void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y, double 
 
 
 void MainWindow::Write2Log(QString str){
-    ui->plainTextEdit->appendPlainText(str);
+    ui->textEdit->append(str);
     qDebug()<< str;
+    ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
 }
 
 void MainWindow::on_pushButton_clicked(){
     QString fileName;
     fileName = QFileDialog::getOpenFileName(this,
                                             "Open File",
-                                            "/Users/mobileryan/Triplet-ESR",
+                                            "C:/Users/Triplet-ESR/Desktop/nonLinearFit",
                                             tr("Col-wise (*.csv *.txt *.dat);; Row-wise (*txt *dat)"));
 
     ui->lineEdit->setText(fileName);
@@ -73,6 +74,9 @@ void MainWindow::on_pushButton_clicked(){
     }
 
     if(file->IsOpen() == 0) return;
+
+    Write2Log("Opened file :");
+    Write2Log(fileName);
 
     qDebug("X: (%f %f)", file->GetXMin(), file->GetXMax());
     qDebug("Y: (%f %f)", file->GetYMin(), file->GetYMax());
@@ -109,7 +113,7 @@ void MainWindow::on_spinBox_x_valueChanged(int arg1){
     PlotFitFunc();
 }
 
-void MainWindow::PlotFitFunc(){ // also initialize ana
+void MainWindow::PlotFitFunc(){
 
     if( file == NULL) return;
 
@@ -161,6 +165,9 @@ void MainWindow::on_lineEdit_Tb_returnPressed(){
 
 
 void MainWindow::on_pushButton_Fit_clicked(){
+
+    Write2Log("========================================");
+
     QVector<double> par;
     par.push_back(ui->lineEdit_a->text().toDouble());
     par.push_back(ui->lineEdit_Ta->text().toDouble());
@@ -169,16 +176,21 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
 
     double lambda = ui->lineEdit_lambda->text().toDouble();
-
+    int maxIter = ui->lineEdit_MaxIter->text().toInt();
     //ana->Print();
     ana->Setlambda(lambda);
+    ana->SetMaxInteration(maxIter);
     ana->MeanAndvariance(0, ana->GetStartFitIndex()-20);
     ana->NonLinearFit(par);
 
+    //display result
     ana->PrintVector(ana->GetParameters(), "sol");
     ana->PrintVector(ana->GetParError(), "error");
     ana->PrintVector(ana->GetParPValue(), "p-Value");
+    if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(255,0,0,255));
     ana->PrintVector(ana->GetSSRgrad(), "SSR grad");
+    if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(0,0,0,255));
+
 
     Msg.sprintf("DF : %d, SSR: %f, delta: %e", ana->GetNDF(), ana->GetSSR(), ana->GetDelta() );
     Write2Log(Msg);
@@ -186,6 +198,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     Msg.sprintf("Fit Variance : %f, Sample Variance : %f, Reduced Chi-squared : %f", ana->GetFitVariance(), ana->GetSampleVariance(), chisq);
     Write2Log(Msg);
 
+    // update the parameter
     QVector<double> sol = ana->GetParameters();
     ui->lineEdit_a->setText(QString::number(sol[0]));
     ui->lineEdit_Ta->setText(QString::number(sol[1]));

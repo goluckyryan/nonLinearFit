@@ -24,6 +24,7 @@ public:
     void SetData(const QVector<double> x, const QVector<double> y);
     void SetStartFitIndex(int index){ this->startIndex = index;}
     void Setlambda(double l){this->lambda = l;}
+    void SetMaxInteration(int i){this->MaxIter = i;}
     void MeanAndvariance(int index_1, int index_2);
 
     int Regression(QVector<double> par0);
@@ -69,6 +70,7 @@ public slots:
 
     double GetDelta(){return delta;}
     double GetLambda(){return lambda;}
+    int GetMaxIteration(){return MaxIter;}
 
     int GetYIndex() {return yIndex;}
     double GetBValue() {return yValue;}
@@ -91,6 +93,7 @@ private:
 
     Matrix CoVar;
 
+    int MaxIter;
     double SSR;
     int n, p, DF;
     int startIndex;

@@ -43,6 +43,8 @@ void FileIO::OpenSaveFile(){
     outfilePath += "_fit.txt";
     outfile = new QFile(outfilePath);
     outfile->open(QIODevice::Append );
+    SendMsg("Fit result will save to :");
+    SendMsg(outfilePath);
 }
 
 void FileIO::OpenCSVData(){

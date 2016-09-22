@@ -24,24 +24,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="plainTextEdit">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>380</y>
-      <width>791</width>
-      <height>161</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Courier New</family>
-     </font>
-    </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOn</enum>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
@@ -347,7 +329,64 @@
      </rect>
     </property>
     <property name="text">
-     <string>1</string>
+     <string>0.01</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_MaxIter">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>40</y>
+      <width>71</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>300</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>40</y>
+      <width>71</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Max Iteration</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_9">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>40</y>
+      <width>31</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>lamda</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>380</y>
+      <width>791</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Courier New</family>
+     </font>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
     </property>
    </widget>
   </widget>

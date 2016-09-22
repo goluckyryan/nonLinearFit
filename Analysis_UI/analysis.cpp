@@ -28,14 +28,6 @@ void Analysis::Initialize(){
 
     yIndex = 0;
     yValue = 0;
-
-    /*
-    connect(&sol, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
-    connect(&dpar, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
-    connect(&error, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
-    connect(&tDis, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
-    connect(&pValue, SIGNAL(SendMsg(QString)), this, SLOT(MsgConnector(QString)));
-    */
 }
 
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
@@ -74,8 +66,6 @@ void Analysis::MeanAndvariance(int index_1, int index_2)
         mean += (this->ydata)[i];
     }
     mean = mean / size;
-
-
 
     var = 0;
     for( int i = index_1 ; i <= index_2 ; i++){
@@ -126,7 +116,11 @@ int Analysis::Regression(QVector<double> par0)
 
     Matrix Ft = F.Transpose();
     Matrix FtF = Ft*F;
-    Matrix D(p,p); for(int i = 1; i <= p ; i++) { D(i,i) = this->lambda;}
+    Matrix D(p,p);
+    for(int i = 1; i <= p ; i++) {
+        D(i,i) = this->lambda;
+        //D(i,i) = this->lambda * FtF(i,i); //alternative
+    }
 
     try{
         this->CoVar = (FtF + D).Inverse();
@@ -199,9 +193,9 @@ int Analysis::Regression(QVector<double> par0)
 int Analysis::LMA( QVector<double> par0, double lambda0){
 
     this->lambda = lambda0;
-    const int MaxIter = 200;
+    //MaxIter = 200;
     const double torr = 1e-6;
-    const double torrGrad = 1e-4;
+    const double torrGrad = 1e-1;
     QString tmp;
     PrintVector(par0, "ini. par:");
 
@@ -293,14 +287,16 @@ void Analysis::CalFitData(QVector<double> par){
 void Analysis::Print()
 {
     qDebug() << "======= Ana ==========";
+    qDebug("yIndex : %d, yValue : %f", yIndex, yValue);
     qDebug("Data size : %d", n);
     qDebug("par size : %d", p);
-    qDebug("DF : %d", DF);
     qDebug("Start Fit Index : %d", startIndex);
-    qDebug("mean : %f", mean);
-    qDebug("variance : %f", var);
+    qDebug("DF : %d", DF);
+    qDebug("Sample mean : %f", mean);
+    qDebug("Sample variance : %f", var);
     qDebug("SSR : %f", SSR);
-    qDebug("Is fit ? %d", fitFlag);
+    qDebug("fitFlag : %d", fitFlag);
+    qDebug("lambda : %f, delta : %f", lambda, delta);
 
     PrintVector(sol, "sol:");
     PrintVector(dpar, "dpar:");
@@ -314,13 +310,15 @@ void Analysis::Print()
 void Analysis::PrintVector(QVector<double> vec, QString str)
 {
     QString tmp;
-    Msg.sprintf("%*s(%d) : [ ", 15, str.toStdString().c_str(), vec.size());
+    tmp.sprintf("%*s(%d) : [ ", 15, str.toStdString().c_str(), vec.size());
+    Msg = tmp;
     for(int i = 0; i < vec.size() - 1; i++){
         tmp.sprintf(" %7.3f,", vec[i]);
         Msg += tmp;
     }
     tmp.sprintf(" %7.3f]", vec[vec.size()-1]);
     Msg += tmp;
-    //qDebug() << Msg;
+
     SendMsg(Msg);
+
 }
