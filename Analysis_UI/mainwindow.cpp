@@ -13,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
+    ui->pushButton_Fit->setEnabled(0);
+    ui->pushButton_reset->setEnabled(0);
+    ui->pushButton_save->setEnabled(0);
+    ui->pushButton_FitAll->setEnabled(0);
+
 }
 
 MainWindow::~MainWindow(){
@@ -74,6 +79,11 @@ void MainWindow::on_pushButton_clicked(){
     }
 
     if(file->IsOpen() == 0) return;
+
+    ui->pushButton_Fit->setEnabled(1);
+    ui->pushButton_reset->setEnabled(1);
+    ui->pushButton_save->setEnabled(1);
+    ui->pushButton_FitAll->setEnabled(1);
 
     Write2Log("Opened file :");
     Write2Log(fileName);
@@ -191,9 +201,17 @@ void MainWindow::on_pushButton_Fit_clicked(){
     ana->PrintVector(ana->GetParameters(), "sol");
     ana->PrintVector(ana->GetParError(), "error");
     ana->PrintVector(ana->GetParPValue(), "p-Value");
-    if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(255,0,0,255));
+    QVector<double> gradSSR = ana->GetSSRgrad();
+    bool redFlag = 0;
+    for(int i = 0 ; i < gradSSR.size(); i++){
+        redFlag |= std::abs(gradSSR[i]) > 0.2;
+    }
+
+    //if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(255,0,0,255));
+    if( redFlag) ui->textEdit->setTextColor(QColor(255,0,0,255));
     ana->PrintVector(ana->GetSSRgrad(), "SSR grad");
-    if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(0,0,0,255));
+    //if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(0,0,0,255));
+    if( redFlag) ui->textEdit->setTextColor(QColor(0,0,0,255));
 
 
     Msg.sprintf("DF : %d, SSR: %f, delta: %e", ana->GetNDF(), ana->GetSSR(), ana->GetDelta() );

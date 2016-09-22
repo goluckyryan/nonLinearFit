@@ -32,7 +32,6 @@ void Analysis::Initialize(){
 
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
 {
-    // assume x.size() == y.size()
     if( x.size() != y.size() ){
         Msg.sprintf("The sizes of input data x and y are not match. Size(x) = %d, Size(y) = %d", x.size(), y.size());
         SendMsg(Msg);
@@ -42,9 +41,6 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
     this->ydata = y;
 
     this->n = this->xdata.size();
-    //Msg.sprintf("Input Data, size = %d", this->n);
-    //SendMsg(Msg);
-
 }
 
 void Analysis::MeanAndvariance(int index_1, int index_2)
@@ -85,9 +81,6 @@ int Analysis::Regression(QVector<double> par0)
     int xStart = this->startIndex;
     int xEnd = this->n - 1;
     int fitSize = xEnd - xStart + 1;
-
-    //Msg.sprintf("%d, %d, %d", xStart, xEnd, fitSize);
-    //SendMsg(Msg);
 
     this->p = par0.size();
     this->DF = fitSize - this->p;
@@ -147,12 +140,6 @@ int Analysis::Regression(QVector<double> par0)
     double SSRn = (dYn.Transpose() * dYn)(1,1);
 
     this->delta = SSRn - this->SSR;
-
-    //Msg.sprintf("lambda : %f, SSRn : %f, SSR: %f, delta : %e", lambda, SSRn, SSR, delta);
-    //qDebug() << Msg;
-    //par_old.PrintVector("par0");
-    //dpar.PrintVector("dpar");
-    //sol.PrintVector("parN");
 
     if( this->delta > 0){
         this->lambda = this->lambda / 10;
@@ -264,11 +251,15 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
 int Analysis::GnuFit(QVector<double> par)
 {   // using gnuplot to fit and read the gnufit.log
     // need the "text.dat", which is condensed from *.cvs
+    PrintVector(par, "ini. par:");
+    Msg.sprintf(" === Start fit using gnuplot, also Levenberg-Marquardt Algorithm. ");
+    SendMsg(Msg);
 
     QString cmd;
     cmd.sprintf("gnuplot -e \"yIndex=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d\" gnuFit.gp", yIndex, par[0], par[1], par[2], par[3], startIndex);
     qDebug() << cmd.toStdString().c_str();
-    QDir::setCurrent("C:/Users/goluc/Desktop/nonLinearFit/");
+    //QDir::setCurrent("C:/Users/goluc/Desktop/nonLinearFit/");
+    QDir::setCurrent("C:/Users/Triplet-ESR/Desktop/nonLinearFit/");
     qDebug() << QDir::currentPath();
     system(cmd.toStdString().c_str());
 
@@ -278,7 +269,8 @@ int Analysis::GnuFit(QVector<double> par)
     this->pValue.clear();
     this->gradSSR.clear();
 
-    QFile fitlog("C:/Users/goluc/Desktop/nonLinearFit/gnufit.log");
+    //QFile fitlog("C:/Users/goluc/Desktop/nonLinearFit/gnufit.log");
+    QFile fitlog("C:/Users/Triplet-ESR/Desktop/nonLinearFit/gnufit.log");
     fitlog.open( QIODevice::ReadOnly);
     QTextStream stream(&fitlog);
     QString line, findstr;
@@ -290,7 +282,6 @@ int Analysis::GnuFit(QVector<double> par)
         pos = line.indexOf(findstr) +  findstr.length();
         if( pos > findstr.length()) {
             SSR = line.mid(pos,10).toDouble();
-            //qDebug() << pos << "," << line.mid(pos, 10) << "," << SSR;
         }
 
         //get NDF;
@@ -299,7 +290,6 @@ int Analysis::GnuFit(QVector<double> par)
         if( pos > findstr.length()) {
             pos = line.indexOf(":");
             DF = line.mid(pos+1, 10).toDouble();
-            //qDebug()<< pos << "," << line.mid(pos+1, 10) << "," << DF;
         }
 
         //get delta;
@@ -308,7 +298,6 @@ int Analysis::GnuFit(QVector<double> par)
         if( pos > findstr.length()) {
             pos = line.indexOf(":");
             delta = line.mid(pos+1, 20).toDouble();
-            //qDebug()<< pos << "," << line.mid(pos+1, 10) << "," << DF;
         }
 
         //get a and error a;
@@ -317,7 +306,7 @@ int Analysis::GnuFit(QVector<double> par)
         pos = line.indexOf(findstr);
         if( pos > -1) {
 
-            for( int j = 0; j < p; j++){
+            for( int j = 0; j < this->p; j++){
                 stream.readLineInto(&line);
 
                 pos = line.indexOf("=");
@@ -329,7 +318,6 @@ int Analysis::GnuFit(QVector<double> par)
                 this->error.push_back(ea);
                 this->dpar.push_back(0);
                 this->pValue.push_back(cum_tDis30(- std::abs(a/ea)));
-                //qDebug() << a << ", " << ea;
             }
 
         }
@@ -363,8 +351,6 @@ int Analysis::GnuFit(QVector<double> par)
     //new gradient of SSR
     Matrix FtdY = F.Transpose()*dYn;
     this->gradSSR = FtdY.Matrix2QVec();
-
-
 
     return 0;
 }
