@@ -45,6 +45,7 @@ void FileIO::OpenSaveFile(){
     outfile->open(QIODevice::Append );
     SendMsg("Fit result will save to :");
     SendMsg(outfilePath);
+
 }
 
 void FileIO::OpenCSVData(){
@@ -144,11 +145,20 @@ void FileIO::SaveFitResult(Analysis *ana)
 {
     QTextStream stream(outfile);
     QString text, tmp;
+    int p = ana->GetParametersSize();
+
+    //set header
+    if( outfile->pos() == 0){
+        text.sprintf("%5s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s\n",
+                     "yIndex", "yValue",
+                     "a" , "Ta", "b", "Tb",
+                     "e(a)", "e(Ta)", "e(b)", "e(Tb)",
+                     "SSR", "DF", "chi-sq/ndf");
+        stream << text;
+    }
 
     tmp.sprintf("%5d, %8.4f, ", ana->GetYIndex(), ana->GetBValue());
     text = tmp;
-
-    int p = ana->GetParametersSize();
 
     QVector<double> sol = ana->GetParameters();
 
@@ -162,7 +172,9 @@ void FileIO::SaveFitResult(Analysis *ana)
         tmp.sprintf("%8.4f, ", error[i]);
         text += tmp;
     }
-    tmp.sprintf("%8.4f, %5d \n", ana->GetSSR(), ana->GetNDF());
+
+    double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
+    tmp.sprintf("%8.4e, %5d, %8.5f \n", ana->GetSSR(), ana->GetNDF(), chisq);
     text += tmp;
 
     SendMsg("fit result saved.");

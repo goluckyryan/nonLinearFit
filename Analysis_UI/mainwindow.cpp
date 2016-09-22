@@ -111,6 +111,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
 
 void MainWindow::on_spinBox_x_valueChanged(int arg1){
     ui->lineEdit_x->setText(QString::number(file->GetDataX(arg1)));
+    ana->SetStartFitIndex(arg1);
     PlotFitFunc();
 }
 
@@ -144,7 +145,6 @@ void MainWindow::PlotFitFunc(){
     Plot(2, xline_x, xline_y,
     file->GetXMin(), file->GetXMax(), yMin, yMax);
 
-    ana->SetStartFitIndex(xIndex);
 }
 
 void MainWindow::on_lineEdit_a_returnPressed(){
@@ -167,7 +167,9 @@ void MainWindow::on_lineEdit_Tb_returnPressed(){
 
 void MainWindow::on_pushButton_Fit_clicked(){
 
-    Msg.sprintf("=================================== %d", ana->GetYIndex());
+    if( file == NULL) return;
+    bool gnu = ui->checkBox->isChecked();
+    Msg.sprintf("=================================== %d, gnufit? %d", ana->GetYIndex(), gnu);
     Write2Log(Msg);
 
     QVector<double> par;
@@ -183,7 +185,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     ana->Setlambda(lambda);
     ana->SetMaxInteration(maxIter);
     ana->MeanAndvariance(0, ana->GetStartFitIndex()-20);
-    ana->NonLinearFit(par);
+    ana->NonLinearFit(par, gnu);
 
     //display result
     ana->PrintVector(ana->GetParameters(), "sol");
@@ -197,7 +199,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     Msg.sprintf("DF : %d, SSR: %f, delta: %e", ana->GetNDF(), ana->GetSSR(), ana->GetDelta() );
     Write2Log(Msg);
     double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
-    Msg.sprintf("Fit Variance : %f, Sample Variance : %f, Reduced Chi-squared : %f", ana->GetFitVariance(), ana->GetSampleVariance(), chisq);
+    Msg.sprintf("Fit Variance : %f, Sample Variance : %f, Chi-sq/ndf : %f", ana->GetFitVariance(), ana->GetSampleVariance(), chisq);
     Write2Log(Msg);
 
     // update the parameter
@@ -215,14 +217,16 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
 void MainWindow::on_pushButton_reset_clicked()
 {
+    if( file == NULL) return;
     int xIndex = ui->spinBox_x->value();
-    double xValue = file->GetDataX(xIndex);
+    int yIndex = ui->spinBox_y->value();
+    double zValue = file->GetDataZ(xIndex, yIndex);
 
-    if(xValue > 0) {
+    if(zValue > 0) {
         ui->lineEdit_a->setText("20");
         ui->lineEdit_b->setText("-10");
     }else{
-        ui->lineEdit_a->setText("-20");
+        ui->lineEdit_a->setText("-40");
         ui->lineEdit_b->setText("10");
     }
     ui->lineEdit_Ta->setText("20");
@@ -233,11 +237,13 @@ void MainWindow::on_pushButton_reset_clicked()
 
 void MainWindow::on_pushButton_save_clicked()
 {
+    if( file == NULL) return;
     file->SaveFitResult(ana);
 }
 
 void MainWindow::on_pushButton_FitAll_clicked()
 {
+    if( file == NULL) return;
     int n = file->GetDataSetSize();
     QProgressDialog progress("Fitting...", "Abort", 0, n, this);
     progress.setWindowModality(Qt::WindowModal);
@@ -246,11 +252,11 @@ void MainWindow::on_pushButton_FitAll_clicked()
 
     for( int yIndex = 0; yIndex < n ; yIndex ++){
     //for( int yIndex = 100; yIndex < 300 ; yIndex ++){
-        on_pushButton_reset_clicked();
+        //on_pushButton_reset_clicked();
         on_spinBox_y_valueChanged(yIndex);
         on_pushButton_Fit_clicked();
         PlotFitFunc();
-        Sleep(500);
+        //Sleep(500);
         str.sprintf("Fitting #%d / %d , saved %d", yIndex + 1, n, count + 1);
         progress.setLabelText(str);
         progress.setValue(yIndex);

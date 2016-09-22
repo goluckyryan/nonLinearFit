@@ -6,6 +6,8 @@
 #include <QString>
 #include <cmath>
 #include <math.h>
+#include <QCoreApplication>
+#include <QDir>
 #include "matrix.h"
 
 class Analysis : public QObject
@@ -29,8 +31,8 @@ public:
 
     int Regression(QVector<double> par0);
     int LMA(QVector<double> par0, double lambda0 = 0.01);
-    int GnuFit(QVector<double> par0);
-    int NonLinearFit(QVector<double> par0);
+    int GnuFit(QVector<double> par);
+    int NonLinearFit(QVector<double> par0, bool gnufit);
 
     void CalFitData(QVector<double> par);
 

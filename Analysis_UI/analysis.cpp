@@ -206,7 +206,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     bool contFlag;
     Msg.sprintf(" === Start fit using Levenberg-Marquardt Algorithm: ");
     do{
-        int reg = Regression(par);
+        Regression(par);
         par = this->sol;
         count ++;
 
@@ -214,7 +214,6 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
             fitFlag = 2; // fitFlag = 2 when iteration too many
             break;
         }
-        //if( reg == 0) qDebug() << "*====== stay unchnage";
         bool converge = 0;
         //since this is 4-parameter fit
         converge = std::abs(this->delta) <  torr;
@@ -262,16 +261,122 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     return 0;
 }
 
-int Analysis::GnuFit(QVector<double> par0)
-{ // using gnuplot to fit and read the gnufit.log
+int Analysis::GnuFit(QVector<double> par)
+{   // using gnuplot to fit and read the gnufit.log
+    // need the "text.dat", which is condensed from *.cvs
+
+    QString cmd;
+    cmd.sprintf("gnuplot -e \"yIndex=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d\" gnuFit.gp", yIndex, par[0], par[1], par[2], par[3], startIndex);
+    qDebug() << cmd.toStdString().c_str();
+    QDir::setCurrent("C:/Users/goluc/Desktop/nonLinearFit/");
+    qDebug() << QDir::currentPath();
+    system(cmd.toStdString().c_str());
+
+    this->p = 4;
+    this->sol.clear();
+    this->error.clear();
+    this->pValue.clear();
+    this->gradSSR.clear();
+
+    QFile fitlog("C:/Users/goluc/Desktop/nonLinearFit/gnufit.log");
+    fitlog.open( QIODevice::ReadOnly);
+    QTextStream stream(&fitlog);
+    QString line, findstr;
+    int pos;
+    //Get fit parameter
+    while(stream.readLineInto(&line)){
+        //get SSR;
+        findstr = "residuals :";
+        pos = line.indexOf(findstr) +  findstr.length();
+        if( pos > findstr.length()) {
+            SSR = line.mid(pos,10).toDouble();
+            //qDebug() << pos << "," << line.mid(pos, 10) << "," << SSR;
+        }
+
+        //get NDF;
+        findstr = "(FIT_NDF)";
+        pos = line.indexOf(findstr) + findstr.length();
+        if( pos > findstr.length()) {
+            pos = line.indexOf(":");
+            DF = line.mid(pos+1, 10).toDouble();
+            //qDebug()<< pos << "," << line.mid(pos+1, 10) << "," << DF;
+        }
+
+        //get delta;
+        findstr = "iteration";
+        pos = line.indexOf(findstr) + findstr.length();
+        if( pos > findstr.length()) {
+            pos = line.indexOf(":");
+            delta = line.mid(pos+1, 20).toDouble();
+            //qDebug()<< pos << "," << line.mid(pos+1, 10) << "," << DF;
+        }
+
+        //get a and error a;
+        double a, ea;
+        findstr = "=======================";
+        pos = line.indexOf(findstr);
+        if( pos > -1) {
+
+            for( int j = 0; j < p; j++){
+                stream.readLineInto(&line);
+
+                pos = line.indexOf("=");
+                a = line.mid(pos+1, 12).toDouble();
+
+                pos = line.indexOf("+/-");
+                ea = line.mid(pos+3, 8).toDouble();
+                this->sol.push_back(a);
+                this->error.push_back(ea);
+                this->dpar.push_back(0);
+                this->pValue.push_back(cum_tDis30(- std::abs(a/ea)));
+                //qDebug() << a << ", " << ea;
+            }
+
+        }
+
+    }
+
+    if( this->sol.isEmpty() ) return 1;
+    int xStart = this->startIndex;
+    int xEnd = this->n - 1;
+    int fitSize = xEnd - xStart + 1;
+    Matrix Y(fitSize,1);
+    for(int i = 1; i <= fitSize ; i++) {
+        Y(i,1) = ydata[i + xStart - 1];
+    }
+
+    Matrix fn(fitSize,1);
+    for(int i = 1; i <= fitSize ; i++) {
+        double x = xdata[i + xStart - 1];
+        fn(i,1) = FitFunc(x, this->sol);
+    }
+    Matrix dYn = fn-Y;
+
+    Matrix F(fitSize,p); // F = grad(f)
+    for(int i = 1; i <= fitSize ; i++) {
+        double x = xdata[i - 1 + xStart];
+        QVector<double> gradf = GradFitFunc(x, this->sol);
+        for(int j = 1; j <= p; j++){
+            F(i,j) = gradf[j-1];
+        }
+    }
+    //new gradient of SSR
+    Matrix FtdY = F.Transpose()*dYn;
+    this->gradSSR = FtdY.Matrix2QVec();
+
+
 
     return 0;
 }
 
-int Analysis::NonLinearFit(QVector<double> par0)
+int Analysis::NonLinearFit(QVector<double> par0, bool gnufit)
 {
-
-    LMA(par0, this->lambda);
+    if( !gnufit){
+        LMA(par0, this->lambda);
+    }else{
+        GnuFit(par0);
+    }
+    //Print();
 
     return 0;
 }

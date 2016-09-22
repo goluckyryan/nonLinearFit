@@ -2,29 +2,25 @@ set key autotitle columnhead
 
 
 #yIndex = 104
-startX = 195
+#startX = 195
 
 
 col = yIndex + 2
 set grid
 stats "test.dat" u 1:col nooutput
 
+set fit logfile "gnufit.log"
+!del gnufit.log
 
-!del fit.log
-
-set xrange [-40:160]
+set xrange [-40:170]
 set yrange [STATS_min_y*1.1:STATS_max_y*1.1]
 
 f(x) = a*exp(-x/Ta) + b*exp(-x/Tb)
 FIT_LIMIT = 1e-3;
-a = 40
-Ta = 20
-b = -5
-Tb = 80
 
-fit f(x) "test.dat" u 1:col every ::(startX+2) via a, Ta, b, Tb
+fit f(x) "test.dat" u 1:col every ::(startX) via a, Ta, b, Tb
 
-set title sprintf("Col = %d, (a, Ta, b, Tb) = (%4.2f, %4.2f, %4.2f, %4.2f) \n X(%d, %d)", yIndex, a, Ta, b, Tb, startX, 1002)
+#set title sprintf("Col = %d, (a, Ta, b, Tb) = (%4.2f, %4.2f, %4.2f, %4.2f) \n X(%d, %d)", yIndex, a, Ta, b, Tb, startX, 1002)
 
 
 #plot "test.dat" u 1:col every ::2 w l,\
