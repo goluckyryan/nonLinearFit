@@ -195,7 +195,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     this->lambda = lambda0;
     //MaxIter = 200;
     const double torr = 1e-6;
-    const double torrGrad = 1e-1;
+    const double torrGrad = 1e-2;
     QString tmp;
     PrintVector(par0, "ini. par:");
 

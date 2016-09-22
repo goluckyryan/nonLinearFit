@@ -102,6 +102,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
          file->GetXMin(), file->GetXMax(),
          file->GetZMin(), file->GetZMax());
 
+    ui->spinBox_y->setValue(arg1);
     ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1)));
     ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
     ana->SetY(arg1, file->GetDataY(arg1));
@@ -166,7 +167,8 @@ void MainWindow::on_lineEdit_Tb_returnPressed(){
 
 void MainWindow::on_pushButton_Fit_clicked(){
 
-    Write2Log("========================================");
+    Msg.sprintf("=================================== %d", ana->GetYIndex());
+    Write2Log(Msg);
 
     QVector<double> par;
     par.push_back(ui->lineEdit_a->text().toDouble());
@@ -213,9 +215,17 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
 void MainWindow::on_pushButton_reset_clicked()
 {
-    ui->lineEdit_a->setText("20");
+    int xIndex = ui->spinBox_x->value();
+    double xValue = file->GetDataX(xIndex);
+
+    if(xValue > 0) {
+        ui->lineEdit_a->setText("20");
+        ui->lineEdit_b->setText("-10");
+    }else{
+        ui->lineEdit_a->setText("-20");
+        ui->lineEdit_b->setText("10");
+    }
     ui->lineEdit_Ta->setText("20");
-    ui->lineEdit_b->setText("-10");
     ui->lineEdit_Tb->setText("80");
 
     PlotFitFunc();
@@ -224,4 +234,42 @@ void MainWindow::on_pushButton_reset_clicked()
 void MainWindow::on_pushButton_save_clicked()
 {
     file->SaveFitResult(ana);
+}
+
+void MainWindow::on_pushButton_FitAll_clicked()
+{
+    int n = file->GetDataSetSize();
+    QProgressDialog progress("Fitting...", "Abort", 0, n, this);
+    progress.setWindowModality(Qt::WindowModal);
+    QString str;
+    int count = 0;
+
+    for( int yIndex = 0; yIndex < n ; yIndex ++){
+    //for( int yIndex = 100; yIndex < 300 ; yIndex ++){
+        on_pushButton_reset_clicked();
+        on_spinBox_y_valueChanged(yIndex);
+        on_pushButton_Fit_clicked();
+        PlotFitFunc();
+        Sleep(500);
+        str.sprintf("Fitting #%d / %d , saved %d", yIndex + 1, n, count + 1);
+        progress.setLabelText(str);
+        progress.setValue(yIndex);
+        if(progress.wasCanceled()) break;
+
+        double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
+
+        bool pcheck = 1;
+        //QVector<double> pValue = ana->GetParPValue();
+        //for( int p = 0; p < pValue.size(); p++){
+        //    pcheck &= std::abs(pValue[p]) < 0.3;
+        //}
+
+        if( std::abs(chisq-1) < 0.5 && pcheck){
+            file->SaveFitResult(ana);
+            count ++;
+        }else{
+            Write2Log("reduced chi-sq > 2 and p-value(s) > 0.3, not save fitting.");
+        }
+    }
+    progress.setValue(n);
 }
