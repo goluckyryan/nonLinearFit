@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    savedSimplifiedtxt = 0;
+
     plot = ui->customPlot;
 
     ana = new Analysis();
@@ -65,7 +67,7 @@ void MainWindow::on_pushButton_clicked(){
     QString fileName;
     fileName = QFileDialog::getOpenFileName(this,
                                             "Open File",
-                                            "C:/Users/Triplet-ESR/Desktop/nonLinearFit",
+                                            openPath, // openPath in constant.h
                                             tr("Col-wise (*.csv *.txt *.dat);; Row-wise (*txt *dat)"));
 
     ui->lineEdit->setText(fileName);
@@ -129,11 +131,7 @@ void MainWindow::PlotFitFunc(){
 
     if( file == NULL) return;
 
-    QVector<double> par;
-    par.push_back(ui->lineEdit_a->text().toDouble());
-    par.push_back(ui->lineEdit_Ta->text().toDouble());
-    par.push_back(ui->lineEdit_b->text().toDouble());
-    par.push_back(ui->lineEdit_Tb->text().toDouble());
+    QVector<double> par = GetParametersFromLineText();
 
     ana->CalFitData(par);
     Plot(1, ana->GetData_x(), ana->GetFitData_y(),
@@ -179,15 +177,16 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     if( file == NULL) return;
     bool gnu = ui->checkBox->isChecked();
+
+    if( savedSimplifiedtxt == 0 && gnu){
+        file->SaveSimplifiedTxt();
+        savedSimplifiedtxt = 1;
+    }
+
     Msg.sprintf("=================================== %d, gnufit? %d", ana->GetYIndex(), gnu);
     Write2Log(Msg);
 
-    QVector<double> par;
-    par.push_back(ui->lineEdit_a->text().toDouble());
-    par.push_back(ui->lineEdit_Ta->text().toDouble());
-    par.push_back(ui->lineEdit_b->text().toDouble());
-    par.push_back(ui->lineEdit_Tb->text().toDouble());
-
+    QVector<double> par = GetParametersFromLineText();
 
     double lambda = ui->lineEdit_lambda->text().toDouble();
     int maxIter = ui->lineEdit_MaxIter->text().toInt();
@@ -221,11 +220,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     Write2Log(Msg);
 
     // update the parameter
-    QVector<double> sol = ana->GetParameters();
-    ui->lineEdit_a->setText(QString::number(sol[0]));
-    ui->lineEdit_Ta->setText(QString::number(sol[1]));
-    ui->lineEdit_b->setText(QString::number(sol[2]));
-    ui->lineEdit_Tb->setText(QString::number(sol[3]));
+    UpdateLineTextParameters(ana->GetParameters());
 
     PlotFitFunc();
 
@@ -296,4 +291,39 @@ void MainWindow::on_pushButton_FitAll_clicked()
         }
     }
     progress.setValue(n);
+}
+
+void MainWindow::on_checkBox_c_clicked(bool checked)
+{
+    ui->lineEdit_c->setEnabled(checked);
+}
+
+QVector<double> MainWindow::GetParametersFromLineText()
+{
+    QVector<double> par;
+    par.push_back(ui->lineEdit_a->text().toDouble());
+    par.push_back(ui->lineEdit_Ta->text().toDouble());
+    par.push_back(ui->lineEdit_b->text().toDouble());
+    par.push_back(ui->lineEdit_Tb->text().toDouble());
+
+    if( ui->checkBox_c->isChecked()){
+        par.push_back(ui->lineEdit_c->text().toDouble());
+    }
+
+    return par;
+}
+
+void MainWindow::UpdateLineTextParameters(QVector<double> par)
+{
+
+    ui->lineEdit_a ->setText(QString::number(par[0]));
+    ui->lineEdit_Ta->setText(QString::number(par[1]));
+    ui->lineEdit_b ->setText(QString::number(par[2]));
+    ui->lineEdit_Tb->setText(QString::number(par[3]));
+
+    if( par.size()== 5){
+        ui->lineEdit_c->setText(QString::number(par[4]));
+        on_checkBox_c_clicked(1);
+    }
+
 }

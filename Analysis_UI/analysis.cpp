@@ -258,8 +258,7 @@ int Analysis::GnuFit(QVector<double> par)
     QString cmd;
     cmd.sprintf("gnuplot -e \"yIndex=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d\" gnuFit.gp", yIndex, par[0], par[1], par[2], par[3], startIndex);
     qDebug() << cmd.toStdString().c_str();
-    //QDir::setCurrent("C:/Users/goluc/Desktop/nonLinearFit/");
-    QDir::setCurrent("C:/Users/Triplet-ESR/Desktop/nonLinearFit/");
+    QDir::setCurrent(dirPath); // dirPath in constant.h
     qDebug() << QDir::currentPath();
     system(cmd.toStdString().c_str());
 
@@ -269,8 +268,7 @@ int Analysis::GnuFit(QVector<double> par)
     this->pValue.clear();
     this->gradSSR.clear();
 
-    //QFile fitlog("C:/Users/goluc/Desktop/nonLinearFit/gnufit.log");
-    QFile fitlog("C:/Users/Triplet-ESR/Desktop/nonLinearFit/gnufit.log");
+    QFile fitlog(gnuFitLogPath);
     fitlog.open( QIODevice::ReadOnly);
     QTextStream stream(&fitlog);
     QString line, findstr;

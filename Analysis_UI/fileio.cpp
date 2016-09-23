@@ -182,6 +182,36 @@ void FileIO::SaveFitResult(Analysis *ana)
     stream << text;
 }
 
+void FileIO::SaveSimplifiedTxt()
+{
+    // the simplified txt is needed for Analysis::Gnufit
+    QFile out(simFilePath); // in constant.h
+    out.open( QIODevice::WriteOnly );
+    QTextStream stream(&out);
+    QString str, tmp;
+
+    //output y-value (B-value)
+    tmp.sprintf("%*s,", 8, ""); str = tmp;
+    for(int i = 0; i < ySize; i++){
+        tmp.sprintf("%10.4f,", yData[i]); str += tmp;
+    }
+    str += "\n";
+    stream << str;
+
+    //output x and z
+    for(int i = 0; i < xSize; i++){
+        tmp.sprintf("%8.3f,", xData[i]); str = tmp;
+        for(int j = 0; j < ySize; j++){
+            tmp.sprintf("%10.4f,", zData[j][i]); str += tmp;
+        }
+        str += "\n";
+        stream << str;
+    }
+
+    out.close();
+
+}
+
 double FileIO::ExtractYValue(QString str){
     int pos = str.lastIndexOf("_") ;
     QString strY = str.mid(pos+1, 5);

@@ -23,6 +23,7 @@ HEADERS  += mainwindow.h \
     qcustomplot.h \
     matrix.h \
     analysis.h \
-    fileio.h
+    fileio.h \
+    constant.h
 
 FORMS    += mainwindow.ui

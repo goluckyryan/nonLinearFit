@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QString>
 #include <QFile>
+#include "constant.h"
 #include "analysis.h"
 
 class FileIO : public QObject
@@ -22,6 +23,7 @@ public:
     void OpenTxtData_col();
     void OpenTxtData_row();
     void SaveFitResult(Analysis *ana);
+    void SaveSimplifiedTxt();
 
 signals:
 

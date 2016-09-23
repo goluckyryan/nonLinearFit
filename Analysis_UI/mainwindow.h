@@ -7,6 +7,7 @@
 #include "matrix.h"
 #include "analysis.h"
 #include "qcustomplot.h"
+#include "constant.h"
 #include "fileio.h"
 
 namespace Ui {
@@ -39,10 +40,14 @@ private slots:
 
     void on_pushButton_Fit_clicked();
     void on_pushButton_reset_clicked();
-
     void on_pushButton_save_clicked();
-
     void on_pushButton_FitAll_clicked();
+
+    void on_checkBox_c_clicked(bool checked);
+
+    QVector<double> GetParametersFromLineText();
+    void UpdateLineTextParameters(QVector<double> par);
+
 
 private:
     Ui::MainWindow *ui;
@@ -52,6 +57,8 @@ private:
     QCustomPlot *plot;
     FileIO *file;
     Analysis *ana;
+
+    bool savedSimplifiedtxt;
 
 };
 

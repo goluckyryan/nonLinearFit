@@ -8,6 +8,7 @@
 #include <math.h>
 #include <QCoreApplication>
 #include <QDir>
+#include "constant.h"
 #include "matrix.h"
 
 class Analysis : public QObject
@@ -114,6 +115,7 @@ private:
     double FitFunc(double x, QVector<double> par){
         double fit = 0;
         fit = par[0] * exp(-x/par[1]) + par[2] * exp(-x/par[3]);
+        if( this->p == 5) fit += par[4];
         return fit;
     }
 
@@ -124,6 +126,7 @@ private:
         gradFit.push_back(par[0] * x* exp(-x/par[1])/par[1]/par[1]);
         gradFit.push_back(exp(-x/par[3]));
         gradFit.push_back(par[2] * x* exp(-x/par[3])/par[3]/par[3]);
+        if( this->p == 5) gradFit.push_back(1); // in case of c
 
         return gradFit;
     }
