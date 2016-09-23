@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QString>
 #include <QFile>
+#include "analysis.h"
 
 class FileIO : public QObject
 {
@@ -14,10 +15,13 @@ public:
     explicit FileIO(QString filepath);
     ~FileIO();
 
+    void Initialize();
+    void OpenSaveFile();
     void FileStructure(bool colwise);
     void OpenCSVData();
     void OpenTxtData_col();
     void OpenTxtData_row();
+    void SaveFitResult(Analysis *ana);
 
 signals:
 
@@ -57,9 +61,10 @@ private:
     bool openState;
 
     QFile * myfile;
+    QFile * outfile;
     QString filePath;
 
-    double GetYValue(QString str);
+    double ExtractYValue(QString str);
 
     double FindMax(QVector<double> vec);
     double FindMin(QVector<double> vec);

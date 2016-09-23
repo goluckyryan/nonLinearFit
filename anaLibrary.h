@@ -22,9 +22,10 @@ int sizeX, sizeY;
 int errFlag;  //err
 
 Matrix sol, dpar, error, tDis, pValue;
-Matrix FtF, DFtF, FtdY;
+Matrix FtF, DI, FtdY;
 int DF, dataSize;
-double SSR_old, SSR, var;
+double SSR, var;
+double lambda = 0.01, delta; // delta = SSRn - SSR
 
 const double torr = 0.0001;
 const double CL   = 0.05;
@@ -192,7 +193,7 @@ double variance(int yIndex){ // finding variance T < ~3 ns
 	return var;
 }
 
-void regression(bool fit4par, double lambda, int yIndex,double a, double Ta, double b, double Tb, int info){
+void regression(bool fit4par, int yIndex,double a, double Ta, double b, double Tb, int info){
 	
 	errFlag = 0;
 	
@@ -212,12 +213,9 @@ void regression(bool fit4par, double lambda, int yIndex,double a, double Ta, dou
 	
 	Matrix f(n,1);
 	for(int i = 1; i <= n ; i++) {
-		//f(i,1) = funcX(valX[i - 1 +xStart], a, Ta, b, Tb);
 		double x = valX[i - 1 +xStart];
-		
 		f(i,1) = a * exp(-x/Ta); 
 		if(  fit4par ) f(i,1) += b * exp(-x/Tb); 
-		  
 	}
 	
 	Matrix F(n,p);
@@ -229,35 +227,35 @@ void regression(bool fit4par, double lambda, int yIndex,double a, double Ta, dou
 		if( fit4par ) F(i,4) = b * x * exp(-x/Tb)/Tb/Tb;
 	}
 	
-	Matrix Ft = Transpose(F); //printf("    Ft(%d,%d)\n", Ft.GetRows(), Ft.GetCols());
-	FtF = Ft*F;        //printf("   FtF(%d,%d)\n", FtF.GetRows(), FtF.GetCols());
+	Matrix Ft = Transpose(F); ///printf("    Ft(%d,%d)\n", Ft.GetRows(), Ft.GetCols());
+	FtF = Ft*F;        ///printf("   FtF(%d,%d)\n", FtF.GetRows(), FtF.GetCols());
 
-	DFtF = Matrix( FtF.GetRows(), FtF.GetCols());
+	DI = Matrix( FtF.GetRows(), FtF.GetCols());
 	for( int i = 1; i <= FtF.GetRows() ; i++){
-		DFtF(i,i) = lambda * FtF.Get(i,i);
+		DI(i,i) = lambda ;
 	}
 	
-	Matrix Q = FtF + DFtF;
+	Matrix Q = FtF + DI;
 	
 	Matrix CoVar;
 	try{
-		CoVar = Inv(Q);  //printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
+		CoVar = Inv(Q);  ///printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
 	}catch( Exception err){
-		//if( info >= 1) printf("%s. #par=%d | Terminated.\n", err.msg, p);
-		//FtF.Print();
+		///if( info >= 1) printf("%s. #par=%d | Terminated.\n", err.msg, p);
+		///FtF.Print();
 		errFlag = 1;
 		return;
 	}
 	
-	//CoVar.Print();
+	///CoVar.Print();
 	
 	if( isnan(CoVar(1,1)) ) {
 		errFlag = 1;
 		return;
 	}
 	
-	Matrix dY = Y - f;    //printf("    dY(%d,%d)\n", dY.GetRows(), dY.GetCols());
-	FtdY = Ft*dY;  //printf("  FtdY(%d,%d)\n", FtdY.GetRows(), FtdY.GetCols());
+	Matrix dY = Y - f;    ///printf("    dY(%d,%d)\n", dY.GetRows(), dY.GetCols());
+	FtdY = Ft*dY;  ///printf("  FtdY(%d,%d)\n", FtdY.GetRows(), FtdY.GetCols());
 	
 	Matrix par_old(p,1);
 	par_old(1,1) = a;
@@ -266,17 +264,83 @@ void regression(bool fit4par, double lambda, int yIndex,double a, double Ta, dou
 	if( fit4par ) par_old(4,1) = Tb;
 
 	DF = n - p;	
-	dpar = CoVar * FtdY;  //printf("  dpar(%d,%d)\n", dpar.GetRows(), dpar.GetCols());
-	sol = par_old + dpar;  //printf("  sol(%d,%d)\n", sol.GetRows(), sol.GetCols());
+	dpar = CoVar * FtdY;  ///printf("  dpar(%d,%d)\n", dpar.GetRows(), dpar.GetCols());
+	
+	SSR = (Transpose(dY)*dY)(1,1); ///printf("SSR = %f\n", SSR);
+	
+	//Try the dpar 
+	Matrix sol_try = par_old + dpar;  ///printf("  sol(%d,%d)\n", sol.GetRows(), sol.GetCols());
 		
-	SSR = (Transpose(dY)*dY)(1,1); //printf("SSR = %f\n", SSR);
+	Matrix fn(n,1);
+	for(int i = 1; i <= n ; i++) {
+		double x = valX[i - 1 +xStart];
+		fn(i,1) = sol_try(1,1) * exp(-x/sol_try(2,1)); 
+		if(  fit4par ) fn(i,1) += sol_try(3,1) * exp(-x/sol_try(4,1)); 
+	}
+	
+	Matrix dYn = Y - fn;
+	double SSRn = (Transpose(dYn)*dYn)(1,1);
+	
+	//printf("lambda : %f \n", lambda);
+	//printf("SSR : %f, SSRn : %f \n", SSR, SSRn);
+	//printf(" dpar: "); Transpose(dpar).Print();
+	//printf(" FtdY: "); Transpose(FtdY).Print();
+	Matrix Fn(n,p);
+	for(int i = 1; i <= n ; i++) {
+		double x = valX[i - 1 +xStart];
+		Fn(i,1) = exp(-x/sol_try(2,1));
+		Fn(i,2) = sol_try(1,1) * x * exp(-x/sol_try(2,1))/sol_try(2,1)/sol_try(2,1);
+		if( fit4par ) Fn(i,3) = exp(-x/sol_try(4,1));
+		if( fit4par ) Fn(i,4) = sol_try(3,1) * x * exp(-x/sol_try(4,1))/sol_try(4,1)/sol_try(4,1);
+	}
+	
+	Matrix Fnt = Transpose(Fn);
+	Matrix FntdYn = Fnt*dYn;
+	
+	//printf(" FntdYn: "); Transpose(FntdYn).Print();
+	
+	delta = SSRn - SSR;
+	
+	if( SSRn > SSR ){
+		lambda = lambda / 10;
+		sol = par_old;
+		var = SSR/DF;
+		//printf(" ----- stay unchange \n");
+		
+		try{
+			CoVar = Inv(FtF);  //printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
+		}catch( Exception err){
+			errFlag = 1;
+			return;
+		}
+			
+		error = Matrix(p,1);
+		for( int i = 1; i <= p ; i++){
+			error(i,1) = sqrt(var * CoVar(i,i));
+		}
+		
+		tDis = Matrix(p,1);
+		for( int i = 1; i <= p ; i++){
+			tDis(i,1) = sol(i,1)/error(i,1);
+		}
+	
+		pValue = Matrix(p,1);
+		for( int i = 1; i <= p ; i++){
+			pValue(i,1) = cum_tDis30(- std::abs(tDis(i,1)));
+		}
+		
+		return;
+	}
+	
+	lambda = lambda * 10;
+		
+	sol = par_old + dpar;
+	SSR = SSRn;
 	var = SSR / DF;
 	
 	try{
-		CoVar = Inv(FtF);  //printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
+		CoVar = Inv(Fnt*Fn);  //printf(" CoVar(%d,%d)\n", CoVar.GetRows(), CoVar.GetCols());
 	}catch( Exception err){
-		//if( info >= 1) printf("%s. #par=%d | Terminated.\n", err.msg, p);
-		//FtF.Print();
 		errFlag = 1;
 		return;
 	}
@@ -329,18 +393,15 @@ void GaussNewton(int yIndex, bool fit4par, int info, double a, double Ta, double
 		Tb = 0;
 	}
 	
-	SSR_old = 1e+10;
-	
 	do{
 		count ++ ;
 		if( count > 50){
 			errFlag = 2;
 			break;
 		}
-		if( count > 1){ 
-			SSR_old = SSR;
-		}
-		regression(fit4par, 0, yIndex, a1, Ta1, b1, Tb1, info);
+		
+		lambda = 0;
+		regression(fit4par, yIndex, a1, Ta1, b1, Tb1, info);
 		
 		a1  = sol(1,1);
 		Ta1 = sol(2,1);
@@ -355,7 +416,7 @@ void GaussNewton(int yIndex, bool fit4par, int info, double a, double Ta, double
 		//printf("dpar: ");Transpose(dpar).Print();
 		//printf("sigma: ");Transpose(error).Print();
 		printf("%d ", count);
-		checkdpar = std::abs(SSR_old-SSR) > SSR * torr;
+		checkdpar = std::abs(delta) > torr;
 		
 	}while(errFlag == 0  && checkdpar); //iterate when no err and any of the dpar > 0.01;
 	
@@ -373,10 +434,8 @@ void GaussNewton(int yIndex, bool fit4par, int info, double a, double Ta, double
 
 void LMA(int yIndex, int info, double a, double Ta, double b, double Tb){
 	//Levenberg-Marquardt Algorithm
-	double lambda = 6;
-	const double lim = 0.1;
-	const double Lup = 11;
-	const double Ldown = 9;
+	
+	//printf("LMA");
 	
 	if(  a == 0 || b == 0 ){
 		 errFlag = 3;
@@ -392,52 +451,26 @@ void LMA(int yIndex, int info, double a, double Ta, double b, double Tb){
 	double  b1 =  b;
 	double Tb1 = Tb;
 	
-	SSR_old = 1e+10;
-	
-	Matrix DFtF_old, FtdY_old, FtF_old;
-	
-	double rho;
-	
 	int count = 0;
 	do{
 		count ++ ;
+		if( info > 0) printf(" %d", count);
 		if( count > 50){
 			errFlag = 2;
 			break;
 		}
-		if( count > 1){ 
-			SSR_old = SSR;
-			DFtF_old = DFtF;
-			FtdY_old = FtdY;
-			FtF_old  = FtF;
-		}
-		regression(1, lambda, yIndex, a1, Ta1, b1, Tb1, info);
+		regression(1, yIndex, a1, Ta1, b1, Tb1, info);
 		
 		a1  = sol(1,1);
 		Ta1 = sol(2,1);
 		b1  = sol(3,1);
 		Tb1 = sol(4,1);
 		
-		if( count > 2){
-			double gg = (Transpose(dpar)*(DFtF_old*dpar) + Transpose(dpar)*FtdY)(1,1);
-			rho = (SSR - SSR_old)/gg;
-			if( rho > lim){
-				lambda = std::max(lambda/Ldown, 1e-7);
-			}else{
-				lambda = std::min(lambda*Lup, 1e+7);
-			}
-		}
 		
-		FtdY.Print();
-		
-		printf("%d ", count);
-		printf("lambda : %f, rho :%f, lim :%f , dSSR: %f\n", lambda, rho, lim, SSR-SSR_old);
-		printf("SSR: %f\n", SSR);
-		printf("%f, %f, delta : %f\n", Det(FtF),  Det(FtF_old), Det(FtF) - Det(FtF_old)); 
-		printf("sol : ");Transpose(sol).Print();
-		printf("dpar: ");Transpose(dpar).Print();
-		printf("sigma: ");Transpose(error).Print();
-		checkdpar = std::abs(SSR_old-SSR) > SSR * torr;
+		//printf("sol : ");Transpose(sol).Print();
+		//printf("dpar: ");Transpose(dpar).Print();
+		//printf("sigma: ");Transpose(error).Print();
+		checkdpar = std::abs(delta) > torr && lambda > 0.0001;
 		
 	}while(errFlag == 0  && checkdpar); //iterate when no err and any of the dpar > 0.01;
 	
@@ -457,10 +490,11 @@ void LMA(int yIndex, int info, double a, double Ta, double b, double Tb){
 void Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	
 	double Yvalue = valY[yIndex];
-	if( info >= 0) printf("========================= index : %3d, B field : %f ", yIndex, Yvalue);
+	if( info >= 0) printf("======== index : %3d, B field : %f ", yIndex, Yvalue);
 	if( info >= 1) printf("\n");
 	
-	LMA(yIndex, 4, a, Ta, b, Tb);
+	lambda = 0.01;
+	LMA(yIndex, info, a, Ta, b, Tb);
 
 	/*
 	GaussNewton(yIndex, 1, info, a, Ta, b, Tb);
@@ -482,21 +516,21 @@ void Fitting(int yIndex, int info, double a, double Ta, double b, double Tb){
 	if( failFlag || errFlag){
 		GaussNewton(yIndex, 0, info, a, Ta, b, Tb);
 	}
-
+	*/
 	double SampleMean = mean(yIndex);
 	double SampleVar = variance(yIndex);
 	double fitVar = var;
 	double redchisq = fitVar/SampleVar;
 	
 	if( info >= 3) printf("==== SSR : %f , dataSize = %d, ndf = %d\n", SSR, dataSize, DF);
-	if( info >= 3) printf("==== dSSR : %f \n", SSR-SSR_old);
+	if( info >= 3) printf("==== dSSR : %f \n", delta);
 	if( info >= 3) printf("####### red-chi^2: %f | FitSigma: %f, SampleSigma(Mean): %f(%f) \n", redchisq, sqrt(fitVar), sqrt(SampleVar), SampleMean);
 	if( info >= 0) {printf("         sol  : "); Transpose(sol).Print();}
 	if( info >= 1) {printf("        sigma : "); Transpose(error).Print();}
 	//if( info >= 0) {printf("        t-dis : "); Transpose(tDis).Print();}
 	if( info >= 2) {printf("Appr. p-Value : "); Transpose(pValue).Print();}
 	
-	*/
+	
 }
 
 void SaveFitResult(char* filename, int yIndex){

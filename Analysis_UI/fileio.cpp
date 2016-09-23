@@ -2,7 +2,21 @@
 
 FileIO::FileIO()
 {
+    Initialize();
+}
+
+FileIO::FileIO(QString filePath){
+    Initialize();
+
+    this->filePath = filePath;
+    myfile = new QFile(filePath);
+    myfile->open(QIODevice::ReadOnly);
+
+}
+
+void FileIO::Initialize(){
     myfile = NULL;
+    outfile = NULL;
     zData = NULL;
     colwise = 0;
     xMax = 0;
@@ -11,20 +25,27 @@ FileIO::FileIO()
     yMin = 0;
     zMax = 0;
     zMin = 0;
+    openState = 0;
 
     xSize = 0;
     ySize = 0;
 }
 
-FileIO::FileIO(QString filePath){
-    this->filePath = filePath;
-    myfile = new QFile(filePath);
-    openState = myfile->open(QIODevice::ReadOnly);
-}
-
 FileIO::~FileIO(){
     delete myfile;
     //if( zData != NULL ) delete zData;
+}
+
+void FileIO::OpenSaveFile(){
+    if( openState == 0 ) return;
+    int lenght = filePath.length();
+    QString outfilePath = filePath.left(lenght -4);
+    outfilePath += "_fit.txt";
+    outfile = new QFile(outfilePath);
+    outfile->open(QIODevice::Append );
+    SendMsg("Fit result will save to :");
+    SendMsg(outfilePath);
+
 }
 
 void FileIO::OpenCSVData(){
@@ -49,6 +70,13 @@ void FileIO::OpenCSVData(){
     }
     xSize --;
 
+    qDebug() << xSize << "," << ySize;
+
+    if( ySize < 1) {
+        SendMsg("!!!! Invalide file structure.");
+        return;
+    }
+
     zData = new QVector<double> [xSize];
     double ** z ;
     z = new double *[ySize];
@@ -66,7 +94,7 @@ void FileIO::OpenCSVData(){
         if( rows == 1){ // get yDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1) {
-                    double temp = GetYValue(lineList[i]);
+                    double temp = ExtractYValue(lineList[i]);
                     yData.push_back(temp) ; // get data from string.
                 }
             }
@@ -105,13 +133,56 @@ void FileIO::OpenCSVData(){
     yMin = FindMin(yData);
     yMax = FindMax(yData);
 
+    openState = 1;
+
 }
 
 void FileIO::OpenTxtData_row(){
 
 }
 
-double FileIO::GetYValue(QString str){
+void FileIO::SaveFitResult(Analysis *ana)
+{
+    QTextStream stream(outfile);
+    QString text, tmp;
+    int p = ana->GetParametersSize();
+
+    //set header
+    if( outfile->pos() == 0){
+        text.sprintf("%5s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s\n",
+                     "yIndex", "yValue",
+                     "a" , "Ta", "b", "Tb",
+                     "e(a)", "e(Ta)", "e(b)", "e(Tb)",
+                     "SSR", "DF", "chi-sq/ndf");
+        stream << text;
+    }
+
+    tmp.sprintf("%5d, %8.4f, ", ana->GetYIndex(), ana->GetBValue());
+    text = tmp;
+
+    QVector<double> sol = ana->GetParameters();
+
+    for( int i = 0; i < p ; i++){
+        tmp.sprintf("%8.4f, ", sol[i]);
+        text += tmp;
+    }
+
+    QVector<double> error = ana->GetParError();
+    for( int i = 0; i < p ; i++){
+        tmp.sprintf("%8.4f, ", error[i]);
+        text += tmp;
+    }
+
+    double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
+    tmp.sprintf("%8.4e, %5d, %8.5f \n", ana->GetSSR(), ana->GetNDF(), chisq);
+    text += tmp;
+
+    SendMsg("fit result saved.");
+    SendMsg(text);
+    stream << text;
+}
+
+double FileIO::ExtractYValue(QString str){
     int pos = str.lastIndexOf("_") ;
     QString strY = str.mid(pos+1, 5);
     //qDebug() << str << ", " << pos << ", " << strY;
