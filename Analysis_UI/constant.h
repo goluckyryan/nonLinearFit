@@ -18,5 +18,7 @@ const QString dirPath = "/Users/mobileryan/Triplet-ESR/";
 const QString gnuFitLogPath = "/Users/mobileryan/Triplet-ESR/gnufit.log";
 const QString simFilePath = "/Users/mobileryan/Triplet-ESR/test.dat";
 
+const double TORR = 1e-6;
+const double TORRGRAD = 1e-1;
 
 #endif // CONSTANT_H

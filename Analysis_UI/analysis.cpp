@@ -180,9 +180,7 @@ int Analysis::Regression(QVector<double> par0)
 int Analysis::LMA( QVector<double> par0, double lambda0){
 
     this->lambda = lambda0;
-    //MaxIter = 200;
-    const double torr = 1e-6;
-    const double torrGrad = 1e-2;
+
     QString tmp;
     PrintVector(par0, "ini. par:");
 
@@ -203,9 +201,9 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         }
         bool converge = 0;
         //since this is 4-parameter fit
-        converge = std::abs(this->delta) <  torr;
+        converge = std::abs(this->delta) <  TORR;
         for(int i = 0; i < p; i++){
-            converge &= std::abs(this->gradSSR[i]) < torrGrad;
+            converge &= std::abs(this->gradSSR[i]) < TORRGRAD;
         }
         // if lambda to small or too big, reset
         if( this->lambda < 1e-5) this->lambda = 1e+5;
@@ -251,6 +249,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
 int Analysis::GnuFit(QVector<double> par)
 {   // using gnuplot to fit and read the gnufit.log
     // need the "text.dat", which is condensed from *.cvs
+
     PrintVector(par, "ini. par:");
     Msg.sprintf(" === Start fit using gnuplot, also Levenberg-Marquardt Algorithm. ");
     SendMsg(Msg);
