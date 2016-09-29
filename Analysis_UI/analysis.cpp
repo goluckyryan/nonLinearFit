@@ -125,13 +125,17 @@ int Analysis::Regression(QVector<double> par0)
 
     //========================================== Check the SSR(p+dpar)
     QVector<double> par_new = sol.Matrix2QVec();
-    Matrix fn(fitSize,1);
+
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i + xStart - 1];
-        fn(i,1) = FitFunc(x, par_new);
+        f(i,1) = FitFunc(x, par_new);
+        QVector<double> gradf = GradFitFunc(x, par_new);
+        for(int j = 1; j <= p; j++){
+            F(i,j) = gradf[j-1];
+        }
     }
-    Matrix dYn = fn-Y;
-    double SSRn = (dYn.Transpose() * dYn)(1,1);
+    dY = f-Y;
+    double SSRn = (dY.Transpose() * dY)(1,1);
 
     this->delta = SSRn - this->SSR;
 
@@ -149,18 +153,8 @@ int Analysis::Regression(QVector<double> par0)
     this->lambda = this->lambda * 10;
     this->sol = sol.Matrix2QVec();
     this->dpar = dpar.Matrix2QVec();
-
-    F(fitSize,p); // F = grad(f)
-    for(int i = 1; i <= fitSize ; i++) {
-        double x = xdata[i - 1 + xStart];
-        QVector<double> gradf = GradFitFunc(x, this->sol);
-        for(int j = 1; j <= p; j++){
-            F(i,j) = gradf[j-1];
-        }
-    }
     //new gradient of SSR
-    FtdY = F.Transpose()*dYn;
-    this->gradSSR = FtdY.Matrix2QVec();
+    this->gradSSR = (F.Transpose()*dY).Matrix2QVec();
 
     try{
         this->CoVar = (F.Transpose()*F).Inverse();
@@ -185,9 +179,9 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     bool contFlag;
     Msg.sprintf(" === Start fit using Levenberg-Marquardt Algorithm: ");
     do{
-        count += Regression(par);
+        Regression(par);
         par = this->sol;
-
+        count ++;
         if( count >= MaxIter ) {
             fitFlag = 2; // fitFlag = 2 when iteration too many
             break;
@@ -215,7 +209,6 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         tmp.sprintf("| Terminated. Fail to converge in %d trials.", MaxIter);
         Msg += tmp;
     }
-    //qDebug() << Msg;
     SendMsg(Msg);
 
     //===== cal error
@@ -232,9 +225,6 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
 
     this->error = error.Matrix2QVec();
     this->pValue = pValue.Matrix2QVec();
-
-    //PrintVector(this->sol, "sol:");
-    //PrintVector(this->error, "error:");
 
     return 0;
 }

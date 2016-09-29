@@ -37,9 +37,6 @@ public:
 
     void CalFitData(QVector<double> par);
 
-    int Regression2(QVector<double> par0);
-    int LMA2(QVector<double> par0, double lambda0 = 0.01);
-
 signals:
 
     void SendMsg(QString msg);
