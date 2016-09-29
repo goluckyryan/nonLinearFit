@@ -6,14 +6,13 @@ using namespace std;
  
 int main(int argc, char *argv[]){ 
 	
-	if( argc != 2 && argc != 4 && argc != 6 && argc != 7){
-		printf("usage: ./analaysis.o yindex (a Ta b Tb) lambda\n");
-		printf("         yIndex = -1 ; loop all, minimum massage. \n");
-		printf("      a Ta b Tb = are optional initial guesses. \n");
+	if( argc != 3 && argc != 5 && argc != 7 && argc != 8){
+		printf("usage: ./analaysis fileName yindex (a Ta b Tb lambda)\n");
+		printf("     yIndex = -1 ; loop all, minimum massage. \n");
 		return 1;
 	}
-
-	int yIndex = atoi(argv[1]);
+	char *filename = argv[1]; // = "20160725pentacene_pterphenyl.csv";
+	int yIndex = atoi(argv[2]);
 	
 	///defual initial guess value, since the algorithm converge quickly, 1 guess is usually OK.
 	double  a =  20;
@@ -21,20 +20,21 @@ int main(int argc, char *argv[]){
 	double  b = -10;
 	double Tb =  80;
 	
-	if( argc >= 4){
-		a  = atof(argv[2]);
-		Ta = atof(argv[3]);
-	}
-	if( argc >= 6){
-		b  = atof(argv[4]);
-		Tb = atof(argv[5]);
+	lambda = -1;
+
+	if( argc >= 5){
+		a  = atof(argv[3]);
+		Ta = atof(argv[4]);
 	}
 	if( argc >= 7){
-		lambda = atof(argv[6]);
+		b  = atof(argv[5]);
+		Tb = atof(argv[6]);
+	}
+	if( argc >= 8){
+		lambda = atof(argv[7]);
 	}
 	
 	///======================= get data
-	char filename[100] = "20160725pentacene_pterphenyl.csv";
 	getData(filename);
 	
 	///======================= save in dat file
@@ -42,7 +42,12 @@ int main(int argc, char *argv[]){
 	//output(outfile);
 
 	///====================== fitting 
-	char savefile[100] = "FitResult.txt";
+	char savefile[400];
+	memcpy (savefile, filename, strlen(filename)-4);
+	printf("%s\n", savefile);
+	strcat (savefile, "_cmdfit.txt");
+	printf("%s\n", savefile);
+	
 	char savefile_single[100] = "FitResult_single.txt";
 	
 	Matrix * output;
@@ -56,7 +61,7 @@ int main(int argc, char *argv[]){
 	par0(4,1) = Tb;
 	
 	if( yIndex == -1){
-		system("rm FitResult.txt");
+		printf(" save as : %s \n", savefile);
 		for( int i = 0; i < sizeY; i++){
 			NonLinearFit(i, 0, par0);
 			SaveFitResult(savefile, i);
@@ -67,7 +72,6 @@ int main(int argc, char *argv[]){
 	}
 	
 	///====================== gnuplot
-	/*
 	char plot_cmd[100];
 	if( yIndex == -1 ){
 		
@@ -88,7 +92,7 @@ int main(int argc, char *argv[]){
                     yIndex, a, Ta, b, Tb, 195, sizeX);
 		system(plot_cmd);
 	}
-	*/
+	/**/
 	
 	return 0; 
 } 

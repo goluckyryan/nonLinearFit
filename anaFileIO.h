@@ -175,7 +175,7 @@ void SaveFitResult(char* filename, int yIndex){
 		//output of data
 		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", a[i]);
 		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", s[i]);
-		for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", pV[i]);
+		//for ( int i = 0; i < 4 ; i++) fprintf(file, "%8.3f, ", pV[i]);
 		fprintf(file, "%8.4f\n", redchisq);
 	
 		fclose(file);	

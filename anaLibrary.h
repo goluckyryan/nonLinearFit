@@ -84,7 +84,7 @@ int regression(int yIndex, Matrix par, int info){
 	int xStart = 195;
 	int xEnd = sizeX-1;
 	
-	int p = 4; /// number of parameters
+	int p = par.GetRows(); /// number of parameters
 	
 	int n = xEnd - xStart + 1 ;
 	dataSize = n;
@@ -98,10 +98,9 @@ int regression(int yIndex, Matrix par, int info){
 		f(i,1) = FitFunction(x, par);
 		Matrix Frow = GradFitFunction(x, par);
 		//printf("Frow :"); Transpose(Frow).Print();
-		F(i,1) = Frow(1,1);
-		F(i,2) = Frow(2,1);
-		F(i,3) = Frow(3,1);
-		F(i,4) = Frow(4,1);
+		for( int k = 1; k <= p ; k++){
+			F(i,k) = Frow(k,1);
+		}
 	}
 	
 	Matrix Ft = Transpose(F); 
@@ -151,10 +150,9 @@ int regression(int yIndex, Matrix par, int info){
 		double x = valX[i - 1 +xStart];
 		fn(i,1) = FitFunction(x, par_new);
 		Matrix Frow = GradFitFunction(x, par_new);
-		Fn(i,1) = Frow(1,1);
-		Fn(i,2) = Frow(2,1);
-		Fn(i,3) = Frow(3,1);
-		Fn(i,4) = Frow(4,1);
+		for( int k = 1; k <= p ; k++){
+			Fn(i,k) = Frow(k,1);
+		}
 	}
 	
 	Matrix dYn = Y - fn;
@@ -237,7 +235,7 @@ void LMA(int yIndex, int info, Matrix par0){
 	
 	int count = 0;
 	lastSSR = 0;
-	lambda = 4;
+
 	do{
 		regression(yIndex, par_temp, info);
 		par_temp = sol;
