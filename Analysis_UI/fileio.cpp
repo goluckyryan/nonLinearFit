@@ -185,6 +185,9 @@ void FileIO::SaveFitResult(Analysis *ana)
 void FileIO::SaveSimplifiedTxt()
 {
     // the simplified txt is needed for Analysis::Gnufit
+    int len = this->filePath.length();
+    QString simFilePath = this->filePath.left(len-4).append("_sim.txt");
+
     QFile out(simFilePath); // in constant.h
     out.open( QIODevice::WriteOnly );
     QTextStream stream(&out);

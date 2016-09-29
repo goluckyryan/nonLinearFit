@@ -3,6 +3,10 @@ set key autotitle columnhead
 
 #yIndex = 104
 #startX = 195
+#a = 20
+#Ta = 20
+#b = -10
+#Tb = 80
 
 
 col = yIndex + 2

@@ -67,7 +67,7 @@ void MainWindow::on_pushButton_clicked(){
     QString fileName;
     fileName = QFileDialog::getOpenFileName(this,
                                             "Open File",
-                                            openPath, // openPath in constant.h
+                                            OPENPATH, // OPENPATH in constant.h
                                             tr("Col-wise (*.csv *.txt *.dat);; Row-wise (*txt *dat)"));
 
     ui->lineEdit->setText(fileName);
