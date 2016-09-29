@@ -30,26 +30,38 @@ double sMean, sVar;
 const double TORR = 0.001;
 const double MAXITR = 300;
 
+int FindxIndex(double goal){
+
+	for( int i = 0; i < sizeX; i++){
+		if( valX[i] >= goal ){
+			return i;
+		}
+	}
+	
+	return 0;
+}
+
+
 double Cum_tDis30(double x){
 	return 1/(1+exp(-x/0.6));
 }
 
 void MeanVariance(int yIndex){
-	int xStart = 195-20; // start for fitting, end of finding variance 
+	int xEnd = FindxIndex(-4); // start for fitting, end of finding variance 
 	
 	//find mean
 	sMean = 0;
-	for( int i = 0; i < xStart ; i++){
+	for( int i = 0; i < xEnd ; i++){
 		sMean += data[yIndex][i];
 	} 
-	sMean = sMean/xStart;
+	sMean = sMean/xEnd;
 	
 	//find variance
 	sVar = 0;
-	for( int i = 0; i < xStart ; i++){
+	for( int i = 0; i < xEnd ; i++){
 		sVar += pow(data[yIndex][i] - sMean,2);
 	} 
-	sVar = sVar/(xStart-1);
+	sVar = sVar/(xEnd-1);
 	
 }
 
@@ -81,7 +93,7 @@ int regression(int yIndex, Matrix par, int info){
 	
 	errFlag = 0;
 	
-	int xStart = 195;
+	int xStart = FindxIndex(4);
 	int xEnd = sizeX-1;
 	
 	int p = 4; /// number of parameters
