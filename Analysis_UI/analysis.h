@@ -84,6 +84,8 @@ public slots:
         emit SendMsg(msg);
     }
 
+    int FindstartIndex(double goal);
+
 private:
     QVector<double> xdata, ydata;
     QVector<double> fydata;

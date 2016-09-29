@@ -101,7 +101,8 @@ void MainWindow::on_pushButton_clicked(){
     ui->spinBox_x->setMaximum(file->GetDataSize()-1);
 
     ui->spinBox_y->setValue(104);
-    ui->spinBox_x->setValue(195);
+    int xIndex = ana->FindstartIndex(4);
+    ui->spinBox_x->setValue(xIndex);
 
     //ana->SetData(file->GetDataSetX(), file->GetDataSetZ(104));
     //ana->SetY(104, file->GetDataY(104));
@@ -193,7 +194,8 @@ void MainWindow::on_pushButton_Fit_clicked(){
     //ana->Print();
     ana->Setlambda(lambda);
     ana->SetMaxInteration(maxIter);
-    ana->MeanAndvariance(0, ana->GetStartFitIndex()-20);
+    int x1 = ana->FindstartIndex(-3);
+    ana->MeanAndvariance(0, x1);
     ana->NonLinearFit(par, gnu);
 
     //display result
@@ -244,6 +246,7 @@ void MainWindow::on_pushButton_reset_clicked()
     }
     ui->lineEdit_Ta->setText("20");
     ui->lineEdit_Tb->setText("80");
+    ui->lineEdit_c->setText("0");
 
     PlotFitFunc();
 }
@@ -269,7 +272,7 @@ void MainWindow::on_pushButton_FitAll_clicked()
         on_spinBox_y_valueChanged(yIndex);
         on_pushButton_Fit_clicked();
         PlotFitFunc();
-        Sleep(500);
+        //Sleep(500);
         str.sprintf("Fitting #%d / %d , saved %d", yIndex + 1, n, count + 1);
         progress.setLabelText(str);
         progress.setValue(yIndex);

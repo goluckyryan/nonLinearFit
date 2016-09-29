@@ -227,6 +227,7 @@ int regression(int yIndex, Matrix par, int info){
 	
 	gradSSR = FntdYn;
 	
+	return 1;
 }
 
 void LMA(int yIndex, int info, Matrix par0){
