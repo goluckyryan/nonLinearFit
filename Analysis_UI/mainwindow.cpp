@@ -265,11 +265,11 @@ void MainWindow::on_pushButton_FitAll_clicked()
 
     for( int yIndex = 0; yIndex < n ; yIndex ++){
     //for( int yIndex = 100; yIndex < 300 ; yIndex ++){
-        //on_pushButton_reset_clicked();
+        on_pushButton_reset_clicked();
         on_spinBox_y_valueChanged(yIndex);
         on_pushButton_Fit_clicked();
         PlotFitFunc();
-        //Sleep(500);
+        Sleep(500);
         str.sprintf("Fitting #%d / %d , saved %d", yIndex + 1, n, count + 1);
         progress.setLabelText(str);
         progress.setValue(yIndex);

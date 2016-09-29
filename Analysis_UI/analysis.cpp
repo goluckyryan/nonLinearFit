@@ -172,83 +172,6 @@ int Analysis::Regression(QVector<double> par0)
     return 1;
 }
 
-int Analysis::Regression2(QVector<double> par0)
-{
-    //Levenberg-Marquardt Algorithm
-    fitFlag = 0;
-    int xStart = this->startIndex;
-    int xEnd = this->n - 1;
-    int fitSize = xEnd - xStart + 1;
-
-    this->p = par0.size();
-    this->DF = fitSize - this->p;
-    Matrix par_old(p,1); for(int i = 0; i < p; i++){ par_old(i+1,1) = par0[i];}
-
-    //============================Start regression
-    Matrix Y(fitSize,1);
-    Matrix f(fitSize,1);
-    Matrix F(fitSize,p); // F = grad(f)
-    for(int i = 1; i <= fitSize ; i++) {
-        Y(i,1) = ydata[i + xStart - 1];
-        double x = xdata[i + xStart - 1];
-        f(i,1) = FitFunc(x, par0);
-        QVector<double> gradf = GradFitFunc(x, par0);
-        for(int j = 1; j <= p; j++){
-            F(i,j) = gradf[j-1];
-        }
-    }
-
-    Matrix Ft = F.Transpose();
-    Matrix FtF = Ft*F;
-    Matrix D(p,p);
-    for(int i = 1; i <= p ; i++) {
-        D(i,i) = this->lambda;
-        //D(i,i) = this->lambda * FtF(i,i); //alternative
-    }
-
-    try{
-        this->CoVar = (FtF + D).Inverse();
-    }catch( Exception err){
-        fitFlag = 1;
-        return 0; // return 1 when covariance cannot be compute.
-    }
-
-    Matrix dY = f-Y;
-    this->SSR = (dY.Transpose() * dY)(1,1);
-
-    Matrix FtdY = Ft*dY; // gradient of SSR
-    Matrix dpar = CoVar * FtdY;
-    Matrix sol = par_old + dpar;
-
-    this->delta = this->SSR - this->lastSSR;
-
-    qDebug("laset SSR :%f, SSR: %f, delta: %f, lambda: %f", lastSSR, SSR, delta, lambda);
-    sol.PrintVector("sol");
-
-    this->sol = sol.Matrix2QVec();
-    this->dpar = dpar.Matrix2QVec();
-    this->gradSSR = FtdY.Matrix2QVec();
-
-    try{
-        this->CoVar = (F.Transpose()*F).Inverse();
-    }catch( Exception err){
-        fitFlag = 1;
-        return 0; // return 0 when covariance cannot be compute.
-    }
-
-    if( this->delta >= 0){
-        //========== SSRn > SSR
-        this->lambda = this->lambda / 10;
-        return 0;
-    }else{
-        //========== SSRn < SSR
-        this->lambda = this->lambda * 10;
-        return 1;
-    }
-
-    return 1;
-}
-
 int Analysis::LMA( QVector<double> par0, double lambda0){
 
     this->lambda = lambda0;
@@ -315,76 +238,6 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
 
     return 0;
 }
-
-int Analysis::LMA2( QVector<double> par0, double lambda0){
-
-    this->lambda = lambda0;
-
-    QString tmp;
-    PrintVector(par0, "ini. par:");
-
-    int count = 0;
-    QVector<double> par = par0;
-
-    bool contFlag;
-    Msg.sprintf(" === Start fit using Levenberg-Marquardt Algorithm: ");
-    do{
-        qDebug()<< "------- "<< count;
-        count += Regression2(par);
-        par = this->sol;
-        this->lastSSR = this->SSR;
-        if( count >= MaxIter ) {
-            fitFlag = 2; // fitFlag = 2 when iteration too many
-            break;
-        }
-
-        bool converge = 0;
-        //since this is 4-parameter fit
-        converge = std::abs(this->delta) <  TORR;
-        for(int i = 0; i < p; i++){
-            converge &= std::abs(this->gradSSR[i]) < TORRGRAD;
-        }
-        // if lambda to small or too big, reset
-        if( this->lambda < 1e-5) this->lambda = 1e+5;
-        if( this->lambda > 1e+10) this->lambda = 1e-4;
-        contFlag = fitFlag == 0 && ( !converge );
-
-    }while(contFlag);
-
-    tmp.sprintf(" %d", count);
-    Msg += tmp;
-    if( fitFlag == 0) {
-        Msg += "| End Normally.";
-    }else if(fitFlag == 1){
-        Msg += "| Terminated. Covariance fail to cal.";
-    }else if(fitFlag == 2){
-        tmp.sprintf("| Terminated. Fail to converge in %d trials.", MaxIter);
-        Msg += tmp;
-    }
-    //qDebug() << Msg;
-    SendMsg(Msg);
-
-    //===== cal error
-    double fitVar = this->SSR / this->DF;
-    Matrix error(p,1);
-    for( int i = 1; i <= p ; i++){
-        error(i,1)  = sqrt(fitVar * CoVar(i,i));
-    }
-    Matrix pValue(p,1);
-    for( int i = 1; i <= p ; i++){
-        double tDis = sol[i-1]/error(i,1);
-        pValue(i,1) = cum_tDis30(- std::abs(tDis));
-    }
-
-    this->error = error.Matrix2QVec();
-    this->pValue = pValue.Matrix2QVec();
-
-    //PrintVector(this->sol, "sol:");
-    //PrintVector(this->error, "error:");
-
-    return 0;
-}
-
 
 int Analysis::GnuFit(QVector<double> par)
 {   // using gnuplot to fit and read the gnufit.log
@@ -497,7 +350,7 @@ int Analysis::GnuFit(QVector<double> par)
 int Analysis::NonLinearFit(QVector<double> par0, bool gnufit)
 {
     if( !gnufit){
-        LMA2(par0, this->lambda);
+        LMA(par0, this->lambda);
     }else{
         GnuFit(par0);
     }
