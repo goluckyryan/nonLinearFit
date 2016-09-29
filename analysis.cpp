@@ -1,6 +1,7 @@
 
 #include "anaLibrary.h"
- 
+#include "anaFileIO.h"
+
 using namespace std; 
  
 int main(int argc, char *argv[]){ 
@@ -17,8 +18,8 @@ int main(int argc, char *argv[]){
 	///defual initial guess value, since the algorithm converge quickly, 1 guess is usually OK.
 	double  a =  20;
 	double Ta =  20;
-	double  b = -20;
-	double Tb =  60;
+	double  b = -10;
+	double Tb =  80;
 	
 	if( argc >= 4){
 		a  = atof(argv[2]);
@@ -47,18 +48,26 @@ int main(int argc, char *argv[]){
 	Matrix * output;
 	
 	printf ("init guess (a, Ta, b, Tb) = (%3.0f, %3.0f, %3.0f, %3.0f) \n", a, Ta, b, Tb);
+	
+	Matrix par0 (4,1);
+	par0(1,1) = a;
+	par0(2,1) = Ta;
+	par0(3,1) = b;
+	par0(4,1) = Tb;
+	
 	if( yIndex == -1){
 		system("rm FitResult.txt");
 		for( int i = 0; i < sizeY; i++){
-			Fitting(i, 0, a, Ta, b, Tb);
+			NonLinearFit(i, 0, par0);
 			SaveFitResult(savefile, i);
 		}
 	}else{
-		Fitting(yIndex,4, a, Ta, b, Tb);
+		NonLinearFit(yIndex, 4, par0);
 		SaveFitResult(savefile_single, yIndex);
 	}
 	
 	///====================== gnuplot
+	/*
 	char plot_cmd[100];
 	if( yIndex == -1 ){
 		
@@ -79,7 +88,7 @@ int main(int argc, char *argv[]){
                     yIndex, a, Ta, b, Tb, 195, sizeX);
 		system(plot_cmd);
 	}
-	
+	*/
 	
 	return 0; 
 } 
