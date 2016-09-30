@@ -48,7 +48,6 @@ private slots:
     QVector<double> GetParametersFromLineText();
     void UpdateLineTextParameters(QVector<double> par);
 
-
 private:
     Ui::MainWindow *ui;
 

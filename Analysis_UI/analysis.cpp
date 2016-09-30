@@ -103,14 +103,26 @@ int Analysis::Regression(QVector<double> par0)
 
     Matrix Ft = F.Transpose();
     Matrix FtF = Ft*F;
-    Matrix D(p,p);
+
+    if( this->lambda == -1){ // the default initial value is -1
+        this->lambda = 0;
+        for(int i = 1; i <= fitSize; i++){
+            for(int j = 1; j <= p ; j++){
+                this->lambda += F(i,j)* F(i,j);
+            }
+        }
+
+        this->lambda = sqrt(this->lambda/fitSize/p);
+        //Msg.sprintf(" ==== cal inital lambda : %f", this->lambda);
+        //SendMsg(Msg);
+    }
+    Matrix DI(p,p);
     for(int i = 1; i <= p ; i++) {
-        D(i,i) = this->lambda;
-        //D(i,i) = this->lambda * FtF(i,i); //alternative
+        DI(i,i) = this->lambda;
     }
 
     try{
-        this->CoVar = (FtF + D).Inverse();
+        this->CoVar = (FtF + DI).Inverse();
     }catch( Exception err){
         fitFlag = 1;
         return 0; // return 1 when covariance cannot be compute.
@@ -126,22 +138,24 @@ int Analysis::Regression(QVector<double> par0)
     //========================================== Check the SSR(p+dpar)
     QVector<double> par_new = sol.Matrix2QVec();
 
+    Matrix fn(fitSize, 1);
+    Matrix Fn(fitSize, p);
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i + xStart - 1];
-        f(i,1) = FitFunc(x, par_new);
+        fn(i,1) = FitFunc(x, par_new);
         QVector<double> gradf = GradFitFunc(x, par_new);
         for(int j = 1; j <= p; j++){
-            F(i,j) = gradf[j-1];
+            Fn(i,j) = gradf[j-1];
         }
     }
-    dY = f-Y;
-    double SSRn = (dY.Transpose() * dY)(1,1);
+    Matrix dYn = fn-Y;
+    double SSRn = (dYn.Transpose() * dYn)(1,1);
 
     this->delta = SSRn - this->SSR;
 
     //========== SSRn > SSR
     if( this->delta >= 0){
-        this->lambda = this->lambda / 10;
+        this->lambda = this->lambda * 10;
         sol = par_old;
         this->sol = sol.Matrix2QVec();
         this->dpar = Matrix(p,1).Matrix2QVec(); ///Zero matrix
@@ -150,14 +164,16 @@ int Analysis::Regression(QVector<double> par0)
     }
     //========== SSRn < SSR
 
-    this->lambda = this->lambda * 10;
+    this->lambda = this->lambda / 10;
     this->sol = sol.Matrix2QVec();
     this->dpar = dpar.Matrix2QVec();
+    this->SSR = SSRn;
     //new gradient of SSR
-    this->gradSSR = (F.Transpose()*dY).Matrix2QVec();
+    this->gradSSR = (Fn.Transpose()*dYn).Matrix2QVec();
 
+    // replace CoVar
     try{
-        this->CoVar = (F.Transpose()*F).Inverse();
+        this->CoVar = (Fn.Transpose()*Fn).Inverse();
     }catch( Exception err){
         fitFlag = 1;
         return 0; // return 0 when covariance cannot be compute.
@@ -175,12 +191,13 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
 
     int count = 0;
     QVector<double> par = par0;
-
+    lastSSR = 0;
     bool contFlag;
     Msg.sprintf(" === Start fit using Levenberg-Marquardt Algorithm: ");
     do{
         Regression(par);
         par = this->sol;
+        lastSSR = SSR;
         count ++;
         if( count >= MaxIter ) {
             fitFlag = 2; // fitFlag = 2 when iteration too many
@@ -188,13 +205,13 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         }
         bool converge = 0;
         //since this is 4-parameter fit
-        converge = std::abs(this->delta) <  TORR;
+        converge = std::abs(this->delta) <  TORR * SSR;
         for(int i = 0; i < p; i++){
             converge &= std::abs(this->gradSSR[i]) < TORRGRAD;
         }
         // if lambda to small or too big, reset
-        if( this->lambda < 1e-5) this->lambda = 1e+5;
-        if( this->lambda > 1e+10) this->lambda = 1e-4;
+        //if( this->lambda < 1e-5) this->lambda = 1e+5;
+        //if( this->lambda > 1e+10) this->lambda = 1e-4;
         contFlag = fitFlag == 0 && ( !converge );
 
     }while(contFlag);
@@ -394,4 +411,15 @@ void Analysis::PrintVector(QVector<double> vec, QString str)
 
     SendMsg(Msg);
 
+}
+
+int Analysis::FindstartIndex(double goal){
+    int xIndex = 0;
+    for(int i = 0; i < xdata.size() ; i++){
+        if( xdata[i] >= goal){
+            xIndex = i;
+            break;
+        }
+    }
+    return xIndex;
 }
