@@ -20,7 +20,7 @@ set xrange [-40:170]
 set yrange [STATS_min_y*1.1:STATS_max_y*1.1]
 
 f(x) = a*exp(-x/Ta) + b*exp(-x/Tb)
-FIT_LIMIT = 1e-3;
+FIT_LIMIT = 1e-6;
 
 fit f(x) "test.dat" u 1:col every ::(startX) via a, Ta, b, Tb
 
