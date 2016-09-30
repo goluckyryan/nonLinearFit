@@ -1,7 +1,7 @@
 
 
 *******************************************************************************
-Fri Sep 30 17:25:19 2016
+Fri Sep 30 17:38:34 2016
 
 
 FIT:    data read from FileName u 1:col every ::(startX)
@@ -14,27 +14,27 @@ function used for fitting: f(x)
 fitted parameters initialized with current variable values
 
 iter      chisq       delta/lim  lambda   a             Ta            b             Tb           
-   0 6.2507242593e+04  0.00e+00 3.91e+00  2.000000e+01  2.000000e+01 -1.000000e+01  8.000000e+01
-   5 6.6384776600e+03 -2.79e-02 3.91e-03  4.894768e+01  2.393772e+01 -7.081843e+00  9.443963e+01
+   0 9.1441946903e+03  0.00e+00 3.91e+00  2.000000e+01  2.000000e+01 -1.000000e+01  8.000000e+01
+  32 7.0391234509e+03 -9.81e-01 3.91e-01  1.748391e+01  4.306788e+01 -1.591383e+01  6.226171e+01
 
-After 5 iterations the fit converged.
-final sum of squares of residuals : 6638.48
-rel. change during last iteration : -2.79408e-008
+After 32 iterations the fit converged.
+final sum of squares of residuals : 7039.12
+rel. change during last iteration : -9.80664e-007
 
 degrees of freedom    (FIT_NDF)                        : 796
-rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 2.88787
-variance of residuals (reduced chisquare) = WSSR/ndf   : 8.3398
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 2.97374
+variance of residuals (reduced chisquare) = WSSR/ndf   : 8.84312
 
 Final set of parameters            Asymptotic Standard Error
 =======================            ==========================
-a               = 48.9477          +/- 3.519        (7.19%)
-Ta              = 23.9377          +/- 2.011        (8.403%)
-b               = -7.08184         +/- 4.04         (57.04%)
-Tb              = 94.4396          +/- 38.01        (40.24%)
+a               = 17.4839          +/- 230          (1316%)
+Ta              = 43.0679          +/- 111          (257.7%)
+b               = -15.9138         +/- 230.6        (1449%)
+Tb              = 62.2617          +/- 162.5        (261.1%)
 
 correlation matrix of the fit parameters:
                 a      Ta     b      Tb     
 a               1.000 
-Ta              0.885  1.000 
-b              -0.975 -0.960  1.000 
-Tb             -0.976 -0.919  0.987  1.000 
+Ta              0.998  1.000 
+b              -1.000 -0.998  1.000 
+Tb             -0.999 -0.995  0.999  1.000 
