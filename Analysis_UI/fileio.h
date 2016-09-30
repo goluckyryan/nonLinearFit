@@ -32,6 +32,7 @@ signals:
 public slots:
 
     QString GetFilePath(){return filePath;}
+    QString GetSimFilePath(){return simFilePath;}
     bool IsColWise(){return colwise;}
     int GetDataSize(){ return xData.size();}
     int GetDataSetSize() {return yData.size();}
@@ -64,7 +65,7 @@ private:
 
     QFile * myfile;
     QFile * outfile;
-    QString filePath;
+    QString filePath, simFilePath;
 
     double ExtractYValue(QString str);
 

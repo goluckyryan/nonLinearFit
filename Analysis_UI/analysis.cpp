@@ -255,7 +255,8 @@ int Analysis::GnuFit(QVector<double> par)
     SendMsg(Msg);
 
     QString cmd;
-    cmd.sprintf("gnuplot -e \"yIndex=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d\" gnuFit.gp", yIndex, par[0], par[1], par[2], par[3], startIndex);
+    cmd.sprintf("gnuplot -e \"yIndex=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d\" gnuFit.gp",
+                yIndex, par[0], par[1], par[2], par[3], startIndex);
     qDebug() << cmd.toStdString().c_str();
     QDir::setCurrent(OPENPATH); // OPENPATH in constant.h
     qDebug() << QDir::currentPath();

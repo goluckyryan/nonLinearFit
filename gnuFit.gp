@@ -7,22 +7,24 @@ set key autotitle columnhead
 #Ta = 20
 #b = -10
 #Tb = 80
+FileName = "test.dat"
 
 
 col = yIndex + 2
 set grid
-stats "test.dat" u 1:col nooutput
+
+#stats FileName u 1:col nooutput
+#set xrange [-40:170]
+#set yrange [STATS_min_y*1.1:STATS_max_y*1.1]
 
 set fit logfile "gnufit.log"
 !del gnufit.log
 
-set xrange [-40:170]
-set yrange [STATS_min_y*1.1:STATS_max_y*1.1]
-
 f(x) = a*exp(-x/Ta) + b*exp(-x/Tb)
-FIT_LIMIT = 1e-6;
+set fit maxiter 300
+set fit limit 1e-6
 
-fit f(x) "test.dat" u 1:col every ::(startX) via a, Ta, b, Tb
+fit f(x) FileName u 1:col every ::(startX) via a, Ta, b, Tb
 
 #set title sprintf("Col = %d, (a, Ta, b, Tb) = (%4.2f, %4.2f, %4.2f, %4.2f) \n X(%d, %d)", yIndex, a, Ta, b, Tb, startX, 1002)
 

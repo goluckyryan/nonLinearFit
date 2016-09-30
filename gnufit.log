@@ -1,13 +1,12 @@
 
 
 *******************************************************************************
-Thu Sep 29 19:57:50 2016
+Fri Sep 30 17:25:19 2016
 
 
-FIT:    data read from "test.dat" u 1:col every ::(startX)
+FIT:    data read from FileName u 1:col every ::(startX)
         format = x:z
-        x range restricted to [-40.0000 : 170.000]
-        #datapoints = 807
+        #datapoints = 800
         residuals are weighted equally (unit weight)
 
 function used for fitting: f(x)
@@ -15,27 +14,27 @@ function used for fitting: f(x)
 fitted parameters initialized with current variable values
 
 iter      chisq       delta/lim  lambda   a             Ta            b             Tb           
-   0 8.2081216584e+04  0.00e+00 4.00e+00  2.000000e+01  2.000000e+01 -1.000000e+01  8.000000e+01
-   5 8.8280380247e+03 -1.59e-01 4.00e+00  6.067598e+01  2.840166e+01 -1.732697e+01  6.504116e+01
+   0 6.2507242593e+04  0.00e+00 3.91e+00  2.000000e+01  2.000000e+01 -1.000000e+01  8.000000e+01
+   5 6.6384776600e+03 -2.79e-02 3.91e-03  4.894768e+01  2.393772e+01 -7.081843e+00  9.443963e+01
 
 After 5 iterations the fit converged.
-final sum of squares of residuals : 8828.04
-rel. change during last iteration : -0.000158502
+final sum of squares of residuals : 6638.48
+rel. change during last iteration : -2.79408e-008
 
-degrees of freedom    (FIT_NDF)                        : 803
-rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 3.31569
-variance of residuals (reduced chisquare) = WSSR/ndf   : 10.9938
+degrees of freedom    (FIT_NDF)                        : 796
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 2.88787
+variance of residuals (reduced chisquare) = WSSR/ndf   : 8.3398
 
 Final set of parameters            Asymptotic Standard Error
 =======================            ==========================
-a               = 60.676           +/- 17.03        (28.07%)
-Ta              = 28.4017          +/- 4.241        (14.93%)
-b               = -17.327          +/- 17.59        (101.5%)
-Tb              = 65.0412          +/- 26.15        (40.2%)
+a               = 48.9477          +/- 3.519        (7.19%)
+Ta              = 23.9377          +/- 2.011        (8.403%)
+b               = -7.08184         +/- 4.04         (57.04%)
+Tb              = 94.4396          +/- 38.01        (40.24%)
 
 correlation matrix of the fit parameters:
                 a      Ta     b      Tb     
 a               1.000 
-Ta              0.979  1.000 
-b              -0.999 -0.986  1.000 
-Tb             -0.995 -0.964  0.994  1.000 
+Ta              0.885  1.000 
+b              -0.975 -0.960  1.000 
+Tb             -0.976 -0.919  0.987  1.000 

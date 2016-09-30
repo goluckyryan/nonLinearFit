@@ -3,7 +3,7 @@ CC=g++
 
 all: analysis
 
-analysis: analysis.cpp anaLibrary.h Matrix.h
+analysis: analysis.cpp anaLibrary.h Matrix.h anaFileIO.h
 	$(CC) analysis.cpp -o analysis
 
 clean:
