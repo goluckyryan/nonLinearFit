@@ -64,11 +64,19 @@ void MainWindow::Write2Log(QString str){
 }
 
 void MainWindow::on_pushButton_clicked(){
+
+    QFileDialog fileDialog(this);
+    QStringList filters;
+    filters << "Col-wise (*.csv *.txt *.dat)" << "Row-wise (*txt *dat)";
+    fileDialog.setNameFilters(filters);
+    fileDialog.setReadOnly(1);
+    fileDialog.setDirectory(OPENPATH);
+    QStringList fileNames;
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this,
-                                            "Open File",
-                                            OPENPATH, // OPENPATH in constant.h
-                                            tr("Col-wise (*.csv *.txt *.dat);; Row-wise (*txt *dat)"));
+    if( fileDialog.exec()) {
+        fileNames = fileDialog.selectedFiles();
+        fileName = fileNames[0];
+    }
 
     ui->lineEdit->setText(fileName);
 
@@ -76,12 +84,20 @@ void MainWindow::on_pushButton_clicked(){
 
     file = new FileIO(fileName);
     connect(file, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
-    if(fileName.right(3)=="csv"){
-        file->OpenCSVData();
+    if( fileDialog.selectedNameFilter() == filters[0]){
+        if(fileName.right(3)=="csv"){
+            file->OpenCSVData();
+        }else{
+            file->OpenTxtData_col();
+        }
+    }else{
+        file->OpenTxtData_row();
     }
 
-    if(file->IsOpen() == 0) return;
-
+    if(file->IsOpen() == 0) {
+        Write2Log("Cannot open file.");
+        return;
+    }
     ui->pushButton_Fit->setEnabled(1);
     ui->pushButton_reset->setEnabled(1);
     ui->pushButton_save->setEnabled(1);

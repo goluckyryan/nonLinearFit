@@ -58,21 +58,18 @@ void FileIO::OpenCSVData(){
     QString line;
 
 
-    // get number of rows;
-    xSize = 0;
+    // get number of rows and cols;
+    xSize = -1;
     while(stream.readLineInto(&line)){
         xSize ++;
         QStringList lineList = line.split(",");
 
-        if( xSize == 1){ // get yDatax
+        if( xSize == 0){ // get yDatax
             ySize = lineList.size()/2;
         }
     }
-    xSize --;
 
-    qDebug() << xSize << "," << ySize;
-
-    if( ySize < 1) {
+    if( ySize < 1 || xSize < 1) {
         SendMsg("!!!! Invalide file structure.");
         return;
     }
@@ -100,17 +97,17 @@ void FileIO::OpenCSVData(){
             }
         }else{
             xData.push_back( (lineList[0]).toDouble() * 1e6);
-            int yCount = 0;
+            int yIndex = 0;
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1){
-                    z[yCount][rows-2] = (lineList[i]).toDouble() * 1000;
-                    yCount ++;
+                    z[yIndex][rows-2] = (lineList[i]).toDouble() * 1000;
+                    yIndex ++;
                 }
             }
         }
     }
 
-    //transpose the zData
+    //transpose the zData to row-wise
     zMin = z[0][0];
     zMax = z[0][0];
     for( int j = 0; j < ySize ; j ++){
@@ -135,10 +132,177 @@ void FileIO::OpenCSVData(){
 
     openState = 1;
 
+    QString msg;
+    msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
+    SendMsg(msg);
+
+    msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin, yMax, ySize);
+    SendMsg(msg);
+
+    msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
+    SendMsg(msg);
+
+}
+
+void FileIO::OpenTxtData_col()
+{
+    this->colwise = 0;
+
+    myfile->seek(0);
+
+    QTextStream stream(myfile);
+    QString line;
+
+    // get number of rows and cols;
+    xSize = -1;
+    while(stream.readLineInto(&line)){
+        xSize ++;
+        QStringList lineList = line.split(",");
+
+        if( ySize == 0){ // get yDatax
+            ySize = lineList.size()-2;
+        }
+    }
+
+    if( ySize < 1 || xSize < 1) {
+        SendMsg("!!!! Invalide file structure.");
+        return;
+    }
+
+    // get Data
+    zData = new QVector<double> [xSize];
+    double ** z ;
+    z = new double *[ySize];
+    for(int i = 0; i < ySize; i++){
+        z[i] = new double [xSize];
+    }
+
+    myfile->seek(0);
+    int rows = 0;
+    while(stream.readLineInto(&line)){
+        rows ++;
+        QStringList lineList = line.split(",");
+
+        if( rows == 1){ // get xDatax
+            for( int i = 1 ; i < lineList.size() ; i++ ){
+                double temp = ExtractYValue(lineList[i]);
+                yData.push_back(temp);
+            }
+        }else{
+            xData.push_back((lineList[0]).toDouble()) ;
+            int yIndex = 0;
+            for( int i = 1 ; i < lineList.size() ; i++ ){
+                z[yIndex][rows-2] = (lineList[i]).toDouble();
+                yIndex++;
+            }
+        }
+    }
+
+    //transpose the zData to row-wise
+    zMin = z[0][0];
+    zMax = z[0][0];
+    for( int j = 0; j < ySize ; j ++){
+        for(int i = 0; i < xSize ; i++){
+            zData[j].push_back(z[j][i]);
+            if( z[j][i] > zMax) zMax = z[j][i];
+            if( z[j][i] < zMin) zMin = z[j][i];
+        }
+    }
+
+    delete z;
+
+    qDebug("X: %d , %d", xData.size(), xSize);
+    qDebug("Y: %d , %d", yData.size(), ySize);
+
+    xMin = FindMin(xData);
+    xMax = FindMax(xData);
+
+    yMin = FindMin(yData);
+    yMax = FindMax(yData);
+
+    openState = 1;
+
+    QString msg;
+    msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
+    SendMsg(msg);
+
+    msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin, yMax, ySize);
+    SendMsg(msg);
+
+    msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
+    SendMsg(msg);
 }
 
 void FileIO::OpenTxtData_row(){
+    this->colwise = 0;
 
+    myfile->seek(0);
+
+    QTextStream stream(myfile);
+    QString line;
+
+    // get number of rows and cols;
+    ySize = -1;
+    while(stream.readLineInto(&line)){
+        ySize ++;
+        QStringList lineList = line.split(",");
+
+        if( xSize == 0){ // get yDatax
+            xSize = lineList.size()-1;
+        }
+    }
+
+    if( ySize < 1 || xSize < 1) {
+        SendMsg("!!!! Invalide file structure.");
+        return;
+    }
+
+    // get Data
+    myfile->seek(0);
+    int rows = 0;
+    zMin = 0;
+    zMax = 0;
+    while(stream.readLineInto(&line)){
+        rows ++;
+        QStringList lineList = line.split(",");
+
+        if( rows == 1){ // get xDatax
+            for( int i = 1 ; i < lineList.size() ; i++ ){
+                xData.push_back((lineList[0]).toDouble() * 1e6) ;
+            }
+        }else{
+            double temp = ExtractYValue(lineList[0]);
+            yData.push_back(temp);
+            int yIndex = 0;
+            for( int i = 1 ; i < lineList.size() ; i++ ){
+                temp = (lineList[i]).toDouble() * 1000;
+                zData[yIndex].push_back(temp);
+                if( temp > zMax ) zMax = temp;
+                if( temp < zMin ) zMin = temp;
+            }
+        }
+    }
+
+    qDebug("X: %d , %d", xData.size(), xSize);
+    qDebug("Y: %d , %d", yData.size(), ySize);
+
+    xMin = FindMin(xData);
+    xMax = FindMax(xData);
+
+    yMin = FindMin(yData);
+    yMax = FindMax(yData);
+
+    openState = 1;
+
+    QString msg;
+    msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
+    SendMsg(msg);
+
+    msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin, yMax, ySize);
+    SendMsg(msg);
+
+    msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
+    SendMsg(msg);
 }
 
 void FileIO::SaveFitResult(Analysis *ana)
@@ -219,7 +383,13 @@ void FileIO::SaveSimplifiedTxt()
 
 double FileIO::ExtractYValue(QString str){
     int pos = str.lastIndexOf("_") ;
-    QString strY = str.mid(pos+1, 5);
+    int pos2 = str.lastIndexOf("FUNCTION");
+    QString strY;
+    if( pos2 == -1){
+        strY = str.mid(pos+1);
+    }else{
+        strY = str.mid(pos+1, pos2-pos-1);
+    }
     //qDebug() << str << ", " << pos << ", " << strY;
     return strY.toDouble();
 }

@@ -1,4 +1,6 @@
 analysis
+*.txt
+*.log
 *.o
 *.exe
 FitResult_single.txt
