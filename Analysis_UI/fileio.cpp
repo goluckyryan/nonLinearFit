@@ -45,7 +45,6 @@ void FileIO::OpenSaveFile(){
     outfile->open(QIODevice::Append );
     SendMsg("Fit result will save to :");
     SendMsg(outfilePath);
-
 }
 
 void FileIO::OpenCSVData(){

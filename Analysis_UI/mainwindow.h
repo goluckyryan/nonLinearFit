@@ -59,6 +59,10 @@ private:
 
     bool savedSimplifiedtxt;
 
+    QVector<double> *fitPar;
+    QVector<double> *fitParError;
+    double *SSR;
+
 };
 
 #endif // MAINWINDOW_H

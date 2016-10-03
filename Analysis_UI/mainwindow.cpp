@@ -4,7 +4,10 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    file(NULL)
+    file(NULL),
+    fitPar(NULL),
+    fitParError(NULL),
+    SSR(NULL)
 {
     ui->setupUi(this);
 
@@ -27,6 +30,9 @@ MainWindow::~MainWindow(){
     delete plot;
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
+    if( fitPar != NULL) delete fitPar;
+    if( fitParError != NULL) delete fitParError;
+    if( SSR != NULL) delete SSR;
 }
 
 void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y, double xMin, double xMax, double yMin, double yMax){
@@ -271,6 +277,19 @@ void MainWindow::on_pushButton_save_clicked()
 {
     if( file == NULL) return;
     file->SaveFitResult(ana);
+
+    //initialize fitPar and fitParError;
+    if( fitPar == NULL){
+        const int sizeY = file->GetDataSetSize();
+        fitPar = new QVector<double> [sizeY];
+        fitParError = new QVector<double> [sizeY];
+        SSR = new double [sizeY];
+    }else{
+        int yIndex = ana->GetYIndex();
+        fitPar[yIndex] = ana->GetParameters();
+        fitParError[yIndex] = ana->GetParError();
+        SSR[yIndex] = ana->GetSSR();
+    }
 }
 
 void MainWindow::on_pushButton_FitAll_clicked()
