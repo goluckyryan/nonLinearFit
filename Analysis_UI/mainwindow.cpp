@@ -107,9 +107,6 @@ void MainWindow::on_pushButton_clicked(){
     Write2Log("Opened file :");
     Write2Log(fileName);
 
-    qDebug("X: (%f %f)", file->GetXMin(), file->GetXMax());
-    qDebug("Y: (%f %f)", file->GetYMin(), file->GetYMax());
-
     file->OpenSaveFile();
 
     ui->spinBox_y->setMinimum(0);
@@ -136,7 +133,12 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1)));
     ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
     ana->SetY(arg1, file->GetDataY(arg1));
-    PlotFitFunc();
+    if( ui->checkBox_AutoFit->isChecked()) {
+        on_pushButton_reset_clicked();
+        on_pushButton_Fit_clicked();
+    }else{
+        PlotFitFunc();
+    }
 }
 
 void MainWindow::on_spinBox_x_valueChanged(int arg1){
@@ -168,8 +170,7 @@ void MainWindow::PlotFitFunc(){
         xline_y.push_back(y);
         xline_x.push_back(x);
     }
-    Plot(2, xline_x, xline_y,
-    file->GetXMin(), file->GetXMax(), yMin, yMax);
+    Plot(2, xline_x, xline_y, file->GetXMin(), file->GetXMax(), yMin, yMax);
 
 }
 
@@ -322,6 +323,12 @@ void MainWindow::on_pushButton_FitAll_clicked()
     progress.setValue(n);
 }
 
+void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
+{
+    ui->lineEdit_b->setEnabled(checked);
+    ui->lineEdit_Tb->setEnabled(checked);
+}
+
 void MainWindow::on_checkBox_c_clicked(bool checked)
 {
     ui->lineEdit_c->setEnabled(checked);
@@ -332,9 +339,10 @@ QVector<double> MainWindow::GetParametersFromLineText()
     QVector<double> par;
     par.push_back(ui->lineEdit_a->text().toDouble());
     par.push_back(ui->lineEdit_Ta->text().toDouble());
-    par.push_back(ui->lineEdit_b->text().toDouble());
-    par.push_back(ui->lineEdit_Tb->text().toDouble());
-
+    if( ui->checkBox_b_Tb->isChecked()){
+        par.push_back(ui->lineEdit_b->text().toDouble());
+        par.push_back(ui->lineEdit_Tb->text().toDouble());
+    }
     if( ui->checkBox_c->isChecked()){
         par.push_back(ui->lineEdit_c->text().toDouble());
     }
@@ -344,22 +352,23 @@ QVector<double> MainWindow::GetParametersFromLineText()
 
 void MainWindow::UpdateLineTextParameters(QVector<double> par)
 {
-
     ui->lineEdit_a ->setText(QString::number(par[0]));
     ui->lineEdit_Ta->setText(QString::number(par[1]));
-    ui->lineEdit_b ->setText(QString::number(par[2]));
-    ui->lineEdit_Tb->setText(QString::number(par[3]));
-
+    if( par.size() == 3){
+        ui->lineEdit_c->setText(QString::number(par[2]));
+    }
+    if( par.size() == 4){
+        ui->lineEdit_b ->setText(QString::number(par[2]));
+        ui->lineEdit_Tb->setText(QString::number(par[3]));
+    }
     if( par.size()== 5){
         ui->lineEdit_c->setText(QString::number(par[4]));
-        on_checkBox_c_clicked(1);
     }
 
 }
 
 void MainWindow::on_actionFit_Result_triggered()
 {
-
     if(fitResultDialog->isHidden()){
         fitResultDialog->show();
         fitResultDialog->PlotData();

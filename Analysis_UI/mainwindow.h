@@ -51,6 +51,8 @@ private slots:
 
     void on_actionFit_Result_triggered();
 
+    void on_checkBox_b_Tb_clicked(bool checked);
+
 private:
     Ui::MainWindow *ui;
     Dialog * fitResultDialog;
