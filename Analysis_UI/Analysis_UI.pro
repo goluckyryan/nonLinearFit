@@ -17,13 +17,16 @@ SOURCES += main.cpp\
     qcustomplot.cpp \
     matrix.cpp \
     analysis.cpp \
-    fileio.cpp
+    fileio.cpp \
+    dialog.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot.h \
     matrix.h \
     analysis.h \
     fileio.h \
-    constant.h
+    constant.h \
+    dialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    dialog.ui

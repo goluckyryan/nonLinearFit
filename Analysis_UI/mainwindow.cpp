@@ -4,12 +4,10 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    file(NULL),
-    fitPar(NULL),
-    fitParError(NULL),
-    SSR(NULL)
+    file(NULL)
 {
     ui->setupUi(this);
+    fitResultDialog = new Dialog(this);
 
     savedSimplifiedtxt = 0;
 
@@ -27,12 +25,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow(){
     delete ui;
+    delete fitResultDialog;
     delete plot;
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
-    if( fitPar != NULL) delete fitPar;
-    if( fitParError != NULL) delete fitParError;
-    if( SSR != NULL) delete SSR;
+
 }
 
 void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y, double xMin, double xMax, double yMin, double yMax){
@@ -124,8 +121,8 @@ void MainWindow::on_pushButton_clicked(){
     int xIndex = ana->FindstartIndex(4);
     ui->spinBox_x->setValue(xIndex);
 
-    //ana->SetData(file->GetDataSetX(), file->GetDataSetZ(104));
-    //ana->SetY(104, file->GetDataY(104));
+    //Reset Data in fitResultDialog
+    fitResultDialog->ClearData();
 
 }
 
@@ -248,6 +245,14 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     //ana->Print();
 
+    //initialize fitPar and fitParError in FitDialog;
+    if( fitResultDialog->IsDataSizeFixed() == 0){
+        fitResultDialog->SetDataSize(file->GetDataSetSize());
+    }
+
+    fitResultDialog->FillData(ana);
+    fitResultDialog->PlotData();
+
 }
 
 void MainWindow::on_pushButton_reset_clicked()
@@ -276,18 +281,6 @@ void MainWindow::on_pushButton_save_clicked()
     if( file == NULL) return;
     file->SaveFitResult(ana);
 
-    //initialize fitPar and fitParError;
-    if( fitPar == NULL){
-        const int sizeY = file->GetDataSetSize();
-        fitPar = new QVector<double> [sizeY];
-        fitParError = new QVector<double> [sizeY];
-        SSR = new double [sizeY];
-    }else{
-        int yIndex = ana->GetYIndex();
-        fitPar[yIndex] = ana->GetParameters();
-        fitParError[yIndex] = ana->GetParError();
-        SSR[yIndex] = ana->GetSSR();
-    }
 }
 
 void MainWindow::on_pushButton_FitAll_clicked()
@@ -362,4 +355,13 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par)
         on_checkBox_c_clicked(1);
     }
 
+}
+
+void MainWindow::on_actionFit_Result_triggered()
+{
+
+    if(fitResultDialog->isHidden()){
+        fitResultDialog->show();
+        fitResultDialog->PlotData();
+    }
 }

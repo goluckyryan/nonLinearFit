@@ -320,7 +320,7 @@ void FileIO::SaveFitResult(Analysis *ana)
         stream << text;
     }
 
-    tmp.sprintf("%5d, %8.4f, ", ana->GetYIndex(), ana->GetBValue());
+    tmp.sprintf("%5d, %8.4f, ", ana->GetYIndex(), ana->GetDataYValue());
     text = tmp;
 
     QVector<double> sol = ana->GetParameters();

@@ -9,6 +9,7 @@
 #include "qcustomplot.h"
 #include "constant.h"
 #include "fileio.h"
+#include "dialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -48,8 +49,11 @@ private slots:
     QVector<double> GetParametersFromLineText();
     void UpdateLineTextParameters(QVector<double> par);
 
+    void on_actionFit_Result_triggered();
+
 private:
     Ui::MainWindow *ui;
+    Dialog * fitResultDialog;
 
     QString Msg;
 
@@ -58,10 +62,6 @@ private:
     Analysis *ana;
 
     bool savedSimplifiedtxt;
-
-    QVector<double> *fitPar;
-    QVector<double> *fitParError;
-    double *SSR;
 
 };
 

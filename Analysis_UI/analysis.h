@@ -73,9 +73,8 @@ public slots:
     double GetDelta(){return delta;}
     double GetLambda(){return lambda;}
     int GetMaxIteration(){return MaxIter;}
-
-    int GetYIndex() {return yIndex;}
-    double GetBValue() {return yValue;}
+    int GetYIndex()    {return yIndex;}
+    double GetDataYValue() {return yValue;}
 
     void Print();
     void PrintVector(QVector<double> vec, QString str);
