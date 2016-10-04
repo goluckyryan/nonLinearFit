@@ -88,7 +88,9 @@ void Dialog::SetAvalibleData(int n)
         ui->checkBox_c->setEnabled(1);
 
         ui->checkBox_b->setChecked(0);
+        on_checkBox_b_clicked(0);
         ui->checkBox_Tb->setChecked(0);
+        on_checkBox_Tb_clicked(0);
 
     }else if( n == 4){
         ui->checkBox_b->setEnabled(1);
@@ -96,6 +98,7 @@ void Dialog::SetAvalibleData(int n)
         ui->checkBox_c->setEnabled(0);
 
         ui->checkBox_c->setChecked(0);
+        on_checkBox_c_clicked(0);
 
     }else if( n == 5){
         ui->checkBox_b->setEnabled(1);
@@ -109,6 +112,10 @@ void Dialog::SetAvalibleData(int n)
         ui->checkBox_b->setChecked(0);
         ui->checkBox_Tb->setChecked(0);
         ui->checkBox_c->setChecked(0);
+
+        on_checkBox_b_clicked(0);
+        on_checkBox_Tb_clicked(0);
+        on_checkBox_c_clicked(0);
     }
 }
 
@@ -128,42 +135,11 @@ void Dialog::PlotData()
 
     //get what to plot
     int plotFlag = 0;
-//    /bool p = ui->checkBox_a->isChecked();
     on_checkBox_a_clicked(ui->checkBox_a->isChecked());
-    //if( ui->checkBox_a->isChecked() ){
-    //    PlotSingleData(0);
-    //}else{
-    //    plot->graph(0)->clearData();
-    //    plot->replot();
-    //}
-
-    if( ui->checkBox_Ta->isChecked() ){
-        PlotSingleData(1);
-    }else{
-        plot->graph(1)->clearData();
-        plot->replot();
-    }
-
-    if( ui->checkBox_b->isChecked() ){
-        PlotSingleData(2);
-    }else{
-        plot->graph(2)->clearData();
-        plot->replot();
-    }
-
-    if( ui->checkBox_Tb->isChecked() ){
-        PlotSingleData(3);
-    }else{
-        plot->graph(3)->clearData();
-        plot->replot();
-    }
-
-    if( ui->checkBox_c->isChecked() ){
-        PlotSingleData(4);
-    }else{
-        plot->graph(4)->clearData();
-        plot->replot();
-    }
+    on_checkBox_Ta_clicked(ui->checkBox_Ta->isChecked());
+    on_checkBox_b_clicked(ui->checkBox_b->isChecked());
+    on_checkBox_Tb_clicked(ui->checkBox_Tb->isChecked());
+    on_checkBox_c_clicked(ui->checkBox_c->isChecked());
 
 }
 
