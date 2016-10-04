@@ -20,25 +20,33 @@ public:
 
     void ClearData();
     void SetDataSize(int n);
+    void SetAvalibleData(int n);
+
     void FillData(Analysis *ana);
 
     bool IsDataSizeFixed(){return fixedSize;}
 
     void PlotData();
+    void PlotSingleData(int plotID);
 
 private slots:
     void on_pushButton_clicked();
+
+    void on_checkBox_a_clicked(bool checked);
+    void on_checkBox_Ta_clicked(bool checked);
+    void on_checkBox_b_clicked(bool checked);
+    void on_checkBox_Tb_clicked(bool checked);
+    void on_checkBox_c_clicked(bool checked);
 
 private:
     Ui::Dialog *ui;
     QCustomPlot * plot;
 
     int dataSize;
+    int parSize;
     QVector<double> *fitPar;
     QVector<double> *fitParError;
     double *SSR;
-
-    double yMin, yMax;
 
     bool fixedSize;
 };

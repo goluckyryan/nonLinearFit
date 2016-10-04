@@ -81,9 +81,9 @@ void MainWindow::on_pushButton_clicked(){
         fileName = fileNames[0];
     }
 
-    ui->lineEdit->setText(fileName);
-
     if(fileName == "") return;
+
+    ui->lineEdit->setText(fileName);
 
     file = new FileIO(fileName);
     connect(file, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
@@ -327,11 +327,39 @@ void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
 {
     ui->lineEdit_b->setEnabled(checked);
     ui->lineEdit_Tb->setEnabled(checked);
+
+    if( checked ){
+        if(ui->checkBox_c->isChecked() ){
+            fitResultDialog->SetAvalibleData(5);
+        }else{
+            fitResultDialog->SetAvalibleData(4);
+        }
+    }else{
+        if(ui->checkBox_c->isChecked() ){
+            fitResultDialog->SetAvalibleData(3);
+        }else{
+            fitResultDialog->SetAvalibleData(2);
+        }
+    }
 }
 
 void MainWindow::on_checkBox_c_clicked(bool checked)
 {
     ui->lineEdit_c->setEnabled(checked);
+
+    if( checked ){
+        if(ui->checkBox_b_Tb->isChecked() ){
+            fitResultDialog->SetAvalibleData(5);
+        }else{
+            fitResultDialog->SetAvalibleData(3);
+        }
+    }else{
+        if(ui->checkBox_b_Tb->isChecked() ){
+            fitResultDialog->SetAvalibleData(4);
+        }else{
+            fitResultDialog->SetAvalibleData(2);
+        }
+    }
 }
 
 QVector<double> MainWindow::GetParametersFromLineText()
