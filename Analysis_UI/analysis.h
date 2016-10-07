@@ -117,7 +117,7 @@ private:
         fit = par[0] * exp(-x/par[1]);          // when a*Exp[t/Ta]
         if( par.size() == 3) fit += par[2];     // when a*Exp[t/Ta] + c
         if( par.size() == 4) fit += par[2] * exp(-x/par[3]); // when a*Exp[t/Ta] + b*Exp[t/Tb]
-        if( par.size() == 5) fit += par[4];     // when a*Exp[t/Ta] + b*Exp[t/Ta] + c
+        if( par.size() == 5) fit += par[2] * exp(-x/par[3]) + par[4];     // when a*Exp[t/Ta] + b*Exp[t/Ta] + c
         return fit;
     }
 
@@ -126,12 +126,17 @@ private:
 
         gradFit.push_back(exp(-x/par[1]));
         gradFit.push_back(par[0] * x* exp(-x/par[1])/par[1]/par[1]);
+        if(par.size() == 3) gradFit.push_back(1); // in case of c
+
         if( par.size() == 4){
             gradFit.push_back(exp(-x/par[3]));
             gradFit.push_back(par[2] * x* exp(-x/par[3])/par[3]/par[3]);
         }
-        if( par.size() == 5 || par.size() == 3) gradFit.push_back(1); // in case of c
-
+        if( par.size() == 5) {
+            gradFit.push_back(exp(-x/par[3]));
+            gradFit.push_back(par[2] * x* exp(-x/par[3])/par[3]/par[3]);
+            gradFit.push_back(1); // in case of c
+        }
         return gradFit;
     }
 

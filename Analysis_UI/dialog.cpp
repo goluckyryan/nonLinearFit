@@ -11,6 +11,8 @@ Dialog::Dialog(QWidget *parent) :
     ui->setupUi(this);
     plot = ui->widget;
 
+    parSize = 4; // initial value
+
     //set plot interaction
     plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
@@ -47,23 +49,21 @@ Dialog::~Dialog()
 {
     delete ui;
     delete plot;
-    if( fitPar != NULL) delete fitPar;
-    if( fitParError != NULL) delete fitParError;
+    if( fitPar != NULL) delete [] fitPar;
+    if( fitParError != NULL) delete [] fitParError;
     if( SSR != NULL) delete SSR;
 }
 
 void Dialog::ClearData()
 {
     fixedSize = 0;
-    if( fitPar != NULL) delete fitPar;
-    if( fitParError != NULL) delete fitParError;
+    if( fitPar != NULL) delete [] fitPar;
+    if( fitParError != NULL) delete [] fitParError;
     if( SSR != NULL) delete SSR;
 
     fitPar = NULL;
     fitParError = NULL;
     SSR = NULL;
-
-    parSize = 4;
 
 }
 
@@ -77,11 +77,18 @@ void Dialog::SetDataSize(int n)
     SSR = new double [n];
 
     fixedSize = 1;
+
+    QString msg;
+    msg.sprintf("Initaliate fitPar array. size : %d", n);
+    SendMsg(msg);
 }
 
 void Dialog::SetAvalibleData(int n)
 {
-    parSize = n;
+    this->parSize = n;
+    QString msg;
+    msg.sprintf("parSize: %d", parSize);
+    SendMsg(msg);
     if( n == 3){
         ui->checkBox_b->setEnabled(0);
         ui->checkBox_Tb->setEnabled(0);
@@ -122,11 +129,10 @@ void Dialog::SetAvalibleData(int n)
 void Dialog::FillData(Analysis *ana)
 {
     int yIndex = ana->GetYIndex();
+    this->parSize = ana->GetParametersSize(); // safty
     fitPar[yIndex] = ana->GetParameters();
     fitParError[yIndex] = ana->GetParError();
     SSR[yIndex] = ana->GetSSR();
-
-    //qDebug() << fitPar[yIndex];
 }
 
 void Dialog::PlotData()
@@ -134,7 +140,6 @@ void Dialog::PlotData()
     if( fixedSize == 0) return;
 
     //get what to plot
-    int plotFlag = 0;
     on_checkBox_a_clicked(ui->checkBox_a->isChecked());
     on_checkBox_Ta_clicked(ui->checkBox_Ta->isChecked());
     on_checkBox_b_clicked(ui->checkBox_b->isChecked());
@@ -171,7 +176,7 @@ void Dialog::PlotSingleData(int plotID){
     }
 
     plot->graph(plotID)->setDataValueError(x,y, ye);
-    plot->xAxis->setRange(x[0],x[dataSize-1]);
+    plot->xAxis->setRange(x[0], x[dataSize-1]);
     plot->graph(plotID)->rescaleAxes(true);
     plot->replot();
 

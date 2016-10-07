@@ -53,6 +53,8 @@ private slots:
 
     void on_checkBox_b_Tb_clicked(bool checked);
 
+    void on_lineEdit_c_returnPressed();
+
 private:
     Ui::MainWindow *ui;
     Dialog * fitResultDialog;

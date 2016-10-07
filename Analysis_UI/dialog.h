@@ -29,6 +29,9 @@ public:
     void PlotData();
     void PlotSingleData(int plotID);
 
+signals:
+    void SendMsg(QString str);
+
 private slots:
     void on_pushButton_clicked();
 

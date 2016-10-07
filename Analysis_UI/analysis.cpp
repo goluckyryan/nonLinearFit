@@ -96,7 +96,7 @@ int Analysis::Regression(QVector<double> par0)
         double x = xdata[i + xStart - 1];
         f(i,1) = FitFunc(x, par0);
         QVector<double> gradf = GradFitFunc(x, par0);
-        for(int j = 1; j <= p; j++){
+        for(int j = 1; j <= this->p; j++){
             F(i,j) = gradf[j-1];
         }
     }

@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     fitResultDialog = new Dialog(this);
+    connect(fitResultDialog, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     savedSimplifiedtxt = 0;
 
@@ -120,6 +121,7 @@ void MainWindow::on_pushButton_clicked(){
 
     //Reset Data in fitResultDialog
     fitResultDialog->ClearData();
+    fitResultDialog->SetDataSize(file->GetDataSetSize());
 
 }
 
@@ -189,7 +191,10 @@ void MainWindow::on_lineEdit_b_returnPressed(){
 void MainWindow::on_lineEdit_Tb_returnPressed(){
     PlotFitFunc();
 }
-
+void MainWindow::on_lineEdit_c_returnPressed()
+{
+    PlotFitFunc();
+}
 
 
 void MainWindow::on_pushButton_Fit_clicked(){
@@ -244,13 +249,6 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     PlotFitFunc();
 
-    //ana->Print();
-
-    //initialize fitPar and fitParError in FitDialog;
-    if( fitResultDialog->IsDataSizeFixed() == 0){
-        fitResultDialog->SetDataSize(file->GetDataSetSize());
-    }
-
     fitResultDialog->FillData(ana);
     fitResultDialog->PlotData();
 
@@ -299,7 +297,7 @@ void MainWindow::on_pushButton_FitAll_clicked()
         on_spinBox_y_valueChanged(yIndex);
         on_pushButton_Fit_clicked();
         PlotFitFunc();
-        Sleep(500);
+        //Sleep(500);
         str.sprintf("Fitting #%d / %d , saved %d", yIndex + 1, n, count + 1);
         progress.setLabelText(str);
         progress.setValue(yIndex);
@@ -328,6 +326,9 @@ void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
     ui->lineEdit_b->setEnabled(checked);
     ui->lineEdit_Tb->setEnabled(checked);
 
+    //fitResultDialog->ClearData();
+    //fitResultDialog->SetDataSize(file->GetDataSetSize());
+
     if( checked ){
         if(ui->checkBox_c->isChecked() ){
             fitResultDialog->SetAvalibleData(5);
@@ -341,12 +342,16 @@ void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
             fitResultDialog->SetAvalibleData(2);
         }
     }
+
 }
 
 void MainWindow::on_checkBox_c_clicked(bool checked)
 {
     ui->lineEdit_c->setEnabled(checked);
 
+    //fitResultDialog->ClearData();
+    //fitResultDialog->SetDataSize(file->GetDataSetSize());
+
     if( checked ){
         if(ui->checkBox_b_Tb->isChecked() ){
             fitResultDialog->SetAvalibleData(5);
@@ -360,6 +365,7 @@ void MainWindow::on_checkBox_c_clicked(bool checked)
             fitResultDialog->SetAvalibleData(2);
         }
     }
+
 }
 
 QVector<double> MainWindow::GetParametersFromLineText()
@@ -385,11 +391,13 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par)
     if( par.size() == 3){
         ui->lineEdit_c->setText(QString::number(par[2]));
     }
-    if( par.size() == 4){
+    if( par.size() == 4 ){
         ui->lineEdit_b ->setText(QString::number(par[2]));
         ui->lineEdit_Tb->setText(QString::number(par[3]));
     }
     if( par.size()== 5){
+        ui->lineEdit_b ->setText(QString::number(par[2]));
+        ui->lineEdit_Tb->setText(QString::number(par[3]));
         ui->lineEdit_c->setText(QString::number(par[4]));
     }
 
