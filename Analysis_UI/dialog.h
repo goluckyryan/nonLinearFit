@@ -33,13 +33,14 @@ signals:
     void SendMsg(QString str);
 
 private slots:
-    void on_pushButton_clicked();
 
     void on_checkBox_a_clicked(bool checked);
     void on_checkBox_Ta_clicked(bool checked);
     void on_checkBox_b_clicked(bool checked);
     void on_checkBox_Tb_clicked(bool checked);
     void on_checkBox_c_clicked(bool checked);
+
+    void on_checkBox_abc_clicked(bool checked);
 
 private:
     Ui::Dialog *ui;

@@ -22,8 +22,8 @@ Dialog::Dialog(QWidget *parent) :
     //set yaxis label
     plot->xAxis->setLabel("yIndex");
 
-    //set 5 plots.
-    for(int i = 0; i < 5 ; i++) {
+    //set 7 plots.
+    for(int i = 0; i < 7 ; i++) {
         plot->addGraph();
         plot->graph(i)->setLineStyle(QCPGraph::lsNone);
         plot->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle , 3));
@@ -32,15 +32,20 @@ Dialog::Dialog(QWidget *parent) :
 
     //set plot color
     plot->graph(0)->setPen(QPen(Qt::blue));
-    plot->graph(1)->setPen(QPen(Qt::red));
+    plot->graph(1)->setPen(QPen(Qt::cyan));
     plot->graph(2)->setPen(QPen(Qt::green));
     plot->graph(3)->setPen(QPen(Qt::magenta));
     plot->graph(4)->setPen(QPen(Qt::darkYellow ));
+    plot->graph(5)->setPen(QPen(Qt::red ));
+    plot->graph(6)->setPen(QPen(Qt::darkGreen ));
+
     plot->graph(0)->setErrorPen(QPen(Qt::blue));
-    plot->graph(1)->setErrorPen(QPen(Qt::red));
+    plot->graph(1)->setErrorPen(QPen(Qt::cyan));
     plot->graph(2)->setErrorPen(QPen(Qt::green));
     plot->graph(3)->setErrorPen(QPen(Qt::magenta));
     plot->graph(4)->setErrorPen(QPen(Qt::darkYellow));
+    plot->graph(5)->setErrorPen(QPen(Qt::red));
+    plot->graph(6)->setErrorPen(QPen(Qt::darkGreen));
 
     fixedSize = 0;
 }
@@ -145,6 +150,7 @@ void Dialog::PlotData()
     on_checkBox_b_clicked(ui->checkBox_b->isChecked());
     on_checkBox_Tb_clicked(ui->checkBox_Tb->isChecked());
     on_checkBox_c_clicked(ui->checkBox_c->isChecked());
+    on_checkBox_abc_clicked(ui->checkBox_abc->isChecked());
 
 }
 
@@ -180,11 +186,6 @@ void Dialog::PlotSingleData(int plotID){
     plot->graph(plotID)->rescaleAxes(true);
     plot->replot();
 
-}
-
-void Dialog::on_pushButton_clicked()
-{
-    PlotData();
 }
 
 void Dialog::on_checkBox_a_clicked(bool checked)
@@ -240,4 +241,41 @@ void Dialog::on_checkBox_c_clicked(bool checked)
         plot->graph(4)->clearData();
     }
     plot->replot();
+}
+
+void Dialog::on_checkBox_abc_clicked(bool checked)
+{
+    if( fixedSize == 0 ) return;
+    if( parSize < 3 ) return;
+
+    if(checked){
+
+        QVector<double> x, y, ye;
+        for(int i = 0; i < dataSize; i++){
+            x.push_back(i);
+            if( fitPar[i].size() != parSize){
+                y.push_back(0);
+                ye.push_back(0);
+            }else{
+                double a = fitPar[i][0];
+                double b = 0; if( parSize == 4) b = fitPar[i][2];
+                double c = 0; if( parSize == 5) c = fitPar[i][4];
+                double ea = fitParError[i][0];
+                double eb = 0; if( parSize == 4) eb = fitParError[i][2];
+                double ec = 0; if( parSize == 5) ec = fitParError[i][4];
+                double ee = sqrt(ea*ea + eb*eb + ec*ec);
+                y.push_back(a+b+c);
+                ye.push_back(ee);
+            }
+        }
+
+        plot->graph(5)->setDataValueError(x,y, ye);
+        plot->xAxis->setRange(x[0], x[dataSize-1]);
+        plot->graph(5)->rescaleAxes(true);
+
+    }else{
+        plot->graph(5)->clearData();
+    }
+    plot->replot();
+
 }
