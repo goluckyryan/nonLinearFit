@@ -3,7 +3,9 @@
 
 #include <QDialog>
 #include <QVector>
+#include <QFile>
 #include "qcustomplot.h"
+#include "constant.h"
 #include "analysis.h"
 
 namespace Ui {
@@ -39,8 +41,12 @@ private slots:
     void on_checkBox_b_clicked(bool checked);
     void on_checkBox_Tb_clicked(bool checked);
     void on_checkBox_c_clicked(bool checked);
-
     void on_checkBox_abc_clicked(bool checked);
+    void on_checkBox_SSR_clicked(bool checked);
+
+
+    void on_pushButton_Save_clicked();
+    void on_pushButton_ResetScale_clicked();
 
 private:
     Ui::Dialog *ui;

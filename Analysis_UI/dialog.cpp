@@ -137,7 +137,8 @@ void Dialog::FillData(Analysis *ana)
     this->parSize = ana->GetParametersSize(); // safty
     fitPar[yIndex] = ana->GetParameters();
     fitParError[yIndex] = ana->GetParError();
-    SSR[yIndex] = ana->GetSSR();
+    int nDF = ana->GetNDF();
+    SSR[yIndex] = ana->GetSSR()/nDF;
 }
 
 void Dialog::PlotData()
@@ -151,6 +152,7 @@ void Dialog::PlotData()
     on_checkBox_Tb_clicked(ui->checkBox_Tb->isChecked());
     on_checkBox_c_clicked(ui->checkBox_c->isChecked());
     on_checkBox_abc_clicked(ui->checkBox_abc->isChecked());
+    on_checkBox_SSR_clicked(ui->checkBox_SSR->isChecked());
 
 }
 
@@ -258,13 +260,21 @@ void Dialog::on_checkBox_abc_clicked(bool checked)
                 ye.push_back(0);
             }else{
                 double a = fitPar[i][0];
-                double b = 0; if( parSize == 4) b = fitPar[i][2];
-                double c = 0; if( parSize == 5) c = fitPar[i][4];
+                double b = 0;
+                if( parSize >= 4) b = fitPar[i][2];
+                double c = 0;
+                if( parSize == 3) c = fitPar[i][2];
+                if( parSize == 5) c = fitPar[i][4];
+
                 double ea = fitParError[i][0];
-                double eb = 0; if( parSize == 4) eb = fitParError[i][2];
-                double ec = 0; if( parSize == 5) ec = fitParError[i][4];
+                double eb = 0;
+                if( parSize >= 4) eb = fitParError[i][2];
+                double ec = 0;
+                if( parSize == 3) ec = fitParError[i][2];
+                if( parSize == 5) ec = fitParError[i][4];
+
                 double ee = sqrt(ea*ea + eb*eb + ec*ec);
-                y.push_back(a+b+c);
+                y.push_back(a+b-c);
                 ye.push_back(ee);
             }
         }
@@ -278,4 +288,108 @@ void Dialog::on_checkBox_abc_clicked(bool checked)
     }
     plot->replot();
 
+}
+
+void Dialog::on_checkBox_SSR_clicked(bool checked)
+{
+    if( fixedSize == 0 ) return;
+    if(checked){
+
+        QVector<double> x, y;
+        for(int i = 0; i < dataSize; i++){
+            x.push_back(i);
+            if( fitPar[i].size() != parSize){
+                y.push_back(0);
+            }else{
+                y.push_back(SSR[i]);
+            }
+        }
+
+        plot->graph(6)->setData(x,y);
+        plot->xAxis->setRange(x[0], x[dataSize-1]);
+        plot->graph(6)->rescaleAxes(true);
+
+    }else{
+        plot->graph(6)->clearData();
+    }
+    plot->replot();
+}
+
+void Dialog::on_pushButton_Save_clicked()
+{
+    if( fixedSize == 0 ) return;
+
+    return;
+
+    //TODO need to fix fitPar.size == 0
+
+    QString filename = OPENPATH;
+    filename += "save.txt";
+    QFile savefile(filename);
+
+    QTextStream stream(&savefile);
+
+    QString lineout, tmp;
+
+    //1st line
+    lineout.sprintf("%10s, ", "y-index");
+    tmp.sprintf("%10s, %10s, %10s, %10s, %10s, ", "a", "Ta", "b", "Tb", "c");
+    lineout += tmp;
+    tmp.sprintf("%10s, %10s, %10s, %10s, %10s, ", "s(a)", "s(Ta)", "s(b)", "s(Tb)", "s(c)");
+    lineout += tmp;
+    tmp.sprintf("%10s \n", "SSR");
+    lineout += tmp;
+
+    stream << lineout;
+
+    //data
+    for(int i = 0 ; i < dataSize ; i++){
+        lineout.sprintf("%10d, ", i);
+        if( fitPar->size() == parSize){
+        tmp.sprintf("%10.3f, ", fitPar[i][0]); lineout += tmp;
+        tmp.sprintf("%10.3f, ", fitPar[i][1]); lineout += tmp;
+        if( parSize == 3) {
+            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
+            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
+            tmp.sprintf("%10.3f, ", fitPar[i][2]); lineout += tmp;
+        }
+        if( parSize == 4) {
+            tmp.sprintf("%10.3f, ", fitPar[i][2]); lineout += tmp;
+            tmp.sprintf("%10.3f, ", fitPar[i][3]); lineout += tmp;
+            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
+        }
+        if( parSize == 5) {
+            tmp.sprintf("%10.3f, ", fitPar[i][2]); lineout += tmp;
+            tmp.sprintf("%10.3f, ", fitPar[i][3]); lineout += tmp;
+            tmp.sprintf("%10.3f, ", fitPar[i][4]); lineout += tmp;
+        }
+
+        tmp.sprintf("%10.3f, ", fitParError[i][0]); lineout += tmp;
+        tmp.sprintf("%10.3f, ", fitParError[i][1]); lineout += tmp;
+        if( parSize == 3) {
+            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
+            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
+            tmp.sprintf("%10.3f, ", fitParError[i][2]); lineout += tmp;
+        }
+        if( parSize == 4) {
+            tmp.sprintf("%10.3f, ", fitParError[i][2]); lineout += tmp;
+            tmp.sprintf("%10.3f, ", fitParError[i][3]); lineout += tmp;
+            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
+        }
+        if( parSize == 5) {
+            tmp.sprintf("%10.3f, ", fitParError[i][2]); lineout += tmp;
+            tmp.sprintf("%10.3f, ", fitParError[i][3]); lineout += tmp;
+            tmp.sprintf("%10.3f, ", fitParError[i][4]); lineout += tmp;
+        }
+
+        tmp.sprintf("%10.3f \n", SSR[i]); lineout += tmp;
+        }
+        stream << lineout;
+    }
+}
+
+void Dialog::on_pushButton_ResetScale_clicked()
+{
+    plot->yAxis->setRange(-60,60);
+    plot->replot();
 }

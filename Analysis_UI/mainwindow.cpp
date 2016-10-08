@@ -116,7 +116,7 @@ void MainWindow::on_pushButton_clicked(){
     ui->spinBox_x->setMaximum(file->GetDataSize()-1);
 
     on_spinBox_y_valueChanged(104);
-    int xIndex = ana->FindstartIndex(4);
+    int xIndex = ana->FindstartIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
 
     //Reset Data in fitResultDialog
@@ -217,7 +217,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     //ana->Print();
     ana->Setlambda(lambda);
     ana->SetMaxInteration(maxIter);
-    int x1 = ana->FindstartIndex(-3);
+    int x1 = ana->FindstartIndex(TIME2);
     ana->MeanAndvariance(0, x1);
     ana->NonLinearFit(par, gnu);
 
