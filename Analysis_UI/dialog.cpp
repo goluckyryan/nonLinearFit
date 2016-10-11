@@ -20,9 +20,9 @@ Dialog::Dialog(QWidget *parent) :
     plot->axisRect()->setRangeZoom(Qt::Vertical);
 
     //set xaxis label
-    plot->xAxis->setLabel("yIndex");
+    plot->xAxis->setLabel("y-Value");
     plot->xAxis2->setVisible(true);
-    plot->xAxis2->setLabel("yValue");
+    plot->xAxis2->setLabel("y-Index");
 
     //set 7 plots.
     for(int i = 0; i < 7 ; i++) {
@@ -85,7 +85,8 @@ void Dialog::SetDataSize(FileIO *file)
     fitParError = new QVector<double> [n];
     SSR = new double [n];
     yValue = file->GetDataSetY();
-    plot->xAxis2->setRange(yValue[0], yValue[n-1]);
+    plot->xAxis->setRange(yValue[0], yValue[n-1]);
+    plot->xAxis2->setRange(0,n-1);
 
     fixedSize = 1;
 
@@ -174,13 +175,13 @@ void Dialog::PlotSingleData(int plotID){
 
     QVector<double> x, y, ye;
     for(int i = 0; i < dataSize; i++){
-        x.push_back(i);
+        x.push_back(yValue[i]);
         y.push_back(fitPar[i][plotID]);
         ye.push_back(fitParError[i][plotID]);
     }
 
     plot->graph(plotID)->setDataValueError(x,y, ye);
-    plot->xAxis->setRange(x[0], x[dataSize-1]);
+    //plot->xAxis->setRange(x[0], x[dataSize-1]);
     plot->graph(plotID)->rescaleAxes(true);
     plot->replot();
 
