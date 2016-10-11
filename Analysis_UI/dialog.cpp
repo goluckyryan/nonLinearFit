@@ -238,7 +238,6 @@ void Dialog::on_checkBox_c_clicked(bool checked)
 void Dialog::on_checkBox_abc_clicked(bool checked)
 {
     if( fixedSize == 0 ) return;
-    if( parSize < 3 ) return;
 
     if(checked){
 
@@ -319,7 +318,7 @@ void Dialog::on_pushButton_Save_clicked()
     lineout += tmp;
     tmp.sprintf("%10s, %10s, %10s, %10s, %10s, ", "s(a)", "s(Ta)", "s(b)", "s(Tb)", "s(c)");
     lineout += tmp;
-    tmp.sprintf("%10s \n", "SSR");
+    tmp.sprintf("%10s \n", "SSR/ndf");
     lineout += tmp;
 
     stream << lineout;
