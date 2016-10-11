@@ -26,6 +26,11 @@ public:
     void Plot(int graphID, QVector<double> x, QVector<double> y, double xMin, double xMax, double yMin, double yMax);
     void PlotFitFunc();
 
+    QVector<double> GetParametersFromLineText();
+    void UpdateLineTextParameters(QVector<double> par);
+
+    void PlotContour();
+
 private slots:
     void Write2Log(QString str);
 
@@ -38,22 +43,17 @@ private slots:
     void on_lineEdit_Ta_returnPressed();
     void on_lineEdit_b_returnPressed();
     void on_lineEdit_Tb_returnPressed();
+    void on_lineEdit_c_returnPressed();
 
     void on_pushButton_Fit_clicked();
     void on_pushButton_reset_clicked();
     void on_pushButton_save_clicked();
     void on_pushButton_FitAll_clicked();
 
+    void on_checkBox_b_Tb_clicked(bool checked);
     void on_checkBox_c_clicked(bool checked);
 
-    QVector<double> GetParametersFromLineText();
-    void UpdateLineTextParameters(QVector<double> par);
-
     void on_actionFit_Result_triggered();
-
-    void on_checkBox_b_Tb_clicked(bool checked);
-
-    void on_lineEdit_c_returnPressed();
 
 private:
     Ui::MainWindow *ui;
@@ -62,6 +62,7 @@ private:
     QString Msg;
 
     QCustomPlot *plot;
+    QCustomPlot *ctplot;
     FileIO *file;
     Analysis *ana;
 

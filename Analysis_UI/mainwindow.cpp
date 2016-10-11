@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     savedSimplifiedtxt = 0;
 
     plot = ui->customPlot;
+    ctplot = ui->customPlot_CT;
 
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
@@ -118,6 +119,8 @@ void MainWindow::on_pushButton_clicked(){
     on_spinBox_y_valueChanged(104);
     int xIndex = ana->FindstartIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
+
+    PlotContour();
 
     //Reset Data in fitResultDialog
     fitResultDialog->ClearData();
@@ -401,6 +404,50 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par)
         ui->lineEdit_c->setText(QString::number(par[4]));
     }
 
+}
+
+void MainWindow::PlotContour()
+{
+    ctplot->axisRect()->setupFullAxesBox(true);
+    ctplot->xAxis->setLabel("time [us]");
+    ctplot->yAxis->setLabel("y-Value");
+
+    QCPColorMap *colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
+    int nx = file->GetDataSize();
+    int ny = file->GetDataSetSize();
+    colorMap->data()->setSize(nx, ny);
+
+    double xMin = file->GetXMin();
+    double xMax = file->GetXMax();
+    double yMin = file->GetYMin();
+    double yMax = file->GetYMax();
+    ctplot->xAxis->setRange(xMin, xMax);
+    ctplot->yAxis->setRange(yMin, yMax);
+    colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
+
+    for(int xIndex = 0; xIndex < nx; xIndex++){
+        for(int yIndex = 0; yIndex < ny; yIndex++){
+            double z = file->GetDataZ(xIndex, yIndex);
+            colorMap->data()->setCell(xIndex, yIndex, z); // fill data
+        }
+    }
+
+    QCPColorScale *colorScale = new QCPColorScale(ctplot);
+    ctplot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    colorMap->setColorScale(colorScale); // associate the color map with the color scale
+
+    colorMap->setGradient(QCPColorGradient::gpHues ); //color scheme
+
+    colorMap->rescaleDataRange();
+
+    QCPMarginGroup *marginGroup = new QCPMarginGroup(ctplot);
+    ctplot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+
+    ctplot->rescaleAxes();
+
+    ctplot->replot();
 }
 
 void MainWindow::on_actionFit_Result_triggered()
