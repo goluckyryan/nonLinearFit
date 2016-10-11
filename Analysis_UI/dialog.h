@@ -7,6 +7,7 @@
 #include "qcustomplot.h"
 #include "constant.h"
 #include "analysis.h"
+#include "fileio.h"
 
 namespace Ui {
 class Dialog;
@@ -21,7 +22,7 @@ public:
     ~Dialog();
 
     void ClearData();
-    void SetDataSize(int n);
+    void SetDataSize(FileIO *file);
     void SetAvalibleData(int n);
 
     void FillData(Analysis *ana);
@@ -54,6 +55,7 @@ private:
 
     int dataSize;
     int parSize;
+    QVector<double> yValue;
     QVector<double> *fitPar;
     QVector<double> *fitParError;
     double *SSR;

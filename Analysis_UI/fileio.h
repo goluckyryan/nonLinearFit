@@ -37,6 +37,7 @@ public slots:
     int GetDataSize(){ return xData.size();}
     int GetDataSetSize() {return yData.size();}
     QVector<double> GetDataSetZ(int yIndex){return zData[yIndex];}
+    QVector<double> GetDataSetY(){return yData;}
     QVector<double> GetDataSetX(){return xData;}
     double GetDataZ(int xIndex, int yIndex){return zData[yIndex][xIndex];}
     double GetDataX(int xIndex){ return xData[xIndex];}

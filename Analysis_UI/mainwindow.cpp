@@ -124,7 +124,7 @@ void MainWindow::on_pushButton_clicked(){
 
     //Reset Data in fitResultDialog
     fitResultDialog->ClearData();
-    fitResultDialog->SetDataSize(file->GetDataSetSize());
+    fitResultDialog->SetDataSize(file);
 
 }
 
