@@ -31,6 +31,7 @@ public:
     void PlotData();
     void PlotSingleData(int plotID);
 
+    QVector<double> ReSizeVector(QVector<double> vec);
 signals:
     void SendMsg(QString str);
 
@@ -43,7 +44,6 @@ private slots:
     void on_checkBox_c_clicked(bool checked);
     void on_checkBox_abc_clicked(bool checked);
     void on_checkBox_SSR_clicked(bool checked);
-
 
     void on_pushButton_Save_clicked();
     void on_pushButton_ResetScale_clicked();

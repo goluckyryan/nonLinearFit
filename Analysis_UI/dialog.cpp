@@ -83,6 +83,13 @@ void Dialog::SetDataSize(int n)
 
     fixedSize = 1;
 
+    QVector<double> temp(5);
+    for(int i = 0; i < n; i++){
+        fitPar[i] = temp;
+        fitParError[i] = temp;
+        SSR[i] = 0;
+    }
+
     QString msg;
     msg.sprintf("Initaliate fitPar array. size : %d", n);
     SendMsg(msg);
@@ -135,8 +142,8 @@ void Dialog::FillData(Analysis *ana)
 {
     int yIndex = ana->GetYIndex();
     this->parSize = ana->GetParametersSize(); // safty
-    fitPar[yIndex] = ana->GetParameters();
-    fitParError[yIndex] = ana->GetParError();
+    fitPar[yIndex] = ReSizeVector(ana->GetParameters());
+    fitParError[yIndex] = ReSizeVector(ana->GetParError());
     int nDF = ana->GetNDF();
     SSR[yIndex] = ana->GetSSR()/nDF;
 }
@@ -159,28 +166,11 @@ void Dialog::PlotData()
 void Dialog::PlotSingleData(int plotID){
     // plotID, 1 = a, 2 = Ta, 3 = b, 4 = Tb, 5 = c
 
-    int index = plotID;
-    if( plotID == 2 || plotID == 3){ // plot b or Tb
-        if( parSize == 2) return; // coz no b
-        if( parSize == 3) return; // only a , Ta, c
-        if( parSize == 4 || parSize == 5) index = plotID;
-    }else if(plotID == 4){ // plat c
-        if( parSize == 2) return;
-        if( parSize == 3) index = 2;
-        if( parSize == 4) return;
-        if( parSize == 5) index = 4;
-    }
-
     QVector<double> x, y, ye;
     for(int i = 0; i < dataSize; i++){
         x.push_back(i);
-        if( fitPar[i].size() != parSize){
-            y.push_back(0);
-            ye.push_back(0);
-        }else{
-            y.push_back(fitPar[i][index]);
-            ye.push_back(fitParError[i][index]);
-        }
+        y.push_back(fitPar[i][plotID]);
+        ye.push_back(fitParError[i][plotID]);
     }
 
     plot->graph(plotID)->setDataValueError(x,y, ye);
@@ -255,28 +245,18 @@ void Dialog::on_checkBox_abc_clicked(bool checked)
         QVector<double> x, y, ye;
         for(int i = 0; i < dataSize; i++){
             x.push_back(i);
-            if( fitPar[i].size() != parSize){
-                y.push_back(0);
-                ye.push_back(0);
-            }else{
-                double a = fitPar[i][0];
-                double b = 0;
-                if( parSize >= 4) b = fitPar[i][2];
-                double c = 0;
-                if( parSize == 3) c = fitPar[i][2];
-                if( parSize == 5) c = fitPar[i][4];
 
-                double ea = fitParError[i][0];
-                double eb = 0;
-                if( parSize >= 4) eb = fitParError[i][2];
-                double ec = 0;
-                if( parSize == 3) ec = fitParError[i][2];
-                if( parSize == 5) ec = fitParError[i][4];
+            double a = fitPar[i][0];
+            double b = fitPar[i][2];
+            double c = fitPar[i][4];
+            double ea = fitParError[i][0];
+            double eb = fitParError[i][2];
+            double ec = fitParError[i][4];
 
-                double ee = sqrt(ea*ea + eb*eb + ec*ec);
-                y.push_back(a+b-c);
-                ye.push_back(ee);
-            }
+            double ee = sqrt(ea*ea + eb*eb + ec*ec);
+            y.push_back(a+b-c);
+            ye.push_back(ee);
+
         }
 
         plot->graph(5)->setDataValueError(x,y, ye);
@@ -319,13 +299,15 @@ void Dialog::on_pushButton_Save_clicked()
 {
     if( fixedSize == 0 ) return;
 
-    return;
-
-    //TODO need to fix fitPar.size == 0
-
     QString filename = OPENPATH;
     filename += "save.txt";
     QFile savefile(filename);
+
+    savefile.open(QIODevice::WriteOnly);
+
+    QString msg;
+    msg.sprintf("Saving all to : %s", filename.toStdString().c_str());
+    SendMsg(msg);
 
     QTextStream stream(&savefile);
 
@@ -345,51 +327,62 @@ void Dialog::on_pushButton_Save_clicked()
     //data
     for(int i = 0 ; i < dataSize ; i++){
         lineout.sprintf("%10d, ", i);
-        if( fitPar->size() == parSize){
-        tmp.sprintf("%10.3f, ", fitPar[i][0]); lineout += tmp;
-        tmp.sprintf("%10.3f, ", fitPar[i][1]); lineout += tmp;
-        if( parSize == 3) {
-            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
-            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
-            tmp.sprintf("%10.3f, ", fitPar[i][2]); lineout += tmp;
-        }
-        if( parSize == 4) {
-            tmp.sprintf("%10.3f, ", fitPar[i][2]); lineout += tmp;
-            tmp.sprintf("%10.3f, ", fitPar[i][3]); lineout += tmp;
-            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
-        }
-        if( parSize == 5) {
-            tmp.sprintf("%10.3f, ", fitPar[i][2]); lineout += tmp;
-            tmp.sprintf("%10.3f, ", fitPar[i][3]); lineout += tmp;
-            tmp.sprintf("%10.3f, ", fitPar[i][4]); lineout += tmp;
-        }
 
-        tmp.sprintf("%10.3f, ", fitParError[i][0]); lineout += tmp;
-        tmp.sprintf("%10.3f, ", fitParError[i][1]); lineout += tmp;
-        if( parSize == 3) {
-            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
-            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
-            tmp.sprintf("%10.3f, ", fitParError[i][2]); lineout += tmp;
+        for(int j = 0; j < 5; j++){
+            tmp.sprintf("%10.3f, ", fitPar[i][j]); lineout += tmp;
         }
-        if( parSize == 4) {
-            tmp.sprintf("%10.3f, ", fitParError[i][2]); lineout += tmp;
-            tmp.sprintf("%10.3f, ", fitParError[i][3]); lineout += tmp;
-            tmp.sprintf("%10s, ", "NaN"); lineout += tmp;
-        }
-        if( parSize == 5) {
-            tmp.sprintf("%10.3f, ", fitParError[i][2]); lineout += tmp;
-            tmp.sprintf("%10.3f, ", fitParError[i][3]); lineout += tmp;
-            tmp.sprintf("%10.3f, ", fitParError[i][4]); lineout += tmp;
+        for(int j = 0; j < 5; j++){
+            tmp.sprintf("%10.3f, ", fitParError[i][j]); lineout += tmp;
         }
 
         tmp.sprintf("%10.3f \n", SSR[i]); lineout += tmp;
-        }
+
         stream << lineout;
     }
+
+    savefile.close();
 }
 
 void Dialog::on_pushButton_ResetScale_clicked()
 {
     plot->yAxis->setRange(-60,60);
     plot->replot();
+}
+
+QVector<double> Dialog::ReSizeVector(QVector<double> vec){
+    int vecSize = vec.size();
+    QVector<double> out(5);
+
+    if( vecSize != parSize ) return out;
+
+    out.clear();
+
+    if( vecSize == 2){
+        out = vec;
+        out.push_back(0);
+        out.push_back(0);
+        out.push_back(0);
+    }
+
+    if( vecSize == 3){
+        out.push_back(vec[0]);
+        out.push_back(vec[1]);
+        out.push_back(0);
+        out.push_back(0);
+        out.push_back(vec[2]);
+    }
+
+    if( vecSize == 4){
+        out.push_back(vec[0]);
+        out.push_back(vec[1]);
+        out.push_back(vec[2]);
+        out.push_back(vec[3]);
+        out.push_back(0);
+    }
+
+    if( vecSize == 5){
+        out = vec;
+    }
+
+    return out;
 }
