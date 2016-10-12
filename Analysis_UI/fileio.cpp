@@ -33,7 +33,7 @@ void FileIO::Initialize(){
 
 FileIO::~FileIO(){
     delete myfile;
-    //if( zData != NULL ) delete zData;
+    if( zData != NULL ) delete [] zData;
 }
 
 void FileIO::OpenSaveFile(){
@@ -73,7 +73,7 @@ void FileIO::OpenCSVData(){
         return;
     }
 
-    zData = new QVector<double> [xSize];
+    zData = new QVector<double> [ySize];
     double ** z ;
     z = new double *[ySize];
     for(int i = 0; i < ySize; i++){
@@ -81,12 +81,13 @@ void FileIO::OpenCSVData(){
     }
 
     //get data
+    yData.clear();
+    xData.clear();
     myfile->seek(0);
     int rows = 0;
-    while(stream.readLineInto(&line)){
+    while(stream.readLineInto(&line) && rows <= xSize+1){
         rows ++;
         QStringList lineList = line.split(",");
-
         if( rows == 1){ // get yDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1) {
@@ -110,6 +111,7 @@ void FileIO::OpenCSVData(){
     zMin = z[0][0];
     zMax = z[0][0];
     for( int j = 0; j < ySize ; j ++){
+        zData[j].clear();
         for(int i = 0; i < xSize ; i++){
             zData[j].push_back(z[j][i]);
             if( z[j][i] > zMax) zMax = z[j][i];
@@ -169,7 +171,7 @@ void FileIO::OpenTxtData_col()
     }
 
     // get Data
-    zData = new QVector<double> [xSize];
+    zData = new QVector<double> [ySize];
     double ** z ;
     z = new double *[ySize];
     for(int i = 0; i < ySize; i++){
@@ -181,7 +183,6 @@ void FileIO::OpenTxtData_col()
     while(stream.readLineInto(&line)){
         rows ++;
         QStringList lineList = line.split(",");
-
         if( rows == 1){ // get xDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 double temp = ExtractYValue(lineList[i]);
@@ -201,6 +202,7 @@ void FileIO::OpenTxtData_col()
     zMin = z[0][0];
     zMax = z[0][0];
     for( int j = 0; j < ySize ; j ++){
+        zData[j].clear();
         for(int i = 0; i < xSize ; i++){
             zData[j].push_back(z[j][i]);
             if( z[j][i] > zMax) zMax = z[j][i];
@@ -255,6 +257,8 @@ void FileIO::OpenTxtData_row(){
         SendMsg("!!!! Invalide file structure.");
         return;
     }
+
+    zData = new QVector<double> [ySize];
 
     // get Data
     myfile->seek(0);
