@@ -125,7 +125,7 @@ void MainWindow::on_pushButton_clicked(){
     //Reset Data in fitResultDialog
     fitResultDialog->ClearData();
     fitResultDialog->SetDataSize(file);
-
+    fitResultDialog->SetFilePath(file->GetFilePath());
 }
 
 
@@ -247,6 +247,11 @@ void MainWindow::on_pushButton_Fit_clicked(){
     Msg.sprintf("Fit Variance : %f, Sample Variance : %f, Chi-sq/ndf : %f", ana->GetFitVariance(), ana->GetSampleVariance(), chisq);
     Write2Log(Msg);
 
+    if( ana->GetFitFlag() != 0) {
+        ui->textEdit->setTextColor(QColor(255,0,0,255));
+        Write2Log("!!!!!!!!!!!!!! fit not good.");
+        ui->textEdit->setTextColor(QColor(0,0,0,255));
+    }
     // update the parameter
     UpdateLineTextParameters(ana->GetParameters());
 
@@ -264,14 +269,13 @@ void MainWindow::on_pushButton_reset_clicked()
     int yIndex = ui->spinBox_y->value();
     double zValue = file->GetDataZ(xIndex, yIndex);
 
+    ui->lineEdit_a->setText(QString::number(zValue));
+    ui->lineEdit_Ta->setText("20");
     if(zValue > 0) {
-        ui->lineEdit_a->setText("20");
         ui->lineEdit_b->setText("-10");
     }else{
-        ui->lineEdit_a->setText("-40");
         ui->lineEdit_b->setText("10");
     }
-    ui->lineEdit_Ta->setText("20");
     ui->lineEdit_Tb->setText("80");
     ui->lineEdit_c->setText("0");
 

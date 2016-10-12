@@ -147,6 +147,11 @@ void Dialog::SetAvalibleData(int n)
 
 void Dialog::FillData(Analysis *ana)
 {
+    if( ana->GetFitFlag() != 0){
+        SendMsg("fit not good.");
+        return;
+    }
+
     int yIndex = ana->GetYIndex();
     this->parSize = ana->GetParametersSize(); // safty
     fitPar[yIndex] = ReSizeVector(ana->GetParameters());
@@ -181,8 +186,7 @@ void Dialog::PlotSingleData(int plotID){
     }
 
     plot->graph(plotID)->setDataValueError(x,y, ye);
-    //plot->xAxis->setRange(x[0], x[dataSize-1]);
-    plot->graph(plotID)->rescaleAxes(true);
+    //plot->graph(plotID)->rescaleAxes(true);
     plot->replot();
 
 }
@@ -250,8 +254,7 @@ void Dialog::on_checkBox_abc_clicked(bool checked)
 
         QVector<double> x, y, ye;
         for(int i = 0; i < dataSize; i++){
-            x.push_back(i);
-
+            x.push_back(yValue[i]);
             double a = fitPar[i][0];
             double b = fitPar[i][2];
             double c = fitPar[i][4];
@@ -265,9 +268,9 @@ void Dialog::on_checkBox_abc_clicked(bool checked)
 
         }
 
-        plot->graph(5)->setDataValueError(x,y, ye);
-        plot->xAxis->setRange(x[0], x[dataSize-1]);
-        plot->graph(5)->rescaleAxes(true);
+        plot->graph(5)->setDataValueError(x, y, ye);
+        //plot->xAxis->setRange(x[0], x[dataSize-1]);
+        //plot->graph(5)->rescaleAxes(true);
 
     }else{
         plot->graph(5)->clearData();
@@ -283,17 +286,13 @@ void Dialog::on_checkBox_SSR_clicked(bool checked)
 
         QVector<double> x, y;
         for(int i = 0; i < dataSize; i++){
-            x.push_back(i);
-            if( fitPar[i].size() != parSize){
-                y.push_back(0);
-            }else{
-                y.push_back(SSR[i]);
-            }
+            x.push_back(yValue[i]);
+            y.push_back(SSR[i]);
         }
 
         plot->graph(6)->setData(x,y);
-        plot->xAxis->setRange(x[0], x[dataSize-1]);
-        plot->graph(6)->rescaleAxes(true);
+        //plot->xAxis->setRange(x[0], x[dataSize-1]);
+        //plot->graph(6)->rescaleAxes(true);
 
     }else{
         plot->graph(6)->clearData();
@@ -305,8 +304,11 @@ void Dialog::on_pushButton_Save_clicked()
 {
     if( fixedSize == 0 ) return;
 
-    QString filename = OPENPATH;
-    filename += "save.txt";
+    QString filename = filePath;
+    filename.chop(4);
+    filename += "_";
+    filename += ui->lineEdit->text();
+    filename += ".txt";
     QFile savefile(filename);
 
     savefile.open(QIODevice::WriteOnly);

@@ -63,6 +63,7 @@ public slots:
     QVector<double> GetParPValue() {return pValue;}
     QVector<double> GetSSRgrad() {return gradSSR;}
 
+    int GetNIteration(){return nIter;}
     double GetParameters(int i) {return sol[i];}
     double GetParError(int i) {return error[i];}
     double GetParPValue(int i) {return pValue[i];}
@@ -96,7 +97,7 @@ private:
 
     Matrix CoVar;
 
-    int MaxIter;
+    int MaxIter, nIter;
     double SSR, lastSSR;
     int n, p, DF;
     int startIndex;

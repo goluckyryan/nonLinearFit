@@ -24,15 +24,13 @@ public:
     void ClearData();
     void SetDataSize(FileIO *file);
     void SetAvalibleData(int n);
-
     void FillData(Analysis *ana);
-
     bool IsDataSizeFixed(){return fixedSize;}
-
     void PlotData();
     void PlotSingleData(int plotID);
-
     QVector<double> ReSizeVector(QVector<double> vec);
+    void SetFilePath(QString str){filePath = str;}
+
 signals:
     void SendMsg(QString str);
 
@@ -52,6 +50,8 @@ private slots:
 private:
     Ui::Dialog *ui;
     QCustomPlot * plot;
+
+    QString filePath;
 
     int dataSize;
     int parSize;

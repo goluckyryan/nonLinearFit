@@ -189,7 +189,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     QString tmp;
     PrintVector(par0, "ini. par:");
 
-    int count = 0;
+    nIter = 0;
     QVector<double> par = par0;
     lastSSR = 0;
     bool contFlag;
@@ -198,8 +198,8 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         Regression(par);
         par = this->sol;
         lastSSR = SSR;
-        count ++;
-        if( count >= MaxIter ) {
+        nIter ++;
+        if( nIter >= MaxIter ) {
             fitFlag = 2; // fitFlag = 2 when iteration too many
             break;
         }
@@ -216,7 +216,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
 
     }while(contFlag);
 
-    tmp.sprintf(" %d", count);
+    tmp.sprintf(" %d", nIter);
     Msg += tmp;
     if( fitFlag == 0) {
         Msg += "| End Normally.";
