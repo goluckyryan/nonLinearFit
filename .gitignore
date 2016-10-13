@@ -1,8 +1,10 @@
 analysis
+*.csv
 *.txt
 *.log
 *.o
 *.exe
+test.dat
 FitResult_single.txt
 FitResult.txt
 

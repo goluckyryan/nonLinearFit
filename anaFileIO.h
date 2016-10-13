@@ -27,29 +27,32 @@ int getData(char* filename){
   file.open(filename);
   
   int numCol = 0, yIndex = -1;
-  int strLen = 0;
+
+  size_t pos;
   while (file.good()){
 	getline(file, val, ','); //get it cell by cell
-	if( numCol == 0) {
-		strLen = val.length();
-		///printf(" %d \n", strLen);
+	pos = -1;
+	pos = val.find_last_of("_"); //get the last "_"
+	//printf("%lu,  %s\n", pos, val.c_str());
+	if( pos == -1) {
+		break;
 	}
-
+			
 	// get the Y data
 	if( numCol % 2 == 0){
-		size_t pos = val.find_last_of("_"); //get the last "_"
 		string strY = val.substr(pos+1, 5);
 		yIndex ++;
 		valY[yIndex] = atof(strY.c_str());
-		///printf(" %s, %f \n", strY.c_str(), valY[yIndex]);
+		//printf(" %s, %f \n", strY.c_str(), valY[yIndex]);
 	}
-	
+
 	numCol ++;
-	if ( strLen != val.length()) break; // the last val is data
   }
  
   double stepY = valY[1]-valY[0];
   sizeY = yIndex + 1 ;
+	
+	printf(" %d, %f \n", sizeY, stepY);
 
   //------------ get number of Row
   file.seekg(0);
@@ -61,8 +64,10 @@ int getData(char* filename){
   sizeX = sizeX - 2 ;
   file.close();
   
+  printf(" %d\n", sizeX);
   
-  //------------ get data 
+  
+  //------------ get data  
   file.open(filename);
   if( file.good()) getline(file, val); // skip the 1st line by getline
   
@@ -71,7 +76,7 @@ int getData(char* filename){
   double maxZ = 0;
   double minZ = 0;
   
-  ///printf(" numCol : %d, IsEnd : %d, IsGood : %d\n", numCol, file.eof(), file.good());
+  printf(" numCol : %d, IsEnd : %d, IsGood : %d\n", numCol, file.eof(), file.good());
   
   while (file.good()){
    cols ++; 

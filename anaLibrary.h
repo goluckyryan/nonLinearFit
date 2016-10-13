@@ -15,9 +15,9 @@
 
 using namespace std; 
 
-double valX [1024];      // val of X or time
-double valY [500];       // val of Y or B-field
-double data [500][1024]; // val of data
+double valX [2000];      // val of X or time
+double valY [4000];       // val of Y or B-field
+double data [4000][2000]; // val of data
 int sizeX, sizeY;
 int errFlag;  //err
 

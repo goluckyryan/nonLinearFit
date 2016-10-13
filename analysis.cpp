@@ -38,8 +38,8 @@ int main(int argc, char *argv[]){
 	getData(filename);
 	
 	///======================= save in dat file
-	//char outfile[100] = "test.dat";
-	//output(outfile);
+	char outfile[100] = "test.dat";
+	output(outfile);
 
 	///====================== fitting 
 	char savefile[400];
