@@ -217,9 +217,11 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     double lambda = ui->lineEdit_lambda->text().toDouble();
     int maxIter = ui->lineEdit_MaxIter->text().toInt();
+    int torr = ui->lineEdit_TORR->text().toInt();
     //ana->Print();
     ana->Setlambda(lambda);
     ana->SetMaxInteration(maxIter);
+    ana->SetTORR( pow(10,torr) );
     int x1 = ana->FindstartIndex(TIME2);
     ana->MeanAndvariance(0, x1);
     ana->NonLinearFit(par, gnu);

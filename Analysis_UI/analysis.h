@@ -27,6 +27,7 @@ public:
     void SetData(const QVector<double> x, const QVector<double> y);
     void SetStartFitIndex(int index){ this->startIndex = index;}
     void Setlambda(double l){this->lambda = l;}
+    void SetTORR(double x){ torr = x;}
     void SetMaxInteration(int i){this->MaxIter = i;}
     void MeanAndvariance(int index_1, int index_2);
 
@@ -105,6 +106,7 @@ private:
     double delta; // SSR(p+h) - SSR(p)
     double mean, var; // sample
     double lambda;
+    double torr;
 
     int yIndex;
     double yValue;

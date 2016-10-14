@@ -20,10 +20,14 @@ void Analysis::Initialize(){
     n = 0;
     p = 0;
     DF = 0;
-    fitFlag = 0;
+    fitFlag = -1;
     mean = 0;
     var = 0;
 
+    nIter = 0;
+    MaxIter = 300;
+
+    torr = 1e-6;
     delta = 0;
     lambda = 0;
 
@@ -189,6 +193,8 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     QString tmp;
     PrintVector(par0, "ini. par:");
 
+    tmp.sprintf("Fit Torr: %7.1e, Max Iteration: %d", torr, MaxIter);SendMsg(tmp);
+
     nIter = 0;
     QVector<double> par = par0;
     lastSSR = 0;
@@ -205,7 +211,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         }
         bool converge = 0;
         //since this is 4-parameter fit
-        converge = std::abs(this->delta) <  TORR * SSR;
+        converge = std::abs(this->delta) <  torr * SSR;
         for(int i = 0; i < p; i++){
             converge &= std::abs(this->gradSSR[i]) < TORRGRAD;
         }
