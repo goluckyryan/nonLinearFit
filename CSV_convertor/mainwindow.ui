@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>250</height>
+    <width>520</width>
+    <height>261</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,14 +17,14 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>CSV Convertor</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QPushButton" name="pushButton_Convert">
     <property name="geometry">
      <rect>
-      <x>440</x>
-      <y>60</y>
+      <x>430</x>
+      <y>70</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -40,7 +40,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>20</y>
+      <y>40</y>
       <width>491</width>
       <height>20</height>
      </rect>
@@ -50,7 +50,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>60</y>
+      <y>70</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -63,7 +63,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>100</y>
+      <y>110</y>
       <width>491</width>
       <height>91</height>
      </rect>
@@ -72,13 +72,26 @@
      <enum>Qt::ScrollBarAlwaysOn</enum>
     </property>
    </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>491</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Open a row-wise txt or dat file, which seperated by &quot;,&quot;. Convert to *.csv file.</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>532</width>
+     <width>520</width>
      <height>21</height>
     </rect>
    </property>

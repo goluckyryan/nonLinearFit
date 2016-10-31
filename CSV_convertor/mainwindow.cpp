@@ -24,10 +24,9 @@ void MainWindow::on_pushButton_Open_clicked()
     fileDialog.setReadOnly(1);
     //fileDialog.setDirectory(OPENPATH);
     QStringList fileNames;
-    QString fileName;
     if( fileDialog.exec()) {
         fileNames = fileDialog.selectedFiles();
-        fileName = fileNames[0];
+        fileName  = fileNames[0];
     }
 
     if(fileName == "") return;
@@ -40,6 +39,11 @@ void MainWindow::on_pushButton_Open_clicked()
 }
 
 void MainWindow::OpenRow(QString fileName){
+
+    xData.clear();
+    yData.clear();
+    yName.clear();
+    delete [] zData;
 
     QFile *fileIn = new QFile(fileName);
     fileIn->open(QIODevice::ReadOnly);
@@ -70,37 +74,44 @@ void MainWindow::OpenRow(QString fileName){
     // get Data
     fileIn->seek(0);
     int rows = 0;
-    int zMin = 0;
-    int zMax = 0;
+    double zMin;
+    double zMax;
+    int yIndex = 0;
     while(stream.readLineInto(&line)){
         rows ++;
         QStringList lineList = line.split(",");
 
         if( rows == 1){ // get xDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                xData.push_back((lineList[0]).toDouble() * 1e6) ;
+                xData.push_back((lineList[i]).toDouble()) ;
             }
         }else{
+            yName.push_back(lineList[0]);
             double temp = ExtractYValue(lineList[0]);
             yData.push_back(temp);
-            int yIndex = 0;
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                temp = (lineList[i]).toDouble() * 1000;
+                temp = (lineList[i]).toDouble();
                 zData[yIndex].push_back(temp);
+                if( i == 1) {
+                    zMax = temp;
+                    zMin = temp;
+                }
                 if( temp > zMax ) zMax = temp;
                 if( temp < zMin ) zMin = temp;
+
             }
+            yIndex++;
         }
     }
 
     qDebug("X: %d , %d", xData.size(), xSize);
     qDebug("Y: %d , %d", yData.size(), ySize);
 
-    int xMin = FindMin(xData);
-    int xMax = FindMax(xData);
+    double xMin = FindMin(xData);
+    double xMax = FindMax(xData);
 
-    int yMin = FindMin(yData);
-    int yMax = FindMax(yData);
+    double yMin = FindMin(yData);
+    double yMax = FindMax(yData);
 
     QString msg;
     msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
@@ -123,6 +134,41 @@ void MainWindow::Write2Log(QString str){
 void MainWindow::on_pushButton_Convert_clicked()
 {
     //Save as CSV
+
+
+   QString saveFile = fileName;
+   saveFile.chop(3);
+   saveFile.append("csv");
+
+   QFile fileOut(saveFile);
+   fileOut.open(QIODevice::WriteOnly);
+
+   QTextStream stream(&fileOut);
+   QString line, tmp;
+   line.sprintf("%10s, ", "");
+   for( int i = 0; i < ySize-1; i++){
+       tmp.sprintf("%s, ", yName[i].toStdString().c_str());
+       line.append(tmp);
+   }
+   tmp.sprintf("%s \n", yName[ySize-1].toStdString().c_str());
+   line.append(tmp);
+   stream << line;
+
+   for(int j = 0; j < xSize ; j++){
+       line.sprintf("%f, ", xData[j]);
+
+       for( int i = 0; i < ySize-1; i++){
+           tmp.sprintf("%f,", zData[i][j]);
+           line.append(tmp);
+       }
+       tmp.sprintf("%f \n", zData[ySize-1][j]);
+       line.append(tmp);
+       stream << line;
+   }
+
+    fileOut.close();
+    tmp.sprintf("Converted and Save to :%s ", saveFile.toStdString().c_str());
+    Write2Log(tmp);
 }
 
 

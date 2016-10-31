@@ -39,9 +39,11 @@ private:
     Ui::MainWindow *ui;
 
     QVector<double> xData, yData;
+    QVector<QString> yName;
     QVector<double> *zData;
 
     int xSize, ySize;
+    QString fileName;
 
 };
 
