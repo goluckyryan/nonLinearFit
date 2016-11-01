@@ -59,7 +59,6 @@ void FileIO::OpenCSVData(){
     QTextStream stream(myfile);
     QString line;
 
-
     // get number of rows and cols;
     xSize = -1;
     while(stream.readLineInto(&line)){
@@ -400,6 +399,10 @@ void FileIO::SaveSimplifiedTxt()
 double FileIO::ExtractYValue(QString str){
     int pos = str.lastIndexOf("_") ;
     int pos2 = str.lastIndexOf("FUNCTION");
+    if( pos2 == -1){
+        pos2 = str.lastIndexOf("mT");
+    }
+    qDebug() << str << ", " << pos << ";" << pos2;
     QString strY;
     if( pos2 == -1){
         strY = str.mid(pos+1);

@@ -123,6 +123,8 @@ void MainWindow::OpenRow(QString fileName){
     msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
     Write2Log(msg);
 
+    fileIn->close();
+
 }
 
 void MainWindow::Write2Log(QString str){
@@ -133,8 +135,9 @@ void MainWindow::Write2Log(QString str){
 
 void MainWindow::on_pushButton_Convert_clicked()
 {
-    //Save as CSV
+   //Save as CSV
 
+   bool doubleX = ui->checkBox->isChecked();
 
    QString saveFile = fileName;
    saveFile.chop(3);
@@ -149,24 +152,34 @@ void MainWindow::on_pushButton_Convert_clicked()
    for( int i = 0; i < ySize-1; i++){
        tmp.sprintf("%s, ", yName[i].toStdString().c_str());
        line.append(tmp);
+       if( doubleX ){
+           line.append(" , ");
+       }
    }
    tmp.sprintf("%s \n", yName[ySize-1].toStdString().c_str());
    line.append(tmp);
    stream << line;
 
    for(int j = 0; j < xSize ; j++){
+
        line.sprintf("%f, ", xData[j]);
 
        for( int i = 0; i < ySize-1; i++){
-           tmp.sprintf("%f,", zData[i][j]);
+           tmp.sprintf("%f, ", zData[i][j]);
            line.append(tmp);
+           if( doubleX ){
+               tmp.sprintf("%f, ", xData[j]);
+               line.append(tmp);
+           }
        }
        tmp.sprintf("%f \n", zData[ySize-1][j]);
        line.append(tmp);
+
        stream << line;
    }
 
     fileOut.close();
+    if( doubleX) Write2Log("the x-value is repeated.");
     tmp.sprintf("Converted and Save to :%s ", saveFile.toStdString().c_str());
     Write2Log(tmp);
 }
