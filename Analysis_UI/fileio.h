@@ -63,6 +63,7 @@ private:
     double zMin, zMax;
     bool colwise; // 0 = data store as row, 1 = data store as col
     bool openState;
+    bool isOutFileOpened;
 
     QFile * myfile;
     QFile * outfile;

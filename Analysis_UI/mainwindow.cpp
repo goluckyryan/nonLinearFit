@@ -109,8 +109,6 @@ void MainWindow::on_pushButton_clicked(){
     Write2Log("Opened file :");
     Write2Log(fileName);
 
-    file->OpenSaveFile();
-
     ui->spinBox_y->setMinimum(0);
     ui->spinBox_y->setMaximum(file->GetDataSetSize()-1);
     ui->spinBox_x->setMinimum(0);
@@ -120,7 +118,6 @@ void MainWindow::on_pushButton_clicked(){
     int xIndex = ana->FindstartIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
 
-    qDebug() << "plot contour";
     PlotContour();
 
     //Reset Data in fitResultDialog
@@ -204,6 +201,7 @@ void MainWindow::on_lineEdit_c_returnPressed()
 void MainWindow::on_pushButton_Fit_clicked(){
 
     if( file == NULL) return;
+
     bool gnu = ui->checkBox->isChecked();
 
     if( savedSimplifiedtxt == 0 && gnu){
@@ -288,6 +286,7 @@ void MainWindow::on_pushButton_reset_clicked()
 void MainWindow::on_pushButton_save_clicked()
 {
     if( file == NULL) return;
+    file->OpenSaveFile();
     file->SaveFitResult(ana);
 
 }

@@ -26,6 +26,7 @@ void FileIO::Initialize(){
     zMax = 0;
     zMin = 0;
     openState = 0;
+    isOutFileOpened = 0;
 
     xSize = 0;
     ySize = 0;
@@ -38,6 +39,7 @@ FileIO::~FileIO(){
 
 void FileIO::OpenSaveFile(){
     if( openState == 0 ) return;
+    if( isOutFileOpened == 1 ) return;
     int lenght = filePath.length();
     QString outfilePath = filePath.left(lenght -4);
     outfilePath += "_fit.txt";
@@ -45,6 +47,7 @@ void FileIO::OpenSaveFile(){
     outfile->open(QIODevice::Append );
     SendMsg("Fit result will save to :");
     SendMsg(outfilePath);
+    isOutFileOpened = 1;
 }
 
 void FileIO::OpenCSVData(){
@@ -143,6 +146,8 @@ void FileIO::OpenCSVData(){
     msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
     SendMsg(msg);
 
+    myfile->close();
+
 }
 
 void FileIO::OpenTxtData_col()
@@ -232,6 +237,8 @@ void FileIO::OpenTxtData_col()
 
     msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
     SendMsg(msg);
+
+    myfile->close();
 }
 
 void FileIO::OpenTxtData_row(){
@@ -270,14 +277,14 @@ void FileIO::OpenTxtData_row(){
 
         if( rows == 1){ // get xDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                xData.push_back((lineList[0]).toDouble() * 1e6) ;
+                xData.push_back((lineList[i]).toDouble()) ;
             }
         }else{
             double temp = ExtractYValue(lineList[0]);
             yData.push_back(temp);
 
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                temp = (lineList[i]).toDouble() * 1000;
+                temp = (lineList[i]).toDouble();
                 zData[yIndex].push_back(temp);
                 if( i == 1) {
                     zMax = temp;
@@ -310,6 +317,8 @@ void FileIO::OpenTxtData_row(){
 
     msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
     SendMsg(msg);
+
+    myfile->close();
 }
 
 void FileIO::SaveFitResult(Analysis *ana)
