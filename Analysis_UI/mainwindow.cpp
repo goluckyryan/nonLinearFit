@@ -116,10 +116,11 @@ void MainWindow::on_pushButton_clicked(){
     ui->spinBox_x->setMinimum(0);
     ui->spinBox_x->setMaximum(file->GetDataSize()-1);
 
-    on_spinBox_y_valueChanged(104);
+    on_spinBox_y_valueChanged(0);
     int xIndex = ana->FindstartIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
 
+    qDebug() << "plot contour";
     PlotContour();
 
     //Reset Data in fitResultDialog

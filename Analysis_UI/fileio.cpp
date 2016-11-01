@@ -263,8 +263,7 @@ void FileIO::OpenTxtData_row(){
     // get Data
     myfile->seek(0);
     int rows = 0;
-    zMin = 0;
-    zMax = 0;
+    int yIndex = 0;
     while(stream.readLineInto(&line)){
         rows ++;
         QStringList lineList = line.split(",");
@@ -276,13 +275,18 @@ void FileIO::OpenTxtData_row(){
         }else{
             double temp = ExtractYValue(lineList[0]);
             yData.push_back(temp);
-            int yIndex = 0;
+
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 temp = (lineList[i]).toDouble() * 1000;
                 zData[yIndex].push_back(temp);
+                if( i == 1) {
+                    zMax = temp;
+                    zMin = temp;
+                }
                 if( temp > zMax ) zMax = temp;
                 if( temp < zMin ) zMin = temp;
             }
+            yIndex++;
         }
     }
 

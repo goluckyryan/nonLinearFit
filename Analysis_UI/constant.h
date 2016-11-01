@@ -4,8 +4,8 @@
 #include <QString>
 
 // must have "/" at the end.
-//const QString OPENPATH = "C:/Users/Triplet-ESR/Desktop/nonLinearFit/";
-const QString OPENPATH = "C:/Users/goluc/Desktop/nonLinearFit/";
+const QString OPENPATH = "C:/Users/Triplet-ESR/Desktop/";
+//const QString OPENPATH = "C:/Users/goluc/Desktop/nonLinearFit/";
 //const QString OPENPATH = "/Users/mobileryan/Triplet-ESR/";
 
 const double TORR = 1e-6; //torrelence for fitting SSR
