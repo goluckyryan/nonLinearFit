@@ -72,7 +72,7 @@ void MainWindow::on_pushButton_clicked(){
 
     QFileDialog fileDialog(this);
     QStringList filters;
-    filters << "*.csv" << "Col-wise (*.txt *.dat)" << "Row-wise (*txt *dat)";
+    filters << "Row-wise (*txt *dat *.*)" << "Double-X CSV(*.csv)" << "Col-wise (*.txt *.dat *.csv *.*)" ;
     fileDialog.setNameFilters(filters);
     fileDialog.setReadOnly(1);
     fileDialog.setDirectory(OPENPATH);
@@ -89,11 +89,11 @@ void MainWindow::on_pushButton_clicked(){
 
     file = new FileIO(fileName);
     connect(file, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
-    if( fileDialog.selectedNameFilter() == filters[0]){
+    if( fileDialog.selectedNameFilter() == filters[1]){
         file->OpenCSVData();
-    }else if(fileDialog.selectedNameFilter() == filters[1]){
-        file->OpenTxtData_col();
     }else if(fileDialog.selectedNameFilter() == filters[2]){
+        file->OpenTxtData_col();
+    }else if(fileDialog.selectedNameFilter() == filters[0]){
         file->OpenTxtData_row();
     }
 
