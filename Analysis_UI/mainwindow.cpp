@@ -13,6 +13,13 @@ MainWindow::MainWindow(QWidget *parent) :
     savedSimplifiedtxt = 0;
 
     plot = ui->customPlot;
+    plot->xAxis->setLabel("time [us]");
+    plot->yAxis->setLabel("Voltage [V]");
+    plot->plotLayout()->insertRow(0);
+    plotTitle = new QCPPlotTitle(plot, "title");
+    plotTitle->setFont(QFont("sans", 12, QFont::Bold));
+    plot->plotLayout()->addElement(0,0, plotTitle);
+
     ctplot = ui->customPlot_CT;
 
     ana = new Analysis();
@@ -28,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow(){
     delete ui;
     delete fitResultDialog;
+
+    delete plotTitle;
     delete plot;
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
@@ -38,10 +47,6 @@ void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y, double 
 
     while( plot->graphCount() < graphID+1){
         plot->addGraph();
-        if( plot->graphCount() == 1){
-            plot->xAxis->setLabel("time [us]");
-            plot->yAxis->setLabel("a.u.");
-        }
     }
 
     switch (graphID) {
@@ -128,12 +133,18 @@ void MainWindow::on_pushButton_clicked(){
 
 
 void MainWindow::on_spinBox_y_valueChanged(int arg1){
+
+    ui->spinBox_y->setValue(arg1);
+    ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1)));
+
+    QString title;
+    title.sprintf("Hall Voltage : %f mV", file->GetDataY(arg1));
+    plotTitle->setText(title);
+
     Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1),
          file->GetXMin(), file->GetXMax(),
          file->GetZMin(), file->GetZMax());
 
-    ui->spinBox_y->setValue(arg1);
-    ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1)));
     ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
     ana->SetY(arg1, file->GetDataY(arg1));
     if( ui->checkBox_AutoFit->isChecked()) {

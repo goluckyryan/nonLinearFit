@@ -68,6 +68,8 @@ private:
 
     bool savedSimplifiedtxt;
 
+    QCPPlotTitle *plotTitle;
+
 };
 
 #endif // MAINWINDOW_H

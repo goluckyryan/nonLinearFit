@@ -209,6 +209,9 @@ double MainWindow::ExtractYValue(QString str){
     if( pos2 == -1 ){
         pos2 = str.lastIndexOf("mT");
     }
+    if( pos2 == -1 ){
+        pos2 = str.lastIndexOf("mV");
+    }
     QString strY;
     if( pos2 == -1){
         strY = str.mid(pos+1);
