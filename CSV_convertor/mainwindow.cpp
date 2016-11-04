@@ -206,6 +206,9 @@ double MainWindow::FindMin(QVector<double> vec)
 double MainWindow::ExtractYValue(QString str){
     int pos = str.lastIndexOf("_") ;
     int pos2 = str.lastIndexOf("FUNCTION");
+    if( pos2 == -1 ){
+        pos2 = str.lastIndexOf("mT");
+    }
     QString strY;
     if( pos2 == -1){
         strY = str.mid(pos+1);
