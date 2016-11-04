@@ -162,13 +162,13 @@ void MainWindow::on_pushButton_Convert_clicked()
 
    for(int j = 0; j < xSize ; j++){
 
-       line.sprintf("%f, ", xData[j]);
+       line.sprintf("%e, ", xData[j] * 1e-6);
 
        for( int i = 0; i < ySize-1; i++){
-           tmp.sprintf("%f, ", zData[i][j]);
+           tmp.sprintf("%e, ", zData[i][j]);
            line.append(tmp);
            if( doubleX ){
-               tmp.sprintf("%f, ", xData[j]);
+               tmp.sprintf("%e, ", xData[j] * 1e-6);
                line.append(tmp);
            }
        }
