@@ -402,6 +402,9 @@ double FileIO::ExtractYValue(QString str){
     if( pos2 == -1){
         pos2 = str.lastIndexOf("mT");
     }
+    if( pos2 == -1){
+        pos2 = str.lastIndexOf("mV");
+    }
     qDebug() << str << ", " << pos << ";" << pos2;
     QString strY;
     if( pos2 == -1){
