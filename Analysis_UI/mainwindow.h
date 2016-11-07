@@ -27,7 +27,7 @@ public:
     void PlotFitFunc();
 
     QVector<double> GetParametersFromLineText();
-    void UpdateLineTextParameters(QVector<double> par);
+    void UpdateLineTextParameters(QVector<double> par, QVector<double> epar);
 
     void PlotContour();
 

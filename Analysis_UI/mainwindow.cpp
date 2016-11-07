@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     plot = ui->customPlot;
     plot->xAxis->setLabel("time [us]");
     plot->yAxis->setLabel("Voltage [V]");
+    plot->setInteraction(QCP::iRangeDrag,true);
+    plot->setInteraction(QCP::iRangeZoom,true);
     plot->plotLayout()->insertRow(0);
     plotTitle = new QCPPlotTitle(plot, "title");
     plotTitle->setFont(QFont("sans", 12, QFont::Bold));
@@ -265,7 +267,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
         ui->textEdit->setTextColor(QColor(0,0,0,255));
     }
     // update the parameter
-    UpdateLineTextParameters(ana->GetParameters());
+    UpdateLineTextParameters(ana->GetParameters(), ana->GetParError());
 
     PlotFitFunc();
 
@@ -306,7 +308,7 @@ void MainWindow::on_pushButton_FitAll_clicked()
 {
     if( file == NULL) return;
     int n = file->GetDataSetSize();
-    QProgressDialog progress("Fitting...", "Abort", 0, n, this);
+    QProgressDialog progress("Fitting...", "Abort", 0, n-1, this);
     progress.setWindowModality(Qt::WindowModal);
     QString str;
     int count = 0;
@@ -332,19 +334,20 @@ void MainWindow::on_pushButton_FitAll_clicked()
         //}
 
         if( std::abs(chisq-1) < 0.5 && pcheck){
+            file->OpenSaveFile();
             file->SaveFitResult(ana);
             count ++;
         }else{
             Write2Log("reduced chi-sq > 2 and p-value(s) > 0.3, not save fitting.");
         }
     }
-    progress.setValue(n);
 }
 
 void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
 {
     ui->lineEdit_b->setEnabled(checked);
     ui->lineEdit_Tb->setEnabled(checked);
+    ui->lineEdit_P->setEnabled(checked);
 
     //fitResultDialog->ClearData();
     //fitResultDialog->SetDataSize(file->GetDataSetSize());
@@ -404,21 +407,53 @@ QVector<double> MainWindow::GetParametersFromLineText()
     return par;
 }
 
-void MainWindow::UpdateLineTextParameters(QVector<double> par)
+void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> epar)
 {
+    double P, eP;
     ui->lineEdit_a ->setText(QString::number(par[0]));
     ui->lineEdit_Ta->setText(QString::number(par[1]));
     if( par.size() == 3){
         ui->lineEdit_c->setText(QString::number(par[2]));
+        ui->lineEdit_b ->setText("");
+        ui->lineEdit_Tb->setText("");
+        ui->lineEdit_P->setText("");
     }
     if( par.size() == 4 ){
+        P = (par[0]-par[2])/(par[0]+par[2]);
+        ui->lineEdit_P->setText(QString::number(P));
         ui->lineEdit_b ->setText(QString::number(par[2]));
         ui->lineEdit_Tb->setText(QString::number(par[3]));
+        ui->lineEdit_c->setText("");
     }
     if( par.size()== 5){
+        P = (par[0]-par[2])/(par[0]+par[2]);
+        ui->lineEdit_P->setText(QString::number(P));
         ui->lineEdit_b ->setText(QString::number(par[2]));
         ui->lineEdit_Tb->setText(QString::number(par[3]));
         ui->lineEdit_c->setText(QString::number(par[4]));
+    }
+
+    ui->lineEdit_ea ->setText(QString::number(epar[0]));
+    ui->lineEdit_eTa->setText(QString::number(epar[1]));
+    if( par.size() == 3){
+        ui->lineEdit_ec->setText(QString::number(epar[2]));
+        ui->lineEdit_eb ->setText("");
+        ui->lineEdit_eTb->setText("");
+        ui->lineEdit_eP->setText("");
+    }
+    if( par.size() == 4 ){
+        eP = 1/pow(par[0]+par[2],2)*sqrt(pow(epar[0],2)+ pow(epar[2],2)) * sqrt(2*(pow(par[0],2)+pow(par[2],2)));
+        ui->lineEdit_eP->setText(QString::number(eP));
+        ui->lineEdit_eb ->setText(QString::number(epar[2]));
+        ui->lineEdit_eTb->setText(QString::number(epar[3]));
+        ui->lineEdit_ec->setText("");
+    }
+    if( par.size()== 5){
+        eP = 1/pow(par[0]+par[2],2)*sqrt(pow(epar[0],2)+ pow(epar[2],2)) * sqrt(2*(pow(par[0],2)+pow(par[2],2)));
+        ui->lineEdit_eP->setText(QString::number(eP));
+        ui->lineEdit_eb ->setText(QString::number(epar[2]));
+        ui->lineEdit_eTb->setText(QString::number(epar[3]));
+        ui->lineEdit_ec->setText(QString::number(epar[4]));
     }
 
 }
