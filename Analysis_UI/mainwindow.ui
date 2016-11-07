@@ -273,7 +273,7 @@
       </widget>
       <widget class="QLineEdit" name="lineEdit_c">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -298,6 +298,9 @@
        </property>
        <property name="text">
         <string>c</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_b_Tb">

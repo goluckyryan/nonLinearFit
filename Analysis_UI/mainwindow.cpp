@@ -527,7 +527,15 @@ void MainWindow::PlotContour()
     colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
     colorMap->setColorScale(colorScale); // associate the color map with the color scale
 
-    colorMap->setGradient(QCPColorGradient::gpCandy ); //color scheme
+    QCPColorGradient colorGrad;
+    colorGrad.clearColorStops();
+    colorGrad.setColorStopAt(0, QColor(0,0,255));
+    colorGrad.setColorStopAt(0.5, QColor(255,255,255));
+    colorGrad.setColorStopAt(1, QColor(255,0,0));
+    colorGrad.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+
+    //colorMap->setGradient(QCPColorGradient::gpCandy ); //color scheme
+    colorMap->setGradient( colorGrad ); //color scheme
 
     //colorMap->rescaleDataRange();
     colorMap->setDataRange(QCPRange(file->GetZMin(), file->GetZMax()));

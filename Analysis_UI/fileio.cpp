@@ -326,13 +326,35 @@ void FileIO::SaveFitResult(Analysis *ana)
     QString text, tmp;
     int p = ana->GetParametersSize();
 
+    QVector<QString> header, eheader;
+
+    header.push_back("a"); eheader.push_back("e(a)");
+    header.push_back("Ta"); eheader.push_back("e(Ta)");
+    if( p == 3){
+        header.push_back("c"); eheader.push_back("e(c)");
+    }else if( p == 4){
+        header.push_back("b"); eheader.push_back("e(b)");
+        header.push_back("Tb"); eheader.push_back("e(Tb)");
+    }else if( p == 5){
+        header.push_back("b"); eheader.push_back("e(b)");
+        header.push_back("Tb"); eheader.push_back("e(Tb)");
+        header.push_back("c"); eheader.push_back("e(c)");
+    }
+
     //set header
     if( outfile->pos() == 0){
-        text.sprintf("%5s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s, %8s\n",
-                     "yIndex", "yValue",
-                     "a" , "Ta", "b", "Tb",
-                     "e(a)", "e(Ta)", "e(b)", "e(Tb)",
-                     "SSR", "DF", "chi-sq/ndf");
+
+        text.sprintf("%5s, %8s,","yIndex", "yValue");
+        for( int i = 0; i <p ; i++){
+            tmp.sprintf(" %8s,", header[i]);
+            text.append(tmp);
+        }
+        for( int i = 0; i <p ; i++){
+            tmp.sprintf(" %8s,", eheader[i]);
+            text.append(tmp);
+        }
+        tmp.sprintf(" %8s, %8s, %8s\n","SSR", "DF", "chi-sq/ndf");
+        text.append(tmp);
         stream << text;
     }
 
