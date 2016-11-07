@@ -39,9 +39,11 @@ public slots:
     QVector<double> GetDataSetZ(int yIndex){return zData[yIndex];}
     QVector<double> GetDataSetY(){return yData;}
     QVector<double> GetDataSetX(){return xData;}
+    QVector<double> GetDataSetMeanZ(){return zMean;}
     double GetDataZ(int xIndex, int yIndex){return zData[yIndex][xIndex];}
     double GetDataX(int xIndex){ return xData[xIndex];}
     double GetDataY(int yIndex){ return yData[yIndex];}
+    double GetDataMeanZ(int yIndex){ return zMean[yIndex];}
 
     double GetXMax(){return xMax;}
     double GetXMin(){return xMin;}
@@ -56,6 +58,7 @@ private:
     QVector<double> xData; // time data
     QVector<double> yData; // B-field
     QVector<double> *zData; //data, [ydata][xdata]
+    QVector<double> zMean; // mean
 
     int xSize, ySize;
     double xMin, xMax;
@@ -73,6 +76,8 @@ private:
 
     double FindMax(QVector<double> vec);
     double FindMin(QVector<double> vec);
+
+    void CalMeanVector();
 };
 
 #endif // FILEIO_H

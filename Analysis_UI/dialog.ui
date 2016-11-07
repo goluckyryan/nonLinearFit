@@ -29,7 +29,7 @@
      <item row="0" column="4">
       <widget class="QCheckBox" name="checkBox_c">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string>c</string>

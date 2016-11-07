@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(fitResultDialog, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     bPlot = new BPlot(this);
+    connect(bPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     savedSimplifiedtxt = 0;
 
@@ -22,20 +23,17 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);
     plot->axisRect()->setRangeZoom(Qt::Vertical);
-    plot->plotLayout()->insertRow(0);
-    plotTitle = new QCPPlotTitle(plot, "title");
-    plotTitle->setFont(QFont("sans", 12, QFont::Bold));
-    plot->plotLayout()->addElement(0,0, plotTitle);
+    //plot->plotLayout()->insertRow(0);
+    //plotTitle = new QCPPlotTitle(plot, "title");
+    //plotTitle->setFont(QFont("sans", 12, QFont::Bold));
+    //plot->plotLayout()->addElement(0,0, plotTitle);
 
     ctplot = ui->customPlot_CT;
 
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
-    ui->pushButton_Fit->setEnabled(0);
-    ui->pushButton_reset->setEnabled(0);
-    ui->pushButton_save->setEnabled(0);
-    ui->pushButton_FitAll->setEnabled(0);
+    setDisabledPlanel();
 
     statusBar()->showMessage("Please open a file.");
 
@@ -46,7 +44,7 @@ MainWindow::~MainWindow(){
     delete fitResultDialog;
     delete bPlot;
 
-    delete plotTitle;
+    //delete plotTitle;
     delete plot;
     //delete ctplot;
     //delete colorMap;
@@ -123,10 +121,8 @@ void MainWindow::on_pushButton_clicked(){
         Write2Log("Cannot open file.");
         return;
     }
-    ui->pushButton_Fit->setEnabled(1);
-    ui->pushButton_reset->setEnabled(1);
-    ui->pushButton_save->setEnabled(1);
-    ui->pushButton_FitAll->setEnabled(1);
+
+    setEnabledPlanel();
 
     Write2Log("Opened file :");
     Write2Log(fileName);
@@ -150,7 +146,6 @@ void MainWindow::on_pushButton_clicked(){
     double zMin = file->GetZMin();
     double zMax = file->GetZMax();
     double zRange = fabs(zMax)+fabs(zMin);
-    qDebug() << zMax << "," << zMin;
     ui->doubleSpinBox_zOffset->setMinimum(-zRange);
     ui->doubleSpinBox_zOffset->setMaximum(zRange);
     ui->doubleSpinBox_zOffset->setSingleStep(zRange/200.);
@@ -169,7 +164,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
 
     QString title;
     title.sprintf("Hall Voltage : %f mV", file->GetDataY(arg1));
-    plotTitle->setText(title);
+    //plotTitle->setText(title);
 
     Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1),
          file->GetXMin(), file->GetXMax(),
@@ -183,6 +178,9 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     }else{
         PlotFitFunc();
     }
+
+    int x1 = ana->FindstartIndex(TIME2);
+    ana->MeanAndvariance(0, x1);
 }
 
 void MainWindow::on_spinBox_x_valueChanged(int arg1){
@@ -270,8 +268,6 @@ void MainWindow::on_pushButton_Fit_clicked(){
     ana->Setlambda(lambda);
     ana->SetMaxInteration(maxIter);
     ana->SetTORR( pow(10,torr) );
-    int x1 = ana->FindstartIndex(TIME2);
-    ana->MeanAndvariance(0, x1);
     ana->NonLinearFit(par, gnu);
 
     //display result
@@ -322,13 +318,16 @@ void MainWindow::on_pushButton_reset_clicked()
 
     ui->lineEdit_a->setText(QString::number(zValue));
     ui->lineEdit_Ta->setText("20");
-    if(zValue > 0) {
+
+    double mean = ana->GetSampleMean();
+    ui->lineEdit_c->setText(QString::number(mean));
+
+    if(zValue > mean) {
         ui->lineEdit_b->setText("-10");
     }else{
         ui->lineEdit_b->setText("10");
     }
     ui->lineEdit_Tb->setText("80");
-    ui->lineEdit_c->setText("0");
 
     PlotFitFunc();
 }
@@ -568,10 +567,18 @@ void MainWindow::on_doubleSpinBox_zOffset_valueChanged(double arg1)
     int nx = file->GetDataSize();
     int ny = file->GetDataSetSize();
 
+    bool corr = ui->checkBox_MeanCorr->isChecked();
+
     //double zMax, zMin;
     for(int xIndex = 0; xIndex < nx; xIndex++){
         for(int yIndex = 0; yIndex < ny; yIndex++){
-            double z = file->GetDataZ(xIndex, yIndex)+ arg1;
+
+            double mean = 0;
+            if( corr ){
+                mean = file->GetDataMeanZ(yIndex);
+            }
+
+            double z = file->GetDataZ(xIndex, yIndex)+ arg1 - mean;
             colorMap->data()->setCell(xIndex, yIndex, z); // fill data
             //if(xIndex == 0 && yIndex == 0){
             //    zMax = z;
@@ -593,4 +600,36 @@ void MainWindow::on_actionB_Plot_triggered()
         bPlot->show();
         bPlot->Plot();
     }
+}
+
+void MainWindow::setDisabledPlanel()
+{
+    ui->actionB_Plot->setEnabled(0);
+    ui->pushButton_Fit->setEnabled(0);
+    ui->pushButton_FitAll->setEnabled(0);
+    ui->pushButton_reset->setEnabled(0);
+    ui->pushButton_save->setEnabled(0);
+    ui->spinBox_y->setEnabled(0);
+    ui->spinBox_x->setEnabled(0);
+    ui->checkBox_MeanCorr->setEnabled(0);
+    ui->doubleSpinBox_zOffset->setEnabled(0);
+}
+
+void MainWindow::setEnabledPlanel()
+{
+    ui->actionB_Plot->setEnabled(1);
+    ui->pushButton_Fit->setEnabled(1);
+    ui->pushButton_FitAll->setEnabled(1);
+    ui->pushButton_reset->setEnabled(1);
+    ui->pushButton_save->setEnabled(1);
+    ui->spinBox_y->setEnabled(1);
+    ui->spinBox_x->setEnabled(1);
+    ui->checkBox_MeanCorr->setEnabled(1);
+    ui->doubleSpinBox_zOffset->setEnabled(1);
+}
+
+void MainWindow::on_checkBox_MeanCorr_clicked()
+{
+    double val = ui->doubleSpinBox_zOffset->value();
+    on_doubleSpinBox_zOffset_valueChanged(val);
 }

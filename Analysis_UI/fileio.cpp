@@ -147,6 +147,8 @@ void FileIO::OpenCSVData(){
 
     myfile->close();
 
+    CalMeanVector();
+
 }
 
 void FileIO::OpenTxtData_col()
@@ -238,6 +240,8 @@ void FileIO::OpenTxtData_col()
     SendMsg(msg);
 
     myfile->close();
+
+    CalMeanVector();
 }
 
 void FileIO::OpenTxtData_row(){
@@ -318,6 +322,8 @@ void FileIO::OpenTxtData_row(){
     SendMsg(msg);
 
     myfile->close();
+
+    CalMeanVector();
 }
 
 void FileIO::SaveFitResult(Analysis *ana)
@@ -427,7 +433,7 @@ double FileIO::ExtractYValue(QString str){
     if( pos2 == -1){
         pos2 = str.lastIndexOf("mV");
     }
-    qDebug() << str << ", " << pos << ";" << pos2;
+    //qDebug() << str << ", " << pos << ";" << pos2;
     QString strY;
     if( pos2 == -1){
         strY = str.mid(pos+1);
@@ -454,4 +460,27 @@ double FileIO::FindMin(QVector<double> vec)
         if( vec[i] < min) min = vec[i];
     }
     return min;
+}
+
+void FileIO::CalMeanVector()
+{
+    double goal = -1; // us
+    int xEnd = 0; // the index of x near goal usec
+    for(int i = 0; i < xData.size() ; i++){
+        if( xData[i] >= goal){
+            xEnd = i;
+            break;
+        }
+    }
+
+    double mean = 0;
+
+    for(int yIndex = 0; yIndex < ySize; yIndex++){
+        for( int i = 0; i < xEnd; i ++){
+            mean += zData[yIndex][i];
+        }
+        mean = mean / xEnd;
+        this->zMean.push_back(mean);
+    }
+
 }

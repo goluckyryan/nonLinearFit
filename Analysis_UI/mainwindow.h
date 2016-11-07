@@ -53,12 +53,14 @@ private slots:
 
     void on_checkBox_b_Tb_clicked(bool checked);
     void on_checkBox_c_clicked(bool checked);
-
     void on_actionFit_Result_triggered();
-
     void on_doubleSpinBox_zOffset_valueChanged(double arg1);
-
     void on_actionB_Plot_triggered();
+
+    void setDisabledPlanel();
+    void setEnabledPlanel();
+
+    void on_checkBox_MeanCorr_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -70,7 +72,7 @@ private:
     QCustomPlot *plot;
     QCustomPlot *ctplot;
     QCPColorMap * colorMap;
-    QCPPlotTitle *plotTitle;
+    //QCPPlotTitle *plotTitle;
 
     FileIO *file;
     Analysis *ana;

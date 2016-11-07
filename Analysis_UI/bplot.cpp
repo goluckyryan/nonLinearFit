@@ -24,11 +24,13 @@ BPlot::~BPlot()
     delete ui;
     delete plot;
 
-    //delete file;
+    //if( file != NULL) delete file;
 }
 
-BPlot::SetData(FileIO *file)
+void BPlot::SetData(FileIO *file)
 {
+    if( file == NULL) return;
+
     this->file = file;
 
     int n = file->GetDataSize();
@@ -48,10 +50,13 @@ BPlot::SetData(FileIO *file)
     //ui->lineEdit_StartValue->setText(QString::number(xdata[xStart]));
     //ui->lineEdit_EndValue->setText(QString::number(xdata[xEnd]));
 
+    x.clear();
+    y.clear();
 }
 
-BPlot::Plot()
+void BPlot::Plot()
 {
+    if( file == NULL) return;
     QVector<double> xdata = file->GetDataSetX();
     int n = file->GetDataSetSize();
 
@@ -60,11 +65,9 @@ BPlot::Plot()
 
     double dx = xdata[xEnd]-xdata[xEnd-1];
 
-    QVector<double> x, y;
-    x = file->GetDataSetY();
     double yMin, yMax;
     for( int i = 0; i < n; i++){
-
+        x.push_back(file->GetDataY(i));
         //integrated
         QVector<double> zdata = file->GetDataSetZ(i);
         double sum = 0;
@@ -109,7 +112,7 @@ int BPlot::FindstartIndex(QVector<double> xdata, double goal)
 void BPlot::on_spinBox_Start_valueChanged(int arg1)
 {
     QVector<double> xData = file->GetDataSetX();
-    ui->lineEdit_StartValue->setText(QString::number(xData[arg1]));
+    ui->lineEdit_StartValue->setText(QString::number(xData[arg1])+" us");
 
     Plot();
 }
@@ -117,7 +120,42 @@ void BPlot::on_spinBox_Start_valueChanged(int arg1)
 void BPlot::on_spinBox_End_valueChanged(int arg1)
 {
     QVector<double> xData = file->GetDataSetX();
-    ui->lineEdit_EndValue->setText(QString::number(xData[arg1]));
+    ui->lineEdit_EndValue->setText(QString::number(xData[arg1])+ " us");
 
     Plot();
+}
+
+void BPlot::on_pushButton_clicked()
+{
+    QString filePath = file->GetFilePath();
+    filePath.chop(4);
+    filePath.append("_BPlot.dat");
+    QFile saveFile(filePath);
+    saveFile.open(QIODevice::WriteOnly);
+    QTextStream stream(&saveFile);
+    QString str;
+
+    //header
+    int xEnd = ui->spinBox_End->value();
+    int xStart = ui->spinBox_Start->value();
+    QVector<double> xData = this->file->GetDataSetX();
+    str.sprintf("#xStart : %4d (%8f us) \n", xStart, xData[xStart]);
+    stream << str;
+    str.sprintf("#xEnd   : %4d (%8f us) \n", xEnd, xData[xEnd]);
+    stream << str;
+    str.sprintf("%15s, %15s\n", "B-field [mV]", "Int. Value [a.u.]");
+    stream << str;
+
+    //fill data;
+    int n = file->GetDataSetSize();
+    for(int i = 0; i < n ; i++){
+        str.sprintf("%15.4f, %15.4f\n", x[i], y[i]);
+        stream << str;
+    }
+
+    saveFile.close();
+
+    str.sprintf("Save B-Plot to %s", filePath.toStdString().c_str());
+    SendMsg(str);
+
 }
