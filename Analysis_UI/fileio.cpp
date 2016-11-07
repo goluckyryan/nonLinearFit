@@ -283,9 +283,9 @@ void FileIO::OpenTxtData_row(){
             yData.push_back(temp);
 
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                temp = (lineList[i]).toDouble();
+                temp = (lineList[i]).toDouble() * 1e3;
                 zData[yIndex].push_back(temp);
-                if( i == 1) {
+                if( i == 1 && rows == 2) {
                     zMax = temp;
                     zMin = temp;
                 }

@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->yAxis->setLabel("Voltage [V]");
     plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
+    plot->axisRect()->setRangeDrag(Qt::Vertical);
+    plot->axisRect()->setRangeZoom(Qt::Vertical);
     plot->plotLayout()->insertRow(0);
     plotTitle = new QCPPlotTitle(plot, "title");
     plotTitle->setFont(QFont("sans", 12, QFont::Bold));
@@ -143,9 +145,11 @@ void MainWindow::on_pushButton_clicked(){
 
     double zMin = file->GetZMin();
     double zMax = file->GetZMax();
-    ui->doubleSpinBox_zOffset->setMinimum(-zMax+zMin);
-    ui->doubleSpinBox_zOffset->setMaximum(zMax-zMin);
-    ui->doubleSpinBox_zOffset->setSingleStep((zMax-zMin)/200.);
+    double zRange = fabs(zMax)+fabs(zMin);
+    qDebug() << zMax << "," << zMin;
+    ui->doubleSpinBox_zOffset->setMinimum(-zRange);
+    ui->doubleSpinBox_zOffset->setMaximum(zRange);
+    ui->doubleSpinBox_zOffset->setSingleStep(zRange/200.);
     ui->doubleSpinBox_zOffset->setValue(0);
 }
 
@@ -523,9 +527,10 @@ void MainWindow::PlotContour()
     colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
     colorMap->setColorScale(colorScale); // associate the color map with the color scale
 
-    colorMap->setGradient(QCPColorGradient::gpJet ); //color scheme
+    colorMap->setGradient(QCPColorGradient::gpCandy ); //color scheme
 
-    colorMap->rescaleDataRange();
+    //colorMap->rescaleDataRange();
+    colorMap->setDataRange(QCPRange(file->GetZMin(), file->GetZMax()));
 
     QCPMarginGroup *marginGroup = new QCPMarginGroup(ctplot);
     ctplot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
