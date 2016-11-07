@@ -10,6 +10,7 @@
 #include "constant.h"
 #include "fileio.h"
 #include "dialog.h"
+#include "bplot.h"
 
 namespace Ui {
 class MainWindow;
@@ -57,22 +58,24 @@ private slots:
 
     void on_doubleSpinBox_zOffset_valueChanged(double arg1);
 
+    void on_actionB_Plot_triggered();
+
 private:
     Ui::MainWindow *ui;
     Dialog * fitResultDialog;
+    BPlot * bPlot;
 
     QString Msg;
 
     QCustomPlot *plot;
     QCustomPlot *ctplot;
     QCPColorMap * colorMap;
+    QCPPlotTitle *plotTitle;
 
     FileIO *file;
     Analysis *ana;
 
     bool savedSimplifiedtxt;
-
-    QCPPlotTitle *plotTitle;
 
 };
 

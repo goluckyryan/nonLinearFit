@@ -7,14 +7,17 @@ MainWindow::MainWindow(QWidget *parent) :
     file(NULL)
 {
     ui->setupUi(this);
+
     fitResultDialog = new Dialog(this);
     connect(fitResultDialog, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
+
+    bPlot = new BPlot(this);
 
     savedSimplifiedtxt = 0;
 
     plot = ui->customPlot;
     plot->xAxis->setLabel("time [us]");
-    plot->yAxis->setLabel("Voltage [V]");
+    plot->yAxis->setLabel("Voltage [a.u.]");
     plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);
@@ -41,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow(){
     delete ui;
     delete fitResultDialog;
+    delete bPlot;
 
     delete plotTitle;
     delete plot;
@@ -151,6 +155,8 @@ void MainWindow::on_pushButton_clicked(){
     ui->doubleSpinBox_zOffset->setMaximum(zRange);
     ui->doubleSpinBox_zOffset->setSingleStep(zRange/200.);
     ui->doubleSpinBox_zOffset->setValue(0);
+
+    bPlot->SetData(file);
 }
 
 
@@ -500,7 +506,7 @@ void MainWindow::PlotContour()
 {
     ctplot->axisRect()->setupFullAxesBox(true);
     ctplot->xAxis->setLabel("time [us]");
-    ctplot->yAxis->setLabel("y-Value");
+    ctplot->yAxis->setLabel("B-field [mV]");
 
     colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
     int nx = file->GetDataSize();
@@ -579,4 +585,12 @@ void MainWindow::on_doubleSpinBox_zOffset_valueChanged(double arg1)
     //colorMap->setDataRange(QCPRange(zMin, zMax));
 
     ctplot->replot();
+}
+
+void MainWindow::on_actionB_Plot_triggered()
+{
+    if(bPlot->isHidden()){
+        bPlot->show();
+        bPlot->Plot();
+    }
 }

@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     matrix.cpp \
     analysis.cpp \
     fileio.cpp \
-    dialog.cpp
+    dialog.cpp \
+    bplot.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot.h \
@@ -26,7 +27,9 @@ HEADERS  += mainwindow.h \
     analysis.h \
     fileio.h \
     constant.h \
-    dialog.h
+    dialog.h \
+    bplot.h
 
 FORMS    += mainwindow.ui \
-    dialog.ui
+    dialog.ui \
+    bplot.ui
