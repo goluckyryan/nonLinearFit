@@ -32,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pushButton_save->setEnabled(0);
     ui->pushButton_FitAll->setEnabled(0);
 
+    statusBar()->showMessage("Please open a file.");
+
 }
 
 MainWindow::~MainWindow(){
@@ -40,6 +42,9 @@ MainWindow::~MainWindow(){
 
     delete plotTitle;
     delete plot;
+    //delete ctplot;
+    //delete colorMap;
+
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
 
@@ -90,8 +95,12 @@ void MainWindow::on_pushButton_clicked(){
         fileName = fileNames[0];
     }
 
-    if(fileName == "") return;
+    if(fileName == "") {
+        statusBar()->showMessage("No file was selected.");
+        return;
+    }
 
+    statusBar()->showMessage("Opened an file.");
     ui->lineEdit->setText(fileName);
 
     file = new FileIO(fileName);
@@ -131,10 +140,19 @@ void MainWindow::on_pushButton_clicked(){
     fitResultDialog->ClearData();
     fitResultDialog->SetDataSize(file);
     fitResultDialog->SetFilePath(file->GetFilePath());
+
+    double zMin = file->GetZMin();
+    double zMax = file->GetZMax();
+    ui->doubleSpinBox_zOffset->setMinimum(-zMax+zMin);
+    ui->doubleSpinBox_zOffset->setMaximum(zMax-zMin);
+    ui->doubleSpinBox_zOffset->setSingleStep((zMax-zMin)/200.);
+    ui->doubleSpinBox_zOffset->setValue(0);
 }
 
 
 void MainWindow::on_spinBox_y_valueChanged(int arg1){
+
+    statusBar()->showMessage("Changed y-Index.");
 
     ui->spinBox_y->setValue(arg1);
     ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1)));
@@ -158,6 +176,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
 }
 
 void MainWindow::on_spinBox_x_valueChanged(int arg1){
+    statusBar()->showMessage("Changed x-Index.");
     ui->lineEdit_x->setText(QString::number(file->GetDataX(arg1)));
     ana->SetStartFitIndex(arg1);
     PlotFitFunc();
@@ -191,22 +210,27 @@ void MainWindow::PlotFitFunc(){
 }
 
 void MainWindow::on_lineEdit_a_returnPressed(){
+    statusBar()->showMessage("Changed parameter a.");
     PlotFitFunc();
 }
 
 void MainWindow::on_lineEdit_Ta_returnPressed(){
+    statusBar()->showMessage("Changed parameter Ta.");
     PlotFitFunc();
 }
 
 void MainWindow::on_lineEdit_b_returnPressed(){
+    statusBar()->showMessage("Changed parameter b.");
     PlotFitFunc();
 }
 
 void MainWindow::on_lineEdit_Tb_returnPressed(){
+    statusBar()->showMessage("Changed parameter Tb.");
     PlotFitFunc();
 }
 void MainWindow::on_lineEdit_c_returnPressed()
 {
+    statusBar()->showMessage("Changed parameter c.");
     PlotFitFunc();
 }
 
@@ -214,6 +238,8 @@ void MainWindow::on_lineEdit_c_returnPressed()
 void MainWindow::on_pushButton_Fit_clicked(){
 
     if( file == NULL) return;
+
+    statusBar()->showMessage("Fitting.");
 
     bool gnu = ui->checkBox->isChecked();
 
@@ -279,6 +305,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
 void MainWindow::on_pushButton_reset_clicked()
 {
     if( file == NULL) return;
+    statusBar()->showMessage("Reset parameters to default values.");
     int xIndex = ui->spinBox_x->value();
     int yIndex = ui->spinBox_y->value();
     double zValue = file->GetDataZ(xIndex, yIndex);
@@ -299,6 +326,7 @@ void MainWindow::on_pushButton_reset_clicked()
 void MainWindow::on_pushButton_save_clicked()
 {
     if( file == NULL) return;
+    statusBar()->showMessage("Save fitted parameters.");
     file->OpenSaveFile();
     file->SaveFitResult(ana);
 
@@ -307,6 +335,7 @@ void MainWindow::on_pushButton_save_clicked()
 void MainWindow::on_pushButton_FitAll_clicked()
 {
     if( file == NULL) return;
+    statusBar()->showMessage("Fitting all data.");
     int n = file->GetDataSetSize();
     QProgressDialog progress("Fitting...", "Abort", 0, n-1, this);
     progress.setWindowModality(Qt::WindowModal);
@@ -345,6 +374,7 @@ void MainWindow::on_pushButton_FitAll_clicked()
 
 void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
 {
+
     ui->lineEdit_b->setEnabled(checked);
     ui->lineEdit_Tb->setEnabled(checked);
     ui->lineEdit_P->setEnabled(checked);
@@ -353,12 +383,14 @@ void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
     //fitResultDialog->SetDataSize(file->GetDataSetSize());
 
     if( checked ){
+        statusBar()->showMessage("Enable b and Tb.");
         if(ui->checkBox_c->isChecked() ){
             fitResultDialog->SetAvalibleData(5);
         }else{
             fitResultDialog->SetAvalibleData(4);
         }
     }else{
+        statusBar()->showMessage("Disable b and Tb.");
         if(ui->checkBox_c->isChecked() ){
             fitResultDialog->SetAvalibleData(3);
         }else{
@@ -376,12 +408,14 @@ void MainWindow::on_checkBox_c_clicked(bool checked)
     //fitResultDialog->SetDataSize(file->GetDataSetSize());
 
     if( checked ){
+        statusBar()->showMessage("Enable c.");
         if(ui->checkBox_b_Tb->isChecked() ){
             fitResultDialog->SetAvalibleData(5);
         }else{
             fitResultDialog->SetAvalibleData(3);
         }
     }else{
+        statusBar()->showMessage("Disable c.");
         if(ui->checkBox_b_Tb->isChecked() ){
             fitResultDialog->SetAvalibleData(4);
         }else{
@@ -464,7 +498,7 @@ void MainWindow::PlotContour()
     ctplot->xAxis->setLabel("time [us]");
     ctplot->yAxis->setLabel("y-Value");
 
-    QCPColorMap *colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
+    colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
     int nx = file->GetDataSize();
     int ny = file->GetDataSetSize();
     colorMap->data()->setSize(nx, ny);
@@ -489,7 +523,7 @@ void MainWindow::PlotContour()
     colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
     colorMap->setColorScale(colorScale); // associate the color map with the color scale
 
-    colorMap->setGradient(QCPColorGradient::gpHues ); //color scheme
+    colorMap->setGradient(QCPColorGradient::gpJet ); //color scheme
 
     colorMap->rescaleDataRange();
 
@@ -508,4 +542,28 @@ void MainWindow::on_actionFit_Result_triggered()
         fitResultDialog->show();
         fitResultDialog->PlotData();
     }
+}
+
+void MainWindow::on_doubleSpinBox_zOffset_valueChanged(double arg1)
+{
+    int nx = file->GetDataSize();
+    int ny = file->GetDataSetSize();
+
+    //double zMax, zMin;
+    for(int xIndex = 0; xIndex < nx; xIndex++){
+        for(int yIndex = 0; yIndex < ny; yIndex++){
+            double z = file->GetDataZ(xIndex, yIndex)+ arg1;
+            colorMap->data()->setCell(xIndex, yIndex, z); // fill data
+            //if(xIndex == 0 && yIndex == 0){
+            //    zMax = z;
+            //    zMin = z;
+            //}
+            //if( zMax < z) zMax = z;
+            //if( zMin > z) zMin = z;
+        }
+    }
+
+    //colorMap->setDataRange(QCPRange(zMin, zMax));
+
+    ctplot->replot();
 }

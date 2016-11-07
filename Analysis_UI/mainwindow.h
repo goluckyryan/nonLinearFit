@@ -55,6 +55,8 @@ private slots:
 
     void on_actionFit_Result_triggered();
 
+    void on_doubleSpinBox_zOffset_valueChanged(double arg1);
+
 private:
     Ui::MainWindow *ui;
     Dialog * fitResultDialog;
@@ -63,6 +65,8 @@ private:
 
     QCustomPlot *plot;
     QCustomPlot *ctplot;
+    QCPColorMap * colorMap;
+
     FileIO *file;
     Analysis *ana;
 
