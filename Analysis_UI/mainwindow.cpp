@@ -457,14 +457,14 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> e
         ui->lineEdit_P->setText("");
     }
     if( par.size() == 4 ){
-        P = (par[0]-par[2])/(par[0]+par[2]);
+        P = (fabs(par[0])-fabs(par[2]))/(fabs(par[0])+fabs(par[2]));
         ui->lineEdit_P->setText(QString::number(P));
         ui->lineEdit_b ->setText(QString::number(par[2]));
         ui->lineEdit_Tb->setText(QString::number(par[3]));
         ui->lineEdit_c->setText("");
     }
     if( par.size()== 5){
-        P = (par[0]-par[2])/(par[0]+par[2]);
+        P =  (fabs(par[0])-fabs(par[2]))/(fabs(par[0])+fabs(par[2]));
         ui->lineEdit_P->setText(QString::number(P));
         ui->lineEdit_b ->setText(QString::number(par[2]));
         ui->lineEdit_Tb->setText(QString::number(par[3]));
@@ -480,14 +480,14 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> e
         ui->lineEdit_eP->setText("");
     }
     if( par.size() == 4 ){
-        eP = 1/pow(par[0]+par[2],2)*sqrt(pow(epar[0],2)+ pow(epar[2],2)) * sqrt(2*(pow(par[0],2)+pow(par[2],2)));
+        eP = 1/pow(fabs(par[0])+fabs(par[2]),2)*sqrt(pow(epar[0],2)+ pow(epar[2],2)) * sqrt(2*(pow(par[0],2)+pow(par[2],2)));
         ui->lineEdit_eP->setText(QString::number(eP));
         ui->lineEdit_eb ->setText(QString::number(epar[2]));
         ui->lineEdit_eTb->setText(QString::number(epar[3]));
         ui->lineEdit_ec->setText("");
     }
     if( par.size()== 5){
-        eP = 1/pow(par[0]+par[2],2)*sqrt(pow(epar[0],2)+ pow(epar[2],2)) * sqrt(2*(pow(par[0],2)+pow(par[2],2)));
+        eP =  1/pow(fabs(par[0])+fabs(par[2]),2)*sqrt(pow(epar[0],2)+ pow(epar[2],2)) * sqrt(2*(pow(par[0],2)+pow(par[2],2)));
         ui->lineEdit_eP->setText(QString::number(eP));
         ui->lineEdit_eb ->setText(QString::number(epar[2]));
         ui->lineEdit_eTb->setText(QString::number(epar[3]));
