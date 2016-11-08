@@ -508,6 +508,7 @@ void MainWindow::PlotContour()
     ctplot->yAxis->setLabel("B-field [mV]");
 
     colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
+    colorMap->clearData();
     int nx = file->GetDataSize();
     int ny = file->GetDataSetSize();
     colorMap->data()->setSize(nx, ny);
@@ -535,6 +536,7 @@ void MainWindow::PlotContour()
     }
 
     QCPColorScale *colorScale = new QCPColorScale(ctplot);
+    ctplot->plotLayout()->removeAt(1); // remove any element if there is any
     ctplot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
     colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
     colorMap->setColorScale(colorScale); // associate the color map with the color scale
