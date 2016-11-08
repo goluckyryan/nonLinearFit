@@ -59,7 +59,7 @@ void MainWindow::OpenRow(QString fileName){
         ySize ++;
         QStringList lineList = line.split(",");
 
-        if( xSize == 0){ // get yDatax
+        if( ySize == 0){ // get yDatax
             xSize = lineList.size()-1;
         }
     }
