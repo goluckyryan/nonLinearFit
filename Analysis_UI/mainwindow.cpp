@@ -628,8 +628,9 @@ void MainWindow::setEnabledPlanel()
     ui->doubleSpinBox_zOffset->setEnabled(1);
 }
 
-void MainWindow::on_checkBox_MeanCorr_clicked()
+void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
 {
     double val = ui->doubleSpinBox_zOffset->value();
     on_doubleSpinBox_zOffset_valueChanged(val);
+    bPlot->SetMeanCorr(checked);
 }

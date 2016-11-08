@@ -60,7 +60,7 @@ private slots:
     void setDisabledPlanel();
     void setEnabledPlanel();
 
-    void on_checkBox_MeanCorr_clicked();
+    void on_checkBox_MeanCorr_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;

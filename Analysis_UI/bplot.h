@@ -20,17 +20,17 @@ public:
 
     void SetData(FileIO *file);
     void Plot();
-    int FindstartIndex(QVector<double> xdata, double goal);
+    int FindstartIndex(QVector<double> xdata, double goal);    
+    void SetMeanCorr(bool checked);
 
 signals:
     void SendMsg(QString msg);
 
 private slots:
     void on_spinBox_Start_valueChanged(int arg1);
-
     void on_spinBox_End_valueChanged(int arg1);
-
     void on_pushButton_clicked();
+
 
 private:
     Ui::BPlot *ui;
@@ -40,6 +40,8 @@ private:
     FileIO *file;
 
     QVector<double> x, y;
+
+    bool meanCorr;
 
 };
 
