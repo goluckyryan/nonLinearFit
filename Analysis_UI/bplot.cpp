@@ -10,6 +10,8 @@ BPlot::BPlot(QWidget *parent) :
     plot = ui->plotArea;
     plot->xAxis->setLabel("B-field [mV]");
     plot->yAxis->setLabel("Integrated value [a.u.]");
+    plot->xAxis2->setLabel("y-Index");
+    plot->xAxis2->setVisible(true);
     plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);
@@ -51,6 +53,17 @@ void BPlot::SetData(FileIO *file)
     ui->spinBox_End->setValue(xEnd);
     //ui->lineEdit_StartValue->setText(QString::number(xdata[xStart]));
     //ui->lineEdit_EndValue->setText(QString::number(xdata[xEnd]));
+
+    if(file->IsYRevered()) {
+        plot->xAxis2->setRangeReversed(1);
+    }else{
+        plot->xAxis2->setRangeReversed(0);
+    }
+
+    n = file->GetDataSetSize();
+    QVector<double> yValue = file->GetDataSetY();
+    plot->xAxis->setRange(yValue[0], yValue[n-1]);
+    plot->xAxis2->setRange(0,n-1);
 
     x.clear();
     y.clear();
@@ -96,7 +109,6 @@ void BPlot::Plot()
     }
 
     plot->graph(0)->clearData();
-    plot->xAxis->setRange(x[0], x[n-1]);
     plot->yAxis->setRange(yMin, yMax);
 
     plot->graph(0)->addData(x,y);

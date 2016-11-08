@@ -44,6 +44,7 @@ public slots:
     double GetDataX(int xIndex){ return xData[xIndex];}
     double GetDataY(int yIndex){ return yData[yIndex];}
     double GetDataMeanZ(int yIndex){ return zMean[yIndex];}
+    double GetDataMeanZMean() {return zMeanMean;}
 
     double GetXMax(){return xMax;}
     double GetXMin(){return xMin;}
@@ -53,6 +54,7 @@ public slots:
     double GetZMin(){return zMin;}
 
     bool IsOpen(){return openState;}
+    bool IsYRevered(){return yRevered;}
 
 private:
     QVector<double> xData; // time data
@@ -64,9 +66,11 @@ private:
     double xMin, xMax;
     double yMin, yMax;
     double zMin, zMax;
+    double zMeanMean;
     bool colwise; // 0 = data store as row, 1 = data store as col
     bool openState;
     bool isOutFileOpened;
+    bool yRevered;
 
     QFile * myfile;
     QFile * outfile;

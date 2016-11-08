@@ -516,14 +516,21 @@ void MainWindow::PlotContour()
     double xMax = file->GetXMax();
     double yMin = file->GetYMin();
     double yMax = file->GetYMax();
+
     ctplot->xAxis->setRange(xMin, xMax);
     ctplot->yAxis->setRange(yMin, yMax);
+    //ctplot->yAxis->setRangeReversed(file->IsYRevered());
+
     colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
 
     for(int xIndex = 0; xIndex < nx; xIndex++){
         for(int yIndex = 0; yIndex < ny; yIndex++){
             double z = file->GetDataZ(xIndex, yIndex);
-            colorMap->data()->setCell(xIndex, yIndex, z); // fill data
+            if( file->IsYRevered()){
+                colorMap->data()->setCell(xIndex, ny-yIndex-1, z);
+            }else{
+                colorMap->data()->setCell(xIndex, yIndex, z); // fill data
+            }
         }
     }
 
@@ -579,7 +586,11 @@ void MainWindow::on_doubleSpinBox_zOffset_valueChanged(double arg1)
             }
 
             double z = file->GetDataZ(xIndex, yIndex)+ arg1 - mean;
-            colorMap->data()->setCell(xIndex, yIndex, z); // fill data
+            if( file->IsYRevered()){
+                colorMap->data()->setCell(xIndex, ny-yIndex-1, z);
+            }else{
+                colorMap->data()->setCell(xIndex, yIndex, z); // fill data
+            }
             //if(xIndex == 0 && yIndex == 0){
             //    zMax = z;
             //    zMin = z;
@@ -632,5 +643,7 @@ void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
 {
     double val = ui->doubleSpinBox_zOffset->value();
     on_doubleSpinBox_zOffset_valueChanged(val);
+    //on_doubleSpinBox_zOffset_valueChanged(file->GetDataMeanZMean());
     bPlot->SetMeanCorr(checked);
+
 }

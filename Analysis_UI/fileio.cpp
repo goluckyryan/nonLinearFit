@@ -27,6 +27,7 @@ void FileIO::Initialize(){
     zMin = 0;
     openState = 0;
     isOutFileOpened = 0;
+    yRevered =0;
 
     xSize = 0;
     ySize = 0;
@@ -133,6 +134,8 @@ void FileIO::OpenCSVData(){
     yMin = FindMin(yData);
     yMax = FindMax(yData);
 
+    if(yData[0] > yData[1]) yRevered = 1;
+
     openState = 1;
 
     QString msg;
@@ -227,6 +230,8 @@ void FileIO::OpenTxtData_col()
     yMin = FindMin(yData);
     yMax = FindMax(yData);
 
+    if(yData[0] > yData[1]) yRevered = 1;
+
     openState = 1;
 
     QString msg;
@@ -308,6 +313,8 @@ void FileIO::OpenTxtData_row(){
 
     yMin = FindMin(yData);
     yMax = FindMax(yData);
+
+    if(yData[0] > yData[1]) yRevered = 1;
 
     openState = 1;
 
@@ -474,6 +481,7 @@ void FileIO::CalMeanVector()
     }
 
     double mean = 0;
+    zMeanMean = 0;
 
     for(int yIndex = 0; yIndex < ySize; yIndex++){
         for( int i = 0; i < xEnd; i ++){
@@ -481,6 +489,10 @@ void FileIO::CalMeanVector()
         }
         mean = mean / xEnd;
         this->zMean.push_back(mean);
-    }
+        zMeanMean += mean / ySize;
+    }  
 
+    QString msg;
+    msg.sprintf("total mean z for x < -1 us: %f", zMeanMean);
+    SendMsg(msg);
 }

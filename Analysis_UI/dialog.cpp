@@ -20,7 +20,7 @@ Dialog::Dialog(QWidget *parent) :
     plot->axisRect()->setRangeZoom(Qt::Vertical);
 
     //set xaxis label
-    plot->xAxis->setLabel("y-Value");
+    plot->xAxis->setLabel("B-filed [mV]");
     plot->xAxis2->setVisible(true);
     plot->xAxis2->setLabel("y-Index");
 
@@ -87,6 +87,12 @@ void Dialog::SetDataSize(FileIO *file)
     yValue = file->GetDataSetY();
     plot->xAxis->setRange(yValue[0], yValue[n-1]);
     plot->xAxis2->setRange(0,n-1);
+
+    if(file->IsYRevered()) {
+        plot->xAxis2->setRangeReversed(1);
+    }else{
+        plot->xAxis2->setRangeReversed(0);
+    }
 
     fixedSize = 1;
 
