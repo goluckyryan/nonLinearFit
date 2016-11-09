@@ -16,7 +16,6 @@ Analysis::~Analysis(){
 
 void Analysis::Initialize(){
     SSR = 0;
-    lastSSR = 0;
     n = 0;
     p = 0;
     DF = 0;
@@ -197,13 +196,11 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
 
     nIter = 0;
     QVector<double> par = par0;
-    lastSSR = 0;
     bool contFlag;
     Msg.sprintf(" === Start fit using Levenberg-Marquardt Algorithm: ");
     do{
         Regression(par);
         par = this->sol;
-        lastSSR = SSR;
         nIter ++;
         if( nIter >= MaxIter ) {
             fitFlag = 2; // fitFlag = 2 when iteration too many

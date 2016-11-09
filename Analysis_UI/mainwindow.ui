@@ -24,57 +24,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="11">
-     <widget class="QLineEdit" name="lineEdit_lambda">
-      <property name="text">
-       <string>-1</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="10">
-     <widget class="QLabel" name="label_9">
-      <property name="text">
-       <string>lamda</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="10">
-     <widget class="QLabel" name="label_8">
-      <property name="text">
-       <string>Max Iteration</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QLineEdit" name="lineEdit_y">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="11">
-     <widget class="QLineEdit" name="lineEdit_MaxIter">
-      <property name="text">
-       <string>300</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QSpinBox" name="spinBox_y"/>
-    </item>
-    <item row="2" column="0">
-     <widget class="QCheckBox" name="checkBox_AutoFit">
-      <property name="text">
-       <string>Auto-fit</string>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="0">
      <widget class="QPushButton" name="pushButton">
       <property name="text">
@@ -82,7 +31,7 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0" colspan="12">
+    <item row="5" column="0" colspan="12">
      <widget class="QTextEdit" name="textEdit">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -100,23 +49,97 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="4">
-     <widget class="QCheckBox" name="checkBox">
-      <property name="enabled">
-       <bool>false</bool>
+    <item row="1" column="10" rowspan="3" colspan="2">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Fit Control</string>
       </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="3" column="1">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Max Iteration</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="lineEdit_lambda">
+         <property name="text">
+          <string>-1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>lamda</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="lineEdit_MaxIter">
+         <property name="text">
+          <string>300</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QLineEdit" name="lineEdit_TORR">
+         <property name="text">
+          <string>-6</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>TORR : 10^</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QCheckBox" name="checkBox_AutoFit">
       <property name="text">
-       <string>GnuFit (4 pars)</string>
+       <string>Auto-fit</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="8">
-     <widget class="QLabel" name="label_3">
+    <item row="2" column="1">
+     <widget class="QLabel" name="label">
       <property name="text">
-       <string>z-offset</string>
+       <string>y-Index</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QSpinBox" name="spinBox_y"/>
+    </item>
+    <item row="2" column="3">
+     <widget class="QLineEdit" name="lineEdit_y">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" colspan="9">
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="enabled">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -133,17 +156,44 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="QLabel" name="label">
+    <item row="2" column="8">
+     <widget class="QLabel" name="label_3">
       <property name="text">
-       <string>y-Index</string>
+       <string>z-offset</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
-    <item row="3" column="0" colspan="2">
+    <item row="4" column="7" colspan="5">
+     <widget class="QCustomPlot" name="customPlot_CT" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>3</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="2" colspan="5">
+     <widget class="QCustomPlot" name="customPlot" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>4</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="9">
+     <widget class="QCheckBox" name="checkBox_MeanCorr">
+      <property name="text">
+       <string>Mean Corr.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="2">
      <widget class="QGroupBox" name="groupBox">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -384,54 +434,26 @@
       <zorder>checkBox_b_Tb</zorder>
      </widget>
     </item>
-    <item row="3" column="6" colspan="6">
-     <widget class="QCustomPlot" name="customPlot_CT" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>3</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
+    <item row="3" column="1">
+     <widget class="QCheckBox" name="checkBox_BGsub">
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>BG sub.</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="2" colspan="4">
-     <widget class="QCustomPlot" name="customPlot" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>4</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
+    <item row="3" column="2">
+     <widget class="QSpinBox" name="spinBox_BGIndex"/>
     </item>
-    <item row="1" column="1" colspan="8">
-     <widget class="QLineEdit" name="lineEdit">
+    <item row="2" column="6">
+     <widget class="QCheckBox" name="checkBox">
       <property name="enabled">
        <bool>false</bool>
       </property>
-     </widget>
-    </item>
-    <item row="1" column="9">
-     <widget class="QCheckBox" name="checkBox_MeanCorr">
       <property name="text">
-       <string>Mean Corr.</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="7">
-     <widget class="QLineEdit" name="lineEdit_TORR">
-      <property name="text">
-       <string>-6</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="6">
-     <widget class="QLabel" name="label_10">
-      <property name="text">
-       <string>TORR : 10^</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       <string>GnuFit (4 pars)</string>
       </property>
      </widget>
     </item>
@@ -487,8 +509,6 @@
  <tabstops>
   <tabstop>pushButton</tabstop>
   <tabstop>lineEdit</tabstop>
-  <tabstop>checkBox_AutoFit</tabstop>
-  <tabstop>spinBox_y</tabstop>
   <tabstop>spinBox_x</tabstop>
   <tabstop>lineEdit_a</tabstop>
   <tabstop>lineEdit_Ta</tabstop>
@@ -502,11 +522,6 @@
   <tabstop>checkBox_c</tabstop>
   <tabstop>pushButton_FitAll</tabstop>
   <tabstop>pushButton_Fit</tabstop>
-  <tabstop>lineEdit_TORR</tabstop>
-  <tabstop>checkBox_MeanCorr</tabstop>
-  <tabstop>doubleSpinBox_zOffset</tabstop>
-  <tabstop>lineEdit_lambda</tabstop>
-  <tabstop>lineEdit_MaxIter</tabstop>
   <tabstop>textEdit</tabstop>
   <tabstop>lineEdit_x</tabstop>
   <tabstop>lineEdit_ea</tabstop>
@@ -515,8 +530,6 @@
   <tabstop>lineEdit_eTb</tabstop>
   <tabstop>lineEdit_ec</tabstop>
   <tabstop>lineEdit_eP</tabstop>
-  <tabstop>lineEdit_y</tabstop>
-  <tabstop>checkBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

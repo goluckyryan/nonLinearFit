@@ -99,7 +99,7 @@ private:
     Matrix CoVar;
 
     int MaxIter, nIter;
-    double SSR, lastSSR;
+    double SSR;
     int n, p, DF;
     int startIndex;
     int fitFlag;

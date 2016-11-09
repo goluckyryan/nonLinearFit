@@ -626,6 +626,8 @@ void MainWindow::setDisabledPlanel()
     ui->spinBox_x->setEnabled(0);
     ui->checkBox_MeanCorr->setEnabled(0);
     ui->doubleSpinBox_zOffset->setEnabled(0);
+    ui->checkBox_BGsub->setEnabled(0);
+    ui->spinBox_BGIndex->setEnabled(0);
 }
 
 void MainWindow::setEnabledPlanel()
@@ -639,6 +641,8 @@ void MainWindow::setEnabledPlanel()
     ui->spinBox_x->setEnabled(1);
     ui->checkBox_MeanCorr->setEnabled(1);
     ui->doubleSpinBox_zOffset->setEnabled(1);
+    ui->checkBox_BGsub->setEnabled(1);
+    ui->spinBox_BGIndex->setEnabled(1);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
