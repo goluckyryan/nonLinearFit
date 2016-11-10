@@ -176,7 +176,7 @@ void Dialog::PlotData()
     on_checkBox_b_clicked(ui->checkBox_b->isChecked());
     on_checkBox_Tb_clicked(ui->checkBox_Tb->isChecked());
     on_checkBox_c_clicked(ui->checkBox_c->isChecked());
-    on_checkBox_abc_clicked(ui->checkBox_abc->isChecked());
+    on_checkBox_P_clicked(ui->checkBox_P->isChecked());
     on_checkBox_SSR_clicked(ui->checkBox_SSR->isChecked());
 
 }
@@ -252,7 +252,7 @@ void Dialog::on_checkBox_c_clicked(bool checked)
     plot->replot();
 }
 
-void Dialog::on_checkBox_abc_clicked(bool checked)
+void Dialog::on_checkBox_P_clicked(bool checked)
 {
     if( fixedSize == 0 ) return;
 
@@ -261,16 +261,15 @@ void Dialog::on_checkBox_abc_clicked(bool checked)
         QVector<double> x, y, ye;
         for(int i = 0; i < dataSize; i++){
             x.push_back(yValue[i]);
-            double a = fitPar[i][0];
-            double b = fitPar[i][2];
-            double c = fitPar[i][4];
+            double a = fabs(fitPar[i][0]);
+            double b = fabs(fitPar[i][2]);
             double ea = fitParError[i][0];
             double eb = fitParError[i][2];
-            double ec = fitParError[i][4];
 
-            double ee = sqrt(ea*ea + eb*eb + ec*ec);
-            y.push_back(a+b-c);
-            ye.push_back(ee);
+            double P = (a-b)/(a+b)*100;
+            double eP = 100/pow(a+b,2)*sqrt(pow(ea,2)+ pow(eb,2)) * sqrt(2*(pow(a,2)+pow(b,2)));
+            y.push_back(P);
+            ye.push_back(eP);
 
         }
 

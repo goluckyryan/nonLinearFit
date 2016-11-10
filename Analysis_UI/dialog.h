@@ -41,7 +41,7 @@ private slots:
     void on_checkBox_b_clicked(bool checked);
     void on_checkBox_Tb_clicked(bool checked);
     void on_checkBox_c_clicked(bool checked);
-    void on_checkBox_abc_clicked(bool checked);
+    void on_checkBox_P_clicked(bool checked);
     void on_checkBox_SSR_clicked(bool checked);
 
     void on_pushButton_Save_clicked();

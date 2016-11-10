@@ -15,7 +15,6 @@ class Analysis : public QObject
 {
     Q_OBJECT
 public:
-    QString Msg;
 
     explicit Analysis();
     explicit Analysis(const QVector<double> x, const QVector<double> y);
@@ -77,6 +76,8 @@ public slots:
     int GetMaxIteration(){return MaxIter;}
     int GetYIndex()    {return yIndex;}
     double GetDataYValue() {return yValue;}
+    double GetDataYMin(){return yMin;}
+    double GetDataYMax(){return yMax;}
 
     void Print();
     void PrintVector(QVector<double> vec, QString str);
@@ -88,6 +89,8 @@ public slots:
     int FindstartIndex(double goal);
 
 private:
+    QString Msg;
+
     QVector<double> xdata, ydata;
     QVector<double> fydata;
     QVector<double> sol;
@@ -97,6 +100,8 @@ private:
     QVector<double> gradSSR;
 
     Matrix CoVar;
+
+    double yMin, yMax;
 
     int MaxIter, nIter;
     double SSR;

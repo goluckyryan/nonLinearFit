@@ -84,7 +84,7 @@ void MainWindow::Write2Log(QString str){
     ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
 }
 
-void MainWindow::on_pushButton_clicked(){
+void MainWindow::on_pushButton_OpenFile_clicked(){
 
     QFileDialog fileDialog(this);
     QStringList filters;
@@ -131,6 +131,8 @@ void MainWindow::on_pushButton_clicked(){
     ui->spinBox_y->setMaximum(file->GetDataSetSize()-1);
     ui->spinBox_x->setMinimum(0);
     ui->spinBox_x->setMaximum(file->GetDataSize()-1);
+    ui->spinBox_BGIndex->setMinimum(0);
+    ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
     on_spinBox_y_valueChanged(0);
     int xIndex = ana->FindstartIndex(TIME1);
@@ -273,11 +275,11 @@ void MainWindow::on_pushButton_Fit_clicked(){
     //display result
     ana->PrintVector(ana->GetParameters(), "sol");
     ana->PrintVector(ana->GetParError(), "error");
-    ana->PrintVector(ana->GetParPValue(), "p-Value");
+    //ana->PrintVector(ana->GetParPValue(), "p-Value");
     QVector<double> gradSSR = ana->GetSSRgrad();
     bool redFlag = 0;
     for(int i = 0 ; i < gradSSR.size(); i++){
-        redFlag |= std::abs(gradSSR[i]) > 0.2;
+        redFlag |= std::abs(gradSSR[i]) > 0.02;
     }
 
     //if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(255,0,0,255));
@@ -312,22 +314,25 @@ void MainWindow::on_pushButton_reset_clicked()
 {
     if( file == NULL) return;
     statusBar()->showMessage("Reset parameters to default values.");
-    int xIndex = ui->spinBox_x->value();
-    int yIndex = ui->spinBox_y->value();
-    double zValue = file->GetDataZ(xIndex, yIndex);
 
-    ui->lineEdit_a->setText(QString::number(zValue));
     ui->lineEdit_Ta->setText("20");
-
-    double mean = ana->GetSampleMean();
-    ui->lineEdit_c->setText(QString::number(mean));
-
-    if(zValue > mean) {
-        ui->lineEdit_b->setText("-10");
-    }else{
-        ui->lineEdit_b->setText("10");
-    }
     ui->lineEdit_Tb->setText("80");
+
+    double c = ana->GetSampleMean();
+    ui->lineEdit_c->setText(QString::number(c));
+
+    double a = ana->GetDataYMax();
+    double b = ana->GetDataYMin();
+    a = a-c;
+    b = b-c;
+    if( fabs(a) < fabs(b)) {
+        double tmp = a;
+        a = b;
+        b = tmp;
+    }
+
+    ui->lineEdit_a->setText(QString::number(a));
+    ui->lineEdit_b->setText(QString::number(b));
 
     PlotFitFunc();
 }
@@ -452,7 +457,15 @@ QVector<double> MainWindow::GetParametersFromLineText()
 
 void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> epar)
 {
-    double P, eP;
+    double a = fabs(par[0]);
+    double b = fabs(par[2]);
+    double ea = epar[0];
+    double eb = epar[2];
+
+    double P = (a-b)/(a+b);
+    double eP = 1/pow(a+b,2)*sqrt(pow(ea,2)+ pow(eb,2)) * sqrt(2*(pow(a,2)+pow(b,2)));
+
+
     ui->lineEdit_a ->setText(QString::number(par[0]));
     ui->lineEdit_Ta->setText(QString::number(par[1]));
     if( par.size() == 3){
@@ -462,14 +475,12 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> e
         ui->lineEdit_P->setText("");
     }
     if( par.size() == 4 ){
-        P = (fabs(par[0])-fabs(par[2]))/(fabs(par[0])+fabs(par[2]));
         ui->lineEdit_P->setText(QString::number(P));
         ui->lineEdit_b ->setText(QString::number(par[2]));
         ui->lineEdit_Tb->setText(QString::number(par[3]));
         ui->lineEdit_c->setText("");
     }
     if( par.size()== 5){
-        P =  (fabs(par[0])-fabs(par[2]))/(fabs(par[0])+fabs(par[2]));
         ui->lineEdit_P->setText(QString::number(P));
         ui->lineEdit_b ->setText(QString::number(par[2]));
         ui->lineEdit_Tb->setText(QString::number(par[3]));
@@ -485,14 +496,12 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> e
         ui->lineEdit_eP->setText("");
     }
     if( par.size() == 4 ){
-        eP = 1/pow(fabs(par[0])+fabs(par[2]),2)*sqrt(pow(epar[0],2)+ pow(epar[2],2)) * sqrt(2*(pow(par[0],2)+pow(par[2],2)));
         ui->lineEdit_eP->setText(QString::number(eP));
         ui->lineEdit_eb ->setText(QString::number(epar[2]));
         ui->lineEdit_eTb->setText(QString::number(epar[3]));
         ui->lineEdit_ec->setText("");
     }
     if( par.size()== 5){
-        eP =  1/pow(fabs(par[0])+fabs(par[2]),2)*sqrt(pow(epar[0],2)+ pow(epar[2],2)) * sqrt(2*(pow(par[0],2)+pow(par[2],2)));
         ui->lineEdit_eP->setText(QString::number(eP));
         ui->lineEdit_eb ->setText(QString::number(epar[2]));
         ui->lineEdit_eTb->setText(QString::number(epar[3]));
@@ -642,7 +651,7 @@ void MainWindow::setEnabledPlanel()
     ui->checkBox_MeanCorr->setEnabled(1);
     ui->doubleSpinBox_zOffset->setEnabled(1);
     ui->checkBox_BGsub->setEnabled(1);
-    ui->spinBox_BGIndex->setEnabled(1);
+    //ui->spinBox_BGIndex->setEnabled(1);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
@@ -652,4 +661,37 @@ void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
     //on_doubleSpinBox_zOffset_valueChanged(file->GetDataMeanZMean());
     bPlot->SetMeanCorr(checked);
 
+}
+
+void MainWindow::on_checkBox_BGsub_clicked(bool checked)
+{
+    ui->spinBox_BGIndex->setEnabled(checked);
+    int bgYIndex = ui->spinBox_BGIndex->value();
+
+    if( checked ){
+        //substract. replace the current data with substracted.
+        file->SubstractData(bgYIndex);
+        QString msg;
+        msg.sprintf("Using the %d - data as background.", bgYIndex);
+        Write2Log(msg);
+    }else{
+        //restore to the backup data;
+        file->RestoreData();
+        Write2Log("restoring Data.");
+    }
+
+    //Plot again current for yIndex;
+    int yIndex = ui->spinBox_y->value();
+    on_spinBox_y_valueChanged(yIndex);
+
+    //Plot again the contour plot;
+    //PlotContour();
+    bool corr = ui->checkBox_MeanCorr->isChecked();
+    on_checkBox_MeanCorr_clicked(corr);
+
+}
+
+void MainWindow::on_spinBox_BGIndex_valueChanged(int arg1)
+{
+    on_checkBox_BGsub_clicked(1);
 }

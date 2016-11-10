@@ -35,7 +35,7 @@ public:
 private slots:
     void Write2Log(QString str);
 
-    void on_pushButton_clicked();
+    void on_pushButton_OpenFile_clicked();
 
     void on_spinBox_y_valueChanged(int arg1);
     void on_spinBox_x_valueChanged(int arg1);
@@ -62,6 +62,10 @@ private slots:
 
     void on_checkBox_MeanCorr_clicked(bool checked);
 
+    void on_checkBox_BGsub_clicked(bool checked);
+    
+    void on_spinBox_BGIndex_valueChanged(int arg1);
+    
 private:
     Ui::MainWindow *ui;
     Dialog * fitResultDialog;

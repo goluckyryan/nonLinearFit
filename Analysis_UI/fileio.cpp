@@ -35,7 +35,9 @@ void FileIO::Initialize(){
 
 FileIO::~FileIO(){
     delete myfile;
+    if( outfile != NULL ) delete outfile;
     if( zData != NULL ) delete [] zData;
+    if( backUpData != NULL ) delete [] backUpData;
 }
 
 void FileIO::OpenSaveFile(){
@@ -77,6 +79,7 @@ void FileIO::OpenCSVData(){
     }
 
     zData = new QVector<double> [ySize];
+    backUpData = new QVector<double> [ySize];
     double ** z ;
     z = new double *[ySize];
     for(int i = 0; i < ySize; i++){
@@ -115,8 +118,10 @@ void FileIO::OpenCSVData(){
     zMax = z[0][0];
     for( int j = 0; j < ySize ; j ++){
         zData[j].clear();
+        backUpData[j].clear();
         for(int i = 0; i < xSize ; i++){
             zData[j].push_back(z[j][i]);
+            backUpData[j].push_back(z[j][i]);
             if( z[j][i] > zMax) zMax = z[j][i];
             if( z[j][i] < zMin) zMin = z[j][i];
         }
@@ -181,6 +186,7 @@ void FileIO::OpenTxtData_col()
 
     // get Data
     zData = new QVector<double> [ySize];
+    backUpData = new QVector<double> [ySize];
     double ** z ;
     z = new double *[ySize];
     for(int i = 0; i < ySize; i++){
@@ -212,8 +218,10 @@ void FileIO::OpenTxtData_col()
     zMax = z[0][0];
     for( int j = 0; j < ySize ; j ++){
         zData[j].clear();
+        backUpData[j].clear();
         for(int i = 0; i < xSize ; i++){
             zData[j].push_back(z[j][i]);
+            backUpData[j].push_back(z[j][i]);
             if( z[j][i] > zMax) zMax = z[j][i];
             if( z[j][i] < zMin) zMin = z[j][i];
         }
@@ -274,6 +282,7 @@ void FileIO::OpenTxtData_row(){
     }
 
     zData = new QVector<double> [ySize];
+    backUpData = new QVector<double> [ySize];
 
     // get Data
     myfile->seek(0);
@@ -290,10 +299,12 @@ void FileIO::OpenTxtData_row(){
         }else{
             double temp = ExtractYValue(lineList[0]);
             yData.push_back(temp);
-
+            zData[yIndex].clear();
+            backUpData[yIndex].clear();
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 temp = (lineList[i]).toDouble() * 1e3;
                 zData[yIndex].push_back(temp);
+                backUpData[yIndex].push_back(temp);
                 if( i == 1 && rows == 2) {
                     zMax = temp;
                     zMin = temp;
@@ -431,6 +442,26 @@ void FileIO::SaveSimplifiedTxt()
 
 }
 
+void FileIO::RestoreData()
+{
+    for( int yIndex = 0; yIndex < ySize; yIndex++){
+        zData[yIndex].clear();
+        for(int xIndex = 0; xIndex < xSize; xIndex++){
+            zData[yIndex].push_back(backUpData[yIndex][xIndex]);
+        }
+    }
+}
+
+void FileIO::SubstractData(int yIndex)
+{
+    for( int y = 0; y < ySize; y++){
+        zData[y].clear();
+        for(int x = 0; x < xSize; x++){
+            zData[y].push_back(backUpData[y][x] - backUpData[yIndex][x]);
+        }
+    }
+}
+
 double FileIO::ExtractYValue(QString str){
     int pos = str.lastIndexOf("_") ;
     int pos2 = str.lastIndexOf("FUNCTION");
@@ -492,7 +523,7 @@ void FileIO::CalMeanVector()
         zMeanMean += mean / ySize;
     }  
 
-    QString msg;
-    msg.sprintf("total mean z for x < -1 us: %f", zMeanMean);
-    SendMsg(msg);
+    //QString msg;
+    //msg.sprintf("total mean z for x < -1 us: %f", zMeanMean);
+    //SendMsg(msg);
 }

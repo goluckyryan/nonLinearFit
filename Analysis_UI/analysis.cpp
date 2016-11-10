@@ -45,6 +45,15 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
     this->ydata = y;
 
     this->n = this->xdata.size();
+
+    //finding yMin, yMax;
+    yMin = ydata[0];
+    yMax = ydata[0];
+    for(int i = 1; i < n; i++ ){
+        if( yMin > ydata[i] ) yMin = ydata[i];
+        if( yMax < ydata[i] ) yMax = ydata[i];
+    }
+
 }
 
 void Analysis::MeanAndvariance(int index_1, int index_2)
@@ -73,8 +82,8 @@ void Analysis::MeanAndvariance(int index_1, int index_2)
     }
     var = var / (size-1);
 
-    Msg.sprintf("From index %d to %d (%d data)\nMean = %f, Variance = %f, sigma = %f", index_1, index_2, size, mean, var, sqrt(var));
-    SendMsg(Msg);
+    //Msg.sprintf("From index %d to %d (%d data)\nMean = %f, Variance = %f, sigma = %f", index_1, index_2, size, mean, var, sqrt(var));
+    //SendMsg(Msg);
 
 }
 

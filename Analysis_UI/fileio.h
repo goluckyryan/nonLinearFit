@@ -24,6 +24,8 @@ public:
     void OpenTxtData_row();
     void SaveFitResult(Analysis *ana);
     void SaveSimplifiedTxt();
+    void RestoreData();
+    void SubstractData(int yIndex);
 
 signals:
 
@@ -60,6 +62,7 @@ private:
     QVector<double> xData; // time data
     QVector<double> yData; // B-field
     QVector<double> *zData; //data, [ydata][xdata]
+    QVector<double> *backUpData; //backup data, [ydata][xdata]
     QVector<double> zMean; // mean
 
     int xSize, ySize;

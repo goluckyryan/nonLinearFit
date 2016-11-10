@@ -25,7 +25,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="0">
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="pushButton_OpenFile">
       <property name="text">
        <string>OpenFile</string>
       </property>
@@ -507,7 +507,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>pushButton</tabstop>
+  <tabstop>pushButton_OpenFile</tabstop>
   <tabstop>lineEdit</tabstop>
   <tabstop>spinBox_x</tabstop>
   <tabstop>lineEdit_a</tabstop>
