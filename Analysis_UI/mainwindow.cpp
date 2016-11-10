@@ -561,7 +561,12 @@ void MainWindow::PlotContour()
     colorMap->setGradient( colorGrad ); //color scheme
 
     //colorMap->rescaleDataRange();
-    colorMap->setDataRange(QCPRange(file->GetZMin(), file->GetZMax()));
+    int zRange = qCeil(qMax(fabs(file->GetZMin()), fabs(file->GetZMax())));
+    colorMap->setDataRange(QCPRange(-zRange, zRange));
+    ui->verticalSlider_z->setMinimum(1);
+    ui->verticalSlider_z->setMaximum(zRange);
+    ui->verticalSlider_z->setSingleStep(qCeil(zRange/100.));
+    ui->verticalSlider_z->setValue(zRange);
 
     QCPMarginGroup *marginGroup = new QCPMarginGroup(ctplot);
     ctplot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
@@ -694,4 +699,10 @@ void MainWindow::on_checkBox_BGsub_clicked(bool checked)
 void MainWindow::on_spinBox_BGIndex_valueChanged(int arg1)
 {
     on_checkBox_BGsub_clicked(1);
+}
+
+void MainWindow::on_verticalSlider_z_sliderMoved(int position)
+{
+    colorMap->setDataRange(QCPRange(-position, position));
+    ctplot->replot();
 }
