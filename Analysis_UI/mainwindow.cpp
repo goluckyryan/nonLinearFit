@@ -140,7 +140,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
     QString yLabel;
-    yLabel.sprintf("Voltage [ 10^%d V]", file->GetMultiIndex());
+    yLabel.sprintf("Voltage [ 10^%d V]", -1 * file->GetMultiIndex());
     plot->yAxis->setLabel(yLabel);
 
     if( file->HasBackGround()){

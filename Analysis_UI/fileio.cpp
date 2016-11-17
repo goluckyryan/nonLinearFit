@@ -338,16 +338,14 @@ void FileIO::OpenTxtData_row(){
     xMax = FindMax(xData);
 
     //check is BG data exist by continous,
-    QVector<double> yStep;
     QVector<double> newYData;
     for( int i = 1; i < ySize; i++){
-        yStep.push_back(yData[i]-yData[i-1]);
         newYData.push_back(yData[i]);
     }
+
+    //if Hall probe volatge smaller than 3 mV
     int misIndex = -1;
-    for( int i = 1; i < ySize-1; i++){
-        if( yStep[i] != yStep[i-1] ) misIndex = i;
-    }
+    if( fabs(yData[0]) < 3 ) misIndex = 1;
 
     if( misIndex == 1) {
         hadBG = 1;
@@ -505,6 +503,7 @@ void FileIO::SubstractData(int yIndex)
 
 double FileIO::ExtractYValue(QString str){
     int pos = str.lastIndexOf("_") ;
+
     int pos2 = str.lastIndexOf("FUNCTION");
     if( pos2 == -1){
         pos2 = str.lastIndexOf("mT");
@@ -512,6 +511,7 @@ double FileIO::ExtractYValue(QString str){
     if( pos2 == -1){
         pos2 = str.lastIndexOf("mV");
     }
+
     //qDebug() << str << ", " << pos << ";" << pos2;
     QString strY;
     if( pos2 == -1){
