@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QString>
 #include <QFile>
+#include <qmath.h>
 #include "constant.h"
 #include "analysis.h"
 
@@ -57,6 +58,7 @@ public slots:
 
     bool IsOpen(){return openState;}
     bool IsYRevered(){return yRevered;}
+    bool HasBackGround(){return hadBG;}
 
 private:
     QVector<double> xData; // time data
@@ -74,6 +76,7 @@ private:
     bool openState;
     bool isOutFileOpened;
     bool yRevered;
+    bool hadBG;
 
     QFile * myfile;
     QFile * outfile;

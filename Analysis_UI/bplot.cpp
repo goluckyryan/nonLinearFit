@@ -61,9 +61,11 @@ void BPlot::SetData(FileIO *file)
     }
 
     n = file->GetDataSetSize();
-    QVector<double> yValue = file->GetDataSetY();
-    plot->xAxis->setRange(yValue[0], yValue[n-1]);
+    //QVector<double> yValue = file->GetDataSetY();
+    //plot->xAxis->setRange(yValue[0], yValue[n-1]);
+    plot->xAxis->setRange(file->GetYMin(), file->GetYMax());
     plot->xAxis2->setRange(0,n-1);
+    if( file->HasBackGround() ) plot->xAxis2->setRange(1,n-1);
 
     x.clear();
     y.clear();
@@ -77,6 +79,7 @@ void BPlot::Plot()
 
     QVector<double> xdata = file->GetDataSetX();
     int n = file->GetDataSetSize();
+    if( file->HasBackGround() ) n = n-1;
 
     int xStart = ui->spinBox_Start->value();
     int xEnd = ui->spinBox_End->value();

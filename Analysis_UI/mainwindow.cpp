@@ -107,6 +107,8 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     statusBar()->showMessage("Opened an file.");
     ui->lineEdit->setText(fileName);
 
+    if( file != NULL ) delete file;
+
     file = new FileIO(fileName);
     connect(file, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
     if( fileDialog.selectedNameFilter() == filters[1]){
@@ -134,7 +136,12 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
-    on_spinBox_y_valueChanged(0);
+    if( file->HasBackGround()){
+        on_spinBox_y_valueChanged(1);
+    }else{
+        on_spinBox_y_valueChanged(0);
+    }
+
     int xIndex = ana->FindstartIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
 
@@ -520,6 +527,7 @@ void MainWindow::PlotContour()
     colorMap->clearData();
     int nx = file->GetDataSize();
     int ny = file->GetDataSetSize();
+    if( file->HasBackGround() ) ny = ny -1;
     colorMap->data()->setSize(nx, ny);
 
     double xMin = file->GetXMin();
@@ -533,8 +541,11 @@ void MainWindow::PlotContour()
 
     colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
 
+    int yIndexStart = 0;
+    if( file->HasBackGround()) yIndexStart = 1;
+
     for(int xIndex = 0; xIndex < nx; xIndex++){
-        for(int yIndex = 0; yIndex < ny; yIndex++){
+        for(int yIndex = yIndexStart; yIndex < ny; yIndex++){
             double z = file->GetDataZ(xIndex, yIndex);
             if( file->IsYRevered()){
                 colorMap->data()->setCell(xIndex, ny-yIndex-1, z);

@@ -27,7 +27,8 @@ void FileIO::Initialize(){
     zMin = 0;
     openState = 0;
     isOutFileOpened = 0;
-    yRevered =0;
+    yRevered = 0;
+    hadBG = 0;
 
     xSize = 0;
     ySize = 0;
@@ -271,7 +272,7 @@ void FileIO::OpenTxtData_row(){
         ySize ++;
         QStringList lineList = line.split(",");
 
-        if( xSize == 0){ // get yDatax
+        if( ySize == 0){ // get yDatax
             xSize = lineList.size()-1;
         }
     }
@@ -302,7 +303,7 @@ void FileIO::OpenTxtData_row(){
             zData[yIndex].clear();
             backUpData[yIndex].clear();
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                temp = (lineList[i]).toDouble() * 1e3;
+                temp = (lineList[i]).toDouble();
                 zData[yIndex].push_back(temp);
                 backUpData[yIndex].push_back(temp);
                 if( i == 1 && rows == 2) {
@@ -319,13 +320,46 @@ void FileIO::OpenTxtData_row(){
     qDebug("X: %d , %d", xData.size(), xSize);
     qDebug("Y: %d , %d", yData.size(), ySize);
 
+    int multi = - qFloor(log(zMax))+1;
+    qDebug("data was multiplied 10^%d", multi);
+    for(int i = 0; i < xSize; i++){
+        for(int j = 0; j < ySize; j++){
+            zData[j][i] = zData[j][i] * pow(10,multi);
+            backUpData[j][i] = backUpData[j][i] * pow(10,multi);
+        }
+    }
+
+    zMax = zMax * pow(10, multi);
+    zMin = zMin * pow(10, multi);
+
     xMin = FindMin(xData);
     xMax = FindMax(xData);
 
-    yMin = FindMin(yData);
-    yMax = FindMax(yData);
+    //check is BG data exist by continous,
+    QVector<double> yStep;
+    QVector<double> newYData;
+    for( int i = 1; i < ySize; i++){
+        yStep.push_back(yData[i]-yData[i-1]);
+        newYData.push_back(yData[i]);
+    }
+    int misIndex = -1;
+    for( int i = 1; i < ySize-1; i++){
+        if( yStep[i] != yStep[i-1] ) misIndex = i;
+    }
 
-    if(yData[0] > yData[1]) yRevered = 1;
+    if( misIndex == 1) {
+        hadBG = 1;
+        for( int i = 1; i < ySize; i++){
+            newYData.push_back(yData[i]);
+        }
+    }
+    qDebug() << yData[0] << "," << yData[1] << "," << yData[2]  ;
+    qDebug() << newYData[0] << "," << newYData[1] << "," << newYData[2] ;
+
+    yMin = FindMin(newYData);
+    yMax = FindMax(newYData);
+
+    if(newYData[0] > newYData[1]) yRevered = 1;
 
     openState = 1;
 
@@ -336,7 +370,12 @@ void FileIO::OpenTxtData_row(){
     msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin, yMax, ySize);
     SendMsg(msg);
 
-    msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
+    if( hadBG ){
+        msg.sprintf("BG data exist. At yIndex = %d", misIndex-1);
+        SendMsg(msg);
+    }
+
+    msg.sprintf("Z:(%7.3f, %7.3f), multiplied : 10^%d",zMin, zMax, multi);
     SendMsg(msg);
 
     myfile->close();
@@ -460,6 +499,8 @@ void FileIO::SubstractData(int yIndex)
             zData[y].push_back(backUpData[y][x] - backUpData[yIndex][x]);
         }
     }
+
+    CalMeanVector();
 }
 
 double FileIO::ExtractYValue(QString str){
@@ -502,6 +543,9 @@ double FileIO::FindMin(QVector<double> vec)
 
 void FileIO::CalMeanVector()
 {
+
+    this->zMean.clear();
+
     double goal = -1; // us
     int xEnd = 0; // the index of x near goal usec
     for(int i = 0; i < xData.size() ; i++){
@@ -523,7 +567,7 @@ void FileIO::CalMeanVector()
         zMeanMean += mean / ySize;
     }  
 
-    //QString msg;
-    //msg.sprintf("total mean z for x < -1 us: %f", zMeanMean);
-    //SendMsg(msg);
+    QString msg;
+    msg.sprintf("total mean z for x < -1 us: %f", zMeanMean);
+    SendMsg(msg);
 }

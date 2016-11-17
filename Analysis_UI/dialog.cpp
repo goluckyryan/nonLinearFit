@@ -85,8 +85,10 @@ void Dialog::SetDataSize(FileIO *file)
     fitParError = new QVector<double> [n];
     SSR = new double [n];
     yValue = file->GetDataSetY();
-    plot->xAxis->setRange(yValue[0], yValue[n-1]);
+    //plot->xAxis->setRange(yValue[0], yValue[n-1]);
+    plot->xAxis->setRange(file->GetYMin(), file->GetYMax());
     plot->xAxis2->setRange(0,n-1);
+    if( file->HasBackGround()) plot->xAxis2->setRange(1,n-1);
 
     if(file->IsYRevered()) {
         plot->xAxis2->setRangeReversed(1);
