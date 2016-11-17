@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = Analysis_UI
 TEMPLATE = app
 
+win32:RC_ICONS += icon.ico
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -33,3 +34,6 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
     dialog.ui \
     bplot.ui
+
+DISTFILES += \
+    icon.ico

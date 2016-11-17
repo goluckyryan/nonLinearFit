@@ -63,7 +63,7 @@ void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y, double 
     switch (graphID) {
     case 0: plot->graph(graphID)->setPen(QPen(Qt::blue)); break;
     case 1: plot->graph(graphID)->setPen(QPen(Qt::red)); break;
-    case 2: plot->graph(graphID)->setPen(QPen(Qt::green)); break;
+    case 2: plot->graph(graphID)->setPen(QPen(Qt::darkGreen)); break;
     case 3: plot->graph(graphID)->setPen(QPen(Qt::magenta)); break;
     case 4: plot->graph(graphID)->setPen(QPen(Qt::black)); break;
     }
@@ -223,9 +223,17 @@ void MainWindow::PlotFitFunc(){
     int xIndex = ui->spinBox_x->value();
     double x = file->GetDataX(xIndex);
 
+    //Draw X-line
     QVector<double> xline_y, xline_x;
     double yMin = file->GetZMin();
     double yMax = file->GetZMax();
+
+    double yMean = (yMax + yMin)/2;
+    double yWidth = (yMax - yMin)/2;
+
+    yMin = yMean - yWidth*1.3;
+    yMax = yMean + yWidth*1.3;
+
     int size = ana->GetDataSize();
     for(int i = 0; i < size; i++){
         double y = yMin + (yMax-yMin)*i/size;
@@ -298,11 +306,8 @@ void MainWindow::on_pushButton_Fit_clicked(){
     for(int i = 0 ; i < gradSSR.size(); i++){
         redFlag |= std::abs(gradSSR[i]) > 0.02;
     }
-
-    //if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(255,0,0,255));
     if( redFlag) ui->textEdit->setTextColor(QColor(255,0,0,255));
     ana->PrintVector(ana->GetSSRgrad(), "SSR grad");
-    //if( ana->GetFitFlag() == 2) ui->textEdit->setTextColor(QColor(0,0,0,255));
     if( redFlag) ui->textEdit->setTextColor(QColor(0,0,0,255));
 
 
