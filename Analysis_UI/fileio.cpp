@@ -29,6 +29,7 @@ void FileIO::Initialize(){
     isOutFileOpened = 0;
     yRevered = 0;
     hadBG = 0;
+    multi = 0;
 
     xSize = 0;
     ySize = 0;
@@ -320,7 +321,8 @@ void FileIO::OpenTxtData_row(){
     qDebug("X: %d , %d", xData.size(), xSize);
     qDebug("Y: %d , %d", yData.size(), ySize);
 
-    int multi = - qFloor(log(zMax))+1;
+    qDebug("zMax: %f, zMin: %f", zMax, zMin);
+    this->multi = - qFloor(log(zMax)/log(10))+1;
     qDebug("data was multiplied 10^%d", multi);
     for(int i = 0; i < xSize; i++){
         for(int j = 0; j < ySize; j++){
@@ -353,8 +355,6 @@ void FileIO::OpenTxtData_row(){
             newYData.push_back(yData[i]);
         }
     }
-    qDebug() << yData[0] << "," << yData[1] << "," << yData[2]  ;
-    qDebug() << newYData[0] << "," << newYData[1] << "," << newYData[2] ;
 
     yMin = FindMin(newYData);
     yMax = FindMax(newYData);

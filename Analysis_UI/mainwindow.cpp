@@ -125,6 +125,9 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     }
 
     setEnabledPlanel();
+    ui->checkBox_BGsub->setChecked(0);
+    ui->checkBox_MeanCorr->setChecked(0);
+    ui->doubleSpinBox_zOffset->setValue(0);
 
     Write2Log("Opened file :");
     Write2Log(fileName);
@@ -136,11 +139,17 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
+    QString yLabel;
+    yLabel.sprintf("Voltage [ 10^%d V]", file->GetMultiIndex());
+    plot->yAxis->setLabel(yLabel);
+
     if( file->HasBackGround()){
         on_spinBox_y_valueChanged(1);
     }else{
         on_spinBox_y_valueChanged(0);
     }
+
+
 
     int xIndex = ana->FindstartIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
@@ -161,6 +170,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->doubleSpinBox_zOffset->setValue(0);
 
     bPlot->SetData(file);
+
 }
 
 

@@ -56,6 +56,8 @@ public slots:
     double GetZMax(){return zMax;}
     double GetZMin(){return zMin;}
 
+    int GetMultiIndex(){return multi;}
+
     bool IsOpen(){return openState;}
     bool IsYRevered(){return yRevered;}
     bool HasBackGround(){return hadBG;}
@@ -77,6 +79,8 @@ private:
     bool isOutFileOpened;
     bool yRevered;
     bool hadBG;
+
+    int multi;
 
     QFile * myfile;
     QFile * outfile;
