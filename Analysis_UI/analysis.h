@@ -49,9 +49,9 @@ public slots:
     int GetParametersSize() {return p;}
     int GetNDF() {return DF;}
     QVector<double> GetData_x() {return xdata;}
-    QVector<double> GetData_y() {return ydata;}
+    QVector<double> GetData_y() {return zdata;}
     double GetData_x(int i) {return xdata[i-1];}
-    double GetData_y(int i) {return ydata[i-1];}
+    double GetData_y(int i) {return zdata[i-1];}
 
     QVector<double> GetFitData_y() {return fydata;}
 
@@ -76,8 +76,8 @@ public slots:
     int GetMaxIteration(){return MaxIter;}
     int GetYIndex()    {return yIndex;}
     double GetDataYValue() {return yValue;}
-    double GetDataYMin(){return yMin;}
-    double GetDataYMax(){return yMax;}
+    double GetDataYMin(){return zMin;}
+    double GetDataYMax(){return zMax;}
 
     void Print();
     void PrintVector(QVector<double> vec, QString str);
@@ -91,7 +91,7 @@ public slots:
 private:
     QString Msg;
 
-    QVector<double> xdata, ydata;
+    QVector<double> xdata, zdata;
     QVector<double> fydata;
     QVector<double> sol;
     QVector<double> dpar;
@@ -101,7 +101,7 @@ private:
 
     Matrix CoVar;
 
-    double yMin, yMax;
+    double zMin, zMax;
 
     int MaxIter, nIter;
     double SSR;

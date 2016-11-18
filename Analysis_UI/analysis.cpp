@@ -32,6 +32,10 @@ void Analysis::Initialize(){
 
     yIndex = 0;
     yValue = 0;
+
+    zMin = 0;
+    zMax = 0;
+
 }
 
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
@@ -42,16 +46,16 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
         return;
     }
     this->xdata = x;
-    this->ydata = y;
+    this->zdata = y;
 
     this->n = this->xdata.size();
 
-    //finding yMin, yMax;
-    yMin = ydata[0];
-    yMax = ydata[0];
+    //finding local zMin, zMax;
+    zMin = zdata[0];
+    zMax = zdata[0];
     for(int i = 1; i < n; i++ ){
-        if( yMin > ydata[i] ) yMin = ydata[i];
-        if( yMax < ydata[i] ) yMax = ydata[i];
+        if( zMin > zdata[i] ) zMin = zdata[i];
+        if( zMax < zdata[i] ) zMax = zdata[i];
     }
 
 }
@@ -72,13 +76,13 @@ void Analysis::MeanAndvariance(int index_1, int index_2)
     int size = index_2 - index_1 + 1;
     mean = 0;
     for( int i = index_1 ; i <= index_2 ; i++){
-        mean += (this->ydata)[i];
+        mean += (this->zdata)[i];
     }
     mean = mean / size;
 
     var = 0;
     for( int i = index_1 ; i <= index_2 ; i++){
-        var += pow((this->ydata)[i]-mean,2);
+        var += pow((this->zdata)[i]-mean,2);
     }
     var = var / (size-1);
 
@@ -104,7 +108,7 @@ int Analysis::Regression(QVector<double> par0)
     Matrix f(fitSize,1);
     Matrix F(fitSize,p); // F = grad(f)
     for(int i = 1; i <= fitSize ; i++) {
-        Y(i,1) = ydata[i + xStart - 1];
+        Y(i,1) = zdata[i + xStart - 1];
         double x = xdata[i + xStart - 1];
         f(i,1) = FitFunc(x, par0);
         QVector<double> gradf = GradFitFunc(x, par0);
@@ -342,7 +346,7 @@ int Analysis::GnuFit(QVector<double> par)
     int fitSize = xEnd - xStart + 1;
     Matrix Y(fitSize,1);
     for(int i = 1; i <= fitSize ; i++) {
-        Y(i,1) = ydata[i + xStart - 1];
+        Y(i,1) = zdata[i + xStart - 1];
     }
 
     Matrix fn(fitSize,1);

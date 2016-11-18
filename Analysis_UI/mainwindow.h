@@ -9,7 +9,7 @@
 #include "qcustomplot.h"
 #include "constant.h"
 #include "fileio.h"
-#include "dialog.h"
+#include "fitresult.h"
 #include "bplot.h"
 
 namespace Ui {
@@ -70,7 +70,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    Dialog * fitResultDialog;
+    FitResult * fitResultPlot;
     BPlot * bPlot;
 
     QString Msg;
@@ -78,7 +78,6 @@ private:
     QCustomPlot *plot;
     QCustomPlot *ctplot;
     QCPColorMap * colorMap;
-    //QCPPlotTitle *plotTitle;
 
     FileIO *file;
     Analysis *ana;

@@ -8,8 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    fitResultDialog = new Dialog(this);
-    connect(fitResultDialog, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
+    fitResultPlot = new FitResult(this);
+    connect(fitResultPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     bPlot = new BPlot(this);
     connect(bPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
@@ -23,10 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);
     plot->axisRect()->setRangeZoom(Qt::Vertical);
-    //plot->plotLayout()->insertRow(0);
-    //plotTitle = new QCPPlotTitle(plot, "title");
-    //plotTitle->setFont(QFont("sans", 12, QFont::Bold));
-    //plot->plotLayout()->addElement(0,0, plotTitle);
 
     ctplot = ui->customPlot_CT;
 
@@ -41,12 +37,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow(){
     delete ui;
-    delete fitResultDialog;
+    delete fitResultPlot;
     delete bPlot;
 
     //delete plotTitle;
     delete plot;
-    //delete ctplot;
+    delete ctplot;
     //delete colorMap;
 
     if( file != NULL) delete file;
@@ -88,29 +84,35 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
 
     QFileDialog fileDialog(this);
     QStringList filters;
+    //======== set allowed data structure.
     filters << "Row-wise (*txt *dat *.*)" << "Double-X CSV(*.csv)" << "Col-wise (*.txt *.dat *.csv *.*)" ;
     fileDialog.setNameFilters(filters);
     fileDialog.setReadOnly(1);
     fileDialog.setDirectory(OPENPATH);
-    QStringList fileNames;
     QString fileName;
+    //======== Open read the first file
     if( fileDialog.exec()) {
-        fileNames = fileDialog.selectedFiles();
+        QStringList fileNames = fileDialog.selectedFiles();
         fileName = fileNames[0];
     }
 
+    //======== If no file selected.
     if(fileName == "") {
         statusBar()->showMessage("No file was selected.");
         return;
     }
 
-    statusBar()->showMessage("Opened an file.");
+    //======== show file name
+    statusBar()->showMessage("Selected a file.");
     ui->lineEdit->setText(fileName);
 
+    //======== if open another filed, i.e. exist file, delete it.
     if( file != NULL ) delete file;
-
+    //======== new FileIO
     file = new FileIO(fileName);
     connect(file, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
+
+    //======== read data structure according to the seleteced data format.
     if( fileDialog.selectedNameFilter() == filters[1]){
         file->OpenCSVData();
     }else if(fileDialog.selectedNameFilter() == filters[2]){
@@ -118,20 +120,20 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     }else if(fileDialog.selectedNameFilter() == filters[0]){
         file->OpenTxtData_row();
     }
-
+    //======== if some shit happen, abort.
     if(file->IsOpen() == 0) {
         Write2Log("Cannot open file.");
         return;
     }
+    QString msg = "Opened file : ";
+    msg.append(fileName);
+    Write2Log(msg);
 
+    //========= once the file is opened, eanble planel, set checkBoxes to uncheck, etc...
     setEnabledPlanel();
     ui->checkBox_BGsub->setChecked(0);
     ui->checkBox_MeanCorr->setChecked(0);
     ui->doubleSpinBox_zOffset->setValue(0);
-
-    Write2Log("Opened file :");
-    Write2Log(fileName);
-
     ui->spinBox_y->setMinimum(0);
     ui->spinBox_y->setMaximum(file->GetDataSetSize()-1);
     ui->spinBox_x->setMinimum(0);
@@ -139,28 +141,27 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
+    //========= rename y-title
     QString yLabel;
     yLabel.sprintf("Voltage [ 10^%d V]", -1 * file->GetMultiIndex());
     plot->yAxis->setLabel(yLabel);
 
+    //========= if file has background data
+    //========= the plotting function is called using spinBox_y
     if( file->HasBackGround()){
         on_spinBox_y_valueChanged(1);
+        //on_checkBox_BGsub_clicked(1);
     }else{
         on_spinBox_y_valueChanged(0);
     }
 
-
-
+    //========= find x-index of TIME1, in constant.h
     int xIndex = ana->FindstartIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
 
+    //========= Plot contour
     PlotContour();
-
-    //Reset Data in fitResultDialog
-    fitResultDialog->ClearData();
-    fitResultDialog->SetDataSize(file);
-    fitResultDialog->SetFilePath(file->GetFilePath());
-
+    // sey Plot Contour z-range
     double zMin = file->GetZMin();
     double zMax = file->GetZMax();
     double zRange = fabs(zMax)+fabs(zMin);
@@ -169,6 +170,12 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->doubleSpinBox_zOffset->setSingleStep(zRange/200.);
     ui->doubleSpinBox_zOffset->setValue(0);
 
+    //========= Reset Data in fitResultDialog
+    fitResultPlot->ClearData();
+    fitResultPlot->SetDataSize(file);
+    fitResultPlot->SetFilePath(file->GetFilePath());
+
+    //======== Plot B-plot
     bPlot->SetData(file);
 
 }
@@ -179,7 +186,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     statusBar()->showMessage("Changed y-Index.");
 
     ui->spinBox_y->setValue(arg1);
-    ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1)));
+    ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1))+" mV");
 
     QString title;
     title.sprintf("Hall Voltage : %f mV", file->GetDataY(arg1));
@@ -204,7 +211,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
 
 void MainWindow::on_spinBox_x_valueChanged(int arg1){
     statusBar()->showMessage("Changed x-Index.");
-    ui->lineEdit_x->setText(QString::number(file->GetDataX(arg1)));
+    ui->lineEdit_x->setText(QString::number(file->GetDataX(arg1))+ " us");
     ana->SetStartFitIndex(arg1);
     PlotFitFunc();
 }
@@ -231,8 +238,8 @@ void MainWindow::PlotFitFunc(){
     double yMean = (yMax + yMin)/2;
     double yWidth = (yMax - yMin)/2;
 
-    yMin = yMean - yWidth*1.3;
-    yMax = yMean + yWidth*1.3;
+    yMin = yMean - yWidth*1.2;
+    yMax = yMean + yWidth*1.2;
 
     int size = ana->GetDataSize();
     for(int i = 0; i < size; i++){
@@ -327,8 +334,8 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     PlotFitFunc();
 
-    fitResultDialog->FillData(ana);
-    fitResultDialog->PlotData();
+    fitResultPlot->FillData(ana);
+    fitResultPlot->PlotData();
 
 }
 
@@ -378,7 +385,13 @@ void MainWindow::on_pushButton_FitAll_clicked()
     QString str;
     int count = 0;
 
-    for( int yIndex = 0; yIndex < n ; yIndex ++){
+    int yStartIndex = 0;
+    if( file->HasBackGround()) {
+        //on_checkBox_BGsub_clicked(true);
+        yStartIndex = 1;
+    }
+
+    for( int yIndex = yStartIndex; yIndex < n ; yIndex ++){
     //for( int yIndex = 100; yIndex < 300 ; yIndex ++){
         on_pushButton_reset_clicked();
         on_spinBox_y_valueChanged(yIndex);
@@ -421,16 +434,16 @@ void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
     if( checked ){
         statusBar()->showMessage("Enable b and Tb.");
         if(ui->checkBox_c->isChecked() ){
-            fitResultDialog->SetAvalibleData(5);
+            fitResultPlot->SetAvalibleData(5);
         }else{
-            fitResultDialog->SetAvalibleData(4);
+            fitResultPlot->SetAvalibleData(4);
         }
     }else{
         statusBar()->showMessage("Disable b and Tb.");
         if(ui->checkBox_c->isChecked() ){
-            fitResultDialog->SetAvalibleData(3);
+            fitResultPlot->SetAvalibleData(3);
         }else{
-            fitResultDialog->SetAvalibleData(2);
+            fitResultPlot->SetAvalibleData(2);
         }
     }
 
@@ -446,16 +459,16 @@ void MainWindow::on_checkBox_c_clicked(bool checked)
     if( checked ){
         statusBar()->showMessage("Enable c.");
         if(ui->checkBox_b_Tb->isChecked() ){
-            fitResultDialog->SetAvalibleData(5);
+            fitResultPlot->SetAvalibleData(5);
         }else{
-            fitResultDialog->SetAvalibleData(3);
+            fitResultPlot->SetAvalibleData(3);
         }
     }else{
         statusBar()->showMessage("Disable c.");
         if(ui->checkBox_b_Tb->isChecked() ){
-            fitResultDialog->SetAvalibleData(4);
+            fitResultPlot->SetAvalibleData(4);
         }else{
-            fitResultDialog->SetAvalibleData(2);
+            fitResultPlot->SetAvalibleData(2);
         }
     }
 
@@ -605,9 +618,9 @@ void MainWindow::PlotContour()
 
 void MainWindow::on_actionFit_Result_triggered()
 {
-    if(fitResultDialog->isHidden()){
-        fitResultDialog->show();
-        fitResultDialog->PlotData();
+    if(fitResultPlot->isHidden()){
+        fitResultPlot->show();
+        fitResultPlot->PlotData();
     }
 }
 

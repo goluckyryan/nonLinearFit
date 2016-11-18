@@ -1,5 +1,5 @@
-#ifndef DIALOG_H
-#define DIALOG_H
+#ifndef FITRESULT_H
+#define FITRESULT_H
 
 #include <QDialog>
 #include <QVector>
@@ -10,16 +10,16 @@
 #include "fileio.h"
 
 namespace Ui {
-class Dialog;
+class FitResult;
 }
 
-class Dialog : public QDialog
+class FitResult : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Dialog(QWidget *parent = 0);
-    ~Dialog();
+    explicit FitResult(QWidget *parent = 0);
+    ~FitResult();
 
     void ClearData();
     void SetDataSize(FileIO *file);
@@ -48,7 +48,7 @@ private slots:
     void on_pushButton_ResetScale_clicked();
 
 private:
-    Ui::Dialog *ui;
+    Ui::FitResult *ui;
     QCustomPlot * plot;
 
     QString filePath;
@@ -63,4 +63,4 @@ private:
     bool fixedSize;
 };
 
-#endif // DIALOG_H
+#endif // FITRESULT_H

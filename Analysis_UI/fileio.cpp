@@ -267,7 +267,7 @@ void FileIO::OpenTxtData_row(){
     QTextStream stream(myfile);
     QString line;
 
-    // get number of rows and cols;
+    //============= get number of rows and cols;
     ySize = -1;
     while(stream.readLineInto(&line)){
         ySize ++;
@@ -283,10 +283,10 @@ void FileIO::OpenTxtData_row(){
         return;
     }
 
+    //============ get Data
     zData = new QVector<double> [ySize];
     backUpData = new QVector<double> [ySize];
 
-    // get Data
     myfile->seek(0);
     int rows = 0;
     int yIndex = 0;
@@ -318,26 +318,14 @@ void FileIO::OpenTxtData_row(){
         }
     }
 
-    qDebug("X: %d , %d", xData.size(), xSize);
-    qDebug("Y: %d , %d", yData.size(), ySize);
+    //qDebug("X: %d , %d", xData.size(), xSize);
+    //qDebug("Y: %d , %d", yData.size(), ySize);
+    //qDebug("zMax: %f, zMin: %f", zMax, zMin);
 
-    qDebug("zMax: %f, zMin: %f", zMax, zMin);
-    this->multi = - qFloor(log(zMax)/log(10))+1;
-    qDebug("data was multiplied 10^%d", multi);
-    for(int i = 0; i < xSize; i++){
-        for(int j = 0; j < ySize; j++){
-            zData[j][i] = zData[j][i] * pow(10,multi);
-            backUpData[j][i] = backUpData[j][i] * pow(10,multi);
-        }
-    }
+    //=========== cal the rescale factor
+    RescaleData();
 
-    zMax = zMax * pow(10, multi);
-    zMin = zMin * pow(10, multi);
-
-    xMin = FindMin(xData);
-    xMax = FindMax(xData);
-
-    //check is BG data exist by continous,
+    //============== check is BG data exist by continous,
     QVector<double> newYData;
     for( int i = 1; i < ySize; i++){
         newYData.push_back(yData[i]);
@@ -357,27 +345,26 @@ void FileIO::OpenTxtData_row(){
     yMin = FindMin(newYData);
     yMax = FindMax(newYData);
 
+    //=========== check is data revered.
     if(newYData[0] > newYData[1]) yRevered = 1;
 
+    //=========== the open file complete, show message
     openState = 1;
 
     QString msg;
     msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
     SendMsg(msg);
-
     msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin, yMax, ySize);
     SendMsg(msg);
-
     if( hadBG ){
         msg.sprintf("BG data exist. At yIndex = %d", misIndex-1);
         SendMsg(msg);
     }
-
     msg.sprintf("Z:(%7.3f, %7.3f), multiplied : 10^%d",zMin, zMax, multi);
     SendMsg(msg);
-
     myfile->close();
 
+    //=========== calculate mean vector for mean correction, and estimated c-parameter
     CalMeanVector();
 }
 
@@ -570,4 +557,21 @@ void FileIO::CalMeanVector()
     QString msg;
     msg.sprintf("total mean z for x < -1 us: %f", zMeanMean);
     SendMsg(msg);
+}
+
+void FileIO::RescaleData()
+{
+    this->multi = - qFloor(log(zMax)/log(10))+1;
+    //qDebug("data was multiplied 10^%d", multi);
+    for(int i = 0; i < xSize; i++){
+        for(int j = 0; j < ySize; j++){
+            zData[j][i] = zData[j][i] * pow(10,multi);
+            backUpData[j][i] = backUpData[j][i] * pow(10,multi);
+        }
+    }
+    zMax = zMax * pow(10, multi);
+    zMin = zMin * pow(10, multi);
+
+    xMin = FindMin(xData);
+    xMax = FindMax(xData);
 }

@@ -295,7 +295,7 @@
     <item row="1" column="0">
      <widget class="QPushButton" name="pushButton_OpenFile">
       <property name="text">
-       <string>OpenFile</string>
+       <string>Open File</string>
       </property>
      </widget>
     </item>

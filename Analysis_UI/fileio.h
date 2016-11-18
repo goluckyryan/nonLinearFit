@@ -92,6 +92,7 @@ private:
     double FindMin(QVector<double> vec);
 
     void CalMeanVector();
+    void RescaleData();
 };
 
 #endif // FILEIO_H

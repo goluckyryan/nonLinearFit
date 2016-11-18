@@ -19,8 +19,8 @@ SOURCES += main.cpp\
     matrix.cpp \
     analysis.cpp \
     fileio.cpp \
-    dialog.cpp \
-    bplot.cpp
+    bplot.cpp \
+    fitresult.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot.h \
@@ -28,12 +28,12 @@ HEADERS  += mainwindow.h \
     analysis.h \
     fileio.h \
     constant.h \
-    dialog.h \
-    bplot.h
+    bplot.h \
+    fitresult.h
 
 FORMS    += mainwindow.ui \
-    dialog.ui \
-    bplot.ui
+    bplot.ui \
+    fitresult.ui
 
 DISTFILES += \
     icon.ico

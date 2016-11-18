@@ -1,9 +1,9 @@
-#include "dialog.h"
-#include "ui_dialog.h"
+#include "fitresult.h"
+#include "ui_fitresult.h"
 
-Dialog::Dialog(QWidget *parent) :
+FitResult::FitResult(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::Dialog),
+    ui(new Ui::FitResult),
     fitPar(NULL),
     fitParError(NULL),
     SSR(NULL)
@@ -52,7 +52,7 @@ Dialog::Dialog(QWidget *parent) :
     fixedSize = 0;
 }
 
-Dialog::~Dialog()
+FitResult::~FitResult()
 {
     delete ui;
     delete plot;
@@ -61,7 +61,7 @@ Dialog::~Dialog()
     if( SSR != NULL) delete SSR;
 }
 
-void Dialog::ClearData()
+void FitResult::ClearData()
 {
     fixedSize = 0;
     if( fitPar != NULL) delete [] fitPar;
@@ -74,7 +74,7 @@ void Dialog::ClearData()
 
 }
 
-void Dialog::SetDataSize(FileIO *file)
+void FitResult::SetDataSize(FileIO *file)
 {
     if( fixedSize == 1) return;
 
@@ -110,7 +110,7 @@ void Dialog::SetDataSize(FileIO *file)
     SendMsg(msg);
 }
 
-void Dialog::SetAvalibleData(int n)
+void FitResult::SetAvalibleData(int n)
 {
     this->parSize = n;
     QString msg;
@@ -153,7 +153,7 @@ void Dialog::SetAvalibleData(int n)
     }
 }
 
-void Dialog::FillData(Analysis *ana)
+void FitResult::FillData(Analysis *ana)
 {
     if( ana->GetFitFlag() != 0){
         SendMsg("fit not good.");
@@ -168,7 +168,7 @@ void Dialog::FillData(Analysis *ana)
     SSR[yIndex] = ana->GetSSR()/nDF;
 }
 
-void Dialog::PlotData()
+void FitResult::PlotData()
 {
     if( fixedSize == 0) return;
 
@@ -183,7 +183,7 @@ void Dialog::PlotData()
 
 }
 
-void Dialog::PlotSingleData(int plotID){
+void FitResult::PlotSingleData(int plotID){
     // plotID, 1 = a, 2 = Ta, 3 = b, 4 = Tb, 5 = c
 
     QVector<double> x, y, ye;
@@ -199,7 +199,7 @@ void Dialog::PlotSingleData(int plotID){
 
 }
 
-void Dialog::on_checkBox_a_clicked(bool checked)
+void FitResult::on_checkBox_a_clicked(bool checked)
 {
     if( fixedSize == 0) return;
     if(checked){
@@ -210,7 +210,7 @@ void Dialog::on_checkBox_a_clicked(bool checked)
     plot->replot();
 }
 
-void Dialog::on_checkBox_Ta_clicked(bool checked)
+void FitResult::on_checkBox_Ta_clicked(bool checked)
 {
     if( fixedSize == 0) return;
     if(checked){
@@ -221,7 +221,7 @@ void Dialog::on_checkBox_Ta_clicked(bool checked)
     plot->replot();
 }
 
-void Dialog::on_checkBox_b_clicked(bool checked)
+void FitResult::on_checkBox_b_clicked(bool checked)
 {
     if( fixedSize == 0) return;
     if(checked){
@@ -232,7 +232,7 @@ void Dialog::on_checkBox_b_clicked(bool checked)
     plot->replot();
 }
 
-void Dialog::on_checkBox_Tb_clicked(bool checked)
+void FitResult::on_checkBox_Tb_clicked(bool checked)
 {
     if( fixedSize == 0) return;
     if(checked){
@@ -243,7 +243,7 @@ void Dialog::on_checkBox_Tb_clicked(bool checked)
     plot->replot();
 }
 
-void Dialog::on_checkBox_c_clicked(bool checked)
+void FitResult::on_checkBox_c_clicked(bool checked)
 {
     if( fixedSize == 0) return;
     if(checked){
@@ -254,7 +254,7 @@ void Dialog::on_checkBox_c_clicked(bool checked)
     plot->replot();
 }
 
-void Dialog::on_checkBox_P_clicked(bool checked)
+void FitResult::on_checkBox_P_clicked(bool checked)
 {
     if( fixedSize == 0 ) return;
 
@@ -286,7 +286,7 @@ void Dialog::on_checkBox_P_clicked(bool checked)
 
 }
 
-void Dialog::on_checkBox_SSR_clicked(bool checked)
+void FitResult::on_checkBox_SSR_clicked(bool checked)
 {
     if( fixedSize == 0 ) return;
     if(checked){
@@ -307,7 +307,7 @@ void Dialog::on_checkBox_SSR_clicked(bool checked)
     plot->replot();
 }
 
-void Dialog::on_pushButton_Save_clicked()
+void FitResult::on_pushButton_Save_clicked()
 {
     if( fixedSize == 0 ) return;
 
@@ -358,13 +358,13 @@ void Dialog::on_pushButton_Save_clicked()
     savefile.close();
 }
 
-void Dialog::on_pushButton_ResetScale_clicked()
+void FitResult::on_pushButton_ResetScale_clicked()
 {
     plot->yAxis->setRange(-60,60);
     plot->replot();
 }
 
-QVector<double> Dialog::ReSizeVector(QVector<double> vec){
+QVector<double> FitResult::ReSizeVector(QVector<double> vec){
     int vecSize = vec.size();
     QVector<double> out(5);
 
