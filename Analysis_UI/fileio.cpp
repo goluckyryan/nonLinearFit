@@ -501,19 +501,19 @@ void FileIO::SubstractData(int yIndex)
 void FileIO::FouierForward()
 {
 
-    fftw_complex *out;
+    fftw_complex *in, *out;
+    in = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
     out = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
-    double *z = new double [ySize * xSize];
-
 
     for( int i = 0; i < ySize ; i++){
         for( int j = 0; j < xSize ; j++){
-            z[i*xSize + j] = zData[i][j];
+            in[i*xSize + j][0] = zData[i][j];
+            in[i*xSize + j][1] = 0;
         }
     }
 
     fftw_plan plan;
-    plan = fftw_plan_dft_r2c_2d(ySize, xSize, z, out, FFTW_ESTIMATE);
+    plan = fftw_plan_dft_2d(ySize, xSize, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
     fftw_execute(plan);
 
@@ -521,15 +521,127 @@ void FileIO::FouierForward()
             fZDataA[i].clear();
             fZDataP[i].clear();
         for(int j = 0; j < xSize; j++){
-            fZDataA[i].push_back(out[i*xSize + j][0]);
-            fZDataP[i].push_back(out[i*xSize + j][1]);
+            fZDataA[i].push_back(out[i*xSize + j][0] / xSize / ySize);
+            fZDataP[i].push_back(out[i*xSize + j][1] / xSize / ySize);
+        }
+        if( i == 0 ) {
+            qDebug() << fZDataA[i].length();
+            qDebug() << fZDataA[i];
         }
     }
 
     fftw_destroy_plan(plan);
     fftw_free(out);
+    fftw_free(in);
 
-    delete [] z;
+    SwapFFTData();
+
+}
+
+void FileIO::FouierBackward()
+{
+    SwapFFTData();
+
+    fftw_complex *in, *out;
+    in = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
+    out = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
+
+    for( int i = 0; i < ySize ; i++){
+        for( int j = 0; j < xSize ; j++){
+            if( i == 0 || i == ySize -1){
+                in[i*xSize + j][0] = 0;
+                in[i*xSize + j][1] = 0;
+            }else{
+                in[i*xSize + j][0] = fZDataA[i][j];
+                in[i*xSize + j][1] = fZDataP[i][j];
+            }
+
+        }
+    }
+
+    fftw_plan plan;
+    plan = fftw_plan_dft_2d(ySize, xSize, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    fftw_execute(plan);
+
+    for( int i = 0; i < ySize; i++){
+            zData[i].clear();
+        for(int j = 0; j < xSize; j++){
+            zData[i].push_back(out[i*xSize + j][0]);
+        }
+    }
+
+    fftw_destroy_plan(plan);
+    fftw_free(out);
+    fftw_free(in);
+
+}
+
+void FileIO::SwapFFTData()
+{
+    //Swap X data
+    if( xSize % 2 == 0){ //even xSize
+        int m = xSize / 2;
+        for( int i = 0; i < ySize ; i++){
+            QVector<double> tempA = fZDataA[i];
+            QVector<double> tempP = fZDataP[i];
+            for(int j = 0; j < xSize; j++){
+                if( j < m) {
+                    fZDataA[i][j] = tempA[j+m];
+                    fZDataP[i][j] = tempP[j+m];
+                }else{
+                    fZDataA[i][j] = tempA[j-m];
+                    fZDataP[i][j] = tempP[j-m];
+                }
+            }
+        }
+    }else{
+        int m = (xSize + 1)/2; // xSize = 5; 0,1,2,3,4 -> 3,4,0,1,2 ; m = 3
+        for( int i = 0; i < ySize ; i++){
+            QVector<double> tempA = fZDataA[i];
+            QVector<double> tempP = fZDataP[i];
+            for(int j = 0; j < xSize; j++){
+                if( j < m - 1 ) {
+                    fZDataA[i][j] = tempA[j+m]; // j = 0, j+m = 3 ; j = 1, j+m = 4
+                    fZDataP[i][j] = tempP[j+m];
+                }else{
+                    fZDataA[i][j] = tempA[j-m+1]; // j = 2, j-m+1 = 0, ..., j = 4, j-m+1=4-3+1=2
+                    fZDataP[i][j] = tempP[j-m+1];
+                }
+            }
+        }
+
+    }
+
+    //Swap y
+    if( ySize % 2 == 0){ // ySize is even
+        int m = ySize / 2;
+        for( int i = 0 ; i < m; i++){ // 0,1,2,3, m = 2
+            QVector<double> temp = fZDataA[i]; // i = 0   , i = 1
+            fZDataA[i] = fZDataA[i+m];         // i <- 2  , i <- 3
+            fZDataA[i+m] = temp;               // 2 <- 0
+
+            temp = fZDataP[i];
+            fZDataP[i] = fZDataP[i+m];
+            fZDataP[i+m] = temp;
+        }
+    }else{
+        int m = (ySize - 1)/2;
+        QVector<double> tempMidA = fZDataA[m];
+        QVector<double> tempMidP = fZDataP[m];
+
+        for( int i = 0 ; i < m; i++){ // 0,1,2,3,4  --> 3,4,0,1,2 m = 3
+            QVector<double> temp = fZDataA[i];   // i = 0   , i = 1
+            fZDataA[i] = fZDataA[i+m+1];         // i <- 3  , i <- 4
+            fZDataA[i+m] = temp;                 // 2 <- 0  , 3 <- 1
+
+            temp = fZDataP[i];
+            fZDataP[i] = fZDataP[i+m+1];
+            fZDataP[i+m] = temp;
+        }
+        fZDataA[ySize-1] = tempMidA;
+        fZDataP[ySize-1] = tempMidP;
+    }
 
 }
 
@@ -547,7 +659,7 @@ double FileIO::ExtractYValue(QString str){
     //qDebug() << str << ", " << pos << ";" << pos2;
     QString strY;
     if( pos2 == -1){
-        strY = str.mid(pos+1);
+        strY = str.mid(pos+1, 4);
     }else{
         strY = str.mid(pos+1, pos2-pos-1);
     }

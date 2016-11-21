@@ -9,6 +9,7 @@
 #include "constant.h"
 #include "analysis.h"
 #include "fftw3.h"
+//#include <fftw3.h>
 #include <complex.h>
 
 class FileIO : public QObject
@@ -31,7 +32,7 @@ public:
     void SubstractData(int yIndex);
     void FouierForward(); // manipulated zData
     void FouierBackward();
-    void SwapData(); // for fourier transform
+    void SwapFFTData(); // for fourier transform
 
 signals:
 

@@ -41,12 +41,10 @@ void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double
     colorMap_A->data()->setSize(nx,ny);
     colorMap_P->data()->setSize(nx,ny);
 
-    for( int i = 0; i < nx; i++){
-        for( int j = 0; j < ny; j++){
-            double z = dataA[j][i];
-            colorMap_A->data()->setCell(i,j, z);
-            z = dataP[j][i];
-            colorMap_P->data()->setCell(i,j, z);
+    for( int j = 0; j < ny; j++){
+        for( int i = 0; i < nx; i++){
+            colorMap_A->data()->setCell(i,j, dataA[j][i]);
+            colorMap_P->data()->setCell(i,j, dataP[j][i]);
         }
     }
 
@@ -61,11 +59,16 @@ void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double
 
     colorMap_A->setGradient(QCPColorGradient::gpJet ); //color scheme
     colorMap_P->setGradient(QCPColorGradient::gpJet ); //color scheme
+
     colorMap_A->rescaleDataRange();
     colorMap_P->rescaleDataRange();
 
+    colorScale_A->axis()->setScaleType(QCPAxis::stLogarithmic);
+    //colorScale_P->axis()->setScaleType(QCPAxis::stLogarithmic);
+
     plot_A->rescaleAxes();
     plot_P->rescaleAxes();
+
     plot_A->replot();
     plot_P->replot();
 }
