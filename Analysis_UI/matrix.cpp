@@ -376,7 +376,7 @@ void Matrix::PrintVector(QString str)
     QString msg, tmp;
     msg.sprintf("%s(%d,%d) = ", str.toStdString().c_str(), this->rows, this->cols);
 
-    int n;
+    int n = 0;
     if(this->rows == 1) n = this->cols;
     if(this->cols == 1) n = this->rows;
 

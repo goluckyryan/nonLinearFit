@@ -11,7 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = Analysis_UI
 TEMPLATE = app
 
-win32:RC_ICONS += icon.ico
+RC_ICONS += icon.ico
+win32:LIBS += "$$PWD/libfftw3-3.dll"
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -20,7 +21,8 @@ SOURCES += main.cpp\
     analysis.cpp \
     fileio.cpp \
     bplot.cpp \
-    fitresult.cpp
+    fitresult.cpp \
+    fftplot.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot.h \
@@ -29,11 +31,14 @@ HEADERS  += mainwindow.h \
     fileio.h \
     constant.h \
     bplot.h \
-    fitresult.h
+    fitresult.h \
+    fftw3.h \
+    fftplot.h
 
 FORMS    += mainwindow.ui \
     bplot.ui \
-    fitresult.ui
+    fitresult.ui \
+    fftplot.ui
 
 DISTFILES += \
     icon.ico

@@ -8,6 +8,8 @@
 #include <qmath.h>
 #include "constant.h"
 #include "analysis.h"
+#include "fftw3.h"
+#include <complex.h>
 
 class FileIO : public QObject
 {
@@ -27,6 +29,9 @@ public:
     void SaveSimplifiedTxt();
     void RestoreData();
     void SubstractData(int yIndex);
+    void FouierForward(); // manipulated zData
+    void FouierBackward();
+    void SwapData(); // for fourier transform
 
 signals:
 
@@ -40,6 +45,9 @@ public slots:
     int GetDataSize(){ return xData.size();}
     int GetDataSetSize() {return yData.size();}
     QVector<double> GetDataSetZ(int yIndex){return zData[yIndex];}
+    QVector<double> * GetData(){return zData;}
+    QVector<double> * GetFFTDataA(){return fZDataA;}
+    QVector<double> * GetFFTDataP(){return fZDataP;}
     QVector<double> GetDataSetY(){return yData;}
     QVector<double> GetDataSetX(){return xData;}
     QVector<double> GetDataSetMeanZ(){return zMean;}
@@ -67,6 +75,8 @@ private:
     QVector<double> yData; // B-field
     QVector<double> *zData; //data, [ydata][xdata]
     QVector<double> *backUpData; //backup data, [ydata][xdata]
+    QVector<double> *fZDataA; //amp of fourier zData, [ydata][xdata]
+    QVector<double> *fZDataP; //phase fourier zData, [ydata][xdata]
     QVector<double> zMean; // mean
 
     int xSize, ySize;

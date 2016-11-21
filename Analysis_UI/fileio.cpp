@@ -18,6 +18,10 @@ void FileIO::Initialize(){
     myfile = NULL;
     outfile = NULL;
     zData = NULL;
+    fZDataA = NULL;
+    fZDataP = NULL;
+    backUpData = NULL;
+
     colwise = 0;
     xMax = 0;
     xMin = 0;
@@ -40,6 +44,8 @@ FileIO::~FileIO(){
     if( outfile != NULL ) delete outfile;
     if( zData != NULL ) delete [] zData;
     if( backUpData != NULL ) delete [] backUpData;
+    if( fZDataA != NULL ) delete [] fZDataA;
+    if( fZDataP != NULL ) delete [] fZDataP;
 }
 
 void FileIO::OpenSaveFile(){
@@ -82,6 +88,8 @@ void FileIO::OpenCSVData(){
 
     zData = new QVector<double> [ySize];
     backUpData = new QVector<double> [ySize];
+    fZDataA = new QVector<double> [ySize];
+    fZDataP = new QVector<double> [ySize];
     double ** z ;
     z = new double *[ySize];
     for(int i = 0; i < ySize; i++){
@@ -161,7 +169,7 @@ void FileIO::OpenCSVData(){
 
 }
 
-void FileIO::OpenTxtData_col()
+void FileIO::OpenTxtData_col() // great problem in this function. not updated for long time.
 {
     this->colwise = 0;
 
@@ -286,6 +294,8 @@ void FileIO::OpenTxtData_row(){
     //============ get Data
     zData = new QVector<double> [ySize];
     backUpData = new QVector<double> [ySize];
+    fZDataA = new QVector<double> [ySize];
+    fZDataP = new QVector<double> [ySize];
 
     myfile->seek(0);
     int rows = 0;
@@ -394,11 +404,11 @@ void FileIO::SaveFitResult(Analysis *ana)
 
         text.sprintf("%5s, %8s,","yIndex", "yValue");
         for( int i = 0; i <p ; i++){
-            tmp.sprintf(" %8s,", header[i]);
+            tmp.sprintf(" %8s,", header[i].toStdString().c_str());
             text.append(tmp);
         }
         for( int i = 0; i <p ; i++){
-            tmp.sprintf(" %8s,", eheader[i]);
+            tmp.sprintf(" %8s,", eheader[i].toStdString().c_str());
             text.append(tmp);
         }
         tmp.sprintf(" %8s, %8s, %8s\n","SSR", "DF", "chi-sq/ndf");
@@ -486,6 +496,41 @@ void FileIO::SubstractData(int yIndex)
     }
 
     CalMeanVector();
+}
+
+void FileIO::FouierForward()
+{
+
+    fftw_complex *out;
+    out = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
+    double *z = new double [ySize * xSize];
+
+
+    for( int i = 0; i < ySize ; i++){
+        for( int j = 0; j < xSize ; j++){
+            z[i*xSize + j] = zData[i][j];
+        }
+    }
+
+    fftw_plan plan;
+    plan = fftw_plan_dft_r2c_2d(ySize, xSize, z, out, FFTW_ESTIMATE);
+
+    fftw_execute(plan);
+
+    for( int i = 0; i < ySize; i++){
+            fZDataA[i].clear();
+            fZDataP[i].clear();
+        for(int j = 0; j < xSize; j++){
+            fZDataA[i].push_back(out[i*xSize + j][0]);
+            fZDataP[i].push_back(out[i*xSize + j][1]);
+        }
+    }
+
+    fftw_destroy_plan(plan);
+    fftw_free(out);
+
+    delete [] z;
+
 }
 
 double FileIO::ExtractYValue(QString str){

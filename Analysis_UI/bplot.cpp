@@ -79,7 +79,6 @@ void BPlot::Plot()
 
     QVector<double> xdata = file->GetDataSetX();
     int n = file->GetDataSetSize();
-    if( file->HasBackGround() ) n = n-1;
 
     int xStart = ui->spinBox_Start->value();
     int xEnd = ui->spinBox_End->value();
@@ -87,7 +86,9 @@ void BPlot::Plot()
     double dx = xdata[xEnd]-xdata[xEnd-1];
 
     double yMin, yMax;
-    for( int i = 0; i < n; i++){
+    int startI = 0;
+    if( file->HasBackGround() ) startI = 1;
+    for( int i = startI; i < n; i++){
         x.push_back(file->GetDataY(i));
         //integrated
         QVector<double> zdata = file->GetDataSetZ(i);
@@ -171,7 +172,9 @@ void BPlot::on_pushButton_clicked()
 
     //fill data;
     int n = file->GetDataSetSize();
-    for(int i = 0; i < n ; i++){
+    int startI = 0;
+    if(file->HasBackGround()) startI = 1;
+    for(int i = startI; i < n ; i++){
         str.sprintf("%15.4f, %15.4f\n", x[i], y[i]);
         stream << str;
     }

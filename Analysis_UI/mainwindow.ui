@@ -491,6 +491,7 @@
    </attribute>
    <addaction name="actionFit_Result"/>
    <addaction name="actionB_Plot"/>
+   <addaction name="actionFFTW_Plot"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionFit_Result">
@@ -501,6 +502,11 @@
   <action name="actionB_Plot">
    <property name="text">
     <string>B-Plot</string>
+   </property>
+  </action>
+  <action name="actionFFTW_Plot">
+   <property name="text">
+    <string>FFTW Plot</string>
    </property>
   </action>
  </widget>

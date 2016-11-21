@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
     bPlot = new BPlot(this);
     connect(bPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
+    fftPlot = new FFTPlot(this);
+
     savedSimplifiedtxt = 0;
 
     plot = ui->customPlot;
@@ -25,6 +27,12 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->axisRect()->setRangeZoom(Qt::Vertical);
 
     ctplot = ui->customPlot_CT;
+    ctplot->axisRect()->setupFullAxesBox(true);
+    ctplot->xAxis->setLabel("time [us]");
+    ctplot->yAxis->setLabel("B-field [mV]");
+
+    colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
+    colorMap->clearData();
 
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
@@ -39,11 +47,11 @@ MainWindow::~MainWindow(){
     delete ui;
     delete fitResultPlot;
     delete bPlot;
+    delete fftPlot;
 
-    //delete plotTitle;
+    delete colorMap;
     delete plot;
     delete ctplot;
-    //delete colorMap;
 
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
@@ -428,9 +436,6 @@ void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
     ui->lineEdit_Tb->setEnabled(checked);
     ui->lineEdit_P->setEnabled(checked);
 
-    //fitResultDialog->ClearData();
-    //fitResultDialog->SetDataSize(file->GetDataSetSize());
-
     if( checked ){
         statusBar()->showMessage("Enable b and Tb.");
         if(ui->checkBox_c->isChecked() ){
@@ -452,9 +457,6 @@ void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
 void MainWindow::on_checkBox_c_clicked(bool checked)
 {
     ui->lineEdit_c->setEnabled(checked);
-
-    //fitResultDialog->ClearData();
-    //fitResultDialog->SetDataSize(file->GetDataSetSize());
 
     if( checked ){
         statusBar()->showMessage("Enable c.");
@@ -547,12 +549,7 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> e
 
 void MainWindow::PlotContour()
 {
-    ctplot->axisRect()->setupFullAxesBox(true);
-    ctplot->xAxis->setLabel("time [us]");
-    ctplot->yAxis->setLabel("B-field [mV]");
 
-    colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
-    colorMap->clearData();
     int nx = file->GetDataSize();
     int ny = file->GetDataSetSize();
     if( file->HasBackGround() ) ny = ny -1;
@@ -565,7 +562,6 @@ void MainWindow::PlotContour()
 
     ctplot->xAxis->setRange(xMin, xMax);
     ctplot->yAxis->setRange(yMin, yMax);
-    //ctplot->yAxis->setRangeReversed(file->IsYRevered());
 
     colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
 
@@ -584,7 +580,7 @@ void MainWindow::PlotContour()
     }
 
     QCPColorScale *colorScale = new QCPColorScale(ctplot);
-    ctplot->plotLayout()->removeAt(1); // remove any element if there is any
+    //ctplot->plotLayout()->removeAt(1); // remove any element if there is any
     ctplot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
     colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
     colorMap->setColorScale(colorScale); // associate the color map with the color scale
@@ -631,9 +627,10 @@ void MainWindow::on_doubleSpinBox_zOffset_valueChanged(double arg1)
 
     bool corr = ui->checkBox_MeanCorr->isChecked();
 
-    //double zMax, zMin;
+    int yStartIndex = 0;
+    if( file->HasBackGround()) yStartIndex = 1;
     for(int xIndex = 0; xIndex < nx; xIndex++){
-        for(int yIndex = 0; yIndex < ny; yIndex++){
+        for(int yIndex = yStartIndex; yIndex < ny; yIndex++){
 
             double mean = 0;
             if( corr ){
@@ -646,16 +643,8 @@ void MainWindow::on_doubleSpinBox_zOffset_valueChanged(double arg1)
             }else{
                 colorMap->data()->setCell(xIndex, yIndex, z); // fill data
             }
-            //if(xIndex == 0 && yIndex == 0){
-            //    zMax = z;
-            //    zMin = z;
-            //}
-            //if( zMax < z) zMax = z;
-            //if( zMin > z) zMin = z;
         }
     }
-
-    //colorMap->setDataRange(QCPRange(zMin, zMax));
 
     ctplot->replot();
 }
@@ -671,6 +660,7 @@ void MainWindow::on_actionB_Plot_triggered()
 void MainWindow::setDisabledPlanel()
 {
     ui->actionB_Plot->setEnabled(0);
+    ui->actionFFTW_Plot->setEnabled(0);
     ui->pushButton_Fit->setEnabled(0);
     ui->pushButton_FitAll->setEnabled(0);
     ui->pushButton_reset->setEnabled(0);
@@ -686,6 +676,7 @@ void MainWindow::setDisabledPlanel()
 void MainWindow::setEnabledPlanel()
 {
     ui->actionB_Plot->setEnabled(1);
+    ui->actionFFTW_Plot->setEnabled(1);
     ui->pushButton_Fit->setEnabled(1);
     ui->pushButton_FitAll->setEnabled(1);
     ui->pushButton_reset->setEnabled(1);
@@ -744,4 +735,13 @@ void MainWindow::on_verticalSlider_z_sliderMoved(int position)
 {
     colorMap->setDataRange(QCPRange(-position, position));
     ctplot->replot();
+}
+
+void MainWindow::on_actionFFTW_Plot_triggered()
+{
+    if(fftPlot->isHidden()){
+        fftPlot->show();
+        file->FouierForward();
+        fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
+    }
 }

@@ -11,6 +11,7 @@
 #include "fileio.h"
 #include "fitresult.h"
 #include "bplot.h"
+#include "fftplot.h"
 
 namespace Ui {
 class MainWindow;
@@ -68,10 +69,13 @@ private slots:
     
     void on_verticalSlider_z_sliderMoved(int position);
 
+    void on_actionFFTW_Plot_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
     BPlot * bPlot;
+    FFTPlot * fftPlot;
 
     QString Msg;
 
