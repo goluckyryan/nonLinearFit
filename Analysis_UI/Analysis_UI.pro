@@ -13,6 +13,8 @@ TEMPLATE = app
 
 RC_ICONS += icon.ico
 win32:LIBS += "$$PWD/libfftw3-3.dll"
+#unix:INCLUDEPATH += "/usr/local/lib"
+unix:LIBS += "/usr/local/lib/libfftw3.a"
 
 SOURCES += main.cpp\
         mainwindow.cpp \

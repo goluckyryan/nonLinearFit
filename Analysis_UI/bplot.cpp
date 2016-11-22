@@ -69,6 +69,7 @@ void BPlot::SetData(FileIO *file)
 
     x.clear();
     y.clear();
+
 }
 
 void BPlot::Plot()
@@ -83,7 +84,7 @@ void BPlot::Plot()
     int xStart = ui->spinBox_Start->value();
     int xEnd = ui->spinBox_End->value();
 
-    double dx = xdata[xEnd]-xdata[xEnd-1];
+    double dx = xdata[xEnd+1]-xdata[xEnd];
 
     double yMin, yMax;
     int startI = 0;
@@ -135,7 +136,7 @@ int BPlot::FindstartIndex(QVector<double> xdata, double goal)
 
 void BPlot::on_spinBox_Start_valueChanged(int arg1)
 {
-    QVector<double> xData = file->GetDataSetX();
+    QVector<double> xData = this->file->GetDataSetX();
     ui->lineEdit_StartValue->setText(QString::number(xData[arg1])+" us");
 
     Plot();

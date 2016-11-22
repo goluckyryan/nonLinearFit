@@ -371,6 +371,14 @@ void MainWindow::on_pushButton_reset_clicked()
     ui->lineEdit_a->setText(QString::number(a));
     ui->lineEdit_b->setText(QString::number(b));
 
+    ui->lineEdit_ea->setText("");
+    ui->lineEdit_eTa->setText("");
+    ui->lineEdit_eb->setText("");
+    ui->lineEdit_eTb->setText("");
+    ui->lineEdit_ec->setText("");
+    ui->lineEdit_P->setText("");
+    ui->lineEdit_eP->setText("");
+
     PlotFitFunc();
 }
 
@@ -742,6 +750,7 @@ void MainWindow::on_actionFFTW_Plot_triggered()
     if(fftPlot->isHidden()){
         fftPlot->show();
         file->FouierForward();
-        fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
+        file->FouierBackward();
+        fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetData());
     }
 }
