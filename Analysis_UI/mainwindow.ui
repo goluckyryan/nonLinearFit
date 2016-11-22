@@ -24,93 +24,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <widget class="QPushButton" name="pushButton_OpenFile">
-      <property name="text">
-       <string>Open File</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QCheckBox" name="checkBox_AutoFit">
-      <property name="text">
-       <string>Auto-fit</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1" colspan="9">
-     <widget class="QLineEdit" name="lineEdit">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QLineEdit" name="lineEdit_y">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>y-Index</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QSpinBox" name="spinBox_y"/>
-    </item>
-    <item row="3" column="2">
-     <widget class="QSpinBox" name="spinBox_BGIndex"/>
-    </item>
-    <item row="3" column="9">
-     <widget class="QCheckBox" name="checkBox_MeanCorr">
-      <property name="text">
-       <string>Mean Corr.</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QCheckBox" name="checkBox_BGsub">
-      <property name="layoutDirection">
-       <enum>Qt::RightToLeft</enum>
-      </property>
-      <property name="text">
-       <string>BG sub.</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QPushButton" name="pushButton_RestoreData">
-      <property name="text">
-       <string>Restore data</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0" colspan="15">
-     <widget class="QTextEdit" name="textEdit">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Courier New</family>
-       </font>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOn</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="10" rowspan="3" colspan="5">
+    <item row="1" column="9" rowspan="3" colspan="5">
      <widget class="QGroupBox" name="groupBox_2">
       <property name="title">
        <string>Fit Control</string>
@@ -170,7 +84,7 @@
       </layout>
      </widget>
     </item>
-    <item row="4" column="2" colspan="5">
+    <item row="4" column="2" colspan="4">
      <widget class="QCustomPlot" name="customPlot" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -421,24 +335,7 @@
       <zorder>checkBox_b_Tb</zorder>
      </widget>
     </item>
-    <item row="4" column="14">
-     <widget class="QSlider" name="verticalSlider_z">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="13">
-     <widget class="QSlider" name="verticalSlider_zOffset">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="invertedControls">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="8" colspan="5">
+    <item row="4" column="7" colspan="5">
      <widget class="QCustomPlot" name="customPlot_CT" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -448,13 +345,142 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="9">
+    <item row="3" column="2">
+     <widget class="QSpinBox" name="spinBox_BGIndex"/>
+    </item>
+    <item row="3" column="8">
+     <widget class="QCheckBox" name="checkBox_MeanCorr">
+      <property name="text">
+       <string>Mean Corr.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QCheckBox" name="checkBox_BGsub">
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>BG sub.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QSpinBox" name="spinBox_y"/>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>y-Index</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="pushButton_RestoreData">
+      <property name="text">
+       <string>Restore data</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="13">
+     <widget class="QSlider" name="verticalSlider_z">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="12">
+     <widget class="QSlider" name="verticalSlider_zOffset">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="invertedControls">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="8">
      <widget class="QCheckBox" name="checkBox">
       <property name="enabled">
        <bool>false</bool>
       </property>
       <property name="text">
        <string>GnuFit (4 pars)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0" colspan="14">
+     <widget class="QTextEdit" name="textEdit">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QPushButton" name="pushButton_OpenFile">
+      <property name="text">
+       <string>Open File</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QCheckBox" name="checkBox_AutoFit">
+      <property name="text">
+       <string>Auto-fit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QLineEdit" name="lineEdit_y">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" colspan="8">
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="5">
+     <widget class="QSpinBox" name="spinBox_MovingAvg">
+      <property name="minimum">
+       <number>-1</number>
+      </property>
+      <property name="maximum">
+       <number>301</number>
+      </property>
+      <property name="singleStep">
+       <number>2</number>
+      </property>
+      <property name="value">
+       <number>-1</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Moving Avg.</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>

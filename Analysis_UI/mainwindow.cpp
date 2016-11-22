@@ -58,7 +58,7 @@ MainWindow::~MainWindow(){
 
 }
 
-void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y, double xMin, double xMax, double yMin, double yMax){
+void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y){
 
     while( plot->graphCount() < graphID+1){
         plot->addGraph();
@@ -75,8 +75,7 @@ void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y, double 
     plot->graph(graphID)->clearData();
 
     plot->graph(graphID)->addData(x, y);
-    plot->xAxis->setRange(xMin, xMax);
-    plot->yAxis->setRange(yMin, yMax);
+
     plot->replot();
 
 }
@@ -154,6 +153,15 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     yLabel.sprintf("Voltage [ 10^%d V]", -1 * file->GetMultiIndex());
     plot->yAxis->setLabel(yLabel);
 
+    //========= Plot single data
+    double xMin = file->GetXMin();
+    double xMax = file->GetXMax();
+    double yMin = file->GetYMin();
+    double yMax = file->GetYMax();
+    plot->xAxis->setRange(xMin, xMax);
+    double yRange = qMax(fabs(yMax), fabs(yMin));
+    plot->yAxis->setRange(-yRange, yRange);
+
     //========= if file has background data
     //========= the plotting function is called using spinBox_y
     if( file->HasBackGround()){
@@ -179,11 +187,6 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     int ny = file->GetDataSetSize();
     if( file->HasBackGround() ) ny = ny -1;
     colorMap->data()->setSize(nx, ny);
-
-    double xMin = file->GetXMin();
-    double xMax = file->GetXMax();
-    double yMin = file->GetYMin();
-    double yMax = file->GetYMax();
 
     ctplot->xAxis->setRange(xMin, xMax);
     ctplot->yAxis->setRange(yMin, yMax);
@@ -245,9 +248,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     title.sprintf("Hall Voltage : %f mV", file->GetDataY(arg1));
     //plotTitle->setText(title);
 
-    Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1),
-         file->GetXMin(), file->GetXMax(),
-         file->GetZMin(), file->GetZMax());
+    Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1));
 
     ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
     ana->SetY(arg1, file->GetDataY(arg1));
@@ -276,9 +277,7 @@ void MainWindow::PlotFitFunc(){
     QVector<double> par = GetParametersFromLineText();
 
     ana->CalFitData(par);
-    Plot(1, ana->GetData_x(), ana->GetFitData_y(),
-         file->GetXMin(), file->GetXMax(),
-         file->GetZMin(), file->GetZMax());
+    Plot(1, ana->GetData_x(), ana->GetFitData_y());
 
     int xIndex = ui->spinBox_x->value();
     double x = file->GetDataX(xIndex);
@@ -288,19 +287,22 @@ void MainWindow::PlotFitFunc(){
     double yMin = file->GetZMin();
     double yMax = file->GetZMax();
 
-    double yMean = (yMax + yMin)/2;
-    double yWidth = (yMax - yMin)/2;
+    double yRange = qMax(fabs(yMax), fabs(yMin));
 
-    yMin = yMean - yWidth*1.2;
-    yMax = yMean + yWidth*1.2;
+    //double yMean = (yMax + yMin)/2;
+    //double yWidth = (yMax - yMin)/2;
+    //
+    //yMin = yMean - yWidth*1.2;
+    //yMax = yMean + yWidth*1.2;
 
     int size = ana->GetDataSize();
     for(int i = 0; i < size; i++){
-        double y = yMin + (yMax-yMin)*i/size;
+        //double y = yMin + (yMax-yMin)*i/size;
+        double y = -yRange + 2*yRange*i/size;
         xline_y.push_back(y);
         xline_x.push_back(x);
     }
-    Plot(2, xline_x, xline_y, file->GetXMin(), file->GetXMax(), yMin, yMax);
+    Plot(2, xline_x, xline_y);
 
 }
 
@@ -656,6 +658,7 @@ void MainWindow::setDisabledPlanel()
     ui->verticalSlider_z->setEnabled(0);
     ui->checkBox_BGsub->setEnabled(0);
     ui->spinBox_BGIndex->setEnabled(0);
+    ui->spinBox_MovingAvg->setEnabled(0);
 }
 
 void MainWindow::setEnabledPlanel()
@@ -673,26 +676,19 @@ void MainWindow::setEnabledPlanel()
     ui->verticalSlider_zOffset->setEnabled(1);
     ui->verticalSlider_z->setEnabled(1);
     ui->checkBox_BGsub->setEnabled(1);
-    //ui->spinBox_BGIndex->setEnabled(1);
+    ui->spinBox_MovingAvg->setEnabled(1);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
 {
     if( checked){
         file->MeanCorrection();
+        on_spinBox_y_valueChanged(ui->spinBox_y->value());
+        PlotContour(ui->verticalSlider_zOffset->value());
+        bPlot->Plot();
     }else{
         on_pushButton_RestoreData_clicked();
     }
-
-    PlotContour(0);
-    //int pos = ui->verticalSlider_zOffset->value();
-    //on_verticalSlider_zOffset_sliderMoved(pos); // it replot
-
-    //bPlot->SetMeanCorr(checked);
-    bPlot->Plot();
-
-    int yIndex = ui->spinBox_y->value();
-    on_spinBox_y_valueChanged(yIndex);
 
 }
 
@@ -702,26 +698,13 @@ void MainWindow::on_checkBox_BGsub_clicked(bool checked)
     int bgYIndex = ui->spinBox_BGIndex->value();
 
     if( checked ){
-        //substract. replace the current data with substracted.
         file->SubstractData(bgYIndex);
-        QString msg;
-        msg.sprintf("Using the %d - data as background.", bgYIndex);
-        Write2Log(msg);
+        on_spinBox_y_valueChanged(ui->spinBox_y->value());
+        PlotContour(ui->verticalSlider_zOffset->value());
+        bPlot->Plot();
     }else{
-        //restore to the backup data;
         on_pushButton_RestoreData_clicked();
     }
-
-    //Plot again current for yIndex;
-    int yIndex = ui->spinBox_y->value();
-    on_spinBox_y_valueChanged(yIndex);
-
-    //Plot again the contour plot;
-    PlotContour(0);
-    //bool corr = ui->checkBox_MeanCorr->isChecked();
-    //on_checkBox_MeanCorr_clicked(corr);
-
-    bPlot->Plot();
 
 }
 
@@ -751,13 +734,36 @@ void MainWindow::on_pushButton_RestoreData_clicked()
 {
     file->RestoreData();
     ui->checkBox_BGsub->setChecked(0);
-    Write2Log("restoring Data.");
     ui->checkBox_MeanCorr->setChecked(0);
-    //on_checkBox_MeanCorr_clicked(0);
     ui->verticalSlider_zOffset->setValue(0);
+    ui->spinBox_MovingAvg->setValue(-1);
+
+    on_spinBox_y_valueChanged(ui->spinBox_y->value());
+    PlotContour(ui->verticalSlider_zOffset->value());
+    bPlot->Plot();
 }
 
 void MainWindow::on_verticalSlider_zOffset_sliderMoved(int position)
 {
     PlotContour(position);
+}
+
+void MainWindow::on_spinBox_MovingAvg_valueChanged(int arg1)
+{
+    if( arg1 == -1) {
+        on_pushButton_RestoreData_clicked();
+        return;
+    }
+
+
+    if( ui->checkBox_MeanCorr->isChecked()== 0){
+        ui->checkBox_MeanCorr->setChecked(1);
+        file->MeanCorrection();
+    }
+
+    file->MovingAvg(arg1);
+
+    PlotContour(ui->verticalSlider_zOffset->value());
+    on_spinBox_y_valueChanged(ui->spinBox_y->value());
+    bPlot->Plot();
 }

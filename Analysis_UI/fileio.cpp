@@ -478,35 +478,74 @@ void FileIO::SaveSimplifiedTxt()
 
 void FileIO::RestoreData()
 {
+    SendMsg("restoring Data.");
     for( int yIndex = 0; yIndex < ySize; yIndex++){
         zData[yIndex].clear();
         for(int xIndex = 0; xIndex < xSize; xIndex++){
             zData[yIndex].push_back(backUpData[yIndex][xIndex]);
         }
     }
+
+    CalMeanVector();
 }
 
 void FileIO::SubstractData(int yIndex)
 {
+    QString msg;
+    msg.sprintf("Using the %d(th)-data as background.", yIndex);
+    SendMsg(msg);
+    QVector<double> ref = zData[yIndex];
+
     for( int y = 0; y < ySize; y++){
+        QVector<double> temp = zData[y];
         zData[y].clear();
         for(int x = 0; x < xSize; x++){
-            zData[y].push_back(zData[y][x] - backUpData[yIndex][x]);
+            zData[y].push_back(temp[x] - ref[x]);
         }
     }
+
+    CalMeanVector();
 }
 
 void FileIO::MeanCorrection()
 {
     SendMsg("Mean correction.");
-    int yStartIndex = 0;
-    if( hadBG) yStartIndex = 1;
     for(int xIndex = 0; xIndex < xSize; xIndex++){
-        for(int yIndex = yStartIndex; yIndex < ySize; yIndex++){
+        for(int yIndex = 0; yIndex < ySize; yIndex++){
             double mean = zMean[yIndex];
             zData[yIndex][xIndex] = zData[yIndex][xIndex] - mean;
         }
     }
+
+    CalMeanVector();
+}
+
+void FileIO::MovingAvg(int n)
+{
+    if( n == -1 ) {
+        return;
+    }
+    if( n % 2 == 0) return;
+
+    QString msg;
+    msg.sprintf("Moving Average n = %d.", n);
+    SendMsg(msg);
+
+    int m = (n-1)/2;
+    for(int yIndex = 0; yIndex < ySize; yIndex++){
+        QVector<double> temp = zData[yIndex];
+
+        for(int xIndex = 0; xIndex < xSize; xIndex++){
+            double mean = 0;
+            for( int k = xIndex-m; k <= xIndex+m; k++ ){
+                if( k < 0 || k >= xSize) continue;
+                mean += temp[k]/n;
+            }
+            zData[yIndex][xIndex] = mean;
+        }
+    }
+
+    CalMeanVector();
 }
 
 void FileIO::FouierForward()

@@ -25,7 +25,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void Plot(int graphID, QVector<double> x, QVector<double> y, double xMin, double xMax, double yMin, double yMax);
+    void Plot(int graphID, QVector<double> x, QVector<double> y);
     void PlotFitFunc();
 
     QVector<double> GetParametersFromLineText();
@@ -70,6 +70,8 @@ private slots:
 
     void on_actionFFTW_Plot_triggered();
 
+
+    void on_spinBox_MovingAvg_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;

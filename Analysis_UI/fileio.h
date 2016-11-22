@@ -31,6 +31,8 @@ public:
     void RestoreData();
     void SubstractData(int yIndex);
     void MeanCorrection();
+    void MovingAvg(int n);
+
     void FouierForward(); // manipulated zData
     void FouierBackward();
     void SwapFFTData(bool dir); // for fourier transform
