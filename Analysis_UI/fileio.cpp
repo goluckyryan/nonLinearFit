@@ -491,19 +491,34 @@ void FileIO::SubstractData(int yIndex)
     for( int y = 0; y < ySize; y++){
         zData[y].clear();
         for(int x = 0; x < xSize; x++){
-            zData[y].push_back(backUpData[y][x] - backUpData[yIndex][x]);
+            zData[y].push_back(zData[y][x] - backUpData[yIndex][x]);
         }
     }
+}
 
-    CalMeanVector();
+void FileIO::MeanCorrection()
+{
+    SendMsg("Mean correction.");
+    int yStartIndex = 0;
+    if( hadBG) yStartIndex = 1;
+    for(int xIndex = 0; xIndex < xSize; xIndex++){
+        for(int yIndex = yStartIndex; yIndex < ySize; yIndex++){
+            double mean = zMean[yIndex];
+            zData[yIndex][xIndex] = zData[yIndex][xIndex] - mean;
+        }
+    }
 }
 
 void FileIO::FouierForward()
 {
+    SendMsg("Fouier Transform - Forward.");
 
     fftw_complex *in, *out;
     in = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
     out = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
+
+    fftw_plan plan;
+    plan = fftw_plan_dft_2d(ySize, xSize, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
     for( int i = 0; i < ySize ; i++){
         for( int j = 0; j < xSize ; j++){
@@ -511,9 +526,6 @@ void FileIO::FouierForward()
             in[i*xSize + j][1] = 0;
         }
     }
-
-    fftw_plan plan;
-    plan = fftw_plan_dft_2d(ySize, xSize, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
     fftw_execute(plan);
 
@@ -524,23 +536,27 @@ void FileIO::FouierForward()
             fZDataA[i].push_back(out[i*xSize + j][0] / xSize / ySize);
             fZDataP[i].push_back(out[i*xSize + j][1] / xSize / ySize);
         }
-        if( i == 0 ) {
-            qDebug() << fZDataA[i].length();
-            qDebug() << fZDataA[i];
-        }
+        //if( i == 0 ) {
+        //    qDebug() << fZDataA[i].length();
+        //    qDebug() << fZDataA[i];
+        //}
     }
 
     fftw_destroy_plan(plan);
     fftw_free(out);
     fftw_free(in);
 
-    SwapFFTData();
+    SendMsg("Fouier Transform - Forward. Done.");
+
+    SwapFFTData(1);
 
 }
 
 void FileIO::FouierBackward()
 {
-    SwapFFTData();
+    SwapFFTData(0);
+
+    SendMsg("Fouier Transform - Backward.");
 
     fftw_complex *in, *out;
     in = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
@@ -548,7 +564,7 @@ void FileIO::FouierBackward()
 
     for( int i = 0; i < ySize ; i++){
         for( int j = 0; j < xSize ; j++){
-            if( i == 0 || i == ySize -1){
+            if( i == 0 ){
                 in[i*xSize + j][0] = 0;
                 in[i*xSize + j][1] = 0;
             }else{
@@ -575,10 +591,76 @@ void FileIO::FouierBackward()
     fftw_free(out);
     fftw_free(in);
 
+    SendMsg("Fouier Transform - Backward. Done.");
 }
 
-void FileIO::SwapFFTData()
+QVector<double> FileIO::Shift(QVector<double> list, int d)
 {
+    int n = list.length();
+    QVector<double> temp = list.mid(n-d);
+    for( int i = n-1; i > d-1; i-- ){
+        list[i] = list[i-d];
+    }
+    for( int i = 0; i < temp.length(); i++){
+        list[i] =  temp[i];
+    }
+    return list;
+}
+
+void FileIO::SwapFFTData(bool dir)
+{
+    // dir = 1 , forward swap; dir = 0, backward
+
+    if( dir == 1){
+        SendMsg("Swap data.");
+    }else{
+        SendMsg("UnSwap data.");
+    }
+
+    // Swap X-data
+    int d = 0;
+    if( xSize % 2 == 0){
+        d = xSize /2;
+    }else{
+        d = (xSize-1)/2;
+        if( dir == 0 ) d = xSize - d;
+    }
+    for(int i = 0; i < ySize ; i++){
+        fZDataA[i] = Shift(fZDataA[i], d);
+        fZDataP[i] = Shift(fZDataP[i], d);
+    }
+
+    // Swap Y-data
+    if( ySize % 2 == 0){
+        d = ySize /2;
+    }else{
+        d = (ySize-1)/2;
+        if( dir == 0 ) d = ySize - d;
+    }
+    QVector<double> *tempA = new QVector<double> [d];
+    QVector<double> *tempP = new QVector<double> [d];
+    for(int i = 0 ; i < d; i++){
+        tempA[i] = fZDataA[i+ySize-d];
+        tempP[i] = fZDataP[i+ySize-d];
+    }
+
+    for(int i = ySize-1 ; i > d-1; i--){
+        fZDataA[i].clear();
+        fZDataP[i].clear();
+        fZDataA[i] = fZDataA[i-d];
+        fZDataP[i] = fZDataP[i-d];
+    }
+    for(int i = 0 ; i < d; i++){
+        fZDataA[i].clear();
+        fZDataP[i].clear();
+        fZDataA[i] = tempA[i];
+        fZDataP[i] = tempP[i];
+    }
+
+    delete [] tempA;
+    delete [] tempP;
+
+    /***** old code
     //Swap X data
     if( xSize % 2 == 0){ //even xSize
         int m = xSize / 2;
@@ -642,7 +724,7 @@ void FileIO::SwapFFTData()
         fZDataA[ySize-1] = tempMidA;
         fZDataP[ySize-1] = tempMidP;
     }
-
+*/
 }
 
 double FileIO::ExtractYValue(QString str){

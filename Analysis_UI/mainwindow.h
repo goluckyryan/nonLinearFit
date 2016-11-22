@@ -31,7 +31,7 @@ public:
     QVector<double> GetParametersFromLineText();
     void UpdateLineTextParameters(QVector<double> par, QVector<double> epar);
 
-    void PlotContour();
+    void PlotContour(double offset);
 
 private slots:
     void Write2Log(QString str);
@@ -55,21 +55,21 @@ private slots:
     void on_checkBox_b_Tb_clicked(bool checked);
     void on_checkBox_c_clicked(bool checked);
     void on_actionFit_Result_triggered();
-    void on_doubleSpinBox_zOffset_valueChanged(double arg1);
     void on_actionB_Plot_triggered();
 
     void setDisabledPlanel();
     void setEnabledPlanel();
 
+    void on_pushButton_RestoreData_clicked();
     void on_checkBox_MeanCorr_clicked(bool checked);
-
     void on_checkBox_BGsub_clicked(bool checked);
-    
     void on_spinBox_BGIndex_valueChanged(int arg1);
     
     void on_verticalSlider_z_sliderMoved(int position);
+    void on_verticalSlider_zOffset_sliderMoved(int position);
 
     void on_actionFFTW_Plot_triggered();
+
 
 private:
     Ui::MainWindow *ui;

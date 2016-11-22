@@ -30,9 +30,11 @@ public:
     void SaveSimplifiedTxt();
     void RestoreData();
     void SubstractData(int yIndex);
+    void MeanCorrection();
     void FouierForward(); // manipulated zData
     void FouierBackward();
-    void SwapFFTData(); // for fourier transform
+    void SwapFFTData(bool dir); // for fourier transform
+    QVector<double> Shift(QVector<double> list, int d);
 
 signals:
 

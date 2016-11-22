@@ -20,7 +20,6 @@ BPlot::BPlot(QWidget *parent) :
     plot->graph(0)->setPen(QPen(Qt::blue));
     plot->graph(0)->clearData();
 
-    meanCorr = 0;
 }
 
 BPlot::~BPlot()
@@ -94,11 +93,9 @@ void BPlot::Plot()
         //integrated
         QVector<double> zdata = file->GetDataSetZ(i);
         double sum = 0;
-        double mean = 0 ;
-        if( meanCorr ) mean = file->GetDataMeanZ(i);
 
         for(int j = xStart; j <= xEnd ; j++){
-            sum += zdata[j] - mean;
+            sum += zdata[j];
         }
         sum = sum*dx;
 
@@ -187,8 +184,3 @@ void BPlot::on_pushButton_clicked()
 
 }
 
-void BPlot::SetMeanCorr(bool checked)
-{
-    meanCorr = checked;
-    Plot();
-}

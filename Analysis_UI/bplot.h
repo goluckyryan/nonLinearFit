@@ -21,7 +21,6 @@ public:
     void SetData(FileIO *file);
     void Plot();
     int FindstartIndex(QVector<double> xdata, double goal);    
-    void SetMeanCorr(bool checked);
 
 signals:
     void SendMsg(QString msg);
@@ -40,8 +39,6 @@ private:
     FileIO *file;
 
     QVector<double> x, y;
-
-    bool meanCorr;
 
 };
 

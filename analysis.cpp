@@ -3,8 +3,37 @@
 #include "anaFileIO.h"
 
 using namespace std; 
+
+void Shift(int n,int * data){
+	int m = n/2;
+	int temp = data[n-1];
+	for(int i = n; i > 0; i--){
+		data[i] = data[i-1];
+	}
+	data[0] = temp;
+}
  
 int main(int argc, char *argv[]){ 
+	
+	const int n = 10;
+	int * data = new int [n];
+	for(int i = 0; i < n; i++){
+		data[i] = i;
+	}
+	
+	for(int i = 0; i < n; i++){
+		printf("%d, ", data[i]);
+	}
+	printf("\n");
+	
+	Shift(n, data);
+	
+	for(int i = 0; i < n; i++){
+		printf("%d, ", data[i]);
+	}
+	printf("\n");
+	
+	return 0;
 	
 	if( argc != 3 && argc != 5 && argc != 7 && argc != 8){
 		printf("usage: ./analaysis fileName yindex (a Ta b Tb lambda)\n");

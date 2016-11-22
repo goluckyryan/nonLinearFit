@@ -141,7 +141,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     setEnabledPlanel();
     ui->checkBox_BGsub->setChecked(0);
     ui->checkBox_MeanCorr->setChecked(0);
-    ui->doubleSpinBox_zOffset->setValue(0);
+    ui->verticalSlider_zOffset->setValue(0);
     ui->spinBox_y->setMinimum(0);
     ui->spinBox_y->setMaximum(file->GetDataSetSize()-1);
     ui->spinBox_x->setMinimum(0);
@@ -168,15 +168,60 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_x->setValue(xIndex);
 
     //========= Plot contour
-    PlotContour();
     // sey Plot Contour z-range
     double zMin = file->GetZMin();
     double zMax = file->GetZMax();
-    double zRange = fabs(zMax)+fabs(zMin);
-    ui->doubleSpinBox_zOffset->setMinimum(-zRange);
-    ui->doubleSpinBox_zOffset->setMaximum(zRange);
-    ui->doubleSpinBox_zOffset->setSingleStep(zRange/200.);
-    ui->doubleSpinBox_zOffset->setValue(0);
+    ui->verticalSlider_zOffset->setMinimum(qFloor(zMin));
+    ui->verticalSlider_zOffset->setMaximum(qCeil(zMax));
+    ui->verticalSlider_zOffset->setValue(0);
+
+    int nx = file->GetDataSize();
+    int ny = file->GetDataSetSize();
+    if( file->HasBackGround() ) ny = ny -1;
+    colorMap->data()->setSize(nx, ny);
+
+    double xMin = file->GetXMin();
+    double xMax = file->GetXMax();
+    double yMin = file->GetYMin();
+    double yMax = file->GetYMax();
+
+    ctplot->xAxis->setRange(xMin, xMax);
+    ctplot->yAxis->setRange(yMin, yMax);
+
+    colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
+
+    PlotContour(0);
+
+    QCPColorScale *colorScale = new QCPColorScale(ctplot);
+    //ctplot->plotLayout()->removeAt(1); // remove any element if there is any
+    ctplot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    colorMap->setColorScale(colorScale); // associate the color map with the color scale
+
+    QCPColorGradient colorGrad;
+    colorGrad.clearColorStops();
+    colorGrad.setColorStopAt(0, QColor(0,0,255));
+    colorGrad.setColorStopAt(0.5, QColor(255,255,255));
+    colorGrad.setColorStopAt(1, QColor(255,0,0));
+    colorGrad.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+
+    //colorMap->setGradient(QCPColorGradient::gpCandy ); //color scheme
+    colorMap->setGradient( colorGrad ); //color scheme
+
+    //colorMap->rescaleDataRange();
+    int zRange = qCeil(qMax(fabs(file->GetZMin()), fabs(file->GetZMax())));
+    colorMap->setDataRange(QCPRange(-zRange, zRange));
+    ui->verticalSlider_z->setMinimum(1);
+    ui->verticalSlider_z->setMaximum(zRange);
+    ui->verticalSlider_z->setSingleStep(qCeil(zRange/100.));
+    ui->verticalSlider_z->setValue(zRange);
+
+    QCPMarginGroup *marginGroup = new QCPMarginGroup(ctplot);
+    ctplot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+
+    ctplot->rescaleAxes();
+    ctplot->replot();
 
     //========= Reset Data in fitResultDialog
     fitResultPlot->ClearData();
@@ -555,30 +600,17 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> e
 
 }
 
-void MainWindow::PlotContour()
+void MainWindow::PlotContour(double offset)
 {
-
-    int nx = file->GetDataSize();
-    int ny = file->GetDataSetSize();
-    if( file->HasBackGround() ) ny = ny -1;
-    colorMap->data()->setSize(nx, ny);
-
-    double xMin = file->GetXMin();
-    double xMax = file->GetXMax();
-    double yMin = file->GetYMin();
-    double yMax = file->GetYMax();
-
-    ctplot->xAxis->setRange(xMin, xMax);
-    ctplot->yAxis->setRange(yMin, yMax);
-
-    colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
-
     int yIndexStart = 0;
     if( file->HasBackGround()) yIndexStart = 1;
 
+    int nx = file->GetDataSize();
+    int ny = file->GetDataSetSize();
+
     for(int xIndex = 0; xIndex < nx; xIndex++){
         for(int yIndex = yIndexStart; yIndex < ny; yIndex++){
-            double z = file->GetDataZ(xIndex, yIndex);
+            double z = file->GetDataZ(xIndex, yIndex) + offset;
             if( file->IsYRevered()){
                 colorMap->data()->setCell(xIndex, ny-yIndex-1, z);
             }else{
@@ -586,34 +618,6 @@ void MainWindow::PlotContour()
             }
         }
     }
-
-    QCPColorScale *colorScale = new QCPColorScale(ctplot);
-    //ctplot->plotLayout()->removeAt(1); // remove any element if there is any
-    ctplot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
-    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
-    colorMap->setColorScale(colorScale); // associate the color map with the color scale
-
-    QCPColorGradient colorGrad;
-    colorGrad.clearColorStops();
-    colorGrad.setColorStopAt(0, QColor(0,0,255));
-    colorGrad.setColorStopAt(0.5, QColor(255,255,255));
-    colorGrad.setColorStopAt(1, QColor(255,0,0));
-    colorGrad.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
-
-    //colorMap->setGradient(QCPColorGradient::gpCandy ); //color scheme
-    colorMap->setGradient( colorGrad ); //color scheme
-
-    //colorMap->rescaleDataRange();
-    int zRange = qCeil(qMax(fabs(file->GetZMin()), fabs(file->GetZMax())));
-    colorMap->setDataRange(QCPRange(-zRange, zRange));
-    ui->verticalSlider_z->setMinimum(1);
-    ui->verticalSlider_z->setMaximum(zRange);
-    ui->verticalSlider_z->setSingleStep(qCeil(zRange/100.));
-    ui->verticalSlider_z->setValue(zRange);
-
-    QCPMarginGroup *marginGroup = new QCPMarginGroup(ctplot);
-    ctplot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
 
     ctplot->rescaleAxes();
 
@@ -626,35 +630,6 @@ void MainWindow::on_actionFit_Result_triggered()
         fitResultPlot->show();
         fitResultPlot->PlotData();
     }
-}
-
-void MainWindow::on_doubleSpinBox_zOffset_valueChanged(double arg1)
-{
-    int nx = file->GetDataSize();
-    int ny = file->GetDataSetSize();
-
-    bool corr = ui->checkBox_MeanCorr->isChecked();
-
-    int yStartIndex = 0;
-    if( file->HasBackGround()) yStartIndex = 1;
-    for(int xIndex = 0; xIndex < nx; xIndex++){
-        for(int yIndex = yStartIndex; yIndex < ny; yIndex++){
-
-            double mean = 0;
-            if( corr ){
-                mean = file->GetDataMeanZ(yIndex);
-            }
-
-            double z = file->GetDataZ(xIndex, yIndex)+ arg1 - mean;
-            if( file->IsYRevered()){
-                colorMap->data()->setCell(xIndex, ny-yIndex-1, z);
-            }else{
-                colorMap->data()->setCell(xIndex, yIndex, z); // fill data
-            }
-        }
-    }
-
-    ctplot->replot();
 }
 
 void MainWindow::on_actionB_Plot_triggered()
@@ -673,10 +648,12 @@ void MainWindow::setDisabledPlanel()
     ui->pushButton_FitAll->setEnabled(0);
     ui->pushButton_reset->setEnabled(0);
     ui->pushButton_save->setEnabled(0);
+    ui->pushButton_RestoreData->setEnabled(0);
     ui->spinBox_y->setEnabled(0);
     ui->spinBox_x->setEnabled(0);
     ui->checkBox_MeanCorr->setEnabled(0);
-    ui->doubleSpinBox_zOffset->setEnabled(0);
+    ui->verticalSlider_zOffset->setEnabled(0);
+    ui->verticalSlider_z->setEnabled(0);
     ui->checkBox_BGsub->setEnabled(0);
     ui->spinBox_BGIndex->setEnabled(0);
 }
@@ -689,20 +666,33 @@ void MainWindow::setEnabledPlanel()
     ui->pushButton_FitAll->setEnabled(1);
     ui->pushButton_reset->setEnabled(1);
     ui->pushButton_save->setEnabled(1);
+    ui->pushButton_RestoreData->setEnabled(1);
     ui->spinBox_y->setEnabled(1);
     ui->spinBox_x->setEnabled(1);
     ui->checkBox_MeanCorr->setEnabled(1);
-    ui->doubleSpinBox_zOffset->setEnabled(1);
+    ui->verticalSlider_zOffset->setEnabled(1);
+    ui->verticalSlider_z->setEnabled(1);
     ui->checkBox_BGsub->setEnabled(1);
     //ui->spinBox_BGIndex->setEnabled(1);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
 {
-    double val = ui->doubleSpinBox_zOffset->value();
-    on_doubleSpinBox_zOffset_valueChanged(val);
-    //on_doubleSpinBox_zOffset_valueChanged(file->GetDataMeanZMean());
-    bPlot->SetMeanCorr(checked);
+    if( checked){
+        file->MeanCorrection();
+    }else{
+        on_pushButton_RestoreData_clicked();
+    }
+
+    PlotContour(0);
+    //int pos = ui->verticalSlider_zOffset->value();
+    //on_verticalSlider_zOffset_sliderMoved(pos); // it replot
+
+    //bPlot->SetMeanCorr(checked);
+    bPlot->Plot();
+
+    int yIndex = ui->spinBox_y->value();
+    on_spinBox_y_valueChanged(yIndex);
 
 }
 
@@ -719,8 +709,7 @@ void MainWindow::on_checkBox_BGsub_clicked(bool checked)
         Write2Log(msg);
     }else{
         //restore to the backup data;
-        file->RestoreData();
-        Write2Log("restoring Data.");
+        on_pushButton_RestoreData_clicked();
     }
 
     //Plot again current for yIndex;
@@ -728,9 +717,11 @@ void MainWindow::on_checkBox_BGsub_clicked(bool checked)
     on_spinBox_y_valueChanged(yIndex);
 
     //Plot again the contour plot;
-    //PlotContour();
-    bool corr = ui->checkBox_MeanCorr->isChecked();
-    on_checkBox_MeanCorr_clicked(corr);
+    PlotContour(0);
+    //bool corr = ui->checkBox_MeanCorr->isChecked();
+    //on_checkBox_MeanCorr_clicked(corr);
+
+    bPlot->Plot();
 
 }
 
@@ -751,6 +742,22 @@ void MainWindow::on_actionFFTW_Plot_triggered()
         fftPlot->show();
         file->FouierForward();
         file->FouierBackward();
+        //fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
         fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetData());
     }
+}
+
+void MainWindow::on_pushButton_RestoreData_clicked()
+{
+    file->RestoreData();
+    ui->checkBox_BGsub->setChecked(0);
+    Write2Log("restoring Data.");
+    ui->checkBox_MeanCorr->setChecked(0);
+    //on_checkBox_MeanCorr_clicked(0);
+    ui->verticalSlider_zOffset->setValue(0);
+}
+
+void MainWindow::on_verticalSlider_zOffset_sliderMoved(int position)
+{
+    PlotContour(position);
 }
