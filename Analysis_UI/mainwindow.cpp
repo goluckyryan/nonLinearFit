@@ -723,15 +723,15 @@ void MainWindow::on_verticalSlider_z_sliderMoved(int position)
 void MainWindow::on_actionFFTW_Plot_triggered()
 {
 
-    file->FouierForwardSingle(ui->spinBox_y->value());
+    //file->FouierForwardSingle(ui->spinBox_y->value());
 
-    //if(fftPlot->isHidden()){
-    //    fftPlot->show();
-    //}
-    //
-    //file->FouierForward();
+    if(fftPlot->isHidden()){
+        fftPlot->show();
+    }
+
+    file->FouierForward();
+    fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
     ////file->FouierBackward();
-    //fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
     //fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetData());
 
 }

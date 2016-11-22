@@ -553,8 +553,8 @@ void FileIO::FouierForward()
     SendMsg("Fouier Transform - Forward.");
 
     fftw_complex *in, *out;
-    in = (fftw_complex* ) fftw_alloc_complex(2*ySize*xSize*sizeof(fftw_complex));
-    out = (fftw_complex* ) fftw_alloc_complex(2*ySize*xSize*sizeof(fftw_complex));
+    in = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
+    out = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
 
     fftw_plan plan;
     plan = fftw_plan_dft_2d(ySize, xSize, in, out, FFTW_FORWARD, FFTW_ESTIMATE);

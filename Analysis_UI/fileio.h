@@ -9,7 +9,6 @@
 #include "constant.h"
 #include "analysis.h"
 #include "fftw3.h"
-//#include <fftw3.h>
 #include <complex.h>
 
 class FileIO : public QObject
