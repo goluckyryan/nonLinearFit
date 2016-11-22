@@ -6,19 +6,145 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>687</width>
-    <height>300</height>
+    <width>1005</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>FFTW result</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QCustomPlot" name="widget_A" native="true"/>
+   <item row="0" column="0" rowspan="3">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Fourier Filter</string>
+     </property>
+     <widget class="QCheckBox" name="checkBox_RemoveConstant">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>80</y>
+        <width>111</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Remove fy= 0</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CalFFT">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>40</y>
+        <width>101</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Recal. Fourier</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_LowPassSharp">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>110</y>
+        <width>141</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Low-Pass Sharp Filter</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_LowPass">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>140</y>
+        <width>121</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Low-Pass Filter</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>180</y>
+        <width>111</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Moving Avg.</string>
+      </property>
+     </widget>
+    </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QCustomPlot" name="widget_P" native="true"/>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="pushButton_ApplyFFT">
+     <property name="text">
+      <string>Apply Filter</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QSlider" name="horizontalSlider">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QLineEdit" name="lineEdit">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" rowspan="3">
+    <widget class="QCustomPlot" name="widget_A" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>2</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <zorder>groupBox</zorder>
+    </widget>
+   </item>
+   <item row="0" column="2" rowspan="3">
+    <widget class="QCustomPlot" name="widget_P" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>2</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

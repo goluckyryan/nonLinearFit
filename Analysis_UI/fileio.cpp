@@ -553,8 +553,8 @@ void FileIO::FouierForward()
     SendMsg("Fouier Transform - Forward.");
 
     fftw_complex *in, *out;
-    in = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
-    out = (fftw_complex* ) fftw_alloc_complex(ySize*xSize*sizeof(fftw_complex));
+    in = (fftw_complex* ) fftw_alloc_complex(2*ySize*xSize*sizeof(fftw_complex));
+    out = (fftw_complex* ) fftw_alloc_complex(2*ySize*xSize*sizeof(fftw_complex));
 
     fftw_plan plan;
     plan = fftw_plan_dft_2d(ySize, xSize, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
@@ -562,11 +562,11 @@ void FileIO::FouierForward()
     for( int i = 0; i < ySize ; i++){
         for( int j = 0; j < xSize ; j++){
             in[i*xSize + j][0] = zData[i][j];
-            in[i*xSize + j][1] = 0;
+            in[i*xSize + j][1] = 0.;
         }
     }
 
-    fftw_execute(plan);
+    fftw_execute(plan); //TODO: somehow it crashed when data is too big.
 
     for( int i = 0; i < ySize; i++){
             fZDataA[i].clear();
@@ -575,10 +575,6 @@ void FileIO::FouierForward()
             fZDataA[i].push_back(out[i*xSize + j][0] / xSize / ySize);
             fZDataP[i].push_back(out[i*xSize + j][1] / xSize / ySize);
         }
-        //if( i == 0 ) {
-        //    qDebug() << fZDataA[i].length();
-        //    qDebug() << fZDataA[i];
-        //}
     }
 
     fftw_destroy_plan(plan);
@@ -589,6 +585,37 @@ void FileIO::FouierForward()
 
     SwapFFTData(1);
 
+}
+
+void FileIO::FouierForwardSingle(int yIndex)
+{
+    SendMsg("Single Fouier Transform - Forward.");
+
+    fftw_complex *in, *out;
+    in = (fftw_complex* ) fftw_alloc_complex(xSize*sizeof(fftw_complex));
+    out = (fftw_complex* ) fftw_alloc_complex(xSize*sizeof(fftw_complex));
+
+    fftw_plan plan;
+    plan = fftw_plan_dft_1d(xSize, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+
+
+    for( int j = 0; j < xSize ; j++){
+        in[j][0] = zData[yIndex][j];
+        in[j][1] = 0.;
+    }
+
+    fftw_execute(plan);
+
+    for(int j = 0; j < xSize; j++){
+        qDebug("%d (%f, %f)", j, out[j][0], out[j][1]);
+    }
+
+
+    fftw_destroy_plan(plan);
+    fftw_free(out);
+    fftw_free(in);
+
+    SendMsg("Single Fouier Transform - Forward. Done.");
 }
 
 void FileIO::FouierBackward()

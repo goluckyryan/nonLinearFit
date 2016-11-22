@@ -34,6 +34,7 @@ public:
     void MovingAvg(int n);
 
     void FouierForward(); // manipulated zData
+    void FouierForwardSingle(int yIndex);
     void FouierBackward();
     void SwapFFTData(bool dir); // for fourier transform
     QVector<double> Shift(QVector<double> list, int d);

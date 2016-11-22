@@ -158,9 +158,11 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     double xMax = file->GetXMax();
     double yMin = file->GetYMin();
     double yMax = file->GetYMax();
+    double zMin = file->GetZMin();
+    double zMax = file->GetZMax();
     plot->xAxis->setRange(xMin, xMax);
-    double yRange = qMax(fabs(yMax), fabs(yMin));
-    plot->yAxis->setRange(-yRange, yRange);
+    double zRange1 = qMax(fabs(zMax), fabs(zMin));
+    plot->yAxis->setRange(-zRange1, zRange1);
 
     //========= if file has background data
     //========= the plotting function is called using spinBox_y
@@ -177,8 +179,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
 
     //========= Plot contour
     // sey Plot Contour z-range
-    double zMin = file->GetZMin();
-    double zMax = file->GetZMax();
+
     ui->verticalSlider_zOffset->setMinimum(qFloor(zMin));
     ui->verticalSlider_zOffset->setMaximum(qCeil(zMax));
     ui->verticalSlider_zOffset->setValue(0);
@@ -721,13 +722,18 @@ void MainWindow::on_verticalSlider_z_sliderMoved(int position)
 
 void MainWindow::on_actionFFTW_Plot_triggered()
 {
-    if(fftPlot->isHidden()){
-        fftPlot->show();
-        file->FouierForward();
-        file->FouierBackward();
-        //fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
-        fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetData());
-    }
+
+    file->FouierForwardSingle(ui->spinBox_y->value());
+
+    //if(fftPlot->isHidden()){
+    //    fftPlot->show();
+    //}
+    //
+    //file->FouierForward();
+    ////file->FouierBackward();
+    //fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
+    //fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetData());
+
 }
 
 void MainWindow::on_pushButton_RestoreData_clicked()
