@@ -61,6 +61,10 @@ void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double
 
     colorMap_A->setGradient(QCPColorGradient::gpJet ); //color scheme
     colorMap_P->setGradient(QCPColorGradient::gpJet ); //color scheme
+
+    colorMap_A->setDataScaleType(QCPAxis::stLogarithmic);
+    colorMap_P->setDataScaleType(QCPAxis::stLogarithmic);
+
     colorMap_A->rescaleDataRange();
     colorMap_P->rescaleDataRange();
 
