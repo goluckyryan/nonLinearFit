@@ -63,6 +63,11 @@ public slots:
     double GetZMax(){return zMax;}
     double GetZMin(){return zMin;}
 
+    double GetfXMax(){return fxMax;}
+    double GetfXMin(){return fxMin;}
+    double GetfYMax(){return fyMax;}
+    double GetfYMin(){return fyMin;}
+
     int GetMultiIndex(){return multi;}
 
     bool IsOpen(){return openState;}
@@ -74,7 +79,7 @@ public slots:
     void FouierBackward();
     void FouierForwardSingle(int yIndex);
     void FouierBackwardSingle(int yIndex);
-    void SwapFFTData(bool dir); // for fourier transform
+    void SwapFFTData(bool dir);
     void FFTWFilters(int filterID);
 
 private:
@@ -94,6 +99,10 @@ private:
     double yMin, yMax;
     double zMin, zMax;
     double zMeanMean;
+
+    double fxMin, fxMax;
+    double fyMin, fyMax;
+
     bool colwise; // 0 = data store as row, 1 = data store as col
     bool openState;
     bool isOutFileOpened;
@@ -106,6 +115,7 @@ private:
     QFile * outfile;
     QString filePath, cvsFilePath;
 
+    //Private functions
     double ExtractYValue(QString str);
 
     double FindMax(QVector<double> vec);

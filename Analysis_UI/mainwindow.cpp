@@ -191,6 +191,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->verticalSlider_zOffset->setMaximum(qCeil(zMax));
     ui->verticalSlider_zOffset->setValue(0);
 
+    colorMap->data()->clear();
     int nx = file->GetDataSize();
     int ny = file->GetDataSetSize();
     if( file->HasBackGround() ) ny = ny -1;
@@ -738,6 +739,7 @@ void MainWindow::on_actionFFTW_Plot_triggered()
     }
 
     file->FouierForward();
+    fftPlot->SetFrequency(file->GetfXMin(), file->GetfXMax(), file->GetfYMin(), file->GetfYMax());
     fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
     ////file->FouierBackward();
     //fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetData());

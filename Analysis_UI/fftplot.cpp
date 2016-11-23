@@ -17,41 +17,11 @@ FFTPlot::FFTPlot(QWidget *parent) :
 
     plot_P = ui->widget_P;
     plot_P->axisRect()->setupFullAxesBox(true);
-    plot_P->xAxis->setLabel("x");
-    plot_P->yAxis->setLabel("y");
+    plot_P->xAxis->setLabel("freq [MHz]");
+    plot_P->yAxis->setLabel("1/B [a.u.]");
 
     colorMap_P = new QCPColorMap(plot_P->xAxis, plot_P->yAxis);
     colorMap_P->clearData();
-
-}
-
-FFTPlot::~FFTPlot()
-{
-    delete colorMap_A;
-    delete plot_A;
-    delete colorMap_P;
-    delete plot_P;
-
-    delete ui;
-}
-
-void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double> *dataP)
-{
-
-    plot_A->yAxis2->setVisible(true);
-    plot_A->yAxis2->setRange(-ny/2, ny/2);
-    plot_A->xAxis2->setVisible(true);
-    plot_A->xAxis2->setRange(-nx/2, nx/2);
-
-    colorMap_A->data()->setSize(nx,ny);
-    colorMap_P->data()->setSize(nx,ny);
-
-    for( int j = 0; j < ny; j++){
-        for( int i = 0; i < nx; i++){
-            colorMap_A->data()->setCell(i,j, dataA[j][i]);
-            colorMap_P->data()->setCell(i,j, dataP[j][i]);
-        }
-    }
 
     QCPColorScale *colorScale_A = new QCPColorScale(plot_A);
     QCPColorScale *colorScale_P = new QCPColorScale(plot_P);
@@ -68,11 +38,52 @@ void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double
     colorMap_A->setDataScaleType(QCPAxis::stLogarithmic);
     colorMap_P->setDataScaleType(QCPAxis::stLogarithmic);
 
-    colorMap_A->rescaleDataRange();
-    colorMap_P->rescaleDataRange();
+}
+
+FFTPlot::~FFTPlot()
+{
+    delete colorMap_A;
+    delete plot_A;
+    delete colorMap_P;
+    delete plot_P;
+
+    delete ui;
+}
+
+void FFTPlot::SetFrequency(double xMin, double xMax, double yMin, double yMax)
+{
+    plot_A->xAxis->setRange(xMin, xMax);
+    plot_P->xAxis->setRange(xMin, xMax);
+
+    plot_A->yAxis->setRange(yMin, yMax);
+    plot_P->yAxis->setRange(yMin, yMax);
+
+    colorMap_A->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
+    colorMap_P->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
 
     plot_A->rescaleAxes();
     plot_P->rescaleAxes();
+
+}
+
+void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double> *dataP)
+{
+
+    colorMap_A->data()->clear();
+    colorMap_P->data()->clear();
+
+    colorMap_A->data()->setSize(nx,ny);
+    colorMap_P->data()->setSize(nx,ny);
+
+    for( int j = 0; j < ny; j++){
+        for( int i = 0; i < nx; i++){
+            colorMap_A->data()->setCell(i,j, dataA[j][i]);
+            colorMap_P->data()->setCell(i,j, dataP[j][i]);
+        }
+    }
+
+    colorMap_A->rescaleDataRange();
+    colorMap_P->rescaleDataRange();
 
     plot_A->replot();
     plot_P->replot();

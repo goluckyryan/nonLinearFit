@@ -17,22 +17,33 @@ FileIO::FileIO(QString filePath){
 void FileIO::Initialize(){
     myfile = NULL;
     outfile = NULL;
+
     zData = NULL;
+    backUpData = NULL;
     fZDataA = NULL;
     fZDataP = NULL;
-    backUpData = NULL;
 
-    colwise = 0;
+    xData.clear();
+    yData.clear();
+    zMean.clear();
+
+    fxData.clear();
+    fyData.clear();
+
     xMax = 0;
     xMin = 0;
     yMax = 0;
     yMin = 0;
     zMax = 0;
     zMin = 0;
+    zMeanMean = 0;
+
+    colwise = 0;
     openState = 0;
     isOutFileOpened = 0;
     yRevered = 0;
     hadBG = 0;
+
     multi = 0;
 
     xSize = 0;
@@ -588,6 +599,33 @@ void FileIO::FouierForward()
     fftw_free(in);
 
     SendMsg("Fouier Transform - Forward. Done.");
+
+    SendMsg("Cal. freqeuncy.");
+    double xResol = 1000./(xMax - xMin); // MHz
+    int d = 0;
+    if( xSize % 2 == 0){
+        d = xSize /2;
+    }else{
+        d = (xSize+1)/2;
+    }
+    for( int i = 0; i < xSize; i++){
+        fxData.push_back( (-d + i) * xResol );
+    }
+
+    fxMin = -d * xResol;
+    fxMax = (xSize-1-d) * xResol;
+
+    if( ySize % 2 == 0){
+        d = ySize /2;
+    }else{
+        d = (ySize+1)/2;
+    }
+    for( int i = 0; i < ySize; i++){
+        fyData.push_back( (-d + i) );
+    }
+
+    fyMin = -d;
+    fyMax = (ySize-1-d);
 
     SwapFFTData(1);
 
