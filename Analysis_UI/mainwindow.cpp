@@ -126,9 +126,6 @@ void MainWindow::SetupPlots()
     if( multi == 9) yLabel = "Voltage [nV]";
     plot->yAxis->setLabel(yLabel);
 
-    int xIndex = ana->FindstartIndex(TIME1);
-    ui->spinBox_x->setValue(xIndex);
-
     if( file->HasBackGround()){
         ui->spinBox_y->setValue(1);
     }else{
@@ -226,6 +223,16 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
+    //========= Reset Data in fitResultDialog
+    fitResultPlot->ClearData();
+    fitResultPlot->SetDataSize(file);
+    fitResultPlot->SetFilePath(file->GetFilePath());
+
+    //======== Plot B-plot
+    bPlot->SetData(file);
+
+    qDebug() << "dsadasdsad";
+
     //=========== Set up Plots
     SetupPlots();
 
@@ -236,13 +243,8 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
         on_checkBox_BGsub_clicked(false);
     }
 
-    //========= Reset Data in fitResultDialog
-    fitResultPlot->ClearData();
-    fitResultPlot->SetDataSize(file);
-    fitResultPlot->SetFilePath(file->GetFilePath());
-
-    //======== Plot B-plot
-    bPlot->SetData(file);
+    int xIndex = ana->FindstartIndex(TIME1);
+    ui->spinBox_x->setValue(xIndex);
 
 }
 
