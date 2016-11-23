@@ -26,17 +26,11 @@ public:
     void OpenTxtData_col();
     void OpenTxtData_row();
     void SaveFitResult(Analysis *ana);
-    void SaveSimplifiedTxt();
+    void SaveSingleXCVS();
     void RestoreData();
     void SubstractData(int yIndex);
     void MeanCorrection();
     void MovingAvg(int n);
-
-    void FouierForward(); // manipulated zData
-    void FouierForwardSingle(int yIndex);
-    void FouierBackward();
-    void SwapFFTData(bool dir); // for fourier transform
-    QVector<double> Shift(QVector<double> list, int d);
 
 signals:
 
@@ -45,7 +39,7 @@ signals:
 public slots:
 
     QString GetFilePath(){return filePath;}
-    QString GetSimFilePath(){return simFilePath;}
+    QString GetSimFilePath(){return cvsFilePath;}
     bool IsColWise(){return colwise;}
     int GetDataSize(){ return xData.size();}
     int GetDataSetSize() {return yData.size();}
@@ -75,14 +69,25 @@ public slots:
     bool IsYRevered(){return yRevered;}
     bool HasBackGround(){return hadBG;}
 
+    //fourier transform and filters
+    void FouierForward();
+    void FouierBackward();
+    void FouierForwardSingle(int yIndex);
+    void FouierBackwardSingle(int yIndex);
+    void SwapFFTData(bool dir); // for fourier transform
+    void FFTWFilters(int filterID);
+
 private:
     QVector<double> xData; // time data
     QVector<double> yData; // B-field
     QVector<double> *zData; //data, [ydata][xdata]
     QVector<double> *backUpData; //backup data, [ydata][xdata]
+    QVector<double> zMean; // mean
+
+    QVector<double> fxData;
+    QVector<double> fyData;
     QVector<double> *fZDataA; //amp of fourier zData, [ydata][xdata]
     QVector<double> *fZDataP; //phase fourier zData, [ydata][xdata]
-    QVector<double> zMean; // mean
 
     int xSize, ySize;
     double xMin, xMax;
@@ -99,12 +104,14 @@ private:
 
     QFile * myfile;
     QFile * outfile;
-    QString filePath, simFilePath;
+    QString filePath, cvsFilePath;
 
     double ExtractYValue(QString str);
 
     double FindMax(QVector<double> vec);
     double FindMin(QVector<double> vec);
+
+    QVector<double> Shift(QVector<double> list, int d);
 
     void CalMeanVector();
     void RescaleData();

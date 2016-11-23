@@ -73,6 +73,8 @@ private slots:
 
     void on_spinBox_MovingAvg_valueChanged(int arg1);
 
+    void on_actionSave_as_Single_X_CVS_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;

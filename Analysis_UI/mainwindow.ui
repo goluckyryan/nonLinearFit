@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>961</width>
-    <height>600</height>
+    <height>606</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -42,6 +42,9 @@
        </item>
        <item row="2" column="2">
         <widget class="QLineEdit" name="lineEdit_lambda">
+         <property name="statusTip">
+          <string>The fit parameter of the LMA. -1 = system calculated. 0 = Gauss Newtonian method; inf = Greatest Decense method.</string>
+         </property>
          <property name="text">
           <string>-1</string>
          </property>
@@ -59,6 +62,9 @@
        </item>
        <item row="3" column="2">
         <widget class="QLineEdit" name="lineEdit_MaxIter">
+         <property name="statusTip">
+          <string>Maximum number of iteration.</string>
+         </property>
          <property name="text">
           <string>300</string>
          </property>
@@ -66,6 +72,9 @@
        </item>
        <item row="4" column="2">
         <widget class="QLineEdit" name="lineEdit_TORR">
+         <property name="statusTip">
+          <string>Fitting tolerance or accuracy of the SSR.</string>
+         </property>
          <property name="text">
           <string>-6</string>
          </property>
@@ -108,13 +117,20 @@
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="1" column="0" colspan="3">
         <widget class="QPushButton" name="pushButton_save">
+         <property name="statusTip">
+          <string>Save fit paramters.</string>
+         </property>
          <property name="text">
           <string>Save</string>
          </property>
         </widget>
        </item>
        <item row="0" column="2">
-        <widget class="QSpinBox" name="spinBox_x"/>
+        <widget class="QSpinBox" name="spinBox_x">
+         <property name="statusTip">
+          <string>Set the start-fit-index.</string>
+         </property>
+        </widget>
        </item>
        <item row="0" column="0" colspan="2">
         <widget class="QLabel" name="label_2">
@@ -128,6 +144,9 @@
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="statusTip">
+          <string>The corresponding timing of the x-index.</string>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -135,6 +154,9 @@
        </item>
        <item row="1" column="3">
         <widget class="QPushButton" name="pushButton_reset">
+         <property name="statusTip">
+          <string>Estimate the fit paramters.</string>
+         </property>
          <property name="text">
           <string>Reset Par.</string>
          </property>
@@ -248,6 +270,9 @@
        </item>
        <item row="7" column="0" colspan="3">
         <widget class="QPushButton" name="pushButton_FitAll">
+         <property name="statusTip">
+          <string>Fit all data set.</string>
+         </property>
          <property name="text">
           <string>Fit All</string>
          </property>
@@ -262,6 +287,9 @@
        </item>
        <item row="7" column="3">
         <widget class="QPushButton" name="pushButton_Fit">
+         <property name="statusTip">
+          <string>Fit this single data set.</string>
+         </property>
          <property name="text">
           <string>Fit</string>
          </property>
@@ -269,6 +297,9 @@
        </item>
        <item row="8" column="1" colspan="2">
         <widget class="QLineEdit" name="lineEdit_P">
+         <property name="statusTip">
+          <string>Polarization</string>
+         </property>
          <property name="text">
           <string>0</string>
          </property>
@@ -346,10 +377,17 @@
      </widget>
     </item>
     <item row="3" column="2">
-     <widget class="QSpinBox" name="spinBox_BGIndex"/>
+     <widget class="QSpinBox" name="spinBox_BGIndex">
+      <property name="statusTip">
+       <string>Select the data as background.</string>
+      </property>
+     </widget>
     </item>
     <item row="3" column="8">
      <widget class="QCheckBox" name="checkBox_MeanCorr">
+      <property name="statusTip">
+       <string>Substract each data with the mean of that data.</string>
+      </property>
       <property name="text">
        <string>Mean Corr.</string>
       </property>
@@ -357,6 +395,9 @@
     </item>
     <item row="3" column="1">
      <widget class="QCheckBox" name="checkBox_BGsub">
+      <property name="statusTip">
+       <string>Substraction of the background. The background is one of the data.</string>
+      </property>
       <property name="layoutDirection">
        <enum>Qt::RightToLeft</enum>
       </property>
@@ -366,7 +407,11 @@
      </widget>
     </item>
     <item row="2" column="2">
-     <widget class="QSpinBox" name="spinBox_y"/>
+     <widget class="QSpinBox" name="spinBox_y">
+      <property name="statusTip">
+       <string>The id of the data.</string>
+      </property>
+     </widget>
     </item>
     <item row="2" column="1">
      <widget class="QLabel" name="label">
@@ -380,6 +425,9 @@
     </item>
     <item row="3" column="0">
      <widget class="QPushButton" name="pushButton_RestoreData">
+      <property name="statusTip">
+       <string>Restore to origin data</string>
+      </property>
       <property name="text">
        <string>Restore data</string>
       </property>
@@ -387,6 +435,9 @@
     </item>
     <item row="4" column="13">
      <widget class="QSlider" name="verticalSlider_z">
+      <property name="statusTip">
+       <string>Change the z-Range of the contour plot. This will not affect the data.</string>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -394,6 +445,9 @@
     </item>
     <item row="4" column="12">
      <widget class="QSlider" name="verticalSlider_zOffset">
+      <property name="statusTip">
+       <string>Change the z-offset of the contour plot. This will not affect the data.</string>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -406,6 +460,9 @@
      <widget class="QCheckBox" name="checkBox">
       <property name="enabled">
        <bool>false</bool>
+      </property>
+      <property name="statusTip">
+       <string>Using external gnuplot to fit.</string>
       </property>
       <property name="text">
        <string>GnuFit (4 pars)</string>
@@ -432,6 +489,9 @@
     </item>
     <item row="1" column="0">
      <widget class="QPushButton" name="pushButton_OpenFile">
+      <property name="statusTip">
+       <string>Open a file.</string>
+      </property>
       <property name="text">
        <string>Open File</string>
       </property>
@@ -439,6 +499,9 @@
     </item>
     <item row="2" column="0">
      <widget class="QCheckBox" name="checkBox_AutoFit">
+      <property name="statusTip">
+       <string>When enabled, changed y-Index will also fit the data.</string>
+      </property>
       <property name="text">
        <string>Auto-fit</string>
       </property>
@@ -449,6 +512,9 @@
       <property name="enabled">
        <bool>false</bool>
       </property>
+      <property name="statusTip">
+       <string>The hall voltage of the data.</string>
+      </property>
      </widget>
     </item>
     <item row="1" column="1" colspan="8">
@@ -456,10 +522,16 @@
       <property name="enabled">
        <bool>false</bool>
       </property>
+      <property name="statusTip">
+       <string>File path</string>
+      </property>
      </widget>
     </item>
     <item row="3" column="5">
      <widget class="QSpinBox" name="spinBox_MovingAvg">
+      <property name="statusTip">
+       <string>Number of data point for moving average. -1 is no moving average.</string>
+      </property>
       <property name="minimum">
        <number>-1</number>
       </property>
@@ -492,14 +564,24 @@
      <x>0</x>
      <y>0</y>
      <width>961</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPlots">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>Plots</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSave_as_Single_X_CVS"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuPlots"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -518,15 +600,29 @@
    <property name="text">
     <string>Fit Result</string>
    </property>
+   <property name="statusTip">
+    <string>Open the fit parameter plannel.</string>
+   </property>
   </action>
   <action name="actionB_Plot">
    <property name="text">
     <string>B-Plot</string>
    </property>
+   <property name="statusTip">
+    <string>Open B-Plot Plannel</string>
+   </property>
   </action>
   <action name="actionFFTW_Plot">
    <property name="text">
     <string>FFTW Plot</string>
+   </property>
+   <property name="statusTip">
+    <string>Fast Fouier Transform plannel</string>
+   </property>
+  </action>
+  <action name="actionSave_as_Single_X_CVS">
+   <property name="text">
+    <string>Save as Single X CVS</string>
    </property>
   </action>
  </widget>

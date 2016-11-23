@@ -25,86 +25,85 @@
      <property name="title">
       <string>Fourier Filter</string>
      </property>
-     <widget class="QCheckBox" name="checkBox_RemoveConstant">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>80</y>
-        <width>111</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Remove fy= 0</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_CalFFT">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>40</y>
-        <width>101</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Recal. Fourier</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="checkBox_LowPassSharp">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>110</y>
-        <width>141</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Low-Pass Sharp Filter</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="checkBox_LowPass">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>140</y>
-        <width>121</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Low-Pass Filter</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="checkBox">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>180</y>
-        <width>111</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Moving Avg.</string>
-      </property>
-     </widget>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="spinBox_MovingAvg">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QRadioButton" name="radioButton_Guassian">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Guassian Filter</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QPushButton" name="pushButton_CalFFT">
+        <property name="text">
+         <string>Fourier Forward</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="checkBox_RemoveConstant">
+        <property name="text">
+         <string>Remove fy= 0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="checkBox_MovingAvg">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Moving Avg.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QRadioButton" name="radioButton_LowPassSharp">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Low-Pass Sharp Filter</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QRadioButton" name="radioButton_LowPass">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Low-Pass Filter</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QRadioButton" name="radioButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Rectangle Filter</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item row="3" column="0">
     <widget class="QPushButton" name="pushButton_ApplyFFT">
      <property name="text">
-      <string>Apply Filter</string>
+      <string>Fouier Backward</string>
      </property>
     </widget>
    </item>
@@ -133,7 +132,6 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <zorder>groupBox</zorder>
     </widget>
    </item>
    <item row="0" column="2" rowspan="3">

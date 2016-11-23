@@ -149,8 +149,12 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
     //========= rename y-title
+    int multi = file->GetMultiIndex();
     QString yLabel;
-    yLabel.sprintf("Voltage [ 10^%d V]", -1 * file->GetMultiIndex());
+    yLabel.sprintf("Voltage [ 10^%d V]", -1 * multi);
+    if( multi == 3) yLabel = "Voltage [mV]";
+    if( multi == 6) yLabel = "Voltage [uV]";
+    if( multi == 9) yLabel = "Voltage [nV]";
     plot->yAxis->setLabel(yLabel);
 
     //========= Plot single data
@@ -160,15 +164,18 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     double yMax = file->GetYMax();
     double zMin = file->GetZMin();
     double zMax = file->GetZMax();
+
     plot->xAxis->setRange(xMin, xMax);
+    plot->xAxis2->setVisible(true);
+    plot->xAxis2->setRange(0, file->GetDataSize());
+
     double zRange1 = qMax(fabs(zMax), fabs(zMin));
     plot->yAxis->setRange(-zRange1, zRange1);
 
-    //========= if file has background data
-    //========= the plotting function is called using spinBox_y
+    // the plotting function is called using spinBox_y
     if( file->HasBackGround()){
         on_spinBox_y_valueChanged(1);
-        //on_checkBox_BGsub_clicked(1);
+        ui->checkBox_BGsub->setChecked(1);
     }else{
         on_spinBox_y_valueChanged(0);
     }
@@ -342,7 +349,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     bool gnu = ui->checkBox->isChecked();
 
     if( savedSimplifiedtxt == 0 && gnu){
-        file->SaveSimplifiedTxt();
+        file->SaveSingleXCVS();
         savedSimplifiedtxt = 1;
     }
 
@@ -696,6 +703,7 @@ void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
 void MainWindow::on_checkBox_BGsub_clicked(bool checked)
 {
     ui->spinBox_BGIndex->setEnabled(checked);
+    ui->checkBox_BGsub->setChecked(checked);
     int bgYIndex = ui->spinBox_BGIndex->value();
 
     if( checked ){
@@ -772,4 +780,9 @@ void MainWindow::on_spinBox_MovingAvg_valueChanged(int arg1)
     PlotContour(ui->verticalSlider_zOffset->value());
     on_spinBox_y_valueChanged(ui->spinBox_y->value());
     bPlot->Plot();
+}
+
+void MainWindow::on_actionSave_as_Single_X_CVS_triggered()
+{
+    file->SaveSingleXCVS();
 }

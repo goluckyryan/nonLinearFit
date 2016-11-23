@@ -97,6 +97,7 @@ void FileIO::OpenCSVData(){
     }
 
     //get data
+    multi = 3;
     yData.clear();
     xData.clear();
     myfile->seek(0);
@@ -116,7 +117,7 @@ void FileIO::OpenCSVData(){
             int yIndex = 0;
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1){
-                    z[yIndex][rows-2] = (lineList[i]).toDouble() * 1000;
+                    z[yIndex][rows-2] = (lineList[i]).toDouble() * pow(10,3);
                     yIndex ++;
                 }
             }
@@ -184,8 +185,8 @@ void FileIO::OpenTxtData_col() // great problem in this function. not updated fo
         xSize ++;
         QStringList lineList = line.split(",");
 
-        if( ySize == 0){ // get yDatax
-            ySize = lineList.size()-2;
+        if( xSize == 0){ // get yDatax
+            ySize = lineList.size()-1;
         }
     }
 
@@ -335,7 +336,7 @@ void FileIO::OpenTxtData_row(){
     //=========== cal the rescale factor
     RescaleData();
 
-    //============== check is BG data exist by continous,
+    //============== check is BG data exist by checking Hall probe volatge,
     QVector<double> newYData;
     for( int i = 1; i < ySize; i++){
         newYData.push_back(yData[i]);
@@ -441,15 +442,16 @@ void FileIO::SaveFitResult(Analysis *ana)
     stream << text;
 }
 
-void FileIO::SaveSimplifiedTxt()
+void FileIO::SaveSingleXCVS()
 {
-    // the simplified txt is needed for Analysis::Gnufit
-    //int len = this->filePath.length();
-    //this->simFilePath = this->filePath.left(len-4).append("_sim.txt");
-    this->simFilePath = OPENPATH;
-    this->simFilePath.append("test.dat");
+    // the simplified txt can be used for Analysis::Gnufit
+    this->cvsFilePath = this->filePath;
+    cvsFilePath.chop(3);
+    cvsFilePath.append("cvs");
+    //this->simFilePath = OPENPATH;
+    //this->simFilePath.append("test.dat");
 
-    QFile out(simFilePath); // in constant.h
+    QFile out(cvsFilePath);
     out.open( QIODevice::WriteOnly );
     QTextStream stream(&out);
     QString str, tmp;
@@ -465,14 +467,18 @@ void FileIO::SaveSimplifiedTxt()
     //output x and z
     for(int i = 0; i < xSize; i++){
         tmp.sprintf("%8.3f,", xData[i]); str = tmp;
-        for(int j = 0; j < ySize; j++){
+        for(int j = 0; j < ySize-1; j++){
             tmp.sprintf("%10.4f,", zData[j][i]); str += tmp;
         }
-        str += "\n";
+        tmp.sprintf("%10.4f\n", zData[ySize-1][i]); str += tmp;
         stream << str;
     }
 
     out.close();
+
+    QString msg;
+    msg.sprintf("Saved a CVS file as : %s ", cvsFilePath.toStdString().c_str());
+    SendMsg(msg);
 
 }
 
@@ -618,6 +624,36 @@ void FileIO::FouierForwardSingle(int yIndex)
     SendMsg("Single Fouier Transform - Forward. Done.");
 }
 
+void FileIO::FouierBackwardSingle(int yIndex)
+{
+    SendMsg("Single Fouier Transform - Backward.");
+
+    fftw_complex *in, *out;
+    in = (fftw_complex* ) fftw_alloc_complex(xSize*sizeof(fftw_complex));
+    out = (fftw_complex* ) fftw_alloc_complex(xSize*sizeof(fftw_complex));
+
+    fftw_plan plan;
+    plan = fftw_plan_dft_1d(xSize, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    for( int j = 0; j < xSize ; j++){
+        in[j][0] = zData[yIndex][j];
+        in[j][1] = 0.;
+    }
+
+    fftw_execute(plan);
+
+    for(int j = 0; j < xSize; j++){
+        qDebug("%d (%f, %f)", j, out[j][0], out[j][1]);
+    }
+
+
+    fftw_destroy_plan(plan);
+    fftw_free(out);
+    fftw_free(in);
+
+    SendMsg("Single Fouier Transform - Backward. Done.");
+}
+
 void FileIO::FouierBackward()
 {
     SwapFFTData(0);
@@ -726,71 +762,11 @@ void FileIO::SwapFFTData(bool dir)
     delete [] tempA;
     delete [] tempP;
 
-    /***** old code
-    //Swap X data
-    if( xSize % 2 == 0){ //even xSize
-        int m = xSize / 2;
-        for( int i = 0; i < ySize ; i++){
-            QVector<double> tempA = fZDataA[i];
-            QVector<double> tempP = fZDataP[i];
-            for(int j = 0; j < xSize; j++){
-                if( j < m) {
-                    fZDataA[i][j] = tempA[j+m];
-                    fZDataP[i][j] = tempP[j+m];
-                }else{
-                    fZDataA[i][j] = tempA[j-m];
-                    fZDataP[i][j] = tempP[j-m];
-                }
-            }
-        }
-    }else{
-        int m = (xSize + 1)/2; // xSize = 5; 0,1,2,3,4 -> 3,4,0,1,2 ; m = 3
-        for( int i = 0; i < ySize ; i++){
-            QVector<double> tempA = fZDataA[i];
-            QVector<double> tempP = fZDataP[i];
-            for(int j = 0; j < xSize; j++){
-                if( j < m - 1 ) {
-                    fZDataA[i][j] = tempA[j+m]; // j = 0, j+m = 3 ; j = 1, j+m = 4
-                    fZDataP[i][j] = tempP[j+m];
-                }else{
-                    fZDataA[i][j] = tempA[j-m+1]; // j = 2, j-m+1 = 0, ..., j = 4, j-m+1=4-3+1=2
-                    fZDataP[i][j] = tempP[j-m+1];
-                }
-            }
-        }
+}
 
-    }
+void FileIO::FFTWFilters(int filterID)
+{
 
-    //Swap y
-    if( ySize % 2 == 0){ // ySize is even
-        int m = ySize / 2;
-        for( int i = 0 ; i < m; i++){ // 0,1,2,3, m = 2
-            QVector<double> temp = fZDataA[i]; // i = 0   , i = 1
-            fZDataA[i] = fZDataA[i+m];         // i <- 2  , i <- 3
-            fZDataA[i+m] = temp;               // 2 <- 0
-
-            temp = fZDataP[i];
-            fZDataP[i] = fZDataP[i+m];
-            fZDataP[i+m] = temp;
-        }
-    }else{
-        int m = (ySize - 1)/2;
-        QVector<double> tempMidA = fZDataA[m];
-        QVector<double> tempMidP = fZDataP[m];
-
-        for( int i = 0 ; i < m; i++){ // 0,1,2,3,4  --> 3,4,0,1,2 m = 3
-            QVector<double> temp = fZDataA[i];   // i = 0   , i = 1
-            fZDataA[i] = fZDataA[i+m+1];         // i <- 3  , i <- 4
-            fZDataA[i+m] = temp;                 // 2 <- 0  , 3 <- 1
-
-            temp = fZDataP[i];
-            fZDataP[i] = fZDataP[i+m+1];
-            fZDataP[i+m] = temp;
-        }
-        fZDataA[ySize-1] = tempMidA;
-        fZDataP[ySize-1] = tempMidP;
-    }
-*/
 }
 
 double FileIO::ExtractYValue(QString str){

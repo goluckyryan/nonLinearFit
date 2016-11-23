@@ -9,8 +9,8 @@ FFTPlot::FFTPlot(QWidget *parent) :
 
     plot_A = ui->widget_A;
     plot_A->axisRect()->setupFullAxesBox(true);
-    plot_A->xAxis->setLabel("x");
-    plot_A->yAxis->setLabel("y");
+    plot_A->xAxis->setLabel("freq [MHz]");
+    plot_A->yAxis->setLabel("1/B [a.u.]");
 
     colorMap_A = new QCPColorMap(plot_A->xAxis, plot_A->yAxis);
     colorMap_A->clearData();
@@ -37,6 +37,11 @@ FFTPlot::~FFTPlot()
 
 void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double> *dataP)
 {
+
+    plot_A->yAxis2->setVisible(true);
+    plot_A->yAxis2->setRange(-ny/2, ny/2);
+    plot_A->xAxis2->setVisible(true);
+    plot_A->xAxis2->setRange(-nx/2, nx/2);
 
     colorMap_A->data()->setSize(nx,ny);
     colorMap_P->data()->setSize(nx,ny);
@@ -71,4 +76,9 @@ void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double
 
     plot_A->replot();
     plot_P->replot();
+}
+
+void FFTPlot::on_pushButton_CalFFT_clicked()
+{
+
 }
