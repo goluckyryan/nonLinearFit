@@ -2,10 +2,26 @@
 
 FileIO::FileIO()
 {
+    myfile = NULL;
+    outfile = NULL;
+
+    zData = NULL;
+    backUpData = NULL;
+    fZDataA = NULL;
+    fZDataP = NULL;
+
     Initialize();
 }
 
 FileIO::FileIO(QString filePath){
+    myfile = NULL;
+    outfile = NULL;
+
+    zData = NULL;
+    backUpData = NULL;
+    fZDataA = NULL;
+    fZDataP = NULL;
+
     Initialize();
 
     this->filePath = filePath;
@@ -15,13 +31,13 @@ FileIO::FileIO(QString filePath){
 }
 
 void FileIO::Initialize(){
-    myfile = NULL;
-    outfile = NULL;
+    if( myfile != NULL ) delete myfile;
+    if( outfile != NULL ) delete outfile;
 
-    zData = NULL;
-    backUpData = NULL;
-    fZDataA = NULL;
-    fZDataP = NULL;
+    if( zData != NULL ) delete [] zData;
+    if( backUpData != NULL ) delete [] backUpData;
+    if( fZDataA != NULL ) delete [] fZDataA;
+    if( fZDataP != NULL ) delete [] fZDataP;
 
     xData.clear();
     yData.clear();

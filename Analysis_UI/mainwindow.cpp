@@ -190,6 +190,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->lineEdit->setText(fileName);
 
     //======== new FileIO
+    if( file != NULL) delete file;
     file = new FileIO(fileName);
     connect(file, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
