@@ -345,7 +345,7 @@ void FileIO::OpenTxtData_row(){
     //qDebug("zMax: %f, zMin: %f", zMax, zMin);
 
     //=========== cal the rescale factor
-    RescaleData();
+    RescaleZData();
 
     //============== check is BG data exist by checking Hall probe volatge,
     QVector<double> newYData;
@@ -493,76 +493,68 @@ void FileIO::SaveSingleXCVS()
 
 }
 
-void FileIO::RestoreData()
+void FileIO::ManipulateData(int id, int bgIndex, int n)
 {
-    SendMsg("restoring Data.");
-    for( int yIndex = 0; yIndex < ySize; yIndex++){
-        zData[yIndex].clear();
-        for(int xIndex = 0; xIndex < xSize; xIndex++){
-            zData[yIndex].push_back(backUpData[yIndex][xIndex]);
-        }
-    }
+    // id is bitwise
+    //    0 = restore data
+    //    1 = bg substraction
+    //   10 = mean correction
+    //  110 = moving average
 
-    CalMeanVector();
-}
-
-void FileIO::SubstractData(int yIndex)
-{
     QString msg;
-    msg.sprintf("Using the %d(th)-data as background.", yIndex);
-    SendMsg(msg);
-    QVector<double> ref = zData[yIndex];
 
+    // restore data
+    SendMsg("restoring Data.");
     for( int y = 0; y < ySize; y++){
-        QVector<double> temp = zData[y];
         zData[y].clear();
         for(int x = 0; x < xSize; x++){
-            zData[y].push_back(temp[x] - ref[x]);
+            zData[y].push_back(backUpData[y][x]);
         }
     }
-
     CalMeanVector();
-}
 
-void FileIO::MeanCorrection()
-{
-    SendMsg("Mean correction.");
-    for(int xIndex = 0; xIndex < xSize; xIndex++){
-        for(int yIndex = 0; yIndex < ySize; yIndex++){
-            double mean = zMean[yIndex];
-            zData[yIndex][xIndex] = zData[yIndex][xIndex] - mean;
-        }
-    }
-
-    CalMeanVector();
-}
-
-void FileIO::MovingAvg(int n)
-{
-    if( n == -1 ) {
-        return;
-    }
-    if( n % 2 == 0) return;
-
-    QString msg;
-    msg.sprintf("Moving Average n = %d.", n);
-    SendMsg(msg);
-
-    int m = (n-1)/2;
-    for(int yIndex = 0; yIndex < ySize; yIndex++){
-        QVector<double> temp = zData[yIndex];
-
-        for(int xIndex = 0; xIndex < xSize; xIndex++){
-            double mean = 0;
-            for( int k = xIndex-m; k <= xIndex+m; k++ ){
-                if( k < 0 || k >= xSize) continue;
-                mean += temp[k]/n;
+    if( (id & 1) == 1 && bgIndex > -1){
+        QVector<double> ref = zData[bgIndex];
+        msg.sprintf("Using the %d(th)-data as background.", bgIndex);
+        SendMsg(msg);
+        for( int y = 0; y < ySize; y++){
+            zData[y].clear();
+            for(int x = 0; x < xSize; x++){
+                zData[y].push_back(backUpData[y][x] - ref[x]);
             }
-            zData[yIndex][xIndex] = mean;
         }
+        CalMeanVector();
     }
 
-    CalMeanVector();
+    if( (id & 2) == 2 ){
+        SendMsg("Mean correction.");
+        for( int y = 0; y < ySize; y++){
+            for(int x = 0; x < xSize; x++){
+                zData[y][x] = zData[y][x] - zMean[y];
+            }
+        }
+        CalMeanVector();
+    }
+
+    // moving average
+    if( (id & 4) == 4 && n > -1  && (n % 2) == 1 ) {
+        msg.sprintf("Moving Average n = %d.", n);
+        SendMsg(msg);
+        int m = (n-1)/2;
+        for( int y = 0; y < ySize; y++){
+            QVector<double> temp = zData[y];
+            for(int x = 0; x < xSize; x++){
+                double mean = 0;
+                for( int k = x-m; k <= x+m; k++ ){
+                    if( k < 0 || k >= xSize) continue;
+                    mean += temp[k]/n;
+                }
+                zData[y][x] = mean;
+            }
+        }
+        CalMeanVector();
+    }
+
 }
 
 void FileIO::FouierForward()
@@ -802,8 +794,38 @@ void FileIO::SwapFFTData(bool dir)
 
 }
 
-void FileIO::FFTWFilters(int filterID)
+void FileIO::FFTWFilters(int filterID, QVector<double> par)
 {
+    // 1 = low pass sharpe cut
+    // 2 = low pass
+    // 3 = Guassian
+    // 4 = retangle
+
+    if( filterID == 1){
+        // par[0] = freq.
+    }
+
+
+}
+
+void FileIO::RemoveYConstant()
+{
+    int d = ySize / 2;
+    if( ySize % 2 == 1){
+        d = (ySize-1)/2;
+    }
+
+    for(int i = 0; i < xSize ; i++){
+        fZDataA[d][i] = 0;
+        fZDataP[d][i] = 0;
+    }
+
+}
+
+void FileIO::MovingAvgFFT(int n)
+{
+    if( n % 2 == 0 ) return;
+
 
 }
 
@@ -873,12 +895,12 @@ void FileIO::CalMeanVector()
         zMeanMean += mean / ySize;
     }  
 
-    QString msg;
-    msg.sprintf("total mean z for x < -1 us: %f", zMeanMean);
-    SendMsg(msg);
+    //QString msg;
+    //msg.sprintf("total mean z for x < -1 us: %f", zMeanMean);
+    //SendMsg(msg);
 }
 
-void FileIO::RescaleData()
+void FileIO::RescaleZData()
 {
     this->multi = - qFloor(log(zMax)/log(10))+1;
     //qDebug("data was multiplied 10^%d", multi);

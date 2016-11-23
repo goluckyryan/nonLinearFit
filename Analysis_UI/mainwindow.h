@@ -25,13 +25,15 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void SetupPlots();
+
     void Plot(int graphID, QVector<double> x, QVector<double> y);
     void PlotFitFunc();
+    void PlotContour(double offset);
 
     QVector<double> GetParametersFromLineText();
     void UpdateLineTextParameters(QVector<double> par, QVector<double> epar);
 
-    void PlotContour(double offset);
 
 private slots:
     void Write2Log(QString str);
@@ -56,6 +58,8 @@ private slots:
     void on_checkBox_c_clicked(bool checked);
     void on_actionFit_Result_triggered();
     void on_actionB_Plot_triggered();
+    void on_actionFFTW_Plot_triggered();
+    void on_actionSave_as_Single_X_CVS_triggered();
 
     void setDisabledPlanel();
     void setEnabledPlanel();
@@ -64,16 +68,11 @@ private slots:
     void on_checkBox_MeanCorr_clicked(bool checked);
     void on_checkBox_BGsub_clicked(bool checked);
     void on_spinBox_BGIndex_valueChanged(int arg1);
+    void on_spinBox_MovingAvg_valueChanged(int arg1);
     
     void on_verticalSlider_z_sliderMoved(int position);
     void on_verticalSlider_zOffset_sliderMoved(int position);
 
-    void on_actionFFTW_Plot_triggered();
-
-
-    void on_spinBox_MovingAvg_valueChanged(int arg1);
-
-    void on_actionSave_as_Single_X_CVS_triggered();
 
 private:
     Ui::MainWindow *ui;

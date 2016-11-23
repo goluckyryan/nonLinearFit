@@ -20,17 +20,16 @@ public:
     ~FileIO();
 
     void Initialize();
+
     void OpenSaveFile();
-    void FileStructure(bool colwise);
     void OpenCSVData();
     void OpenTxtData_col();
     void OpenTxtData_row();
     void SaveFitResult(Analysis *ana);
     void SaveSingleXCVS();
-    void RestoreData();
-    void SubstractData(int yIndex);
-    void MeanCorrection();
-    void MovingAvg(int n);
+
+    //Data manipulation // id is bitwise
+    void ManipulateData(int id, int bgIndex = -1, int n = -1);
 
 signals:
 
@@ -80,7 +79,9 @@ public slots:
     void FouierForwardSingle(int yIndex);
     void FouierBackwardSingle(int yIndex);
     void SwapFFTData(bool dir);
-    void FFTWFilters(int filterID);
+    void FFTWFilters(int filterID, QVector<double> par);
+    void RemoveYConstant();
+    void MovingAvgFFT(int n);
 
 private:
     QVector<double> xData; // time data
@@ -124,7 +125,7 @@ private:
     QVector<double> Shift(QVector<double> list, int d);
 
     void CalMeanVector();
-    void RescaleData();
+    void RescaleZData();
 };
 
 #endif // FILEIO_H
