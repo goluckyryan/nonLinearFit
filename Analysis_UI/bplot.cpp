@@ -50,8 +50,6 @@ void BPlot::SetData(FileIO *file)
 
     ui->spinBox_Start->setValue(xStart);
     ui->spinBox_End->setValue(xEnd);
-    //ui->lineEdit_StartValue->setText(QString::number(xdata[xStart]));
-    //ui->lineEdit_EndValue->setText(QString::number(xdata[xEnd]));
 
     if(file->IsYRevered()) {
         plot->xAxis2->setRangeReversed(1);
@@ -60,8 +58,6 @@ void BPlot::SetData(FileIO *file)
     }
 
     n = file->GetDataSetSize();
-    //QVector<double> yValue = file->GetDataSetY();
-    //plot->xAxis->setRange(yValue[0], yValue[n-1]);
     plot->xAxis->setRange(file->GetYMin(), file->GetYMax());
     plot->xAxis2->setRange(0,n-1);
     if( file->HasBackGround() ) plot->xAxis2->setRange(1,n-1);
@@ -83,7 +79,12 @@ void BPlot::Plot()
     int xStart = ui->spinBox_Start->value();
     int xEnd = ui->spinBox_End->value();
 
-    double dx = xdata[xEnd+1]-xdata[xEnd];
+    qDebug() << xStart << ", " << xEnd << ", " << n;
+
+    if( xStart >= n || xEnd >= n) return;
+    if( xStart > xEnd ) return;
+
+    double dx = xdata[n] - xdata[n-1];
 
     double yMin, yMax;
     int startI = 0;
@@ -134,6 +135,7 @@ int BPlot::FindstartIndex(QVector<double> xdata, double goal)
 void BPlot::on_spinBox_Start_valueChanged(int arg1)
 {
     QVector<double> xData = this->file->GetDataSetX();
+    if( arg1 >= xData.length() ) return;
     ui->lineEdit_StartValue->setText(QString::number(xData[arg1])+" us");
 
     Plot();
@@ -142,6 +144,7 @@ void BPlot::on_spinBox_Start_valueChanged(int arg1)
 void BPlot::on_spinBox_End_valueChanged(int arg1)
 {
     QVector<double> xData = file->GetDataSetX();
+    if( arg1 >= xData.length() ) return;
     ui->lineEdit_EndValue->setText(QString::number(xData[arg1])+ " us");
 
     Plot();

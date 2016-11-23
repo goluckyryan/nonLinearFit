@@ -504,7 +504,7 @@ void FileIO::ManipulateData(int id, int bgIndex, int n)
     QString msg;
 
     // restore data
-    SendMsg("restoring Data.");
+    //SendMsg("restoring Data.");
     for( int y = 0; y < ySize; y++){
         zData[y].clear();
         for(int x = 0; x < xSize; x++){
@@ -515,8 +515,8 @@ void FileIO::ManipulateData(int id, int bgIndex, int n)
 
     if( (id & 1) == 1 && bgIndex > -1){
         QVector<double> ref = zData[bgIndex];
-        msg.sprintf("Using the %d(th)-data as background.", bgIndex);
-        SendMsg(msg);
+        //msg.sprintf("Using the %d(th)-data as background.", bgIndex);
+        //SendMsg(msg);
         for( int y = 0; y < ySize; y++){
             zData[y].clear();
             for(int x = 0; x < xSize; x++){
@@ -527,7 +527,7 @@ void FileIO::ManipulateData(int id, int bgIndex, int n)
     }
 
     if( (id & 2) == 2 ){
-        SendMsg("Mean correction.");
+        //SendMsg("Mean correction.");
         for( int y = 0; y < ySize; y++){
             for(int x = 0; x < xSize; x++){
                 zData[y][x] = zData[y][x] - zMean[y];
@@ -538,8 +538,8 @@ void FileIO::ManipulateData(int id, int bgIndex, int n)
 
     // moving average
     if( (id & 4) == 4 && n > -1  && (n % 2) == 1 ) {
-        msg.sprintf("Moving Average n = %d.", n);
-        SendMsg(msg);
+        //msg.sprintf("Moving Average n = %d.", n);
+        //SendMsg(msg);
         int m = (n-1)/2;
         for( int y = 0; y < ySize; y++){
             QVector<double> temp = zData[y];
