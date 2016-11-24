@@ -79,7 +79,7 @@ void BPlot::Plot()
     int xStart = ui->spinBox_Start->value();
     int xEnd = ui->spinBox_End->value();
 
-    qDebug() << xStart << ", " << xEnd << ", " << n;
+    //qDebug() << xStart << ", " << xEnd << ", " << n;
 
     if( xStart >= n || xEnd >= n) return;
     if( xStart > xEnd ) return;

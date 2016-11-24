@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(bPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     fftPlot = new FFTPlot(this);
+    connect(fftPlot, SIGNAL(PlotData()), this, SLOT(RePlotPlots()));
 
     savedSimplifiedtxt = 0;
 
@@ -163,7 +164,20 @@ void MainWindow::Write2Log(QString str){
     ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
 }
 
+void MainWindow::RePlotPlots()
+{
+    on_spinBox_y_valueChanged(ui->spinBox_y->value());
+    PlotContour(ui->verticalSlider_zOffset->value());
+    bPlot->Plot();
+}
+
 void MainWindow::on_pushButton_OpenFile_clicked(){
+
+    //close all planels
+    if(fitResultPlot->isVisible()) fitResultPlot->hide();
+    if(bPlot->isVisible()) bPlot->hide();
+    if(fftPlot->isVisible()) fftPlot->hide();
+    ui->checkBox_AutoFit->setChecked(false);
 
     QFileDialog fileDialog(this);
     QStringList filters;
@@ -232,7 +246,8 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     //======== Plot B-plot
     bPlot->SetData(file);
 
-    qDebug() << "dsadasdsad";
+    //======== SetData to fftPlot
+    fftPlot->SetData(file);
 
     //=========== Set up Plots
     SetupPlots();
@@ -738,18 +753,9 @@ void MainWindow::on_verticalSlider_z_sliderMoved(int position)
 
 void MainWindow::on_actionFFTW_Plot_triggered()
 {
-
-    //file->FouierForwardSingle(ui->spinBox_y->value());
-
     if(fftPlot->isHidden()){
         fftPlot->show();
     }
-
-    file->FouierForward();
-    fftPlot->SetFrequency(file->GetfXMin(), file->GetfXMax(), file->GetfYMin(), file->GetfYMax());
-    fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetFFTDataP());
-    ////file->FouierBackward();
-    //fftPlot->ContourPlot(file->GetDataSize(), file->GetDataSetSize(), file->GetFFTDataA(), file->GetData());
 
 }
 

@@ -42,6 +42,7 @@ FFTPlot::FFTPlot(QWidget *parent) :
 
 FFTPlot::~FFTPlot()
 {
+
     delete colorMap_A;
     delete plot_A;
     delete colorMap_P;
@@ -50,8 +51,40 @@ FFTPlot::~FFTPlot()
     delete ui;
 }
 
-void FFTPlot::SetFrequency(double xMin, double xMax, double yMin, double yMax)
+void FFTPlot::SetData(FileIO *file)
 {
+    this->file = file;
+
+    colorMap_A->data()->clear();
+    colorMap_P->data()->clear();
+
+    plot_A->replot();
+    plot_P->replot();
+
+
+    ui->checkBox_RemoveConstant->setEnabled(0);
+    ui->checkBox_RemoveConstant->setChecked(false);
+    ui->checkBox_MovingAvg->setEnabled(0);
+    ui->spinBox_MovingAvg->setEnabled(0);
+
+    ui->lineEdit->setEnabled(0);
+    ui->radioButton_LowPass->setEnabled(0);
+    ui->radioButton_LowPassSharp->setEnabled(0);
+    ui->horizontalSlider->setEnabled(0);
+
+    ui->pushButton_ApplyFilter->setEnabled(0);
+
+    ui->pushButton_FFTWBackward->setEnabled(0);
+}
+
+void FFTPlot::SetFrequency()
+{
+    double xMin = file->GetfXMin();
+    double xMax = file->GetfXMax();
+
+    double yMin = file->GetfYMin();
+    double yMax = file->GetfYMax();
+
     plot_A->xAxis->setRange(xMin, xMax);
     plot_P->xAxis->setRange(xMin, xMax);
 
@@ -61,19 +94,34 @@ void FFTPlot::SetFrequency(double xMin, double xMax, double yMin, double yMax)
     colorMap_A->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
     colorMap_P->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
 
-    plot_A->rescaleAxes();
-    plot_P->rescaleAxes();
-
-}
-
-void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double> *dataP)
-{
-
-    colorMap_A->data()->clear();
-    colorMap_P->data()->clear();
+    int nx = file->GetDataSize();
+    int ny = file->GetDataSetSize();
 
     colorMap_A->data()->setSize(nx,ny);
     colorMap_P->data()->setSize(nx,ny);
+
+    plot_A->rescaleAxes();
+    plot_P->rescaleAxes();
+
+    ui->horizontalSlider->setMinimum(1);
+    ui->horizontalSlider->setMaximum(xMax);
+    ui->horizontalSlider->setValue(xMax);
+
+    ui->lineEdit->setText(QString::number(xMax) + " MHz");
+
+}
+
+void FFTPlot::ContourPlot()
+{
+
+    int nx = file->GetDataSize();
+    int ny = file->GetDataSetSize();
+
+    //colorMap_A->data()->clear();
+    //colorMap_P->data()->clear();
+
+    QVector<double> *dataA = file->GetFFTDataA();
+    QVector<double> *dataP = file->GetFFTDataP();
 
     for( int j = 0; j < ny; j++){
         for( int i = 0; i < nx; i++){
@@ -81,6 +129,9 @@ void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double
             colorMap_P->data()->setCell(i,j, dataP[j][i]);
         }
     }
+
+    dataA = NULL;
+    dataP = NULL;
 
     colorMap_A->rescaleDataRange();
     colorMap_P->rescaleDataRange();
@@ -91,5 +142,65 @@ void FFTPlot::ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double
 
 void FFTPlot::on_pushButton_CalFFT_clicked()
 {
+    file->FouierForward();
+    SetFrequency();
+    ContourPlot();
 
+    ui->checkBox_RemoveConstant->setEnabled(1);
+    ui->checkBox_RemoveConstant->setChecked(false);
+    //ui->checkBox_MovingAvg->setEnabled(1);
+    //ui->spinBox_MovingAvg->setEnabled(1);
+
+    ui->lineEdit->setEnabled(1);
+    //ui->radioButton_LowPass->setEnabled(1);
+    ui->radioButton_LowPassSharp->setEnabled(1);
+    ui->radioButton_LowPassSharp->setChecked(true);
+    ui->horizontalSlider->setEnabled(1);
+
+    ui->pushButton_ApplyFilter->setEnabled(1);
+
+    ui->pushButton_FFTWBackward->setEnabled(1);
+}
+
+void FFTPlot::on_checkBox_RemoveConstant_clicked()
+{
+    file->RemoveYConstant();
+    ContourPlot();
+
+    ui->checkBox_RemoveConstant->setEnabled(0);
+}
+
+void FFTPlot::on_pushButton_FFTWBackward_clicked()
+{
+    file->FouierBackward();
+
+    PlotData();
+}
+
+void FFTPlot::on_horizontalSlider_sliderMoved(int position)
+{
+    ui->lineEdit->setText(QString::number(position) + " MHz");
+}
+
+
+void FFTPlot::on_pushButton_ApplyFilter_clicked()
+{
+    QVector<double> par;
+    par.clear();
+
+    if(ui->radioButton_LowPassSharp->isChecked()){
+        par.push_back(ui->horizontalSlider->value());
+        file->FFTWFilters(1, par);
+    }
+
+    ContourPlot();
+
+}
+
+void FFTPlot::on_lineEdit_editingFinished()
+{
+    double freq = ui->lineEdit->text().toDouble();
+    ui->lineEdit->setText(QString::number(freq) + " MHz");
+
+    ui->horizontalSlider->setValue(qCeil(freq));
 }

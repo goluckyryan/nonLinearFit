@@ -81,7 +81,7 @@ public slots:
     void SwapFFTData(bool dir);
     void FFTWFilters(int filterID, QVector<double> par);
     void RemoveYConstant();
-    void MovingAvgFFT(int n);
+    void MovingAvgonFFTW(int n);
 
 private:
     QVector<double> xData; // time data
@@ -103,6 +103,7 @@ private:
 
     double fxMin, fxMax;
     double fyMin, fyMax;
+    double ffreqResol;
 
     bool colwise; // 0 = data store as row, 1 = data store as col
     bool openState;
@@ -126,6 +127,8 @@ private:
 
     void CalMeanVector();
     void RescaleZData();
+
+    int FindIndex(QVector<double> vec, double goal, bool dir);
 };
 
 #endif // FILEIO_H

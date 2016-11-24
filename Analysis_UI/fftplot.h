@@ -17,18 +17,25 @@ public:
     explicit FFTPlot(QWidget *parent = 0);
     ~FFTPlot();
 
-    void SetFrequency(double xMin, double xMax, double yMin, double yMax);
-    void ContourPlot(int nx, int ny, QVector<double> *dataA, QVector<double> *dataP);
+    void SetData(FileIO *file);
+    void SetFrequency();
+    void ContourPlot();
+
 
 signals:
-    void CalFFTWForward();
-    void CalFFTWBackward();
-    void RemoveYConstant();
-    void MovingAvgOnFFTW();
-    void ApplyFilters(int filterID);
+    void PlotData();
 
 private slots:
     void on_pushButton_CalFFT_clicked();
+
+    void on_checkBox_RemoveConstant_clicked();
+
+    void on_horizontalSlider_sliderMoved(int position);
+    void on_lineEdit_editingFinished();
+
+    void on_pushButton_ApplyFilter_clicked();
+
+    void on_pushButton_FFTWBackward_clicked();
 
 private:
     Ui::FFTPlot *ui;
@@ -37,6 +44,8 @@ private:
     QCustomPlot * plot_P;
     QCPColorMap * colorMap_A;
     QCPColorMap * colorMap_P;
+
+    FileIO *file;
 };
 
 #endif // FFTPLOT_H

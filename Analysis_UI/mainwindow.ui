@@ -601,7 +601,7 @@
     <string>Fit Result</string>
    </property>
    <property name="statusTip">
-    <string>Open the fit parameter plannel.</string>
+    <string>Open the fit parameter planel.</string>
    </property>
   </action>
   <action name="actionB_Plot">
@@ -609,7 +609,7 @@
     <string>B-Plot</string>
    </property>
    <property name="statusTip">
-    <string>Open B-Plot Plannel</string>
+    <string>Open B-Plot planel</string>
    </property>
   </action>
   <action name="actionFFTW_Plot">
@@ -617,7 +617,7 @@
     <string>FFTW Plot</string>
    </property>
    <property name="statusTip">
-    <string>Fast Fouier Transform plannel</string>
+    <string>Fast Fouier Transform planel. The FFTW data is stored seperately.</string>
    </property>
   </action>
   <action name="actionSave_as_Single_X_CVS">

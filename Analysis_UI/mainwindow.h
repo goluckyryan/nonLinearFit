@@ -26,7 +26,6 @@ public:
     ~MainWindow();
 
     void SetupPlots();
-
     void Plot(int graphID, QVector<double> x, QVector<double> y);
     void PlotFitFunc();
     void PlotContour(double offset);
@@ -34,9 +33,10 @@ public:
     QVector<double> GetParametersFromLineText();
     void UpdateLineTextParameters(QVector<double> par, QVector<double> epar);
 
-
 private slots:
     void Write2Log(QString str);
+
+    void RePlotPlots();
 
     void on_pushButton_OpenFile_clicked();
 

@@ -608,26 +608,30 @@ void FileIO::FouierForward()
 
     SendMsg("Fouier Transform - Forward. Done.");
 
+    //======================================
     SendMsg("Cal. freqeuncy.");
-    double xResol = 1000./(xMax - xMin); // MHz
+    this->ffreqResol = 1000./(xMax - xMin); // MHz
     int d = 0;
     if( xSize % 2 == 0){
         d = xSize /2;
     }else{
         d = (xSize+1)/2;
     }
+
+    fxData.clear();
     for( int i = 0; i < xSize; i++){
-        fxData.push_back( (-d + i) * xResol );
+        fxData.push_back( (-d + i) * this->ffreqResol );
     }
 
-    fxMin = -d * xResol;
-    fxMax = (xSize-1-d) * xResol;
+    fxMin = -d * this->ffreqResol;
+    fxMax = (xSize-1-d) * this->ffreqResol;
 
     if( ySize % 2 == 0){
         d = ySize /2;
     }else{
         d = (ySize+1)/2;
     }
+    fyData.clear();
     for( int i = 0; i < ySize; i++){
         fyData.push_back( (-d + i) );
     }
@@ -712,14 +716,8 @@ void FileIO::FouierBackward()
 
     for( int i = 0; i < ySize ; i++){
         for( int j = 0; j < xSize ; j++){
-            if( i == 0 ){
-                in[i*xSize + j][0] = 0;
-                in[i*xSize + j][1] = 0;
-            }else{
-                in[i*xSize + j][0] = fZDataA[i][j];
-                in[i*xSize + j][1] = fZDataP[i][j];
-            }
-
+            in[i*xSize + j][0] = fZDataA[i][j];
+            in[i*xSize + j][1] = fZDataP[i][j];
         }
     }
 
@@ -740,6 +738,8 @@ void FileIO::FouierBackward()
     fftw_free(in);
 
     SendMsg("Fouier Transform - Backward. Done.");
+
+    SwapFFTData(1);
 }
 
 QVector<double> FileIO::Shift(QVector<double> list, int d)
@@ -819,6 +819,26 @@ void FileIO::FFTWFilters(int filterID, QVector<double> par)
 
     if( filterID == 1){
         // par[0] = freq.
+        qDebug() << par;
+
+        int x1 = FindIndex(fxData, -par[0], 1);
+        int x2 = FindIndex(fxData, par[0], 0);
+
+        qDebug() << fxData.length();
+        qDebug() << x1 << ", " << x2;
+        qDebug() << fxData[x1] << ", " << fxData[x2];
+
+        for(int i = 0 ; i < ySize ; i++){
+            for(int j = 0 ; j <= x1 ; j++){
+                fZDataA[i][j] = 0;
+                fZDataP[i][j] = 0;
+            }
+            for(int j = x2 ; j < xSize ; j++){
+                fZDataA[i][j] = 0;
+                fZDataP[i][j] = 0;
+            }
+        }
+
     }
 
 
@@ -838,7 +858,7 @@ void FileIO::RemoveYConstant()
 
 }
 
-void FileIO::MovingAvgFFT(int n)
+void FileIO::MovingAvgonFFTW(int n)
 {
     if( n % 2 == 0 ) return;
 
@@ -931,4 +951,25 @@ void FileIO::RescaleZData()
 
     xMin = FindMin(xData);
     xMax = FindMax(xData);
+}
+
+int FileIO::FindIndex(QVector<double> vec, double goal, bool dir)
+{
+    int index = 0;
+    if( dir == 0 ){
+        for(int i = 0; i < vec.size() ; i++){
+            if( vec[i] >= goal){
+                index = i;
+                break;
+            }
+        }
+    }else{
+        for(int i = vec.size() - 1; i > -1 ; i--){
+            if( vec[i] <= goal){
+                index = i;
+                break;
+            }
+        }
+    }
+    return index;
 }
