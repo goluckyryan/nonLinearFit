@@ -24,7 +24,7 @@ win32 {
 
     } else {
         message("x86_64 build")
-        LIBS += "$$PWD/libfftw3-3_x64.dll"
+        LIBS += "$$PWD/libfftw3-3_x64.lib"
         ## Windows x64 (64bit) specific build here
 
     }
