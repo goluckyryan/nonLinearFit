@@ -75,17 +75,19 @@ void BPlot::Plot()
     y.clear();
 
     QVector<double> xdata = file->GetDataSetX();
-    int n = file->GetDataSetSize();
 
     int xStart = ui->spinBox_Start->value();
     int xEnd = ui->spinBox_End->value();
 
-    //qDebug() << xStart << ", " << xEnd << ", " << n;
+    int nx = xdata.size();
+    int ny = file->GetDataSetSize();
 
-    if( xStart >= n || xEnd >= n) return;
+    //qDebug() << xStart << ", " << xEnd << ", " << nx ;
+
+    if( xStart >= nx || xEnd >= nx) return;
     if( xStart > xEnd ) return;
 
-    double dx = xdata[n] - xdata[n-1];
+    double dx = xdata[nx-1] - xdata[nx-2];
 
     double yMin, yMax;
     double xMin, xMax;
@@ -110,7 +112,7 @@ void BPlot::Plot()
 
     int startI = 0;
     if( file->HasBackGround() ) startI = 1;
-    for( int i = startI; i < n; i++){
+    for( int i = startI; i < ny; i++){
         double xValue = 0;
         switch (plotUnit) {
         case 0:xValue = file->GetDataY_CV(i);break;
