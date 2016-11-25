@@ -804,8 +804,14 @@ void MainWindow::on_actionFFTW_Plot_triggered()
 void MainWindow::on_pushButton_RestoreData_clicked()
 {
     //file->RestoreData();
-    file->ManipulateData(0);
-    ui->checkBox_BGsub->setChecked(0);
+    if( file->HasBackGround()){
+        file->ManipulateData(1, ui->spinBox_BGIndex->value());
+        ui->checkBox_BGsub->setChecked(1);
+    }else{
+        file->ManipulateData(0);
+        ui->checkBox_BGsub->setChecked(0);
+    }
+
     ui->checkBox_MeanCorr->setChecked(0);
     ui->verticalSlider_zOffset->setValue(0);
     ui->spinBox_MovingAvg->setValue(-1);

@@ -167,15 +167,17 @@ void BPlot::on_spinBox_Start_valueChanged(int arg1)
     QVector<double> xData = this->file->GetDataSetX();
     if( arg1 >= xData.length() ) return;
     ui->lineEdit_StartValue->setText(QString::number(xData[arg1])+" us");
+    ui->spinBox_End->setMinimum(arg1);
 
     Plot();
 }
 
 void BPlot::on_spinBox_End_valueChanged(int arg1)
 {
-    QVector<double> xData = file->GetDataSetX();
+    QVector<double> xData = this->file->GetDataSetX();
     if( arg1 >= xData.length() ) return;
-    ui->lineEdit_EndValue->setText(QString::number(xData[arg1])+ " us");
+    ui->lineEdit_EndValue->setText(QString::number(xData[arg1])+" us");
+    ui->spinBox_Start->setMaximum(arg1);
 
     Plot();
 }
@@ -202,10 +204,7 @@ void BPlot::on_pushButton_clicked()
     stream << str;
 
     //fill data;
-    int n = file->GetDataSetSize();
-    int startI = 0;
-    if(file->HasBackGround()) startI = 1;
-    for(int i = startI; i < n ; i++){
+    for(int i = 0; i < x.size() ; i++){
         str.sprintf("%15.4f, %15.4f\n", x[i], y[i]);
         stream << str;
     }
