@@ -19,6 +19,8 @@ public:
     ~BPlot();
 
     void SetData(FileIO *file);
+    void SetPlotUnit(int unit){ this->plotUnit = unit;}
+    void SetupPlot(double xMin, double xMax);
     void Plot();
     int FindstartIndex(QVector<double> xdata, double goal);    
 
@@ -39,6 +41,7 @@ private:
     FileIO *file;
 
     QVector<double> x, y;
+    int plotUnit;
 
 };
 

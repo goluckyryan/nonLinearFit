@@ -56,10 +56,12 @@ private slots:
 
     void on_checkBox_b_Tb_clicked(bool checked);
     void on_checkBox_c_clicked(bool checked);
+
     void on_actionFit_Result_triggered();
     void on_actionB_Plot_triggered();
     void on_actionFFTW_Plot_triggered();
     void on_actionSave_as_Single_X_CVS_triggered();
+    void on_actionSave_as_Double_X_CVS_triggered();
 
     void setDisabledPlanel();
     void setEnabledPlanel();
@@ -73,8 +75,7 @@ private slots:
     void on_verticalSlider_z_sliderMoved(int position);
     void on_verticalSlider_zOffset_sliderMoved(int position);
 
-
-    void on_actionSave_as_Double_X_CVS_triggered();
+    void on_comboBox_yLabelType_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;

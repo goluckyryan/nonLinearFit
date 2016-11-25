@@ -30,7 +30,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ctplot = ui->customPlot_CT;
     ctplot->axisRect()->setupFullAxesBox(true);
     ctplot->xAxis->setLabel("time [us]");
-    ctplot->yAxis->setLabel("B-field [mV]");
+    ctplot->yAxis->setLabel("Ctrl. Vol. [V]");
+    //ctplot->yAxis2->setVisible(1);
+    //ctplot->yAxis2->setLabel("index");
 
     colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
     colorMap->clearData();
@@ -63,14 +65,15 @@ void MainWindow::SetupPlots()
 {
     double xMin = file->GetXMin();
     double xMax = file->GetXMax();
-    double yMin = file->GetYMin();
-    double yMax = file->GetYMax();
+    double yMin = file->GetYMin_CV();
+    double yMax = file->GetYMax_CV();
     double zMin = file->GetZMin();
     double zMax = file->GetZMax();
-
+    int zRange = qCeil(qMax(fabs(file->GetZMin()), fabs(file->GetZMax())));
     //========= contour Plot
-    ui->verticalSlider_zOffset->setMinimum(qFloor(zMin));
-    ui->verticalSlider_zOffset->setMaximum(qCeil(zMax));
+
+    ui->verticalSlider_zOffset->setMinimum(-zRange);
+    ui->verticalSlider_zOffset->setMaximum(zRange);
     ui->verticalSlider_zOffset->setValue(0);
 
     colorMap->data()->clear();
@@ -78,6 +81,9 @@ void MainWindow::SetupPlots()
     int ny = file->GetDataSetSize();
     if( file->HasBackGround() ) ny = ny -1;
     colorMap->data()->setSize(nx, ny);
+    //colorMap->setInterpolate(true);
+    //colorMap->setTightBoundary(false);
+    //colorMap->setAntialiased(true);
 
     ctplot->xAxis->setRange(xMin, xMax);
     ctplot->yAxis->setRange(yMin, yMax);
@@ -101,7 +107,6 @@ void MainWindow::SetupPlots()
     colorMap->setGradient( colorGrad ); //color scheme
 
     //colorMap->rescaleDataRange();
-    int zRange = qCeil(qMax(fabs(file->GetZMin()), fabs(file->GetZMax())));
     colorMap->setDataRange(QCPRange(-zRange, zRange));
     ui->verticalSlider_z->setMinimum(1);
     ui->verticalSlider_z->setMaximum(zRange);
@@ -168,6 +173,7 @@ void MainWindow::RePlotPlots()
 {
     on_spinBox_y_valueChanged(ui->spinBox_y->value());
     PlotContour(ui->verticalSlider_zOffset->value());
+    bPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
     bPlot->Plot();
 }
 
@@ -228,6 +234,10 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
 
     //========= once the file is opened, eanble planel, set checkBoxes to uncheck, etc...
     setEnabledPlanel();
+    if( fileDialog.selectedNameFilter() == filters[1]){
+        ui->comboBox_yLabelType->setEnabled(0);
+        ui->comboBox_yLabelType->setCurrentIndex(0);
+    }
     ui->checkBox_BGsub->setChecked(0);
     ui->checkBox_MeanCorr->setChecked(0);
     ui->spinBox_MovingAvg->setValue(-1);
@@ -271,12 +281,19 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     statusBar()->showMessage("Changed y-Index.");
 
     ui->spinBox_y->setValue(arg1);
-    ui->lineEdit_y->setText(QString::number(file->GetDataY(arg1))+" mV");
+    QString unitText = " V";
+    switch (ui->comboBox_yLabelType->currentIndex()) {
+    case 0: unitText = " V";break;
+    case 1: unitText = " mV";break;
+    case 2: unitText = " mT";break;
+    }
+
+    ui->lineEdit_y->setText(QString::number(file->GetDataY_CV(arg1))+ unitText);
 
     Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1));
 
     ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
-    ana->SetY(arg1, file->GetDataY(arg1));
+    ana->SetY(arg1, file->GetDataY_CV(arg1));
     if( ui->checkBox_AutoFit->isChecked()) {
         on_pushButton_reset_clicked();
         on_pushButton_Fit_clicked();
@@ -363,7 +380,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     statusBar()->showMessage("Fitting.");
 
-    bool gnu = ui->checkBox->isChecked();
+    bool gnu = ui->checkBox_GunFit->isChecked();
 
     if( savedSingleXCVS == 0 && gnu){
         file->SaveCVS(0); // save as single-X
@@ -637,12 +654,36 @@ void MainWindow::PlotContour(double offset)
 
     for(int xIndex = 0; xIndex < nx; xIndex++){
         for(int yIndex = yIndexStart; yIndex < ny; yIndex++){
-            double z = file->GetDataZ(xIndex, yIndex) + offset;
-            if( file->IsYRevered()){
-                colorMap->data()->setCell(xIndex, ny-yIndex-1, z);
-            }else{
-                colorMap->data()->setCell(xIndex, yIndex, z); // fill data
+            double x = file->GetDataX(xIndex);
+            double y , dy;
+            switch (ui->comboBox_yLabelType->currentIndex()) {
+            case 1:
+                y = file->GetDataY_HV(yIndex);
+                dy = file->GetYStep_HV();
+                break;
+            case 2:
+                y = file->HV2Mag(file->GetDataY_HV(yIndex));
+                dy = file->HV2Mag(file->GetYStep_HV());
+                break;
+            default:
+                y = file->GetDataY_CV(yIndex);
+                dy = 0;
+                break;
             }
+            double z = file->GetDataZ(xIndex, yIndex) + offset;
+
+            colorMap->data()->setData(x, y, z);
+
+            // this is need for plotting Hall Volatge, since not uniform;
+            if( ui->comboBox_yLabelType->currentIndex() > 0 && yIndex < ny - 1){
+                double zn = file->GetDataZ(xIndex, yIndex+1) + offset;
+                colorMap->data()->setData(x, y+dy/2, (z + zn)/2);
+            }
+            //if( file->IsYRevered()){
+            //    colorMap->data()->setCell(xIndex, ny-yIndex-1, z);
+            //}else{
+            //    colorMap->data()->setCell(xIndex, yIndex, z); // fill data
+            //}
         }
     }
 
@@ -663,6 +704,7 @@ void MainWindow::on_actionB_Plot_triggered()
 {
     if(bPlot->isHidden()){
         bPlot->show();
+        bPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
         bPlot->Plot();
     }
 }
@@ -684,6 +726,8 @@ void MainWindow::setDisabledPlanel()
     ui->checkBox_BGsub->setEnabled(0);
     ui->spinBox_BGIndex->setEnabled(0);
     ui->spinBox_MovingAvg->setEnabled(0);
+    ui->comboBox_yLabelType->setEnabled(0);
+
 }
 
 void MainWindow::setEnabledPlanel()
@@ -702,6 +746,7 @@ void MainWindow::setEnabledPlanel()
     ui->verticalSlider_z->setEnabled(1);
     ui->checkBox_BGsub->setEnabled(1);
     ui->spinBox_MovingAvg->setEnabled(1);
+    ui->comboBox_yLabelType->setEnabled(1);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
@@ -716,9 +761,7 @@ void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
 
     file->ManipulateData(id, bgIndex);
 
-    on_spinBox_y_valueChanged(ui->spinBox_y->value());
-    PlotContour(ui->verticalSlider_zOffset->value());
-    bPlot->Plot();
+    RePlotPlots();
 
 }
 
@@ -735,9 +778,7 @@ void MainWindow::on_checkBox_BGsub_clicked(bool checked)
 
     file->ManipulateData(id, bgYIndex);
 
-    on_spinBox_y_valueChanged(ui->spinBox_y->value());
-    PlotContour(ui->verticalSlider_zOffset->value());
-    bPlot->Plot();
+    RePlotPlots();
 
 }
 
@@ -769,9 +810,7 @@ void MainWindow::on_pushButton_RestoreData_clicked()
     ui->verticalSlider_zOffset->setValue(0);
     ui->spinBox_MovingAvg->setValue(-1);
 
-    on_spinBox_y_valueChanged(ui->spinBox_y->value());
-    PlotContour(ui->verticalSlider_zOffset->value());
-    bPlot->Plot();
+    RePlotPlots();
 }
 
 void MainWindow::on_verticalSlider_zOffset_sliderMoved(int position)
@@ -798,9 +837,7 @@ void MainWindow::on_spinBox_MovingAvg_valueChanged(int arg1)
 
     file->ManipulateData(id, bgIndex, arg1);
 
-    PlotContour(ui->verticalSlider_zOffset->value());
-    on_spinBox_y_valueChanged(ui->spinBox_y->value());
-    bPlot->Plot();
+    RePlotPlots();
 }
 
 void MainWindow::on_actionSave_as_Single_X_CVS_triggered()
@@ -812,4 +849,47 @@ void MainWindow::on_actionSave_as_Double_X_CVS_triggered()
 {
     file->SaveCVS(1); // double-X
     savedSingleXCVS = 1;
+}
+
+
+void MainWindow::on_comboBox_yLabelType_currentIndexChanged(int index)
+{
+    double xMin = file->GetXMin();
+    double xMax = file->GetXMax();
+    double yMin = file->GetYMin_CV();
+    double yMax = file->GetYMax_CV();
+    QString unitText = " V";
+    int yIndex = ui->spinBox_y->value();
+    if(index == 0){ //Control Volatge
+        ctplot->yAxis->setLabel("Ctrl. Vol. [V]");
+        ctplot->yAxis->setRange(yMin, yMax);
+        unitText = " V";
+        ui->lineEdit_y->setText(QString::number(file->GetDataY_CV(yIndex))+ unitText);
+
+    }else if(index == 1){ // Hall Volatage
+        ctplot->yAxis->setLabel("Hall Vol. [mV]");
+        yMin = file->GetYMin_HV();
+        yMax = file->GetYMax_HV();
+        ctplot->yAxis->setRange(yMin, yMax);
+        unitText = " mV";
+        ui->lineEdit_y->setText(QString::number(file->GetDataY_HV(yIndex))+ unitText);
+
+    }else if(index == 2){ // Magnetic field [T]
+        ctplot->yAxis->setLabel("B-field [mT]");
+        yMin = file->HV2Mag(file->GetYMin_HV());
+        yMax = file->HV2Mag(file->GetYMax_HV());
+        ctplot->yAxis->setRange(yMin, yMax);
+        unitText = " mT";
+        ui->lineEdit_y->setText(QString::number(file->HV2Mag(file->GetDataY_HV(yIndex)))+ unitText);
+
+    }
+
+    bPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
+    bPlot->Plot();
+
+    colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
+
+    PlotContour(ui->verticalSlider_zOffset->value());
+    //ctplot->replot();
+
 }

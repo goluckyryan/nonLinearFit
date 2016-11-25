@@ -40,7 +40,7 @@ void FileIO::Initialize(){
     if( fZDataP != NULL ) delete [] fZDataP;
 
     xData.clear();
-    yData.clear();
+    yData_CV.clear();
     zMean.clear();
 
     fxData.clear();
@@ -48,8 +48,8 @@ void FileIO::Initialize(){
 
     xMax = 0;
     xMin = 0;
-    yMax = 0;
-    yMin = 0;
+    yMax_CV = 0;
+    yMin_CV = 0;
     zMax = 0;
     zMin = 0;
     zMeanMean = 0;
@@ -125,7 +125,7 @@ void FileIO::OpenCSVData(){
 
     //get data
     multi = 3;
-    yData.clear();
+    yData_CV.clear();
     xData.clear();
     myfile->seek(0);
     int rows = 0;
@@ -135,9 +135,10 @@ void FileIO::OpenCSVData(){
         if( rows == 1){ // get yDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1) {
-                    double temp = ExtractYValue(lineList[i]);
+                    double temp = ExtractYValue(lineList[i],1);
                     yString.push_back(lineList[i]);
-                    yData.push_back(temp) ; // get data from string.
+                    yData_CV.push_back(temp) ; // get data from string.
+                    yData_HV.push_back(temp); // for CSV data, HV = CV
                 }
             }
         }else{
@@ -170,15 +171,18 @@ void FileIO::OpenCSVData(){
 
     //check
     qDebug("X: %d , %d", xData.size(), xSize);
-    qDebug("Y: %d , %d", yData.size(), ySize);
+    qDebug("Y: %d , %d", yData_CV.size(), ySize);
 
     xMin = FindMin(xData);
     xMax = FindMax(xData);
 
-    yMin = FindMin(yData);
-    yMax = FindMax(yData);
+    yMin_CV = FindMin(yData_CV);
+    yMax_CV = FindMax(yData_CV);
 
-    if(yData[0] > yData[1]) yRevered = 1;
+    yStep_CV = fabs(yData_CV[ySize-1]- yData_CV[ySize-2]);
+    yStep_HV = yStep_CV;
+
+    if(yData_CV[0] > yData_CV[1]) yRevered = 1;
 
     openState = 1;
 
@@ -186,7 +190,7 @@ void FileIO::OpenCSVData(){
     msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
     SendMsg(msg);
 
-    msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin, yMax, ySize);
+    msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin_CV, yMax_CV, ySize);
     SendMsg(msg);
 
     msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
@@ -242,7 +246,9 @@ void FileIO::OpenTxtData_col() // great problem in this function. not updated fo
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 yString.push_back(lineList[i]);
                 double temp = ExtractYValue(lineList[i]);
-                yData.push_back(temp);
+                yData_CV.push_back(temp);
+                temp = ExtractYValue(lineList[i],1);
+                yData_HV.push_back(temp);
             }
         }else{
             xData.push_back((lineList[0]).toDouble()) ;
@@ -271,15 +277,15 @@ void FileIO::OpenTxtData_col() // great problem in this function. not updated fo
     delete z;
 
     qDebug("X: %d , %d", xData.size(), xSize);
-    qDebug("Y: %d , %d", yData.size(), ySize);
+    qDebug("Y: %d , %d", yData_CV.size(), ySize);
 
     xMin = FindMin(xData);
     xMax = FindMax(xData);
 
-    yMin = FindMin(yData);
-    yMax = FindMax(yData);
+    yMin_CV = FindMin(yData_CV);
+    yMax_CV = FindMax(yData_CV);
 
-    if(yData[0] > yData[1]) yRevered = 1;
+    if(yData_CV[0] > yData_CV[1]) yRevered = 1;
 
     openState = 1;
 
@@ -287,7 +293,7 @@ void FileIO::OpenTxtData_col() // great problem in this function. not updated fo
     msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
     SendMsg(msg);
 
-    msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin, yMax, ySize);
+    msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin_CV, yMax_CV, ySize);
     SendMsg(msg);
 
     msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
@@ -342,7 +348,9 @@ void FileIO::OpenTxtData_row(){
         }else{
             double temp = ExtractYValue(lineList[0]);
             yString.push_back(lineList[0]);
-            yData.push_back(temp);
+            yData_CV.push_back(temp);
+            temp = ExtractYValue(lineList[0],1);
+            yData_HV.push_back(temp);
             zData[yIndex].clear();
             backUpData[yIndex].clear();
             for( int i = 1 ; i < lineList.size() ; i++ ){
@@ -368,41 +376,51 @@ void FileIO::OpenTxtData_row(){
     RescaleZData();
 
     //============== check is BG data exist by checking Hall probe volatge,
-    QVector<double> newYData;
-    for( int i = 1; i < ySize; i++){
-        newYData.push_back(yData[i]);
-    }
+    QVector<double> newYData_CV = yData_CV;
+    QVector<double> newYData_HV = yData_HV;
 
     //if Hall probe volatge smaller than 3 mV
     int misIndex = -1;
-    if( fabs(yData[0]) < 3 ) misIndex = 1;
-
-    if( misIndex == 1) {
-        hadBG = 1;
-        for( int i = 1; i < ySize; i++){
-            newYData.push_back(yData[i]);
+    for( int i = 0; i < ySize; i++){
+        if( fabs(yData_HV[i]) < 3 ) {
+            misIndex = i;
+        }else{
+            break;
         }
     }
 
-    yMin = FindMin(newYData);
-    yMax = FindMax(newYData);
+    if( misIndex != -1 ) {
+        hadBG = 1;
+        newYData_CV.remove(0);
+        newYData_HV.remove(0);
+    }
+
+    yMin_CV = FindMin(newYData_CV);
+    yMax_CV = FindMax(newYData_CV);
+    yMin_HV = FindMin(newYData_HV);
+    yMax_HV = FindMax(newYData_HV);
+
+    yStep_CV = fabs(yData_CV[ySize-1]- yData_CV[ySize-2]);
+    yStep_HV = fabs(yData_HV[ySize-1]- yData_HV[ySize-2]);
 
     //=========== check is data revered.
-    if(newYData[0] > newYData[1]) yRevered = 1;
+    if(newYData_HV[0] > newYData_HV[1]) yRevered = 1;
 
     //=========== the open file complete, show message
     openState = 1;
 
     QString msg;
-    msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
+    msg.sprintf("X   :(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
     SendMsg(msg);
-    msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin, yMax, ySize);
+    msg.sprintf("Y_CV:(%7.3f, %7.3f) sizeY:%d",yMin_CV, yMax_CV, ySize);
+    SendMsg(msg);
+    msg.sprintf("Y_HV:(%7.3f, %7.3f) sizeY:%d",yMin_HV, yMax_HV, yData_HV.size());
     SendMsg(msg);
     if( hadBG ){
-        msg.sprintf("BG data exist. At yIndex = %d", misIndex-1);
+        msg.sprintf("    BG data exist. At yIndex = %d", misIndex);
         SendMsg(msg);
     }
-    msg.sprintf("Z:(%7.3f, %7.3f), multiplied : 10^%d",zMin, zMax, multi);
+    msg.sprintf("Z   :(%7.3f, %7.3f), multiplied : 10^%d",zMin, zMax, multi);
     SendMsg(msg);
     myfile->close();
 
@@ -878,26 +896,31 @@ void FileIO::MovingAvgonFFTW(int n)
 
 }
 
-double FileIO::ExtractYValue(QString str){
-    int pos = str.lastIndexOf("_") ;
+double FileIO::ExtractYValue(QString str, int index){
+    //when index = 0 (default) get first
 
-    int pos2 = str.lastIndexOf("FUNCTION");
-    if( pos2 == -1){
-        pos2 = str.lastIndexOf("mT");
-    }
-    if( pos2 == -1){
-        pos2 = str.lastIndexOf("mV");
+    QStringList strList = str.split("_");
+
+    index = index + 1; // the 0 is for data name;
+
+    if( index >= strList.length()) index = strList.length() - 1;
+
+    //check charectors, to remove non interger
+    int pos;
+    QString temp = strList[index];
+    for( int i = 0; i < temp.length(); i++ ){
+        if( temp[i].isLetter()) {
+            pos = i;
+            break;
+        }
     }
 
-    //qDebug() << str << ", " << pos << ";" << pos2;
-    QString strY;
-    if( pos2 == -1){
-        strY = str.mid(pos+1, 4);
-    }else{
-        strY = str.mid(pos+1, pos2-pos-1);
-    }
-    //qDebug() << str << ", " << pos << ", " << strY;
-    return strY.toDouble();
+    temp.chop(temp.length()-pos);
+
+    //qDebug()<< index-1 << "|" << strList[index] << ", " << pos << " = " << temp << ", " << temp.toDouble();
+
+    return temp.toDouble();
+
 }
 
 double FileIO::FindMax(QVector<double> vec)

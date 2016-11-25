@@ -41,26 +41,31 @@ public slots:
     QString GetSimFilePath(){return cvsFilePath;}
     bool IsColWise(){return colwise;}
     int GetDataSize(){ return xData.size();}
-    int GetDataSetSize() {return yData.size();}
+    int GetDataSetSize() {return yData_CV.size();}
     QVector<double> GetDataSetZ(int yIndex){return zData[yIndex];}
     QVector<double> * GetData(){return zData;}
     QVector<double> * GetFFTDataA(){return fZDataA;}
     QVector<double> * GetFFTDataP(){return fZDataP;}
-    QVector<double> GetDataSetY(){return yData;}
+    QVector<double> GetDataSetY(){return yData_CV;}
     QVector<double> GetDataSetX(){return xData;}
     QVector<double> GetDataSetMeanZ(){return zMean;}
     double GetDataZ(int xIndex, int yIndex){return zData[yIndex][xIndex];}
     double GetDataX(int xIndex){ return xData[xIndex];}
-    double GetDataY(int yIndex){ return yData[yIndex];}
+    double GetDataY_CV(int yIndex){ return yData_CV[yIndex];}
+    double GetDataY_HV(int yIndex){ return yData_HV[yIndex];}
     double GetDataMeanZ(int yIndex){ return zMean[yIndex];}
     double GetDataMeanZMean() {return zMeanMean;}
 
     double GetXMax(){return xMax;}
     double GetXMin(){return xMin;}
-    double GetYMax(){return yMax;}
-    double GetYMin(){return yMin;}
+    double GetYMax_CV(){return yMax_CV;}
+    double GetYMin_CV(){return yMin_CV;}
+    double GetYMax_HV(){return yMax_HV;}
+    double GetYMin_HV(){return yMin_HV;}
     double GetZMax(){return zMax;}
     double GetZMin(){return zMin;}
+    double GetYStep_CV(){return yStep_CV;}
+    double GetYStep_HV(){return yStep_HV;}
 
     double GetfXMax(){return fxMax;}
     double GetfXMin(){return fxMin;}
@@ -83,9 +88,14 @@ public slots:
     void RemoveYConstant();
     void MovingAvgonFFTW(int n);
 
+    double HV2Mag(double HV){
+        return -0.05 + 0.9*HV;
+    }
+
 private:
     QVector<double> xData; // time data
-    QVector<double> yData; // B-field
+    QVector<double> yData_CV; // Control Voltage
+    QVector<double> yData_HV; // Hall Voltage
     QVector<double> *zData; //data, [ydata][xdata]
     QVector<double> *backUpData; //backup data, [ydata][xdata]
     QVector<double> zMean; // mean
@@ -98,7 +108,8 @@ private:
 
     int xSize, ySize;
     double xMin, xMax;
-    double yMin, yMax;
+    double yMin_CV, yMax_CV, yStep_CV;
+    double yMin_HV, yMax_HV, yStep_HV;
     double zMin, zMax;
     double zMeanMean;
 
@@ -119,7 +130,7 @@ private:
     QString filePath, cvsFilePath;
 
     //Private functions
-    double ExtractYValue(QString str);
+    double ExtractYValue(QString str, int index = 0);
 
     double FindMax(QVector<double> vec);
     double FindMin(QVector<double> vec);
@@ -130,6 +141,7 @@ private:
     void RescaleZData();
 
     int FindIndex(QVector<double> vec, double goal, bool dir);
+
 };
 
 #endif // FILEIO_H

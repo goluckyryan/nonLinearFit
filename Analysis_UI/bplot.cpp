@@ -8,7 +8,7 @@ BPlot::BPlot(QWidget *parent) :
     ui->setupUi(this);
 
     plot = ui->plotArea;
-    plot->xAxis->setLabel("B-field [mV]");
+    plot->xAxis->setLabel("Ctrl. Vol. [V]");
     plot->yAxis->setLabel("Integrated value [a.u.]");
     plot->xAxis2->setLabel("y-Index");
     plot->xAxis2->setVisible(true);
@@ -20,6 +20,8 @@ BPlot::BPlot(QWidget *parent) :
     plot->graph(0)->setPen(QPen(Qt::blue));
     plot->graph(0)->clearData();
 
+    plotUnit = 0;
+
 }
 
 BPlot::~BPlot()
@@ -27,7 +29,6 @@ BPlot::~BPlot()
     delete ui;
     delete plot;
 
-    //if( file != NULL) delete file;
 }
 
 void BPlot::SetData(FileIO *file)
@@ -51,6 +52,9 @@ void BPlot::SetData(FileIO *file)
     ui->spinBox_Start->setValue(xStart);
     ui->spinBox_End->setValue(xEnd);
 
+    x.clear();
+    y.clear();
+
     if(file->IsYRevered()) {
         plot->xAxis2->setRangeReversed(1);
     }else{
@@ -58,12 +62,9 @@ void BPlot::SetData(FileIO *file)
     }
 
     n = file->GetDataSetSize();
-    plot->xAxis->setRange(file->GetYMin(), file->GetYMax());
+    plot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
     plot->xAxis2->setRange(0,n-1);
     if( file->HasBackGround() ) plot->xAxis2->setRange(1,n-1);
-
-    x.clear();
-    y.clear();
 
 }
 
@@ -87,10 +88,37 @@ void BPlot::Plot()
     double dx = xdata[n] - xdata[n-1];
 
     double yMin, yMax;
+    double xMin, xMax;
+    switch (plotUnit) {
+    case 0:
+        xMin = file->GetYMin_CV();
+        xMax = file->GetYMax_CV();
+        plot->xAxis->setLabel("Ctrl. Vol. [V]");
+        break;
+    case 1:
+        xMin = file->GetYMin_HV();
+        xMax = file->GetYMax_HV();
+        plot->xAxis->setLabel("Hall Vol. [mV]");
+        break;
+    case 2:
+        xMin = file->HV2Mag(file->GetYMin_HV());
+        xMax = file->HV2Mag(file->GetYMax_HV());
+        plot->xAxis->setLabel("B-field [mT]");
+        break;
+    }
+    plot->xAxis->setRange(xMin, xMax);
+
     int startI = 0;
     if( file->HasBackGround() ) startI = 1;
     for( int i = startI; i < n; i++){
-        x.push_back(file->GetDataY(i));
+        double xValue = 0;
+        switch (plotUnit) {
+        case 0:xValue = file->GetDataY_CV(i);break;
+        case 1:xValue = file->GetDataY_HV(i);break;
+        case 2:xValue = file->HV2Mag(file->GetDataY_HV(i));break;
+        }
+
+        x.push_back(xValue);
         //integrated
         QVector<double> zdata = file->GetDataSetZ(i);
         double sum = 0;

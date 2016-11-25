@@ -10,7 +10,7 @@ FFTPlot::FFTPlot(QWidget *parent) :
     plot_A = ui->widget_A;
     plot_A->axisRect()->setupFullAxesBox(true);
     plot_A->xAxis->setLabel("freq [MHz]");
-    plot_A->yAxis->setLabel("1/B [a.u.]");
+    plot_A->yAxis->setLabel("index [a.u.]");
 
     colorMap_A = new QCPColorMap(plot_A->xAxis, plot_A->yAxis);
     colorMap_A->clearData();
@@ -18,7 +18,7 @@ FFTPlot::FFTPlot(QWidget *parent) :
     plot_P = ui->widget_P;
     plot_P->axisRect()->setupFullAxesBox(true);
     plot_P->xAxis->setLabel("freq [MHz]");
-    plot_P->yAxis->setLabel("1/B [a.u.]");
+    plot_P->yAxis->setLabel("index [a.u.]");
 
     colorMap_P = new QCPColorMap(plot_P->xAxis, plot_P->yAxis);
     colorMap_P->clearData();

@@ -86,7 +86,7 @@ void FitResult::SetDataSize(FileIO *file)
     SSR = new double [n];
     yValue = file->GetDataSetY();
     //plot->xAxis->setRange(yValue[0], yValue[n-1]);
-    plot->xAxis->setRange(file->GetYMin(), file->GetYMax());
+    plot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
     plot->xAxis2->setRange(0,n-1);
     if( file->HasBackGround()) plot->xAxis2->setRange(1,n-1);
 
