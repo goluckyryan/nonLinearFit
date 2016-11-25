@@ -12,7 +12,24 @@ TARGET = Analysis_UI
 TEMPLATE = app
 
 RC_ICONS += icon.ico
-win32:LIBS += "$$PWD/libfftw3-3.dll"
+
+win32 {
+
+    ## Windows common build here
+
+    !contains(QMAKE_TARGET.arch, x86_64) {
+        message("x86 build")
+        LIBS += "$$PWD/libfftw3-3_x32.dll"
+        ## Windows x86 (32bit) specific build here
+
+    } else {
+        message("x86_64 build")
+        LIBS += "$$PWD/libfftw3-3_x64.dll"
+        ## Windows x64 (64bit) specific build here
+
+    }
+}
+
 unix:LIBS += "/usr/local/lib/libfftw3.a"
 
 SOURCES += main.cpp\

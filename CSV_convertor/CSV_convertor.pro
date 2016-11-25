@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = CSV_convertor
 TEMPLATE = app
 
+RC_ICONS += icon.ico
 
 SOURCES += main.cpp\
         mainwindow.cpp
