@@ -383,7 +383,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     bool gnu = ui->checkBox_GunFit->isChecked();
 
     if( savedSingleXCVS == 0 && gnu){
-        file->SaveCVS(0); // save as single-X
+        file->SaveCSV(0); // save as single-X
         savedSingleXCVS = 1;
     }
 
@@ -840,14 +840,14 @@ void MainWindow::on_spinBox_MovingAvg_valueChanged(int arg1)
     RePlotPlots();
 }
 
-void MainWindow::on_actionSave_as_Single_X_CVS_triggered()
+void MainWindow::on_actionSave_as_Single_X_CSV_triggered()
 {
-    file->SaveCVS(0); // single-X
+    file->SaveCSV(0); // single-X
 }
 
-void MainWindow::on_actionSave_as_Double_X_CVS_triggered()
+void MainWindow::on_actionSave_as_Double_X_CSV_triggered()
 {
-    file->SaveCVS(1); // double-X
+    file->SaveCSV(1); // double-X
     savedSingleXCVS = 1;
 }
 

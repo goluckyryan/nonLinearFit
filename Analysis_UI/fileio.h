@@ -26,7 +26,7 @@ public:
     void OpenTxtData_col();
     void OpenTxtData_row();
     void SaveFitResult(Analysis *ana);
-    void SaveCVS(bool doubleX);
+    void SaveCSV(bool doubleX);
 
     //Data manipulation // id is bitwise
     void ManipulateData(int id, int bgIndex = -1, int n = -1);
@@ -38,7 +38,7 @@ signals:
 public slots:
 
     QString GetFilePath(){return filePath;}
-    QString GetSimFilePath(){return cvsFilePath;}
+    QString GetSimFilePath(){return csvFilePath;}
     bool IsColWise(){return colwise;}
     int GetDataSize(){ return xData.size();}
     int GetDataSetSize() {return yData_CV.size();}
@@ -127,7 +127,7 @@ private:
 
     QFile * myfile;
     QFile * outfile;
-    QString filePath, cvsFilePath;
+    QString filePath, csvFilePath;
 
     //Private functions
     double ExtractYValue(QString str, int index = 0);

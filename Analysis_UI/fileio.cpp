@@ -491,51 +491,52 @@ void FileIO::SaveFitResult(Analysis *ana)
     stream << text;
 }
 
-void FileIO::SaveCVS(bool doubleX)
+void FileIO::SaveCSV(bool doubleX)
 {
     // the simplified txt can be used for Analysis::Gnufit
-    this->cvsFilePath = this->filePath;
-    cvsFilePath.chop(4);
+    this->csvFilePath = this->filePath;
+    csvFilePath.chop(4);
     if(doubleX){
-        cvsFilePath.append("_col_doubleX.cvs");
+        csvFilePath.append("_col_doubleX.csv");
     }else{
-        cvsFilePath.append("_col_singleX.cvs");
+        csvFilePath.append("_col_singleX.csv");
     }
     //this->simFilePath = OPENPATH;
     //this->simFilePath.append("test.dat");
 
-    QFile out(cvsFilePath);
+    QFile out(csvFilePath);
     out.open( QIODevice::WriteOnly );
     QTextStream stream(&out);
     QString str, tmp;
 
     //output y-String
-    tmp.sprintf("%*s,", 8, ""); str = tmp;
+    tmp.sprintf("%*s,", 8, "time [s]"); str = tmp;
     for(int i = 0; i < ySize-1; i++){
         //tmp.sprintf("%10.4f,", yData[i]); str += tmp;
-        tmp.sprintf("%s,", yString[i]); str += tmp;
+        QString ytext = yString[i];
+        tmp.sprintf("%s,", ytext.toStdString().c_str()); str += tmp;
         if( doubleX ) str += " X,";
     }
-    tmp.sprintf("%s\n", yString[ySize-1]); str += tmp;
+    tmp.sprintf("%s\n", yString[ySize-1].toStdString().c_str()); str += tmp;
     stream << str;
 
     //output x and z
     for(int i = 0; i < xSize; i++){
-        tmp.sprintf("%8.3f,", xData[i]); str = tmp;
+        tmp.sprintf("%8e,", xData[i]*1e-6); str = tmp;
         for(int j = 0; j < ySize-1; j++){
-            tmp.sprintf("%10.4f,", zData[j][i]); str += tmp;
+            tmp.sprintf("%10e,", zData[j][i] * pow(10, -multi)); str += tmp;
             if(doubleX ) {
-                tmp.sprintf("%8.3f,", xData[i]); str += tmp;
+                tmp.sprintf("%8e,", xData[i]*1e-6); str += tmp;
             }
         }
-        tmp.sprintf("%10.4f\n", zData[ySize-1][i]); str += tmp;
+        tmp.sprintf("%10e\n", zData[ySize-1][i] * pow(10, -multi)); str += tmp;
         stream << str;
     }
 
     out.close();
 
     QString msg;
-    msg.sprintf("Saved a CVS file as : %s ", cvsFilePath.toStdString().c_str());
+    msg.sprintf("Saved a CVS file as : %s ", csvFilePath.toStdString().c_str());
     SendMsg(msg);
 
 }

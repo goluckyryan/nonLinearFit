@@ -601,8 +601,8 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionSave_as_Single_X_CVS"/>
-    <addaction name="actionSave_as_Double_X_CVS"/>
+    <addaction name="actionSave_as_Single_X_CSV"/>
+    <addaction name="actionSave_as_Double_X_CSV"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPlots"/>
@@ -643,14 +643,14 @@
     <string>Fast Fouier Transform planel. The FFTW data is stored seperately.</string>
    </property>
   </action>
-  <action name="actionSave_as_Single_X_CVS">
+  <action name="actionSave_as_Single_X_CSV">
    <property name="text">
-    <string>Save as Single-X CVS</string>
+    <string>Save as Single-X CSV</string>
    </property>
   </action>
-  <action name="actionSave_as_Double_X_CVS">
+  <action name="actionSave_as_Double_X_CSV">
    <property name="text">
-    <string>Save as Double-X CVS</string>
+    <string>Save as Double-X CSV</string>
    </property>
   </action>
  </widget>

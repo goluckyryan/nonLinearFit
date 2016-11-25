@@ -60,8 +60,8 @@ private slots:
     void on_actionFit_Result_triggered();
     void on_actionB_Plot_triggered();
     void on_actionFFTW_Plot_triggered();
-    void on_actionSave_as_Single_X_CVS_triggered();
-    void on_actionSave_as_Double_X_CVS_triggered();
+    void on_actionSave_as_Single_X_CSV_triggered();
+    void on_actionSave_as_Double_X_CSV_triggered();
 
     void setDisabledPlanel();
     void setEnabledPlanel();
