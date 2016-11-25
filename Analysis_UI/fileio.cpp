@@ -2,25 +2,10 @@
 
 FileIO::FileIO()
 {
-    myfile = NULL;
-    outfile = NULL;
-
-    zData = NULL;
-    backUpData = NULL;
-    fZDataA = NULL;
-    fZDataP = NULL;
-
     Initialize();
 }
 
 FileIO::FileIO(QString filePath){
-    myfile = NULL;
-    outfile = NULL;
-
-    zData = NULL;
-    backUpData = NULL;
-    fZDataA = NULL;
-    fZDataP = NULL;
 
     Initialize();
 
@@ -31,13 +16,14 @@ FileIO::FileIO(QString filePath){
 }
 
 void FileIO::Initialize(){
-    if( myfile != NULL ) delete myfile;
-    if( outfile != NULL ) delete outfile;
+    myfile = NULL;
+    outfile = NULL;
+    hallParFile = NULL;
 
-    if( zData != NULL ) delete [] zData;
-    if( backUpData != NULL ) delete [] backUpData;
-    if( fZDataA != NULL ) delete [] fZDataA;
-    if( fZDataP != NULL ) delete [] fZDataP;
+    zData = NULL;
+    backUpData = NULL;
+    fZDataA = NULL;
+    fZDataP = NULL;
 
     xData.clear();
     yData_CV.clear();
@@ -45,6 +31,8 @@ void FileIO::Initialize(){
 
     fxData.clear();
     fyData.clear();
+
+    hallPar.clear();
 
     xMax = 0;
     xMin = 0;
@@ -67,8 +55,10 @@ void FileIO::Initialize(){
 }
 
 FileIO::~FileIO(){
+    SendMsg("release mem.");
     delete myfile;
     if( outfile != NULL ) delete outfile;
+    if( hallParFile != NULL ) delete hallParFile;
     if( zData != NULL ) delete [] zData;
     if( backUpData != NULL ) delete [] backUpData;
     if( fZDataA != NULL ) delete [] fZDataA;
@@ -88,7 +78,55 @@ void FileIO::OpenSaveFileforFit(){
     isOutFileOpened = 1;
 }
 
+
+void FileIO::OpenHV2MagParametersFile()
+{
+    QString parFilePath = DESKTOP_PATH + "Hallpar.txt";
+
+    hallParFile = new QFile(parFilePath);
+    hallParFile->open(QIODevice::ReadOnly);
+
+    if( hallParFile->isOpen() ){
+        SendMsg("Openned Hall parameter file.");
+
+        QTextStream stream(hallParFile);
+        QString line;
+
+        while(stream.readLineInto(&line)){
+            hallPar.push_back(line.toDouble());
+        }
+
+        hallParFile->close();
+    }else{
+
+        SendMsg("For Hall <-> B-field convertion, please add");
+        SendMsg(parFilePath);
+        SendMsg("and parameters in single coloumn.");
+        SendMsg("==== Use no convertion 1 mV = 1 mT."); //TODO tell mainWindows no magnetic field.
+
+        hallPar.push_back(0.);
+        hallPar.push_back(1.);
+
+        return;
+    }
+
+
+    QString msg = "Hall Parameters : ";
+    QString tmp;
+    int n = hallPar.size();
+    for( int i = 0; i < n-1; i++){
+        tmp.sprintf("%8e, ", hallPar[i]);
+        msg.append(tmp);
+    }
+    tmp.sprintf("%8e #", hallPar[n-1]);
+    msg.append(tmp);
+    SendMsg(msg);
+
+}
+
 void FileIO::OpenCSVData(){
+
+    //TODO add myfile->isOpen check
 
     this->colwise = 1;
 

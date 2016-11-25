@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     file(NULL)
 {
+
     ui->setupUi(this);
 
     fitResultPlot = new FitResult(this);
@@ -43,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setDisabledPlanel();
 
     statusBar()->showMessage("Please open a file.");
+
+    Write2Log("Desktop: " + DESKTOP_PATH);
 
 }
 
@@ -185,6 +188,8 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     if(fftPlot->isVisible()) fftPlot->hide();
     ui->checkBox_AutoFit->setChecked(false);
     savedSingleXCVS = 0;
+    Write2Log("##########################################");
+
 
     QFileDialog fileDialog(this);
     QStringList filters;
@@ -192,7 +197,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     filters << "Row-wise (*txt *dat *.*)" << "Double-X CSV(*.csv)" << "Col-wise (*.txt *.dat *.csv *.*)" ;
     fileDialog.setNameFilters(filters);
     fileDialog.setReadOnly(1);
-    fileDialog.setDirectory(OPENPATH);
+    fileDialog.setDirectory(DESKTOP_PATH);
     QString fileName;
     //======== Open read the first file
     if( fileDialog.exec()) {
@@ -214,6 +219,8 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     if( file != NULL) delete file;
     file = new FileIO(fileName);
     connect(file, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
+
+    file->OpenHV2MagParametersFile();
 
     //======== read data structure according to the seleteced data format.
     if( fileDialog.selectedNameFilter() == filters[1]){
@@ -282,13 +289,24 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
 
     ui->spinBox_y->setValue(arg1);
     QString unitText = " V";
+    double yValue = 0;
     switch (ui->comboBox_yLabelType->currentIndex()) {
-    case 0: unitText = " V";break;
-    case 1: unitText = " mV";break;
-    case 2: unitText = " mT";break;
+    case 0:
+        unitText = " V";
+        yValue = file->GetDataY_CV(arg1);
+        break;
+    case 1:
+        unitText = " mV";
+        yValue = file->GetDataY_HV(arg1);
+        break;
+    case 2:
+        unitText = " mT";
+        yValue = file->GetDataY_HV(arg1);
+        yValue = file->HV2Mag(yValue);
+        break;
     }
 
-    ui->lineEdit_y->setText(QString::number(file->GetDataY_CV(arg1))+ unitText);
+    ui->lineEdit_y->setText(QString::number(yValue)+ unitText);
 
     Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1));
 
@@ -516,13 +534,13 @@ void MainWindow::on_pushButton_FitAll_clicked()
         //    pcheck &= std::abs(pValue[p]) < 0.3;
         //}
 
-        if( std::abs(chisq-1) < 0.5 && pcheck){
-            file->OpenSaveFileforFit();
-            file->SaveFitResult(ana);
-            count ++;
-        }else{
-            Write2Log("reduced chi-sq > 2 and p-value(s) > 0.3, not save fitting.");
-        }
+        file->OpenSaveFileforFit();
+        file->SaveFitResult(ana);
+        count ++;
+        //if( std::abs(chisq-1) < 0.5 && pcheck){
+        //}else{
+        //    Write2Log("reduced chi-sq > 2 and p-value(s) > 0.3, not save fitting.");
+        //}
     }
 }
 

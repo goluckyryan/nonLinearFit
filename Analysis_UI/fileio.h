@@ -21,6 +21,7 @@ public:
 
     void Initialize();
 
+    void OpenHV2MagParametersFile();
     void OpenSaveFileforFit();
     void OpenCSVData();
     void OpenTxtData_col();
@@ -89,7 +90,11 @@ public slots:
     void MovingAvgonFFTW(int n);
 
     double HV2Mag(double HV){
-        return -0.05 + 0.9*HV;
+        double mag = 0;
+        for(int i = 0; i < hallPar.size() ; i++){
+            mag += hallPar[i] * pow(HV, i);
+        }
+        return mag;
     }
 
 private:
@@ -128,6 +133,10 @@ private:
     QFile * myfile;
     QFile * outfile;
     QString filePath, csvFilePath;
+
+    QFile * hallParFile;
+    QVector<double> hallPar;
+
 
     //Private functions
     double ExtractYValue(QString str, int index = 0);

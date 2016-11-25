@@ -274,7 +274,7 @@ int Analysis::GnuFit(QVector<double> par)
     cmd.sprintf("gnuplot -e \"yIndex=%d;a=%f;Ta=%f;b=%f;Tb=%f;startX=%d\" gnuFit.gp",
                 yIndex, par[0], par[1], par[2], par[3], startIndex);
     qDebug() << cmd.toStdString().c_str();
-    QDir::setCurrent(OPENPATH); // OPENPATH in constant.h
+    QDir::setCurrent(DESKTOP_PATH);
     qDebug() << QDir::currentPath();
     system(cmd.toStdString().c_str());
 
@@ -284,7 +284,7 @@ int Analysis::GnuFit(QVector<double> par)
     this->pValue.clear();
     this->gradSSR.clear();
 
-    QString gnuFitLogPath = OPENPATH;
+    QString gnuFitLogPath = DESKTOP_PATH;
     gnuFitLogPath += "/gnufit.log";
     QFile fitlog(gnuFitLogPath);
     fitlog.open( QIODevice::ReadOnly);
