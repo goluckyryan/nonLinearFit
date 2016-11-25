@@ -564,7 +564,7 @@
      <x>0</x>
      <y>0</y>
      <width>961</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPlots">
@@ -580,6 +580,7 @@
      <string>File</string>
     </property>
     <addaction name="actionSave_as_Single_X_CVS"/>
+    <addaction name="actionSave_as_Double_X_CVS"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPlots"/>
@@ -622,7 +623,12 @@
   </action>
   <action name="actionSave_as_Single_X_CVS">
    <property name="text">
-    <string>Save as Single X CVS</string>
+    <string>Save as Single-X CVS</string>
+   </property>
+  </action>
+  <action name="actionSave_as_Double_X_CVS">
+   <property name="text">
+    <string>Save as Double-X CVS</string>
    </property>
   </action>
  </widget>

@@ -74,6 +74,8 @@ private slots:
     void on_verticalSlider_zOffset_sliderMoved(int position);
 
 
+    void on_actionSave_as_Double_X_CVS_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
@@ -89,7 +91,7 @@ private:
     FileIO *file;
     Analysis *ana;
 
-    bool savedSimplifiedtxt;
+    bool savedSingleXCVS;
 
 };
 

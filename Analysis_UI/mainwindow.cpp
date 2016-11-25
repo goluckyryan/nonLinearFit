@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     fftPlot = new FFTPlot(this);
     connect(fftPlot, SIGNAL(PlotData()), this, SLOT(RePlotPlots()));
 
-    savedSimplifiedtxt = 0;
+    savedSingleXCVS = 0;
 
     plot = ui->customPlot;
     plot->xAxis->setLabel("time [us]");
@@ -178,6 +178,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     if(bPlot->isVisible()) bPlot->hide();
     if(fftPlot->isVisible()) fftPlot->hide();
     ui->checkBox_AutoFit->setChecked(false);
+    savedSingleXCVS = 0;
 
     QFileDialog fileDialog(this);
     QStringList filters;
@@ -364,9 +365,9 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     bool gnu = ui->checkBox->isChecked();
 
-    if( savedSimplifiedtxt == 0 && gnu){
-        file->SaveSingleXCVS();
-        savedSimplifiedtxt = 1;
+    if( savedSingleXCVS == 0 && gnu){
+        file->SaveCVS(0); // save as single-X
+        savedSingleXCVS = 1;
     }
 
     Msg.sprintf("=================================== %d, gnufit? %d", ana->GetYIndex(), gnu);
@@ -457,7 +458,7 @@ void MainWindow::on_pushButton_save_clicked()
 {
     if( file == NULL) return;
     statusBar()->showMessage("Save fitted parameters.");
-    file->OpenSaveFile();
+    file->OpenSaveFileforFit();
     file->SaveFitResult(ana);
 
 }
@@ -499,7 +500,7 @@ void MainWindow::on_pushButton_FitAll_clicked()
         //}
 
         if( std::abs(chisq-1) < 0.5 && pcheck){
-            file->OpenSaveFile();
+            file->OpenSaveFileforFit();
             file->SaveFitResult(ana);
             count ++;
         }else{
@@ -804,5 +805,11 @@ void MainWindow::on_spinBox_MovingAvg_valueChanged(int arg1)
 
 void MainWindow::on_actionSave_as_Single_X_CVS_triggered()
 {
-    file->SaveSingleXCVS();
+    file->SaveCVS(0); // single-X
+}
+
+void MainWindow::on_actionSave_as_Double_X_CVS_triggered()
+{
+    file->SaveCVS(1); // double-X
+    savedSingleXCVS = 1;
 }

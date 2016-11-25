@@ -75,7 +75,7 @@ FileIO::~FileIO(){
     if( fZDataP != NULL ) delete [] fZDataP;
 }
 
-void FileIO::OpenSaveFile(){
+void FileIO::OpenSaveFileforFit(){
     if( openState == 0 ) return;
     if( isOutFileOpened == 1 ) return;
     int lenght = filePath.length();
@@ -136,6 +136,7 @@ void FileIO::OpenCSVData(){
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1) {
                     double temp = ExtractYValue(lineList[i]);
+                    yString.push_back(lineList[i]);
                     yData.push_back(temp) ; // get data from string.
                 }
             }
@@ -237,7 +238,9 @@ void FileIO::OpenTxtData_col() // great problem in this function. not updated fo
         rows ++;
         QStringList lineList = line.split(",");
         if( rows == 1){ // get xDatax
+
             for( int i = 1 ; i < lineList.size() ; i++ ){
+                yString.push_back(lineList[i]);
                 double temp = ExtractYValue(lineList[i]);
                 yData.push_back(temp);
             }
@@ -338,6 +341,7 @@ void FileIO::OpenTxtData_row(){
             }
         }else{
             double temp = ExtractYValue(lineList[0]);
+            yString.push_back(lineList[0]);
             yData.push_back(temp);
             zData[yIndex].clear();
             backUpData[yIndex].clear();
@@ -469,12 +473,16 @@ void FileIO::SaveFitResult(Analysis *ana)
     stream << text;
 }
 
-void FileIO::SaveSingleXCVS()
+void FileIO::SaveCVS(bool doubleX)
 {
     // the simplified txt can be used for Analysis::Gnufit
     this->cvsFilePath = this->filePath;
-    cvsFilePath.chop(3);
-    cvsFilePath.append("cvs");
+    cvsFilePath.chop(4);
+    if(doubleX){
+        cvsFilePath.append("_col_doubleX.cvs");
+    }else{
+        cvsFilePath.append("_col_singleX.cvs");
+    }
     //this->simFilePath = OPENPATH;
     //this->simFilePath.append("test.dat");
 
@@ -483,12 +491,14 @@ void FileIO::SaveSingleXCVS()
     QTextStream stream(&out);
     QString str, tmp;
 
-    //output y-value (B-value)
+    //output y-String
     tmp.sprintf("%*s,", 8, ""); str = tmp;
-    for(int i = 0; i < ySize; i++){
-        tmp.sprintf("%10.4f,", yData[i]); str += tmp;
+    for(int i = 0; i < ySize-1; i++){
+        //tmp.sprintf("%10.4f,", yData[i]); str += tmp;
+        tmp.sprintf("%s,", yString[i]); str += tmp;
+        if( doubleX ) str += " X,";
     }
-    str += "\n";
+    tmp.sprintf("%s\n", yString[ySize-1]); str += tmp;
     stream << str;
 
     //output x and z
@@ -496,6 +506,9 @@ void FileIO::SaveSingleXCVS()
         tmp.sprintf("%8.3f,", xData[i]); str = tmp;
         for(int j = 0; j < ySize-1; j++){
             tmp.sprintf("%10.4f,", zData[j][i]); str += tmp;
+            if(doubleX ) {
+                tmp.sprintf("%8.3f,", xData[i]); str += tmp;
+            }
         }
         tmp.sprintf("%10.4f\n", zData[ySize-1][i]); str += tmp;
         stream << str;

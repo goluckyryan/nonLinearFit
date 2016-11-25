@@ -21,12 +21,12 @@ public:
 
     void Initialize();
 
-    void OpenSaveFile();
+    void OpenSaveFileforFit();
     void OpenCSVData();
     void OpenTxtData_col();
     void OpenTxtData_row();
     void SaveFitResult(Analysis *ana);
-    void SaveSingleXCVS();
+    void SaveCVS(bool doubleX);
 
     //Data manipulation // id is bitwise
     void ManipulateData(int id, int bgIndex = -1, int n = -1);
@@ -89,6 +89,7 @@ private:
     QVector<double> *zData; //data, [ydata][xdata]
     QVector<double> *backUpData; //backup data, [ydata][xdata]
     QVector<double> zMean; // mean
+    QVector<QString> yString; // store y-String for saving
 
     QVector<double> fxData;
     QVector<double> fyData;
