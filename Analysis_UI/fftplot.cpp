@@ -7,7 +7,8 @@ FFTPlot::FFTPlot(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    filterFunc.clear();
+    filterFuncX.clear();
+    filterFuncY.clear();
 
     plot_X = ui->widget_X;
     plot_X->addGraph(); // id = 0 amp or phase
@@ -91,7 +92,8 @@ void FFTPlot::SetData(FileIO *file)
 
     EnablePlanels(0);
 
-    filterFunc.clear();
+    filterFuncX.clear();
+    filterFuncY.clear();
 }
 
 void FFTPlot::EnablePlanels(bool IO)
@@ -100,10 +102,12 @@ void FFTPlot::EnablePlanels(bool IO)
     ui->checkBox_RemoveConstant->setChecked(0);
     ui->checkBox_MovingAvg->setEnabled(0);
     ui->spinBox_MovingAvg->setEnabled(0);
-    ui->checkBox_Reverse->setEnabled(IO);
 
-    ui->lineEdit_freqL->setEnabled(IO);
-    ui->lineEdit_freqH->setEnabled(IO);
+    ui->checkBox_Reverse->setEnabled(IO);
+    ui->checkBox_EnableY->setEnabled(IO);
+
+    ui->lineEdit_XfreqL->setEnabled(IO);
+    ui->lineEdit_XfreqH->setEnabled(IO);
     ui->horizontalSlider_freqH->setEnabled(IO);
     ui->horizontalSlider_freqL->setEnabled(IO);
 
@@ -160,23 +164,27 @@ void FFTPlot::SetPlots()
     ui->horizontalSlider_freqL->setMaximum(xMax);
     ui->horizontalSlider_freqL->setValue(0);
 
+    ui->verticalSlider_freqH->setMinimum(0);
+    ui->verticalSlider_freqH->setMaximum(yMax);
+    ui->verticalSlider_freqH->setValue(yMax);
+
+    ui->verticalSlider_freqL->setMinimum(0);
+    ui->verticalSlider_freqL->setMaximum(yMax);
+    ui->verticalSlider_freqL->setValue(0);
+
     enableSliderFunction = 1;
 }
 
 void FFTPlot::ContourPlot()
 {
-    //SetPlots();
 
     int nx = file->GetDataSize();
     int ny = file->GetDataSetSize();
 
-    QVector<double> *dataA = file->GetFFTDataA();
-    QVector<double> *dataP = file->GetFFTDataP();
+    filterFuncX.clear();
+    filterFuncY.clear();
 
-    filterFunc.clear();
-
-    QVector<double> amp;
-
+    //================= x filter
     double freqH = ui->horizontalSlider_freqH->value();
     double freqL = 0;
     if( filterID == 3 || filterID == 4){
@@ -190,24 +198,24 @@ void FFTPlot::ContourPlot()
         if( filterID == 1 || filterID == 3){
             if( fabs(fx) <= freqH && fabs(fx) >= freqL){
                 if( ui->checkBox_Reverse->isChecked()){
-                    filterFunc.push_back(0);
+                    filterFuncX.push_back(0);
                 }else{
-                    filterFunc.push_back(1);
+                    filterFuncX.push_back(1);
                 }
             }else{
                 if( ui->checkBox_Reverse->isChecked()){
-                    filterFunc.push_back(1);
+                    filterFuncX.push_back(1);
                 }else{
-                    filterFunc.push_back(0);
+                    filterFuncX.push_back(0);
                 }
             }
         }
 
         if (filterID == 2){
             if( ui->checkBox_Reverse->isChecked()){
-                filterFunc.push_back( fabs(fx/freqH) / sqrt(1 + pow(fx/freqH,2) ) );
+                filterFuncX.push_back( fabs(fx/freqH) / sqrt(1 + pow(fx/freqH,2) ) );
             }else{
-                filterFunc.push_back( 1. / sqrt(1 + pow(fx/freqH,2) ) );
+                filterFuncX.push_back( 1. / sqrt(1 + pow(fx/freqH,2) ) );
             }
 
         }
@@ -215,26 +223,60 @@ void FFTPlot::ContourPlot()
         if( filterID == 4){
             if( ui->checkBox_Reverse->isChecked()){
                 if( fabs(fx) < freqH ){
-                    filterFunc.push_back( exp( - pow((fabs(fx) - freqH)/freqL,2) / 2 ) );
+                    filterFuncX.push_back( exp( - pow((fabs(fx) - freqH)/freqL,2) / 2 ) );
                 }else{
-                    filterFunc.push_back(1);
+                    filterFuncX.push_back(1);
                 }
             }else{
                 if( fabs(fx) > freqH ){
-                    filterFunc.push_back( exp( - pow((fabs(fx) - freqH)/freqL,2) / 2 ) );
+                    filterFuncX.push_back( exp( - pow((fabs(fx) - freqH)/freqL,2) / 2 ) );
                 }else{
-                    filterFunc.push_back(1);
+                    filterFuncX.push_back(1);
                 }
             }
         }
     }
 
+    //=================== y filter
+    freqH = ui->verticalSlider_freqH->value();
+    freqL = 0;
+    if(filterID == 3 ) ui->verticalSlider_freqL->value();
+    for(int j = 0; j < ny; j++){
+        if( ui->checkBox_EnableY->isChecked()){
+            double fy = file->GetfYData(j);
+            if( filterID == 1 || filterID == 3){
+                if( fabs(fy) <= freqH && fabs(fy) >= freqL){
+                    if( ui->checkBox_Reverse->isChecked()){
+                        filterFuncY.push_back(0);
+                    }else{
+                        filterFuncY.push_back(1);
+                    }
+                }else{
+                    if( ui->checkBox_Reverse->isChecked()){
+                        filterFuncY.push_back(1);
+                    }else{
+                        filterFuncY.push_back(0);
+                    }
+                }
+            }
+        }else{
+            filterFuncY.push_back(1);
+        }
+    }
+
+    //===================== Apply to contour;
+
+    QVector<double> *dataA = file->GetFFTDataA();
+    QVector<double> *dataP = file->GetFFTDataP();
+
+    QVector<double> amp;
+
     for( int i = 0; i < nx; i++){
         double temp = 0;
         for( int j = 0; j < ny; j++){
 
-            double za = dataA[j][i] * filterFunc[i];
-            double zp = dataP[j][i] * filterFunc[i];
+            double za = dataA[j][i] * filterFuncX[i] * filterFuncY[j];
+            double zp = dataP[j][i] * filterFuncX[i] * filterFuncY[j];
 
             double ta = za;
             double tp = zp;
@@ -273,7 +315,7 @@ void FFTPlot::ContourPlot()
     plot_X->graph(0)->addData(x, amp);
 
     plot_X->graph(1)->clearData();
-    plot_X->graph(1)->addData(x, filterFunc);
+    plot_X->graph(1)->addData(x, filterFuncX);
 
     plot_X->yAxis->rescale();
     if(ui->checkBox_LogY->isChecked()){
@@ -299,6 +341,8 @@ void FFTPlot::on_pushButton_CalFFT_clicked()
     ui->radioButton_LowPassSharp->setChecked(true);
     on_radioButton_LowPassSharp_clicked();
     on_horizontalSlider_freqH_valueChanged(ui->horizontalSlider_freqH->maximum());
+
+    on_checkBox_EnableY_clicked(0);
 
     filterApplied = 0;
     filterChanged = 0;
@@ -326,7 +370,7 @@ void FFTPlot::on_horizontalSlider_freqH_valueChanged(int value)
 
     double freq = ui->horizontalSlider_freqH->value();
 
-    ui->lineEdit_freqH->setText(QString::number(freq) + " kHz");
+    ui->lineEdit_XfreqH->setText(QString::number(freq) + " kHz");
     ContourPlot();
 
     filterChanged = 1;
@@ -334,11 +378,11 @@ void FFTPlot::on_horizontalSlider_freqH_valueChanged(int value)
 }
 
 
-void FFTPlot::on_lineEdit_freqH_editingFinished()
+void FFTPlot::on_lineEdit_XfreqH_editingFinished()
 {
-    QString temp = ui->lineEdit_freqH->text();
+    QString temp = ui->lineEdit_XfreqH->text();
     double freq = ExtractNumber(temp);
-    ui->lineEdit_freqH->setText(QString::number(freq) + " kHz");
+    ui->lineEdit_XfreqH->setText(QString::number(freq) + " kHz");
     ui->horizontalSlider_freqH->setValue(qCeil(freq));
     ui->horizontalSlider_freqL->setMaximum(qCeil(freq));
     ContourPlot();
@@ -355,18 +399,18 @@ void FFTPlot::on_horizontalSlider_freqL_valueChanged(int value)
         ui->horizontalSlider_freqH->setMinimum(value);
     }
     double freq = ui->horizontalSlider_freqL->value();
-    ui->lineEdit_freqL->setText(QString::number(freq) + " kHz");
+    ui->lineEdit_XfreqL->setText(QString::number(freq) + " kHz");
     ContourPlot();
 
     filterChanged = 1;
     ui->lineEdit_Msg->setText("The FFTW data did not changed. chlick \"Apply Filter\" ");
 }
 
-void FFTPlot::on_lineEdit_freqL_editingFinished()
+void FFTPlot::on_lineEdit_XfreqL_editingFinished()
 {
-    QString temp = ui->lineEdit_freqL->text();
+    QString temp = ui->lineEdit_XfreqL->text();
     double freq = ExtractNumber(temp);
-    ui->lineEdit_freqL->setText(QString::number(freq) + " kHz");
+    ui->lineEdit_XfreqL->setText(QString::number(freq) + " kHz");
     ui->horizontalSlider_freqL->setValue(qCeil(freq));
     ui->horizontalSlider_freqH->setMinimum(qCeil(freq));
     ContourPlot();
@@ -382,7 +426,7 @@ void FFTPlot::on_pushButton_ApplyFilter_clicked()
     par.push_back(ui->horizontalSlider_freqH->value());
     par.push_back(ui->horizontalSlider_freqL->value());
 
-    file->FFTWFilters(filterID, par, filterFunc, ui->checkBox_Reverse->isChecked());
+    file->FFTWFilters(filterID, par, filterFuncX, filterFuncY, ui->checkBox_Reverse->isChecked());
 
     ContourPlot();
 
@@ -427,11 +471,21 @@ void FFTPlot::on_radioButton_LowPassSharp_clicked()
 {
     ui->horizontalSlider_freqH->setMinimum(1);
     ui->horizontalSlider_freqL->setEnabled(0);
-    ui->lineEdit_freqL->setEnabled(0);
-    ui->lineEdit_freqL->setText("");
 
-    ui->label_freqH->setText("freqeuncy High");
-    ui->label_freqL->setText("");
+    ui->lineEdit_XfreqL->setEnabled(0);
+    ui->lineEdit_XfreqL->setText("");
+
+    ui->label_XfreqH->setText("freq.");
+    ui->label_XfreqL->setText("");
+
+    ui->verticalSlider_freqH->setMinimum(1);
+    ui->verticalSlider_freqL->setEnabled(0);
+
+    ui->lineEdit_YfreqL->setEnabled(0);
+    ui->lineEdit_YfreqL->setText("");
+
+    ui->label_YfreqH->setText("freq.");
+    ui->label_YfreqL->setText("");
 
     filterID = 1;
     ContourPlot();
@@ -440,13 +494,22 @@ void FFTPlot::on_radioButton_LowPassSharp_clicked()
 void FFTPlot::on_radioButton_LowPass_clicked()
 {
     ui->horizontalSlider_freqH->setMinimum(1);
-
     ui->horizontalSlider_freqL->setEnabled(0);
-    ui->lineEdit_freqL->setEnabled(0);
-    ui->lineEdit_freqL->setText("");
 
-    ui->label_freqH->setText("freqeuncy High");
-    ui->label_freqL->setText("");
+    ui->lineEdit_XfreqL->setEnabled(0);
+    ui->lineEdit_XfreqL->setText("");
+
+    ui->label_XfreqH->setText("freq.");
+    ui->label_XfreqL->setText("");
+
+    ui->verticalSlider_freqH->setMinimum(1);
+    ui->verticalSlider_freqL->setEnabled(0);
+
+    ui->lineEdit_YfreqL->setEnabled(0);
+    ui->lineEdit_YfreqL->setText("");
+
+    ui->label_YfreqH->setText("freq.");
+    ui->label_YfreqL->setText("");
 
     filterID = 2;
     ContourPlot();
@@ -455,14 +518,14 @@ void FFTPlot::on_radioButton_LowPass_clicked()
 void FFTPlot::on_radioButton_BandPassSharp_clicked()
 {
     ui->horizontalSlider_freqL->setEnabled(1);
-    ui->lineEdit_freqL->setEnabled(1);
-    ui->label_freqH->setText("freqeuncy High");
-    ui->label_freqL->setText("freqeuncy Low");
+    ui->lineEdit_XfreqL->setEnabled(1);
+    ui->label_XfreqH->setText("freq. High");
+    ui->label_XfreqL->setText("freq. Low");
     ui->horizontalSlider_freqL->setMinimum(0);
     ui->horizontalSlider_freqL->setValue(0);
     ui->horizontalSlider_freqH->setMinimum(ui->horizontalSlider_freqL->value());
     double freq = ui->horizontalSlider_freqL->value();
-    ui->lineEdit_freqL->setText(QString::number(freq) + " kHz");
+    ui->lineEdit_XfreqL->setText(QString::number(freq) + " kHz");
 
     filterID = 3;
     ContourPlot();
@@ -470,15 +533,15 @@ void FFTPlot::on_radioButton_BandPassSharp_clicked()
 
 void FFTPlot::on_radioButton_Guassian_clicked()
 {
-    ui->label_freqH->setText("freqeuncy Mean");
-    ui->label_freqL->setText("freqeuncy Width");
+    ui->label_XfreqH->setText("freq. Peak");
+    ui->label_XfreqL->setText("freq. Width");
 
     ui->horizontalSlider_freqL->setEnabled(1);
     ui->horizontalSlider_freqL->setMaximum(ui->horizontalSlider_freqH->maximum());
-    ui->lineEdit_freqL->setEnabled(1);
+    ui->lineEdit_XfreqL->setEnabled(1);
     ui->horizontalSlider_freqL->setMinimum(1);
     ui->horizontalSlider_freqL->setValue(50);
-    ui->lineEdit_freqL->setText(QString::number(50) + " kHz");
+    ui->lineEdit_XfreqL->setText(QString::number(50) + " kHz");
 
     filterID = 4;
     ContourPlot();
@@ -516,7 +579,7 @@ void FFTPlot::on_checkBox_Reverse_clicked(bool checked)
     if( checked ){
         ui->radioButton_LowPassSharp->setText("High-Pass Sharp Filter");
         ui->radioButton_LowPass->setText("High-Pass Filter");
-        ui->radioButton_BandPassSharp->setText("Band-Black Sharp Filter");
+        ui->radioButton_BandPassSharp->setText("Band-Block Sharp Filter");
         ui->radioButton_Guassian->setText("Guassian-Block Filter");
     }else{
         ui->radioButton_LowPassSharp->setText("Low-Pass Sharp Filter");
@@ -531,4 +594,70 @@ void FFTPlot::on_checkBox_Reverse_clicked(bool checked)
 void FFTPlot::on_checkBox_toAP_clicked(bool checked)
 {
     ContourPlot();
+}
+
+void FFTPlot::on_checkBox_EnableY_clicked(bool checked)
+{
+    ui->checkBox_EnableY->setChecked(checked);
+    ui->lineEdit_YfreqH->setEnabled(checked);
+    ui->verticalSlider_freqH->setEnabled(checked);
+
+    if( filterID == 3 || filterID == 4){
+        ui->lineEdit_YfreqL->setEnabled(checked);
+        ui->verticalSlider_freqL->setEnabled(checked);
+    }
+    if( checked){
+        ui->label_YfreqH->setText("freq.");
+        ui->lineEdit_YfreqH->setText(QString::number(ui->verticalSlider_freqH->value()));
+        switch (filterID) {
+        case 1:
+            ui->label_YfreqL->setText("");
+            ui->lineEdit_YfreqL->setText("");
+            break;
+        case 2:
+            ui->label_YfreqL->setText("");
+            ui->lineEdit_YfreqL->setText("");
+            break;
+        case 3:
+            ui->label_YfreqH->setText("freq. High");
+            ui->label_YfreqL->setText("freq. Low");
+            ui->lineEdit_YfreqL->setText(QString::number(ui->verticalSlider_freqL->value()));
+            break;
+        case 4:
+            ui->label_YfreqH->setText("freq. Peak");
+            ui->label_YfreqL->setText("freq. Width");
+            ui->lineEdit_YfreqL->setText(QString::number(ui->verticalSlider_freqL->value()));
+            break;
+        }
+    }else{
+        ui->label_YfreqH->setText("");
+        ui->label_YfreqL->setText("");
+        ui->lineEdit_YfreqH->setText("");
+        ui->lineEdit_YfreqL->setText("");
+    }
+
+    ContourPlot();
+}
+
+void FFTPlot::on_verticalSlider_freqH_valueChanged(int value)
+{
+    if( enableSliderFunction == 0 ) return;
+    //int yMin = file->GetfYMin();
+    ui->lineEdit_YfreqH->setText(QString::number(value));
+
+    ContourPlot();
+
+    filterChanged = 1;
+    ui->lineEdit_Msg->setText("The FFTW data did not changed. chlick \"Apply Filter\" ");
+}
+
+void FFTPlot::on_verticalSlider_freqL_valueChanged(int value)
+{
+    if( enableSliderFunction == 0 ) return;
+    ui->lineEdit_YfreqL->setText(QString::number(value));
+
+    ContourPlot();
+
+    filterChanged = 1;
+    ui->lineEdit_Msg->setText("The FFTW data did not changed. chlick \"Apply Filter\" ");
 }

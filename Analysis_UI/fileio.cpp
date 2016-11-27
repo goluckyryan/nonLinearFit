@@ -880,7 +880,7 @@ void FileIO::SwapFFTData(bool dir)
 
 }
 
-void FileIO::FFTWFilters(int filterID, QVector<double> par, QVector<double>func, bool rev)
+void FileIO::FFTWFilters(int filterID, QVector<double> par, QVector<double>funcX, QVector<double> funcY, bool rev)
 {
     // 1 = low pass sharpe cut
     // 2 = low pass
@@ -934,8 +934,8 @@ void FileIO::FFTWFilters(int filterID, QVector<double> par, QVector<double>func,
     //Apply filter
     for(int i = 0 ; i < ySize ; i++){
         for(int j = 0 ; j < xSize ; j++){
-            fZDataA[i][j] = fZDataA[i][j] * func[j];
-            fZDataP[i][j] = fZDataP[i][j] * func[j];
+            fZDataA[i][j] = fZDataA[i][j] * funcX[j] * funcY[i];
+            fZDataP[i][j] = fZDataP[i][j] * funcX[j] * funcY[i];
         }
     }
 

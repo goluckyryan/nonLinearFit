@@ -36,8 +36,8 @@ private slots:
 
     void on_horizontalSlider_freqH_valueChanged(int value);
     void on_horizontalSlider_freqL_valueChanged(int value);
-    void on_lineEdit_freqH_editingFinished();
-    void on_lineEdit_freqL_editingFinished();
+    void on_lineEdit_XfreqH_editingFinished();
+    void on_lineEdit_XfreqL_editingFinished();
 
     void on_pushButton_ResetPlot_clicked();
     void on_pushButton_ApplyFilter_clicked();
@@ -52,6 +52,12 @@ private slots:
 
     void on_checkBox_toAP_clicked(bool checked);
 
+    void on_checkBox_EnableY_clicked(bool checked);
+
+    void on_verticalSlider_freqH_valueChanged(int value);
+
+    void on_verticalSlider_freqL_valueChanged(int value);
+
 private:
     Ui::FFTPlot *ui;
 
@@ -63,7 +69,8 @@ private:
 
     FileIO *file;
 
-    QVector<double> filterFunc;
+    QVector<double> filterFuncX;
+    QVector<double> filterFuncY;
 
     bool filterChanged;
     bool filterApplied;

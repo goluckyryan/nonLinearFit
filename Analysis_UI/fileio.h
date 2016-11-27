@@ -89,7 +89,7 @@ public slots:
     void FouierForwardSingle(int yIndex);
     void FouierBackwardSingle(int yIndex);
     void SwapFFTData(bool dir);
-    void FFTWFilters(int filterID, QVector<double> par, QVector<double> func, bool rev);
+    void FFTWFilters(int filterID, QVector<double> par, QVector<double> funcX, QVector<double> funcY, bool rev);
     void RemoveYConstant();
     void MovingAvgonFFTW(int n);
 
