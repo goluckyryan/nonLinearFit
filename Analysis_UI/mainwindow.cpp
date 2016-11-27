@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ctplot->axisRect()->setupFullAxesBox(true);
     ctplot->xAxis->setLabel("time [us]");
     ctplot->yAxis->setLabel("Ctrl. Vol. [V]");
+    //ctplot->setInteraction(QCP::iRangeZoom,true);
     //ctplot->yAxis2->setVisible(1);
     //ctplot->yAxis2->setLabel("index");
 
@@ -41,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
-    setDisabledPlanel();
+    setEnabledPlanel(0);
 
     statusBar()->showMessage("Please open a file.");
 
@@ -240,7 +241,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     Write2Log(msg);
 
     //========= once the file is opened, eanble planel, set checkBoxes to uncheck, etc...
-    setEnabledPlanel();
+    setEnabledPlanel(1);
     if( fileDialog.selectedNameFilter() == filters[1]){
         ui->comboBox_yLabelType->setEnabled(0);
         ui->comboBox_yLabelType->setCurrentIndex(0);
@@ -727,44 +728,23 @@ void MainWindow::on_actionB_Plot_triggered()
     }
 }
 
-void MainWindow::setDisabledPlanel()
+void MainWindow::setEnabledPlanel(bool IO)
 {
-    ui->actionB_Plot->setEnabled(0);
-    ui->actionFFTW_Plot->setEnabled(0);
-    ui->pushButton_Fit->setEnabled(0);
-    ui->pushButton_FitAll->setEnabled(0);
-    ui->pushButton_reset->setEnabled(0);
-    ui->pushButton_save->setEnabled(0);
-    ui->pushButton_RestoreData->setEnabled(0);
-    ui->spinBox_y->setEnabled(0);
-    ui->spinBox_x->setEnabled(0);
-    ui->checkBox_MeanCorr->setEnabled(0);
-    ui->verticalSlider_zOffset->setEnabled(0);
-    ui->verticalSlider_z->setEnabled(0);
-    ui->checkBox_BGsub->setEnabled(0);
-    ui->spinBox_BGIndex->setEnabled(0);
-    ui->spinBox_MovingAvg->setEnabled(0);
-    ui->comboBox_yLabelType->setEnabled(0);
-
-}
-
-void MainWindow::setEnabledPlanel()
-{
-    ui->actionB_Plot->setEnabled(1);
-    ui->actionFFTW_Plot->setEnabled(1);
-    ui->pushButton_Fit->setEnabled(1);
-    ui->pushButton_FitAll->setEnabled(1);
-    ui->pushButton_reset->setEnabled(1);
-    ui->pushButton_save->setEnabled(1);
-    ui->pushButton_RestoreData->setEnabled(1);
-    ui->spinBox_y->setEnabled(1);
-    ui->spinBox_x->setEnabled(1);
-    ui->checkBox_MeanCorr->setEnabled(1);
-    ui->verticalSlider_zOffset->setEnabled(1);
-    ui->verticalSlider_z->setEnabled(1);
-    ui->checkBox_BGsub->setEnabled(1);
-    ui->spinBox_MovingAvg->setEnabled(1);
-    ui->comboBox_yLabelType->setEnabled(1);
+    ui->actionB_Plot->setEnabled(IO);
+    ui->actionFFTW_Plot->setEnabled(IO);
+    ui->pushButton_Fit->setEnabled(IO);
+    ui->pushButton_FitAll->setEnabled(IO);
+    ui->pushButton_reset->setEnabled(IO);
+    ui->pushButton_save->setEnabled(IO);
+    ui->pushButton_RestoreData->setEnabled(IO);
+    ui->spinBox_y->setEnabled(IO);
+    ui->spinBox_x->setEnabled(IO);
+    ui->checkBox_MeanCorr->setEnabled(IO);
+    ui->verticalSlider_zOffset->setEnabled(IO);
+    ui->verticalSlider_z->setEnabled(IO);
+    ui->checkBox_BGsub->setEnabled(IO);
+    ui->spinBox_MovingAvg->setEnabled(IO);
+    ui->comboBox_yLabelType->setEnabled(IO);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)

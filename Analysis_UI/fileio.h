@@ -68,8 +68,10 @@ public slots:
     double GetYStep_CV(){return yStep_CV;}
     double GetYStep_HV(){return yStep_HV;}
 
+    QVector<double> GetfXDataSet(){ return fxData;}
     double GetfXData(int index){return fxData[index];}
     double GetfYData(int index){return fyData[index];}
+    double GetfResol(){return fFreqResol;}
     double GetfXMax(){return fxMax;}
     double GetfXMin(){return fxMin;}
     double GetfYMax(){return fyMax;}
@@ -87,7 +89,7 @@ public slots:
     void FouierForwardSingle(int yIndex);
     void FouierBackwardSingle(int yIndex);
     void SwapFFTData(bool dir);
-    void FFTWFilters(int filterID, QVector<double> par);
+    void FFTWFilters(int filterID, QVector<double> par, QVector<double> func, bool rev);
     void RemoveYConstant();
     void MovingAvgonFFTW(int n);
 
@@ -122,7 +124,7 @@ private:
 
     double fxMin, fxMax;
     double fyMin, fyMax;
-    double ffreqResol;
+    double fFreqResol;
 
     bool colwise; // 0 = data store as row, 1 = data store as col
     bool openState;

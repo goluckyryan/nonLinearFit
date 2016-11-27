@@ -680,7 +680,7 @@ void FileIO::FouierForward()
 
     //======================================
     SendMsg("Cal. freqeuncy.");
-    this->ffreqResol = 1000./(xMax - xMin); // MHz
+    this->fFreqResol = 1000./(xMax - xMin); // MHz
     int d = 0;
     if( xSize % 2 == 0){
         d = xSize /2;
@@ -690,11 +690,11 @@ void FileIO::FouierForward()
 
     fxData.clear();
     for( int i = 0; i < xSize; i++){
-        fxData.push_back( (-d + i) * this->ffreqResol );
+        fxData.push_back( (-d + i) * this->fFreqResol );
     }
 
-    fxMin = -d * this->ffreqResol;
-    fxMax = (xSize-1-d) * this->ffreqResol;
+    fxMin = -d * this->fFreqResol;
+    fxMax = (xSize-1-d) * this->fFreqResol;
 
     if( ySize % 2 == 0){
         d = ySize /2;
@@ -880,7 +880,7 @@ void FileIO::SwapFFTData(bool dir)
 
 }
 
-void FileIO::FFTWFilters(int filterID, QVector<double> par)
+void FileIO::FFTWFilters(int filterID, QVector<double> par, QVector<double>func, bool rev)
 {
     // 1 = low pass sharpe cut
     // 2 = low pass
@@ -890,83 +890,52 @@ void FileIO::FFTWFilters(int filterID, QVector<double> par)
     QString msg;
 
     if( filterID == 1){
-        int x1 = FindIndex(fxData, -par[0], 1);
         int x2 = FindIndex(fxData, par[0], 0);
-
-        msg.sprintf("FFTW: Low-Pass Sharp Filter. |freq| <= %f kHz", fxData[x1]);
-        SendMsg(msg);
-
-        for(int i = 0 ; i < ySize ; i++){
-            for(int j = 0 ; j < xSize ; j++){
-                if( (j < x1 && j > x2) ){
-                    fZDataA[i][j] = 0;
-                    fZDataP[i][j] = 0;
-                }
-            }
+        if( !rev ){
+            msg.sprintf("FFTW: Low-Pass Sharp Filter. |freq| <= %f kHz", fxData[x2]);
+        }else{
+            msg.sprintf("FFTW: High-Pass Sharp Filter. |freq| >= %f kHz", fxData[x2]);
         }
-
+        SendMsg(msg);
     }
 
     if( filterID == 2){
-
-        msg.sprintf("FFTW: Low-Pass Filter. freq =  %f kHz", par[0]);
+        if( !rev ){
+            msg.sprintf("FFTW: Low-Pass Filter. freq =  %f kHz", par[0]);
+        }else{
+            msg.sprintf("FFTW: High-Pass Filter. freq =  %f kHz", par[0]);
+        }
         SendMsg(msg);
-
-        QVector<double> func;
-        for(int j = 0 ; j < xSize ; j++){
-            func.push_back(1 / sqrt(1 + pow( fxData[j] / par[0],2)) );
-        }
-
-        for(int i = 0 ; i < ySize ; i++){
-            for(int j = 0 ; j < xSize ; j++){
-                fZDataA[i][j] = fZDataA[i][j] * func[j];
-                fZDataP[i][j] = fZDataP[i][j] * func[j];
-            }
-        }
-
     }
 
     if( filterID == 3){
-        int xH1 = FindIndex(fxData, -par[0], 1);
         int xH2 = FindIndex(fxData, par[0], 0);
-
-        int xL1 = FindIndex(fxData, -par[1], 1);
         int xL2 = FindIndex(fxData, par[1], 0);
 
-        msg.sprintf("FFTW: Band-Pass Sharp Filter. %f kHz <= |freq| <= %f kHz", fxData[xL2], fxData[xH2]);
-        SendMsg(msg);
-
-        for(int i = 0 ; i < ySize ; i++){
-            for(int j = 0 ; j < xSize ; j++){
-                if( j < xH1 || (j > xL1 && j < xL2)  || j > xH2 ){
-                    fZDataA[i][j] = 0;
-                    fZDataP[i][j] = 0;
-                }
-            }
+        if( !rev ){
+            msg.sprintf("FFTW: Band-Pass Sharp Filter. %f kHz <= |freq| <= %f kHz", fxData[xL2], fxData[xH2]);
+        }else{
+            msg.sprintf("FFTW: Band-Block Sharp Filter. %f kHz <= |freq| <= %f kHz", fxData[xL2], fxData[xH2]);
         }
+
+        SendMsg(msg);
 
     }
 
     if( filterID == 4){
-
-        msg.sprintf("FFTW: Gaussian Filter. peak = %f kHz, width = %f kHz", par[0], par[1]);
-        SendMsg(msg);
-
-        QVector<double> func;
-        for(int j = 0 ; j < xSize ; j++){
-            double fx = fxData[j];
-            if( fabs(fx) > par[0] ){
-                func.push_back( exp( - pow((fabs(fxData[j]) - par[0])/ par[1],2) ) );
-            }else{
-                func.push_back(1);
-            }
+        if( !rev ){
+            msg.sprintf("FFTW: Gaussian-Pass Filter. peak = %f kHz, width = %f kHz", par[0], par[1]);
+        }else{
+            msg.sprintf("FFTW: Gaussian-Block Filter. peak = %f kHz, width = %f kHz", par[0], par[1]);
         }
+        SendMsg(msg);
+    }
 
-        for(int i = 0 ; i < ySize ; i++){
-            for(int j = 0 ; j < xSize ; j++){
-                fZDataA[i][j] = fZDataA[i][j] * func[j];
-                fZDataP[i][j] = fZDataP[i][j] * func[j];
-            }
+    //Apply filter
+    for(int i = 0 ; i < ySize ; i++){
+        for(int j = 0 ; j < xSize ; j++){
+            fZDataA[i][j] = fZDataA[i][j] * func[j];
+            fZDataP[i][j] = fZDataP[i][j] * func[j];
         }
     }
 

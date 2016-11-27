@@ -63,8 +63,7 @@ private slots:
     void on_actionSave_as_Single_X_CSV_triggered();
     void on_actionSave_as_Double_X_CSV_triggered();
 
-    void setDisabledPlanel();
-    void setEnabledPlanel();
+    void setEnabledPlanel(bool IO);
 
     void on_pushButton_RestoreData_clicked();
     void on_checkBox_MeanCorr_clicked(bool checked);
