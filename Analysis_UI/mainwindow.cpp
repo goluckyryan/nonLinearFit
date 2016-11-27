@@ -526,9 +526,9 @@ void MainWindow::on_pushButton_FitAll_clicked()
         progress.setValue(yIndex);
         if(progress.wasCanceled()) break;
 
-        double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
+        //double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
 
-        bool pcheck = 1;
+        //bool pcheck = 1;
         //QVector<double> pValue = ana->GetParPValue();
         //for( int p = 0; p < pValue.size(); p++){
         //    pcheck &= std::abs(pValue[p]) < 0.3;

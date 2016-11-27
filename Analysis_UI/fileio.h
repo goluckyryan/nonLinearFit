@@ -68,6 +68,8 @@ public slots:
     double GetYStep_CV(){return yStep_CV;}
     double GetYStep_HV(){return yStep_HV;}
 
+    double GetfXData(int index){return fxData[index];}
+    double GetfYData(int index){return fyData[index];}
     double GetfXMax(){return fxMax;}
     double GetfXMin(){return fxMin;}
     double GetfYMax(){return fyMax;}
