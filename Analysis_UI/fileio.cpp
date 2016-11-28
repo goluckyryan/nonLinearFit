@@ -173,7 +173,7 @@ void FileIO::OpenCSVData(){
         if( rows == 1){ // get yDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 if( i % 2 == 1) {
-                    double temp = ExtractYValue(lineList[i],1);
+                    double temp = ExtractYValue(lineList[i],-1);
                     yString.push_back(lineList[i]);
                     yData_CV.push_back(temp) ; // get data from string.
                     yData_HV.push_back(temp); // for CSV data, HV = CV
@@ -418,16 +418,16 @@ void FileIO::OpenTxtData_row(){
     QVector<double> newYData_HV = yData_HV;
 
     //if Hall probe volatge smaller than 3 mV
-    int misIndex = -1;
+    bgIndex = -1;
     for( int i = 0; i < ySize; i++){
         if( fabs(yData_HV[i]) < 3 ) {
-            misIndex = i;
+            bgIndex = i;
         }else{
             break;
         }
     }
 
-    if( misIndex != -1 ) {
+    if( bgIndex != -1 ) {
         hadBG = 1;
         newYData_CV.remove(0);
         newYData_HV.remove(0);
@@ -455,7 +455,7 @@ void FileIO::OpenTxtData_row(){
     msg.sprintf("Y_HV:(%7.3f, %7.3f) sizeY:%d",yMin_HV, yMax_HV, yData_HV.size());
     SendMsg(msg);
     if( hadBG ){
-        msg.sprintf("    BG data exist. At yIndex = %d", misIndex);
+        msg.sprintf("    BG data exist. At yIndex = %d", bgIndex);
         SendMsg(msg);
     }
     msg.sprintf("Z   :(%7.3f, %7.3f), multiplied : 10^%d",zMin, zMax, multi);
@@ -547,9 +547,12 @@ void FileIO::SaveCSV(bool doubleX)
     QTextStream stream(&out);
     QString str, tmp;
 
+    int yStart = 0;
+    if( hadBG ) yStart = bgIndex + 1;
+
     //output y-String
     tmp.sprintf("%*s,", 8, "time [s]"); str = tmp;
-    for(int i = 0; i < ySize-1; i++){
+    for(int i = yStart; i < ySize-1; i++){
         //tmp.sprintf("%10.4f,", yData[i]); str += tmp;
         QString ytext = yString[i];
         tmp.sprintf("%s,", ytext.toStdString().c_str()); str += tmp;
@@ -561,8 +564,8 @@ void FileIO::SaveCSV(bool doubleX)
     //output x and z
     for(int i = 0; i < xSize; i++){
         tmp.sprintf("%8e,", xData[i]*1e-6); str = tmp;
-        for(int j = 0; j < ySize-1; j++){
-            tmp.sprintf("%10e,", zData[j][i] * pow(10, -multi)); str += tmp;
+        for(int j = yStart; j < ySize-1; j++){
+            tmp.sprintf("%10e,", (zData[j][i] - zData[yStart][i]) * pow(10, -multi)); str += tmp;
             if(doubleX ) {
                 tmp.sprintf("%8e,", xData[i]*1e-6); str += tmp;
             }
@@ -963,13 +966,15 @@ void FileIO::MovingAvgonFFTW(int n)
 }
 
 double FileIO::ExtractYValue(QString str, int index){
-    //when index = 0 (default) get first
+    // when index == -1; is old CSV data, use the last one
 
     QStringList strList = str.split("_");
 
-    index = index + 1; // the 0 is for data name;
-
-    if( index >= strList.length()) index = strList.length() - 1;
+    if( index >= strList.length() || index == -1) {
+        index = strList.length() - 1;
+    }else{
+        index = index + 1; // the 0 is for data name;
+    }
 
     //check charectors, to remove non interger
     QString temp = strList[index];
@@ -983,7 +988,7 @@ double FileIO::ExtractYValue(QString str, int index){
 
     temp.chop(temp.length()-pos);
 
-    //qDebug()<< index-1 << "|" << strList[index] << ", " << pos << " = " << temp << ", " << temp.toDouble();
+    //qDebug()<< index << "|" << strList[index] << ", " << pos << " = " << temp << ", " << temp.toDouble();
 
     return temp.toDouble();
 

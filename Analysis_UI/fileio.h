@@ -133,6 +133,7 @@ private:
     bool hadBG;
 
     int multi;
+    int bgIndex;
 
     QFile * myfile;
     QFile * outfile;

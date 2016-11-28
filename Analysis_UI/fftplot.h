@@ -20,6 +20,9 @@ public:
     void SetData(FileIO *file);
     void SetPlots();
     void ContourPlot();
+    void RescalePlots();
+    void CalFilterFunctionX();
+    void CalFilterFunctionY();
 
 public slots:
 
@@ -32,7 +35,9 @@ private slots:
     void on_pushButton_CalFFT_clicked();
 
     void on_checkBox_RemoveConstant_clicked();
+
     void on_checkBox_Reverse_clicked(bool checked);
+    void on_checkBox_EnableY_clicked(bool checked);
 
     void on_horizontalSlider_freqH_valueChanged(int value);
     void on_horizontalSlider_freqL_valueChanged(int value);
@@ -49,14 +54,12 @@ private slots:
     void on_radioButton_Guassian_clicked();
 
     void on_checkBox_LogY_clicked(bool checked);
-
-    void on_checkBox_toAP_clicked(bool checked);
-
-    void on_checkBox_EnableY_clicked(bool checked);
+    void on_checkBox_toAP_clicked();
 
     void on_verticalSlider_freqH_valueChanged(int value);
-
     void on_verticalSlider_freqL_valueChanged(int value);
+    void on_lineEdit_YfreqH_editingFinished();
+    void on_lineEdit_YfreqL_editingFinished();
 
 private:
     Ui::FFTPlot *ui;
@@ -69,12 +72,19 @@ private:
 
     FileIO *file;
 
+    double xMin, xMax;
+    double yMin, yMax;
+
+    int nx, ny;
+
     QVector<double> filterFuncX;
     QVector<double> filterFuncY;
 
     bool filterChanged;
     bool filterApplied;
     bool enableSliderFunction;
+    bool needToCalFilterFuncX;
+    bool needToCalFilterFuncY;
 
     int filterID;
 

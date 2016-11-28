@@ -66,6 +66,8 @@ void BPlot::SetData(FileIO *file)
     plot->xAxis2->setRange(0,n-1);
     if( file->HasBackGround() ) plot->xAxis2->setRange(1,n-1);
 
+    plot->graph(0)->clearData();
+
 }
 
 void BPlot::Plot()
