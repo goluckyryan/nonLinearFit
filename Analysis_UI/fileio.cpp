@@ -384,7 +384,7 @@ void FileIO::OpenTxtData_row(){
                 xData.push_back((lineList[i]).toDouble()) ;
             }
         }else{
-            double temp = ExtractYValue(lineList[0]);
+            double temp = ExtractYValue(lineList[0],2);
             yString.push_back(lineList[0]);
             yData_CV.push_back(temp);
             temp = ExtractYValue(lineList[0],1);
@@ -973,7 +973,7 @@ double FileIO::ExtractYValue(QString str, int index){
     if( index >= strList.length() || index == -1) {
         index = strList.length() - 1;
     }else{
-        index = index + 1; // the 0 is for data name;
+        index = strList.length() - index; // the 0 is for data name;
     }
 
     //check charectors, to remove non interger
