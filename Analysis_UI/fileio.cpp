@@ -81,13 +81,14 @@ void FileIO::OpenSaveFileforFit(){
 
 void FileIO::OpenHV2MagParametersFile()
 {
-    QString parFilePath = DESKTOP_PATH + "Hallpar.txt";
+    QString parFilePath = HALL_PATH;
 
     hallParFile = new QFile(parFilePath);
     hallParFile->open(QIODevice::ReadOnly);
 
     if( hallParFile->isOpen() ){
         SendMsg("Openned Hall parameter file.");
+        SendMsg(HALL_PATH);
 
         QTextStream stream(hallParFile);
         QString line;
@@ -107,9 +108,14 @@ void FileIO::OpenHV2MagParametersFile()
         hallPar.push_back(0.);
         hallPar.push_back(1.);
 
-        return;
     }
 
+    if( hallPar.size() <= 1){
+        SendLogMsg("The Hall Parameters Files is not valid. Use Default Parameters.");
+        hallPar.clear();
+        hallPar.push_back(0.);
+        hallPar.push_back(1.);
+    }
 
     QString msg = "Hall Parameters : ";
     QString tmp;

@@ -5,8 +5,13 @@
 #include <QStandardPaths>
 
 const QString DESKTOP_PATH = QStandardPaths::locate(QStandardPaths::DesktopLocation, QString(), QStandardPaths::LocateDirectory);
+const QString HOME_PATH = QStandardPaths::locate(QStandardPaths::HomeLocation, QString(), QStandardPaths::LocateDirectory);
+const QString DATA_PATH = HOME_PATH + "ESR_Data_201610/";
+const QString LOG_PATH = DATA_PATH + "DAQ_Log";
+const QString HALL_DIR_PATH = DATA_PATH + "Hall_data";
+const QString HALL_PATH = HALL_DIR_PATH + "/Hall_pars.txt";
 
-const double TORR = 1e-6; //torrelence for fitting SSR
+
 const double TORRGRAD = 1e-1; //torrenlence for grad of SSR
 
 const double TIME1 = 5.0;  // start fitting time

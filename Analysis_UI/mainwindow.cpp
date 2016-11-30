@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     statusBar()->showMessage("Please open a file.");
 
-    Write2Log("Desktop: " + DESKTOP_PATH);
+    Write2Log("Directory: " + DATA_PATH);
 
 }
 
@@ -198,7 +198,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     filters << "Row-wise (*txt *dat *.*)" << "Double-X CSV(*.csv)" << "Col-wise (*.txt *.dat *.csv *.*)" ;
     fileDialog.setNameFilters(filters);
     fileDialog.setReadOnly(1);
-    fileDialog.setDirectory(DESKTOP_PATH);
+    fileDialog.setDirectory(DATA_PATH);
     QString fileName;
     //======== Open read the first file
     if( fileDialog.exec()) {
