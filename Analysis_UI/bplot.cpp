@@ -9,7 +9,7 @@ BPlot::BPlot(QWidget *parent) :
 
     plot = ui->plotArea;
     plot->xAxis->setLabel("Ctrl. Vol. [V]");
-    plot->yAxis->setLabel("Integrated value [a.u.]");
+    plot->yAxis->setLabel("Integrated value x=(,) [a.u.]");
     plot->xAxis2->setLabel("y-Index");
     plot->xAxis2->setVisible(true);
     plot->setInteraction(QCP::iRangeDrag,true);
@@ -51,6 +51,9 @@ void BPlot::SetData(FileIO *file)
 
     ui->spinBox_Start->setValue(xStart);
     ui->spinBox_End->setValue(xEnd);
+
+    QString yLabel = "Integrated value x = (-1, 20) us  [a.u.]";
+    plot->yAxis->setLabel(yLabel);
 
     x.clear();
     y.clear();
@@ -167,9 +170,19 @@ int BPlot::FindstartIndex(QVector<double> xdata, double goal)
 void BPlot::on_spinBox_Start_valueChanged(int arg1)
 {
     QVector<double> xData = this->file->GetDataSetX();
+
     if( arg1 >= xData.length() ) return;
-    ui->lineEdit_StartValue->setText(QString::number(xData[arg1])+" us");
+    int arg2 = ui->spinBox_End->value();
+    if( arg2 >= xData.length() ) return;
+
+    double xStart = xData[arg1];
+    double xEnd = xData[arg2];
+    ui->lineEdit_StartValue->setText(QString::number(xStart)+" us");
     ui->spinBox_End->setMinimum(arg1);
+
+    QString yLabel;
+    yLabel.sprintf("Integrated value x = (%4.1f, %4.1f) us [a.u.]", xStart, xEnd);
+    plot->yAxis->setLabel(yLabel);
 
     Plot();
 }
@@ -177,9 +190,19 @@ void BPlot::on_spinBox_Start_valueChanged(int arg1)
 void BPlot::on_spinBox_End_valueChanged(int arg1)
 {
     QVector<double> xData = this->file->GetDataSetX();
+
     if( arg1 >= xData.length() ) return;
-    ui->lineEdit_EndValue->setText(QString::number(xData[arg1])+" us");
+    int arg2 = ui->spinBox_Start->value();
+    if( arg2 >= xData.length() ) return;
+
+    double xStart = xData[arg2];
+    double xEnd = xData[arg1];
+    ui->lineEdit_EndValue->setText(QString::number(xEnd)+" us");
     ui->spinBox_Start->setMaximum(arg1);
+
+    QString yLabel;
+    yLabel.sprintf("Integrated value x = (%4.1f, %4.1f) us [a.u.]", xStart, xEnd);
+    plot->yAxis->setLabel(yLabel);
 
     Plot();
 }
@@ -218,3 +241,28 @@ void BPlot::on_pushButton_clicked()
 
 }
 
+
+void BPlot::on_pushButton_Print_clicked()
+{
+    QFileDialog fileDialog(this);
+    fileDialog.setNameFilter("pdf (*pdf)");
+    fileDialog.setDirectory(DESKTOP_PATH);
+    fileDialog.setReadOnly(0);
+    QString fileName;
+    if( fileDialog.exec()){
+        fileName = fileDialog.selectedFiles()[0];
+    }
+
+    fileName.append(".pdf");
+
+    int ph = plot->geometry().height();
+    int pw = plot->geometry().width();
+
+    bool ok = plot->savePdf(fileName, pw, ph );
+
+    if( ok ){
+        SendMsg("Saved Plot as " + fileName);
+    }else{
+        SendMsg("Save Failed.");
+    }
+}
