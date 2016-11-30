@@ -111,7 +111,7 @@ void FileIO::OpenHV2MagParametersFile()
     }
 
     if( hallPar.size() <= 1){
-        SendLogMsg("The Hall Parameters Files is not valid. Use Default Parameters.");
+        SendMsg("The Hall Parameters Files is not valid. Use Default Parameters.");
         hallPar.clear();
         hallPar.push_back(0.);
         hallPar.push_back(1.);
