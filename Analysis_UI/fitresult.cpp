@@ -360,7 +360,7 @@ void FitResult::on_pushButton_Save_clicked()
 
 void FitResult::on_pushButton_ResetScale_clicked()
 {
-    plot->yAxis->setRange(-60,60);
+    plot->yAxis->setRange(-120,120);
     plot->replot();
 }
 
@@ -400,4 +400,29 @@ QVector<double> FitResult::ReSizeVector(QVector<double> vec){
     }
 
     return out;
+}
+
+void FitResult::on_pushButton_SavePlot_clicked()
+{
+    QFileDialog fileDialog(this);
+    fileDialog.setNameFilter("pdf (*pdf)");
+    fileDialog.setDirectory(DESKTOP_PATH);
+    fileDialog.setReadOnly(0);
+    QString fileName;
+    if( fileDialog.exec()){
+        fileName = fileDialog.selectedFiles()[0];
+    }
+
+    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+
+    int ph = plot->geometry().height();
+    int pw = plot->geometry().width();
+
+    bool ok = plot->savePdf(fileName, pw, ph );
+
+    if( ok ){
+        SendMsg("Saved Fit-Result Plot as " + fileName);
+    }else{
+        SendMsg("Save Failed.");
+    }
 }

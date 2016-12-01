@@ -23,10 +23,22 @@ MainWindow::MainWindow(QWidget *parent) :
     plot = ui->customPlot;
     plot->xAxis->setLabel("time [us]");
     plot->yAxis->setLabel("Voltage [a.u.]");
+    plot->yAxis2->setVisible(true);
+    plot->yAxis2->setTickLabels(false);
+    plot->yAxis2->setTicks(false);
     plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);
     plot->axisRect()->setRangeZoom(Qt::Vertical);
+
+    plot->axisRect()->setRangeDragAxes(plot->xAxis, plot->yAxis);
+    plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis);
+
+    //plot->axisRect()->setRangeDragAxes(plot->xAxis, plot->yAxis2);
+    //plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis2);
+
+    //connect(plot, SIGNAL(axisClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(ChangeReactAxis(QCPAxis*)));
+    connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
 
     ctplot = ui->customPlot_CT;
     ctplot->axisRect()->setupFullAxesBox(true);
@@ -38,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
     colorMap->clearData();
+
+    connect(ctplot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
 
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
@@ -127,6 +141,7 @@ void MainWindow::SetupPlots()
     plot->xAxis2->setRange(0, file->GetDataSize());
     double zRange1 = qMax(fabs(zMax), fabs(zMin));
     plot->yAxis->setRange(-zRange1, zRange1);
+    plot->yAxis2->setRange(-zRange1, zRange1);
 
     int multi = file->GetMultiIndex();
     QString yLabel;
@@ -179,6 +194,33 @@ void MainWindow::RePlotPlots()
     PlotContour(ui->verticalSlider_zOffset->value());
     bPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
     bPlot->Plot();
+}
+
+void MainWindow::ChangeReactAxis(QCPAxis *axis)
+{
+    if( axis != plot->yAxis || axis != plot->yAxis2) return;
+    plot->axisRect()->setRangeZoomAxes(plot->xAxis, axis);
+}
+
+void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot->xAxis->pixelToCoord(pt.rx());
+    double y = plot->yAxis->pixelToCoord(pt.ry());
+    int xIndex = ana->FindXIndex(x);
+
+    QString msg;
+    msg.sprintf("(x, y) = (%f, %f), x-index = %d", x, y, xIndex);
+    statusBar()->showMessage(msg);
+}
+
+void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    QString msg;
+    msg.sprintf("(x, y) = (%f, %f)", ctplot->xAxis->pixelToCoord(pt.rx()), ctplot->yAxis->pixelToCoord(pt.ry()));
+
+    statusBar()->showMessage(msg);
 }
 
 void MainWindow::on_pushButton_OpenFile_clicked(){
@@ -278,7 +320,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
         on_checkBox_BGsub_clicked(false);
     }
 
-    int xIndex = ana->FindstartIndex(TIME1);
+    int xIndex = ana->FindXIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
 
 }
@@ -320,7 +362,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
         PlotFitFunc();
     }
 
-    int x1 = ana->FindstartIndex(TIME2);
+    int x1 = ana->FindXIndex(TIME2);
     ana->MeanAndvariance(0, x1);
 }
 
@@ -402,7 +444,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     bool gnu = ui->checkBox_GunFit->isChecked();
 
     if( savedSingleXCVS == 0 && gnu){
-        file->SaveCSV(0); // save as single-X
+        file->SaveCSV(0,1); // save as single-X
         savedSingleXCVS = 1;
     }
 
@@ -846,12 +888,12 @@ void MainWindow::on_spinBox_MovingAvg_valueChanged(int arg1)
 
 void MainWindow::on_actionSave_as_Single_X_CSV_triggered()
 {
-    file->SaveCSV(0); // single-X
+    file->SaveCSV(0,0); // single-X
 }
 
 void MainWindow::on_actionSave_as_Double_X_CSV_triggered()
 {
-    file->SaveCSV(1); // double-X
+    file->SaveCSV(1,0); // double-X
     savedSingleXCVS = 1;
 }
 
@@ -896,4 +938,80 @@ void MainWindow::on_comboBox_yLabelType_currentIndexChanged(int index)
     PlotContour(ui->verticalSlider_zOffset->value());
     //ctplot->replot();
 
+}
+
+void MainWindow::on_actionConvert_Origin_Data_as_Single_X_CVS_triggered()
+{
+    file->SaveCSV(0,1); // single-X
+    savedSingleXCVS = 1;
+}
+
+void MainWindow::on_actionConvert_Origin_Data_as_Double_X_CVS_triggered()
+{
+    file->SaveCSV(1,1); // double-X
+}
+
+void MainWindow::on_actionSave_Plot_as_PDF_triggered()
+{
+    QFileDialog fileDialog(this);
+    fileDialog.setNameFilter("pdf (*pdf)");
+    fileDialog.setDirectory(DESKTOP_PATH);
+    fileDialog.setReadOnly(0);
+    QString fileName;
+    if( fileDialog.exec()){
+        fileName = fileDialog.selectedFiles()[0];
+    }
+
+    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+
+    int ph = plot->geometry().height();
+    int pw = plot->geometry().width();
+
+    bool ok = plot->savePdf(fileName, pw, ph );
+
+    if( ok ){
+        Write2Log("Saved Single-Data Plot as " + fileName);
+    }else{
+        Write2Log("Save Failed.");
+    }
+}
+
+void MainWindow::on_actionSave_Contour_Plot_as_PDF_triggered()
+{
+    QFileDialog fileDialog(this);
+    fileDialog.setNameFilter("pdf (*pdf)");
+    fileDialog.setDirectory(DESKTOP_PATH);
+    fileDialog.setReadOnly(0);
+    QString fileName;
+    if( fileDialog.exec()){
+        fileName = fileDialog.selectedFiles()[0];
+    }
+
+    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+
+    int ph = ctplot->geometry().height();
+    int pw = ctplot->geometry().width();
+
+    bool ok = ctplot->savePdf(fileName, pw, ph );
+
+    if( ok ){
+        Write2Log("Saved Contour Plot as " + fileName);
+    }else{
+        Write2Log("Save Failed.");
+    }
+}
+
+void MainWindow::on_actionSave_B_Plot_as_PDF_triggered()
+{
+    bPlot->on_pushButton_Print_clicked();
+}
+
+void MainWindow::on_actionSave_Fit_Result_Plot_as_PDF_triggered()
+{
+    fitResultPlot->on_pushButton_SavePlot_clicked();
+}
+
+void MainWindow::on_actionSave_data_triggered()
+{
+    file->SaveTxtData_row();
 }

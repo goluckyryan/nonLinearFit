@@ -86,7 +86,7 @@ public slots:
         emit SendMsg(msg);
     }
 
-    int FindstartIndex(double goal);
+    int FindXIndex(double goal);
 
 private:
     QString Msg;

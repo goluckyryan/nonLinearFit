@@ -24,7 +24,484 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="9" rowspan="3" colspan="5">
+    <item row="5" column="2">
+     <widget class="QCheckBox" name="checkBox_BGsub">
+      <property name="statusTip">
+       <string>Substraction of the background. The background is one of the data.</string>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>BG sub.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>y-Index</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="3">
+     <widget class="QSpinBox" name="spinBox_BGIndex">
+      <property name="statusTip">
+       <string>Select the data as background.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QSpinBox" name="spinBox_y">
+      <property name="statusTip">
+       <string>The id of the data.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QPushButton" name="pushButton_RestoreData">
+      <property name="statusTip">
+       <string>Restore to origin data</string>
+      </property>
+      <property name="text">
+       <string>Restore data</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="13">
+     <widget class="QSlider" name="verticalSlider_zOffset">
+      <property name="statusTip">
+       <string>Change the z-offset of the contour plot. This will not affect the data.</string>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="invertedControls">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="15">
+     <widget class="QTextEdit" name="textEdit">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="14">
+     <widget class="QSlider" name="verticalSlider_z">
+      <property name="statusTip">
+       <string>Change the z-Range of the contour plot. This will not affect the data.</string>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="5">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Moving Avg.</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QCheckBox" name="checkBox_AutoFit">
+      <property name="statusTip">
+       <string>When enabled, changed y-Index will also fit the data.</string>
+      </property>
+      <property name="text">
+       <string>Auto-fit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="6">
+     <widget class="QSpinBox" name="spinBox_MovingAvg">
+      <property name="statusTip">
+       <string>Number of data point for moving average. -1 is no moving average.</string>
+      </property>
+      <property name="minimum">
+       <number>-1</number>
+      </property>
+      <property name="maximum">
+       <number>301</number>
+      </property>
+      <property name="singleStep">
+       <number>2</number>
+      </property>
+      <property name="value">
+       <number>-1</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4">
+     <widget class="QLineEdit" name="lineEdit_y">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="statusTip">
+       <string>The hall voltage of the data.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="9">
+     <widget class="QCheckBox" name="checkBox_MeanCorr">
+      <property name="statusTip">
+       <string>Substract each data with the mean of that data.</string>
+      </property>
+      <property name="text">
+       <string>Mean Corr.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="5" colspan="2">
+     <widget class="QComboBox" name="comboBox_yLabelType">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <item>
+       <property name="text">
+        <string>Control Voltage</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Hall Volatge</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Mag. Field</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="9">
+     <widget class="QCheckBox" name="checkBox_GunFit">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="statusTip">
+       <string>Using external gnuplot to fit.</string>
+      </property>
+      <property name="text">
+       <string>GnuFit (4 pars)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="3" colspan="4">
+     <widget class="QCustomPlot" name="customPlot" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>4</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="3">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>4</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="title">
+       <string>Fit</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="4" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_Ta">
+         <property name="text">
+          <string>20</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QSpinBox" name="spinBox_x">
+         <property name="statusTip">
+          <string>Set the start-fit-index.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="lineEdit_x">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="statusTip">
+          <string>The corresponding timing of the x-index.</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QPushButton" name="pushButton_save">
+         <property name="statusTip">
+          <string>Save fit paramters.</string>
+         </property>
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QLineEdit" name="lineEdit_ea">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLineEdit" name="lineEdit_eTa">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>a</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QPushButton" name="pushButton_reset">
+         <property name="statusTip">
+          <string>Estimate the fit paramters.</string>
+         </property>
+         <property name="text">
+          <string>Reset Par.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_a">
+         <property name="text">
+          <string>20</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QLineEdit" name="lineEdit_eb">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_b">
+         <property name="text">
+          <string>-10</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Ta</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_Tb">
+         <property name="text">
+          <string>80</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Tb</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="3">
+        <widget class="QLineEdit" name="lineEdit_ec">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_c">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="3">
+        <widget class="QLineEdit" name="lineEdit_eTb">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="checkBox_c">
+         <property name="text">
+          <string>c</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0" colspan="3">
+        <widget class="QPushButton" name="pushButton_FitAll">
+         <property name="statusTip">
+          <string>Fit all data set.</string>
+         </property>
+         <property name="text">
+          <string>Fit All</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_P">
+         <property name="statusTip">
+          <string>Polarization</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="3">
+        <widget class="QPushButton" name="pushButton_Fit">
+         <property name="statusTip">
+          <string>Fit this single data set.</string>
+         </property>
+         <property name="text">
+          <string>Fit</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="3">
+        <widget class="QLineEdit" name="lineEdit_eP">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Pol.</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="checkBox_b_Tb">
+         <property name="text">
+          <string>b</string>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QSpinBox" name="spinBox_x2"/>
+       </item>
+       <item row="0" column="0" rowspan="2" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>x-Index</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLineEdit" name="lineEdit_x2">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+      <zorder>lineEdit_a</zorder>
+      <zorder>lineEdit_Ta</zorder>
+      <zorder>lineEdit_b</zorder>
+      <zorder>lineEdit_Tb</zorder>
+      <zorder>pushButton_Fit</zorder>
+      <zorder>lineEdit_x</zorder>
+      <zorder>spinBox_x</zorder>
+      <zorder>pushButton_reset</zorder>
+      <zorder>label_2</zorder>
+      <zorder>label_4</zorder>
+      <zorder>label_5</zorder>
+      <zorder>label_7</zorder>
+      <zorder>pushButton_save</zorder>
+      <zorder>pushButton_FitAll</zorder>
+      <zorder>lineEdit_c</zorder>
+      <zorder>checkBox_c</zorder>
+      <zorder>lineEdit_ea</zorder>
+      <zorder>lineEdit_eTa</zorder>
+      <zorder>lineEdit_eb</zorder>
+      <zorder>lineEdit_eTb</zorder>
+      <zorder>lineEdit_ec</zorder>
+      <zorder>lineEdit_P</zorder>
+      <zorder>lineEdit_eP</zorder>
+      <zorder>label_11</zorder>
+      <zorder>checkBox_b_Tb</zorder>
+      <zorder>spinBox_x2</zorder>
+      <zorder>lineEdit_x2</zorder>
+     </widget>
+    </item>
+    <item row="6" column="8" colspan="5">
+     <widget class="QCustomPlot" name="customPlot_CT" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>3</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="10" rowspan="5" colspan="5">
      <widget class="QGroupBox" name="groupBox_2">
       <property name="title">
        <string>Fit Control</string>
@@ -93,408 +570,7 @@
       </layout>
      </widget>
     </item>
-    <item row="4" column="2" colspan="4">
-     <widget class="QCustomPlot" name="customPlot" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>4</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0" colspan="2">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>4</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="title">
-       <string>Fit</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0" colspan="3">
-        <widget class="QPushButton" name="pushButton_save">
-         <property name="statusTip">
-          <string>Save fit paramters.</string>
-         </property>
-         <property name="text">
-          <string>Save</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QSpinBox" name="spinBox_x">
-         <property name="statusTip">
-          <string>Set the start-fit-index.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>x-Index</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <widget class="QLineEdit" name="lineEdit_x">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="statusTip">
-          <string>The corresponding timing of the x-index.</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QPushButton" name="pushButton_reset">
-         <property name="statusTip">
-          <string>Estimate the fit paramters.</string>
-         </property>
-         <property name="text">
-          <string>Reset Par.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QLineEdit" name="lineEdit_eTa">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>a</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_Ta">
-         <property name="text">
-          <string>20</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_a">
-         <property name="text">
-          <string>20</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="QLineEdit" name="lineEdit_ea">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Ta</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_Tb">
-         <property name="text">
-          <string>80</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3">
-        <widget class="QLineEdit" name="lineEdit_eb">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_b">
-         <property name="text">
-          <string>-10</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Tb</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
-        <widget class="QCheckBox" name="checkBox_c">
-         <property name="text">
-          <string>c</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_c">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="3">
-        <widget class="QLineEdit" name="lineEdit_eTb">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="3">
-        <widget class="QPushButton" name="pushButton_FitAll">
-         <property name="statusTip">
-          <string>Fit all data set.</string>
-         </property>
-         <property name="text">
-          <string>Fit All</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="3">
-        <widget class="QLineEdit" name="lineEdit_ec">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="3">
-        <widget class="QPushButton" name="pushButton_Fit">
-         <property name="statusTip">
-          <string>Fit this single data set.</string>
-         </property>
-         <property name="text">
-          <string>Fit</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_P">
-         <property name="statusTip">
-          <string>Polarization</string>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="0">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Pol.</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="3">
-        <widget class="QLineEdit" name="lineEdit_eP">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QCheckBox" name="checkBox_b_Tb">
-         <property name="text">
-          <string>b</string>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-      <zorder>lineEdit_a</zorder>
-      <zorder>lineEdit_Ta</zorder>
-      <zorder>lineEdit_b</zorder>
-      <zorder>lineEdit_Tb</zorder>
-      <zorder>pushButton_Fit</zorder>
-      <zorder>lineEdit_x</zorder>
-      <zorder>spinBox_x</zorder>
-      <zorder>pushButton_reset</zorder>
-      <zorder>label_2</zorder>
-      <zorder>label_4</zorder>
-      <zorder>label_5</zorder>
-      <zorder>label_7</zorder>
-      <zorder>pushButton_save</zorder>
-      <zorder>pushButton_FitAll</zorder>
-      <zorder>lineEdit_c</zorder>
-      <zorder>checkBox_c</zorder>
-      <zorder>lineEdit_ea</zorder>
-      <zorder>lineEdit_eTa</zorder>
-      <zorder>lineEdit_eb</zorder>
-      <zorder>lineEdit_eTb</zorder>
-      <zorder>lineEdit_ec</zorder>
-      <zorder>lineEdit_P</zorder>
-      <zorder>lineEdit_eP</zorder>
-      <zorder>label_11</zorder>
-      <zorder>checkBox_b_Tb</zorder>
-     </widget>
-    </item>
-    <item row="4" column="7" colspan="5">
-     <widget class="QCustomPlot" name="customPlot_CT" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>3</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="2">
-     <widget class="QSpinBox" name="spinBox_BGIndex">
-      <property name="statusTip">
-       <string>Select the data as background.</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QCheckBox" name="checkBox_BGsub">
-      <property name="statusTip">
-       <string>Substraction of the background. The background is one of the data.</string>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::RightToLeft</enum>
-      </property>
-      <property name="text">
-       <string>BG sub.</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QSpinBox" name="spinBox_y">
-      <property name="statusTip">
-       <string>The id of the data.</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>y-Index</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QPushButton" name="pushButton_RestoreData">
-      <property name="statusTip">
-       <string>Restore to origin data</string>
-      </property>
-      <property name="text">
-       <string>Restore data</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="13">
-     <widget class="QSlider" name="verticalSlider_z">
-      <property name="statusTip">
-       <string>Change the z-Range of the contour plot. This will not affect the data.</string>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="12">
-     <widget class="QSlider" name="verticalSlider_zOffset">
-      <property name="statusTip">
-       <string>Change the z-offset of the contour plot. This will not affect the data.</string>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="invertedControls">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0" colspan="14">
-     <widget class="QTextEdit" name="textEdit">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Courier New</family>
-       </font>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOn</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="pushButton_OpenFile">
-      <property name="statusTip">
-       <string>Open a file.</string>
-      </property>
-      <property name="text">
-       <string>Open File</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QCheckBox" name="checkBox_AutoFit">
-      <property name="statusTip">
-       <string>When enabled, changed y-Index will also fit the data.</string>
-      </property>
-      <property name="text">
-       <string>Auto-fit</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QLineEdit" name="lineEdit_y">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="statusTip">
-       <string>The hall voltage of the data.</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1" colspan="8">
+    <item row="1" column="1" colspan="9">
      <widget class="QLineEdit" name="lineEdit">
       <property name="enabled">
        <bool>false</bool>
@@ -504,77 +580,20 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="5">
-     <widget class="QSpinBox" name="spinBox_MovingAvg">
+    <item row="1" column="0" rowspan="2">
+     <widget class="QPushButton" name="pushButton_OpenFile">
       <property name="statusTip">
-       <string>Number of data point for moving average. -1 is no moving average.</string>
-      </property>
-      <property name="minimum">
-       <number>-1</number>
-      </property>
-      <property name="maximum">
-       <number>301</number>
-      </property>
-      <property name="singleStep">
-       <number>2</number>
-      </property>
-      <property name="value">
-       <number>-1</number>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="4">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Moving Avg.</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="4" colspan="2">
-     <widget class="QComboBox" name="comboBox_yLabelType">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <item>
-       <property name="text">
-        <string>Control Voltage</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Hall Volatge</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Mag. Field</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="3" column="8">
-     <widget class="QCheckBox" name="checkBox_MeanCorr">
-      <property name="statusTip">
-       <string>Substract each data with the mean of that data.</string>
+       <string>Open a file.</string>
       </property>
       <property name="text">
-       <string>Mean Corr.</string>
+       <string>Open File</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="8">
-     <widget class="QCheckBox" name="checkBox_GunFit">
+    <item row="2" column="1" colspan="6">
+     <widget class="QLineEdit" name="lineEdit_yName">
       <property name="enabled">
        <bool>false</bool>
-      </property>
-      <property name="statusTip">
-       <string>Using external gnuplot to fit.</string>
-      </property>
-      <property name="text">
-       <string>GnuFit (4 pars)</string>
       </property>
      </widget>
     </item>
@@ -596,13 +615,22 @@
     <property name="title">
      <string>Plots</string>
     </property>
+    <addaction name="actionSave_Plot_as_PDF"/>
+    <addaction name="actionSave_Contour_Plot_as_PDF"/>
+    <addaction name="actionSave_B_Plot_as_PDF"/>
+    <addaction name="actionSave_Fit_Result_Plot_as_PDF"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionSave_data"/>
+    <addaction name="separator"/>
     <addaction name="actionSave_as_Single_X_CSV"/>
     <addaction name="actionSave_as_Double_X_CSV"/>
+    <addaction name="separator"/>
+    <addaction name="actionConvert_Origin_Data_as_Single_X_CVS"/>
+    <addaction name="actionConvert_Origin_Data_as_Double_X_CVS"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPlots"/>
@@ -651,6 +679,41 @@
   <action name="actionSave_as_Double_X_CSV">
    <property name="text">
     <string>Save as Double-X CSV</string>
+   </property>
+  </action>
+  <action name="actionConvert_Origin_Data_as_Single_X_CVS">
+   <property name="text">
+    <string>Convert Origin Data as Single-X CVS</string>
+   </property>
+  </action>
+  <action name="actionConvert_Origin_Data_as_Double_X_CVS">
+   <property name="text">
+    <string>Convert Origin Data as Double-X CVS</string>
+   </property>
+  </action>
+  <action name="actionSave_B_Plot_as_PDF">
+   <property name="text">
+    <string>Save B-Plot as PDF</string>
+   </property>
+  </action>
+  <action name="actionSave_Fit_Result_Plot_as_PDF">
+   <property name="text">
+    <string>Save Fit Result Plot as PDF</string>
+   </property>
+  </action>
+  <action name="actionSave_Contour_Plot_as_PDF">
+   <property name="text">
+    <string>Save Contour Plot as PDF</string>
+   </property>
+  </action>
+  <action name="actionSave_Plot_as_PDF">
+   <property name="text">
+    <string>Save Single Data Plot as PDF</string>
+   </property>
+  </action>
+  <action name="actionSave_data">
+   <property name="text">
+    <string>Save Data</string>
    </property>
   </action>
  </widget>

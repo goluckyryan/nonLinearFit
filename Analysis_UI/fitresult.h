@@ -34,8 +34,10 @@ public:
 signals:
     void SendMsg(QString str);
 
-private slots:
+public slots:
+    void on_pushButton_SavePlot_clicked();
 
+private slots:
     void on_checkBox_a_clicked(bool checked);
     void on_checkBox_Ta_clicked(bool checked);
     void on_checkBox_b_clicked(bool checked);

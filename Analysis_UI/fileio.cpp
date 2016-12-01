@@ -220,28 +220,54 @@ void FileIO::OpenCSVData(){
     xMin = FindMin(xData);
     xMax = FindMax(xData);
 
-    yMin_CV = FindMin(yData_CV);
-    yMax_CV = FindMax(yData_CV);
+    //============== check is BG data exist by checking Hall probe volatge,
+    QVector<double> newYData_CV = yData_CV;
+    QVector<double> newYData_HV = yData_HV;
+
+    //if Control volatge == 0 V, it is bg
+    bgIndex = -1;
+    for( int i = 0; i < ySize; i++){
+        if( yData_CV[i] == 0 ) {
+            bgIndex = i;
+        }else{
+            break;
+        }
+    }
+
+    if( bgIndex != -1 ) {
+        hadBG = 1;
+        newYData_CV.remove(0);
+        newYData_HV.remove(0);
+    }
+
+    yMin_CV = FindMin(newYData_CV);
+    yMax_CV = FindMax(newYData_CV);
+    yMin_HV = FindMin(newYData_HV);
+    yMax_HV = FindMax(newYData_HV);
 
     yStep_CV = fabs(yData_CV[ySize-1]- yData_CV[ySize-2]);
     yStep_HV = yStep_CV;
 
-    if(yData_CV[0] > yData_CV[1]) yRevered = 1;
+    //=========== check is data revered.
+    if(newYData_HV[0] > newYData_HV[1]) yRevered = 1;
 
+    //=========== the open file complete, show message
     openState = 1;
 
     QString msg;
     msg.sprintf("X:(%7.3f, %7.3f) sizeX:%d",xMin, xMax, xSize);
     SendMsg(msg);
-
     msg.sprintf("Y:(%7.3f, %7.3f) sizeY:%d",yMin_CV, yMax_CV, ySize);
     SendMsg(msg);
-
+    if( hadBG ){
+        msg.sprintf("    BG data exist. At yIndex = %d", bgIndex);
+        SendMsg(msg);
+    }
     msg.sprintf("Z:(%7.3f, %7.3f)",zMin, zMax);
     SendMsg(msg);
-
     myfile->close();
 
+    //=========== calculate mean vector for mean correction, and estimated c-parameter
     CalMeanVector();
 
 }
@@ -416,6 +442,9 @@ void FileIO::OpenTxtData_row(){
     //qDebug("Y: %d , %d", yData.size(), ySize);
     //qDebug("zMax: %f, zMin: %f", zMax, zMin);
 
+    xMin = FindMin(xData);
+    xMax = FindMax(xData);
+
     //=========== cal the rescale factor
     RescaleZData();
 
@@ -423,10 +452,10 @@ void FileIO::OpenTxtData_row(){
     QVector<double> newYData_CV = yData_CV;
     QVector<double> newYData_HV = yData_HV;
 
-    //if Hall probe volatge smaller than 3 mV
+    //if Control volatge == 0 V, it is bg
     bgIndex = -1;
     for( int i = 0; i < ySize; i++){
-        if( fabs(yData_HV[i]) < 3 ) {
+        if( yData_CV[i] == 0 ) {
             bgIndex = i;
         }else{
             break;
@@ -535,12 +564,15 @@ void FileIO::SaveFitResult(Analysis *ana)
     stream << text;
 }
 
-void FileIO::SaveCSV(bool doubleX)
+void FileIO::SaveCSV(bool doubleX, bool origin)
 {
     // the simplified txt can be used for Analysis::Gnufit
     this->csvFilePath = this->filePath;
     csvFilePath.chop(4);
-    if(doubleX){
+    if( origin ){
+        csvFilePath.append("_origin");
+    }
+    if( doubleX ){
         csvFilePath.append("_col_doubleX.csv");
     }else{
         csvFilePath.append("_col_singleX.csv");
@@ -554,7 +586,7 @@ void FileIO::SaveCSV(bool doubleX)
     QString str, tmp;
 
     int yStart = 0;
-    if( hadBG ) yStart = bgIndex + 1;
+    //if( hadBG ) yStart = bgIndex + 1;
 
     //output y-String
     tmp.sprintf("%*s,", 8, "time [s]"); str = tmp;
@@ -571,21 +603,86 @@ void FileIO::SaveCSV(bool doubleX)
     for(int i = 0; i < xSize; i++){
         tmp.sprintf("%8e,", xData[i]*1e-6); str = tmp;
         for(int j = yStart; j < ySize-1; j++){
-            tmp.sprintf("%10e,", (zData[j][i] - zData[yStart][i]) * pow(10, -multi)); str += tmp;
+            if( origin){
+                tmp.sprintf("%11.4e,", backUpData[j][i]  * pow(10, -multi)); str += tmp;
+            }else{
+                tmp.sprintf("%11.4e,", zData[j][i]  * pow(10, -multi)); str += tmp;
+            }
+
             if(doubleX ) {
-                tmp.sprintf("%8e,", xData[i]*1e-6); str += tmp;
+                tmp.sprintf("%11.4e,", xData[i]*1e-6); str += tmp;
             }
         }
-        tmp.sprintf("%10e\n", zData[ySize-1][i] * pow(10, -multi)); str += tmp;
+        if( origin ){
+            tmp.sprintf("%11.4e\n", backUpData[ySize-1][i] * pow(10, -multi)); str += tmp;
+        }else{
+            tmp.sprintf("%11.4e\n", zData[ySize-1][i] * pow(10, -multi)); str += tmp;
+        }
         stream << str;
     }
 
     out.close();
 
     QString msg;
-    msg.sprintf("Saved a CVS file as : %s ", csvFilePath.toStdString().c_str());
+    msg = "Saved ";
+    if( origin ) {
+        msg.append("original date as ");
+    }else{
+        msg.append("modifed data as ");
+    }
+    if( doubleX ){
+        msg.append(" a double-X ");
+    }else{
+        msg.append(" a single-X ");
+    }
+    msg.append("CSV file as :");
     SendMsg(msg);
+    SendMsg(csvFilePath);
 
+}
+
+void FileIO::SaveTxtData_row()
+{
+    QString fileName = this->filePath;
+    fileName.chop(4);
+    fileName.append("_modified.dat");
+
+    QFile out(fileName);
+    out.open(QIODevice::WriteOnly);
+    QTextStream stream(&out);
+    QString str, tmp;
+
+    int nameLenght = 40;
+
+    // Set x
+    tmp.sprintf("%*s,", nameLenght, "time [us]"); str = tmp;
+    for(int i = 0; i < xSize - 1 ; i++){
+        tmp.sprintf("%11.4e,", xData[i]); str += tmp;
+    }
+    tmp.sprintf("10e\n", xData[xSize-1]); str += tmp;
+    stream << str;
+
+    // Set data
+    int yStart = 0;
+    if( hadBG ) yStart = bgIndex + 1;
+    for( int y = yStart; y < ySize; y++){
+        tmp.sprintf("%*s,", nameLenght, yString[yStart].toStdString().c_str()); str = tmp;
+        double bg = 0;
+        for( int i = 0; i < xSize - 1 ; i++){
+            if( hadBG ) bg = zData[y][i];
+            tmp.sprintf("%11.4e,", (zData[y][i] - bg) * pow(10, -multi)); str += tmp;
+        }
+        if( hadBG ) bg = zData[y][xSize - 1];
+        tmp.sprintf("%11.4e\n", (zData[y][xSize -1] - bg) * pow(10, -multi)); str += tmp;
+        stream << str;
+    }
+
+    out.close();
+
+    QString msg;
+    msg.sprintf("Saved modified data as :");
+    SendMsg(msg);
+    SendMsg(fileName);
 }
 
 void FileIO::ManipulateData(int id, int bgIndex, int n)
@@ -1061,9 +1158,6 @@ void FileIO::RescaleZData()
     }
     zMax = zMax * pow(10, multi);
     zMin = zMin * pow(10, multi);
-
-    xMin = FindMin(xData);
-    xMax = FindMax(xData);
 }
 
 int FileIO::FindIndex(QVector<double> vec, double goal, bool dir)

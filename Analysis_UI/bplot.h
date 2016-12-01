@@ -28,13 +28,15 @@ public:
 signals:
     void SendMsg(QString msg);
 
+public slots:
+    void on_pushButton_Print_clicked();
+
 private slots:
     void on_spinBox_Start_valueChanged(int arg1);
     void on_spinBox_End_valueChanged(int arg1);
     void on_pushButton_clicked();
 
 
-    void on_pushButton_Print_clicked();
 
 private:
     Ui::BPlot *ui;

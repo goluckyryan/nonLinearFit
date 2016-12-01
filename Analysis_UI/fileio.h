@@ -27,7 +27,8 @@ public:
     void OpenTxtData_col();
     void OpenTxtData_row();
     void SaveFitResult(Analysis *ana);
-    void SaveCSV(bool doubleX);
+    void SaveCSV(bool doubleX, bool origin);
+    void SaveTxtData_row();
 
     //Data manipulation // id is bitwise
     void ManipulateData(int id, int bgIndex = -1, int n = -1);

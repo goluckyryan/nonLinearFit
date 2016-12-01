@@ -253,7 +253,7 @@ void BPlot::on_pushButton_Print_clicked()
         fileName = fileDialog.selectedFiles()[0];
     }
 
-    fileName.append(".pdf");
+    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
 
     int ph = plot->geometry().height();
     int pw = plot->geometry().width();
@@ -261,7 +261,7 @@ void BPlot::on_pushButton_Print_clicked()
     bool ok = plot->savePdf(fileName, pw, ph );
 
     if( ok ){
-        SendMsg("Saved Plot as " + fileName);
+        SendMsg("Saved B-Plot as " + fileName);
     }else{
         SendMsg("Save Failed.");
     }
