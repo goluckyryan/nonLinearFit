@@ -12,6 +12,9 @@ BPlot::BPlot(QWidget *parent) :
     plot->yAxis->setLabel("Integrated value x=(,) [a.u.]");
     plot->xAxis2->setLabel("y-Index");
     plot->xAxis2->setVisible(true);
+    plot->yAxis2->setVisible(true);
+    plot->yAxis2->setTickLabels(false);
+    plot->yAxis2->setTicks(false);
     plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);

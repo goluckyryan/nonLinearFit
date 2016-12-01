@@ -24,6 +24,10 @@ FitResult::FitResult(QWidget *parent) :
     plot->xAxis->setLabel("Ctrl. Vol. [V]");
     plot->xAxis2->setVisible(true);
     plot->xAxis2->setLabel("y-Index");
+    plot->yAxis->setRange(-120,120);
+    plot->yAxis2->setVisible(true);
+    plot->yAxis2->setTickLabels(false);
+    plot->yAxis2->setTicks(false);
     plotUnit = 0;
 
     //set 7 plots.
@@ -172,6 +176,7 @@ void FitResult::FillData(Analysis *ana)
     fitParError[yIndex] = ReSizeVector(ana->GetParError());
     int nDF = ana->GetNDF();
     SSR[yIndex] = ana->GetSSR()/nDF;
+
 }
 
 void FitResult::PlotData()
