@@ -212,7 +212,6 @@ void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
 
 void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
 {
-
     QPoint pt = mouse->pos();
     double x = ctplot->xAxis->pixelToCoord(pt.rx());
     double y = ctplot->yAxis->pixelToCoord(pt.ry());

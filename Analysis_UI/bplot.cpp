@@ -71,6 +71,8 @@ void BPlot::SetData(FileIO *file)
 
     plot->graph(0)->clearData();
 
+    connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowPlotValue(QMouseEvent*)));
+
 }
 
 void BPlot::Plot()
@@ -239,6 +241,30 @@ void BPlot::on_pushButton_clicked()
     str.sprintf("Save B-Plot to %s", filePath.toStdString().c_str());
     SendMsg(str);
 
+}
+
+void BPlot::ShowPlotValue(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot->xAxis->pixelToCoord(pt.rx());
+    double y = plot->yAxis->pixelToCoord(pt.ry());
+
+    int yIndex = 0;
+    switch (plotUnit) {
+    case 1:
+        yIndex = file->GetYIndex_HV(x);
+        break;
+    case 2:
+        yIndex = file->GetYIndex_HV(file->Mag2HV(x));
+        break;
+    default:
+        yIndex = file->GetYIndex_CV(x);
+        break;
+    }
+
+    QString msg;
+    msg.sprintf("(x, y) = (%7.4f, %7.4f), y-index = %4d", x, y, yIndex);
+    ui->lineEdit_Msg->setText(msg);
 }
 
 

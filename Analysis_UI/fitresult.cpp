@@ -112,6 +112,8 @@ void FitResult::SetDataSize(FileIO *file)
     QString msg;
     msg.sprintf("Initaliate fitPar array. size : %d", n);
     SendMsg(msg);
+
+    connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowPlotValue(QMouseEvent*)));
 }
 
 void FitResult::SetAvalibleData(int n)
@@ -414,6 +416,40 @@ void FitResult::on_pushButton_ResetScale_clicked()
 {
     plot->yAxis->setRange(-120,120);
     plot->replot();
+}
+
+void FitResult::ShowPlotValue(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot->xAxis->pixelToCoord(pt.rx());
+    double y = plot->yAxis->pixelToCoord(pt.ry());
+
+    int yIndex = -1;
+    switch (plotUnit) {
+    case 1:
+        yIndex = file->GetYIndex_HV(x);
+        break;
+    case 2:
+        yIndex = file->GetYIndex_HV(file->Mag2HV(x));
+        break;
+    default:
+        yIndex = file->GetYIndex_CV(x);
+        break;
+    }
+
+    QString msg, tmp;
+    msg.sprintf("(x, y) = (%7.4f, %7.4f), y-index = %4d, ", x, y, yIndex);
+
+    if(yIndex > -1){
+        for( int i = 0; i < parSize-1; i ++ ){
+            tmp.sprintf("%7.4f(%7.4f), ", fitPar[yIndex][i], fitParError[yIndex][i]);
+            msg.append(tmp);
+        }
+        tmp.sprintf("%7.4f(%7.4f) ", fitPar[yIndex][parSize-1], fitParError[yIndex][parSize-1]);
+        msg.append(tmp);
+    }
+
+    ui->lineEdit_Msg->setText(msg);
 }
 
 QVector<double> FitResult::ReSizeVector(QVector<double> vec){

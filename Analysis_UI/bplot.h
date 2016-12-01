@@ -36,6 +36,7 @@ private slots:
     void on_spinBox_End_valueChanged(int arg1);
     void on_pushButton_clicked();
 
+    void ShowPlotValue(QMouseEvent* mouse);
 
 
 private:

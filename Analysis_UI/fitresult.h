@@ -50,6 +50,8 @@ private slots:
     void on_pushButton_Save_clicked();
     void on_pushButton_ResetScale_clicked();
 
+    void ShowPlotValue(QMouseEvent * mouse);
+
 private:
     Ui::FitResult *ui;
     QCustomPlot * plot;
