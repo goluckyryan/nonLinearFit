@@ -219,6 +219,7 @@ void FileIO::OpenCSVData(){
 
     xMin = FindMin(xData);
     xMax = FindMax(xData);
+    xStep = xData[1]-xData[0];
 
     //============== check is BG data exist by checking Hall probe volatge,
     QVector<double> newYData_CV = yData_CV;
@@ -351,6 +352,7 @@ void FileIO::OpenTxtData_col() // great problem in this function. not updated fo
 
     xMin = FindMin(xData);
     xMax = FindMax(xData);
+    xStep = xData[1]-xData[0];
 
     yMin_CV = FindMin(yData_CV);
     yMax_CV = FindMax(yData_CV);
@@ -444,6 +446,7 @@ void FileIO::OpenTxtData_row(){
 
     xMin = FindMin(xData);
     xMax = FindMax(xData);
+    xStep = xData[1]-xData[0];
 
     //=========== cal the rescale factor
     RescaleZData();
@@ -749,6 +752,23 @@ void FileIO::ManipulateData(int id, int bgIndex, int n)
 
 }
 
+int FileIO::GetXIndex(double x)
+{
+    return FindIndex(xData, xStep, x, 0);
+}
+
+int FileIO::GetYIndex_CV(double y)
+{
+    int yIndex = FindIndex(yData_CV, yStep_CV, y, yRevered);
+    return yIndex;
+}
+
+int FileIO::GetYIndex_HV(double y)
+{
+    int yIndex = FindIndex(yData_HV, yStep_HV, y, yRevered);
+    return yIndex;
+}
+
 void FileIO::FouierForward()
 {
     SendMsg("Fouier Transform - Forward.");
@@ -996,7 +1016,7 @@ void FileIO::FFTWFilters(int filterID, QVector<double> par, QVector<double>funcX
     QString msg;
 
     if( filterID == 1){
-        int x2 = FindIndex(fxData, par[0], 0);
+        int x2 = FindIndex(fxData, fFreqResol, par[0], 0);
         if( !rev ){
             msg.sprintf("FFTW: Low-Pass Sharp Filter. |freq| <= %f kHz", fxData[x2]);
         }else{
@@ -1015,8 +1035,8 @@ void FileIO::FFTWFilters(int filterID, QVector<double> par, QVector<double>funcX
     }
 
     if( filterID == 3){
-        int xH2 = FindIndex(fxData, par[0], 0);
-        int xL2 = FindIndex(fxData, par[1], 0);
+        int xH2 = FindIndex(fxData, fFreqResol, par[0], 0);
+        int xL2 = FindIndex(fxData, fFreqResol, par[1], 0);
 
         if( !rev ){
             msg.sprintf("FFTW: Band-Pass Sharp Filter. %f kHz <= |freq| <= %f kHz", fxData[xL2], fxData[xH2]);
@@ -1160,19 +1180,24 @@ void FileIO::RescaleZData()
     zMin = zMin * pow(10, multi);
 }
 
-int FileIO::FindIndex(QVector<double> vec, double goal, bool dir)
+int FileIO::FindIndex(QVector<double> vec, double torr, double goal, bool dir)
 {
-    int index = 0;
+    int index = -1;
+
+    if( openState == 0) return index;
+
     if( dir == 0 ){
         for(int i = 0; i < vec.size() ; i++){
-            if( vec[i] >= goal){
+            //if( vec[i] >= goal){
+            if( fabs(vec[i] - goal) < torr){
                 index = i;
                 break;
             }
         }
     }else{
         for(int i = vec.size() - 1; i > -1 ; i--){
-            if( vec[i] <= goal){
+            //if( vec[i] <= goal){
+            if( fabs(vec[i] - goal) < torr){
                 index = i;
                 break;
             }

@@ -59,6 +59,10 @@ public slots:
     double GetDataMeanZ(int yIndex){ return zMean[yIndex];}
     double GetDataMeanZMean() {return zMeanMean;}
 
+    int GetXIndex(double x);
+    int GetYIndex_CV(double y);
+    int GetYIndex_HV(double y);
+
     int GetBGIndex(){return bgIndex;}
     double GetXMax(){return xMax;}
     double GetXMin(){return xMin;}
@@ -104,6 +108,11 @@ public slots:
         return mag;
     }
 
+    double Mag2HV(double mag){
+        // usually only 1st order matter;
+        return (mag - hallPar[0])/hallPar[1];
+    }
+
 private:
     QVector<double> xData; // time data
     QVector<double> yData_CV; // Control Voltage
@@ -119,7 +128,7 @@ private:
     QVector<double> *fZDataP; //phase fourier zData, [ydata][xdata]
 
     int xSize, ySize;
-    double xMin, xMax;
+    double xMin, xMax, xStep;
     double yMin_CV, yMax_CV, yStep_CV;
     double yMin_HV, yMax_HV, yStep_HV;
     double zMin, zMax;
@@ -156,7 +165,7 @@ private:
 
     void CalMeanVector();
     void RescaleZData();
-    int FindIndex(QVector<double> vec, double goal, bool dir);
+    int FindIndex(QVector<double> vec, double torr, double goal, bool dir);
 };
 
 #endif // FILEIO_H

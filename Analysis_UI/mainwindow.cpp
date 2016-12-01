@@ -35,7 +35,6 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis);
 
     //connect(plot, SIGNAL(axisClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(ChangeReactAxis(QCPAxis*)));
-    connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
 
     ctplot = ui->customPlot_CT;
     ctplot->axisRect()->setupFullAxesBox(true);
@@ -47,8 +46,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
     colorMap->clearData();
-
-    connect(ctplot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
 
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
@@ -202,24 +199,40 @@ void MainWindow::ChangeReactAxis(QCPAxis *axis)
 
 void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
 {
+
     QPoint pt = mouse->pos();
     double x = plot->xAxis->pixelToCoord(pt.rx());
     double y = plot->yAxis->pixelToCoord(pt.ry());
-    int xIndex = ana->FindXIndex(x);
+    int xIndex = file->GetXIndex(x);
 
     QString msg;
-    msg.sprintf("(x, y) = (%f, %f), x-index = %d", x, y, xIndex);
+    msg.sprintf("(x, y) = (%7.4f, %7.4f), x-index = %4d", x, y, xIndex);
     statusBar()->showMessage(msg);
 }
 
 void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
 {
+
     QPoint pt = mouse->pos();
     double x = ctplot->xAxis->pixelToCoord(pt.rx());
     double y = ctplot->yAxis->pixelToCoord(pt.ry());
 
+    int xIndex = file->GetXIndex(x);
+    int yIndex = 0;
+    switch (ui->comboBox_yLabelType->currentIndex()) {
+    case 1:
+        yIndex = file->GetYIndex_HV(y);
+        break;
+    case 2:
+        yIndex = file->GetYIndex_HV(file->Mag2HV(y));
+        break;
+    default:
+        yIndex = file->GetYIndex_CV(y);
+        break;
+    }
+
     QString msg;
-    msg.sprintf("(x, y) = (%f, %f)", x, y);
+    msg.sprintf("(x, y) = (%7.4f, %7.4f), index = (%4d, %4d)", x, y, xIndex, yIndex);
     statusBar()->showMessage(msg);
 }
 
@@ -300,6 +313,9 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_x2->setMaximum(file->GetDataSize()-1);
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
+
+    connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
+    connect(ctplot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
 
     //========= Reset Data in fitResultDialog
     fitResultPlot->ClearData();
