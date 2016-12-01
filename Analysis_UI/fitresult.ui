@@ -42,7 +42,7 @@
         <string>a</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -71,6 +71,9 @@
       <widget class="QCheckBox" name="checkBox_P">
        <property name="text">
         <string>Polarization %</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
