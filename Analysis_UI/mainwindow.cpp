@@ -235,22 +235,21 @@ void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
     statusBar()->showMessage(msg);
 }
 
-void MainWindow::SetXStartIndexByMouseClick(QMouseEvent *mouse)
+void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
 {
     QPoint pt = mouse->pos();
     double x = plot->xAxis->pixelToCoord(pt.rx());
     int xIndex = file->GetXIndex(x);
 
-    ui->spinBox_x->setValue(xIndex);
-}
+    if( mouse->button() == Qt::LeftButton){
+        ui->spinBox_x->setValue(xIndex);
+    }else if(mouse->button() == Qt::RightButton){
+        if( xIndex < ui->spinBox_x->value()){
+            xIndex = ui->spinBox_x2->maximum();
+        }
+        ui->spinBox_x2->setValue(xIndex);
+    }
 
-void MainWindow::SetXEndIndexByMouseClick(QMouseEvent *mouse)
-{
-    QPoint pt = mouse->pos();
-    double x = plot->xAxis->pixelToCoord(pt.rx());
-    int xIndex = file->GetXIndex(x);
-
-    ui->spinBox_x2->setValue(xIndex);
 }
 
 void MainWindow::SetYIndexByMouseClick(QMouseEvent *mouse)
@@ -353,8 +352,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
-    connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXStartIndexByMouseClick(QMouseEvent*)));
-    //connect(plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(SetXEndIndexByMouseClick(QMouseEvent*)));
+    connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXIndexByMouseClick(QMouseEvent*)));
     connect(ctplot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
     connect(ctplot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClick(QMouseEvent*)));
     //========= Reset Data in fitResultDialog

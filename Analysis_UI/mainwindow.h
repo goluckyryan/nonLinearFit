@@ -40,8 +40,7 @@ private slots:
     void ChangeReactAxis(QCPAxis * axis);
     void ShowMousePositionInPlot(QMouseEvent * mouse);
     void ShowMousePositionInCTPlot(QMouseEvent * mouse);
-    void SetXStartIndexByMouseClick(QMouseEvent * mouse);
-    void SetXEndIndexByMouseClick(QMouseEvent * mouse);
+    void SetXIndexByMouseClick(QMouseEvent * mouse);
     void SetYIndexByMouseClick(QMouseEvent * mouse);
 
     void on_pushButton_OpenFile_clicked();
