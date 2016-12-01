@@ -6,7 +6,8 @@ FitResult::FitResult(QWidget *parent) :
     ui(new Ui::FitResult),
     fitPar(NULL),
     fitParError(NULL),
-    SSR(NULL)
+    SSR(NULL),
+    file(NULL)
 {
     ui->setupUi(this);
     plot = ui->widget;
@@ -20,9 +21,10 @@ FitResult::FitResult(QWidget *parent) :
     plot->axisRect()->setRangeZoom(Qt::Vertical);
 
     //set xaxis label
-    plot->xAxis->setLabel("B-filed [mV]");
+    plot->xAxis->setLabel("Ctrl. Vol. [V]");
     plot->xAxis2->setVisible(true);
     plot->xAxis2->setLabel("y-Index");
+    plotUnit = 0;
 
     //set 7 plots.
     for(int i = 0; i < 7 ; i++) {
@@ -72,11 +74,15 @@ void FitResult::ClearData()
     fitParError = NULL;
     SSR = NULL;
 
+    file = NULL;
+
 }
 
 void FitResult::SetDataSize(FileIO *file)
 {
     if( fixedSize == 1) return;
+
+    this->file = file;
 
     int n = file->GetDataSetSize();
 
@@ -84,8 +90,6 @@ void FitResult::SetDataSize(FileIO *file)
     fitPar = new QVector<double> [n];
     fitParError = new QVector<double> [n];
     SSR = new double [n];
-    yValue = file->GetDataSetY();
-    //plot->xAxis->setRange(yValue[0], yValue[n-1]);
     plot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
     plot->xAxis2->setRange(0,n-1);
     if( file->HasBackGround()) plot->xAxis2->setRange(1,n-1);
@@ -181,14 +185,44 @@ void FitResult::PlotData()
     on_checkBox_P_clicked(ui->checkBox_P->isChecked());
     on_checkBox_SSR_clicked(ui->checkBox_SSR->isChecked());
 
+    double xMin, xMax;
+    switch (plotUnit) {
+    case 0:
+        xMin = file->GetYMin_CV();
+        xMax = file->GetYMax_CV();
+        plot->xAxis->setLabel("Ctrl. Vol. [V]");
+        break;
+    case 1:
+        xMin = file->GetYMin_HV();
+        xMax = file->GetYMax_HV();
+        plot->xAxis->setLabel("Hall Vol. [mV]");
+        break;
+    case 2:
+        xMin = file->HV2Mag(file->GetYMin_HV());
+        xMax = file->HV2Mag(file->GetYMax_HV());
+        plot->xAxis->setLabel("B-field [mT]");
+        break;
+    }
+    plot->xAxis->setRange(xMin, xMax);
+
+    plot->replot();
+
 }
 
 void FitResult::PlotSingleData(int plotID){
     // plotID, 1 = a, 2 = Ta, 3 = b, 4 = Tb, 5 = c
 
     QVector<double> x, y, ye;
-    for(int i = 0; i < dataSize; i++){
-        x.push_back(yValue[i]);
+    int iStart = 0;
+    if( file->HasBackGround()) iStart = file->GetBGIndex()+1;
+    for(int i = iStart; i < dataSize; i++){
+
+        double xtemp = file->GetDataY_HV(i);
+        switch (plotUnit) {
+        case 1: x.push_back(xtemp);break;
+        case 2: x.push_back(file->HV2Mag(xtemp));break;
+        default: x.push_back(file->GetDataY_CV(i));break;
+        }
         y.push_back(fitPar[i][plotID]);
         ye.push_back(fitParError[i][plotID]);
     }
@@ -261,8 +295,18 @@ void FitResult::on_checkBox_P_clicked(bool checked)
     if(checked){
 
         QVector<double> x, y, ye;
-        for(int i = 0; i < dataSize; i++){
-            x.push_back(yValue[i]);
+        int iStart = 0;
+        if( file->HasBackGround()) iStart = file->GetBGIndex()+1;
+        for(int i = iStart; i < dataSize; i++){
+
+            double xtemp = file->GetDataY_HV(i);
+
+            switch (plotUnit) {
+            case 1: x.push_back(xtemp);break;
+            case 2: x.push_back(file->HV2Mag(xtemp));break;
+            default: x.push_back(file->GetDataY_CV(i));break;
+            }
+
             double a = fabs(fitPar[i][0]);
             double b = fabs(fitPar[i][2]);
             double ea = fitParError[i][0];
@@ -292,8 +336,16 @@ void FitResult::on_checkBox_SSR_clicked(bool checked)
     if(checked){
 
         QVector<double> x, y;
-        for(int i = 0; i < dataSize; i++){
-            x.push_back(yValue[i]);
+        int iStart = 0;
+        if( file->HasBackGround()) iStart = file->GetBGIndex()+1;
+        for(int i = iStart; i < dataSize; i++){
+            double xtemp = file->GetDataY_HV(i);
+
+            switch (plotUnit) {
+            case 1: x.push_back(xtemp);break;
+            case 2: x.push_back(file->HV2Mag(xtemp));break;
+            default: x.push_back(file->GetDataY_CV(i));break;
+            }
             y.push_back(SSR[i]);
         }
 

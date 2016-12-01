@@ -55,9 +55,11 @@ public slots:
     double GetDataX(int xIndex){ return xData[xIndex];}
     double GetDataY_CV(int yIndex){ return yData_CV[yIndex];}
     double GetDataY_HV(int yIndex){ return yData_HV[yIndex];}
+    QString GetDataYName(int yIndex){return yString[yIndex];}
     double GetDataMeanZ(int yIndex){ return zMean[yIndex];}
     double GetDataMeanZMean() {return zMeanMean;}
 
+    int GetBGIndex(){return bgIndex;}
     double GetXMax(){return xMax;}
     double GetXMin(){return xMin;}
     double GetYMax_CV(){return yMax_CV;}
@@ -154,9 +156,7 @@ private:
 
     void CalMeanVector();
     void RescaleZData();
-
     int FindIndex(QVector<double> vec, double goal, bool dir);
-
 };
 
 #endif // FILEIO_H

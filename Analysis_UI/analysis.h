@@ -25,6 +25,7 @@ public:
     void SetY(int yIndex, double Bfield){ this->yIndex = yIndex; this->yValue = Bfield;}
     void SetData(const QVector<double> x, const QVector<double> y);
     void SetStartFitIndex(int index){ this->startIndex = index;}
+    void SetEndFitIndex(int index){ this->endIndex = index;}
     void Setlambda(double l){this->lambda = l;}
     void SetTORR(double x){ torr = x;}
     void SetMaxInteration(int i){this->MaxIter = i;}
@@ -45,6 +46,7 @@ public slots:
     int GetFitFlag(){return fitFlag;}
     int GetDataSize(){ return n;}
     int GetStartFitIndex(){return startIndex;}
+    int GetEndFitIndex(){return endIndex;}
     int GetStart_x(){return xdata[startIndex];}
     int GetParametersSize() {return p;}
     int GetNDF() {return DF;}
@@ -81,6 +83,8 @@ public slots:
 
     void Print();
     void PrintVector(QVector<double> vec, QString str);
+    void PrintMatrix(Matrix mat, QString str);
+    void PrintCoVarMatrix();
 
     void MsgConnector(QString msg){
         emit SendMsg(msg);
@@ -106,7 +110,7 @@ private:
     int MaxIter, nIter;
     double SSR;
     int n, p, DF;
-    int startIndex;
+    int startIndex, endIndex;
     int fitFlag;
     double delta; // SSR(p+h) - SSR(p)
     double mean, var; // sample

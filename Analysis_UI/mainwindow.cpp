@@ -34,9 +34,6 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->axisRect()->setRangeDragAxes(plot->xAxis, plot->yAxis);
     plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis);
 
-    //plot->axisRect()->setRangeDragAxes(plot->xAxis, plot->yAxis2);
-    //plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis2);
-
     //connect(plot, SIGNAL(axisClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(ChangeReactAxis(QCPAxis*)));
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
 
@@ -169,8 +166,9 @@ void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y){
     case 0: plot->graph(graphID)->setPen(QPen(Qt::blue)); break;
     case 1: plot->graph(graphID)->setPen(QPen(Qt::red)); break;
     case 2: plot->graph(graphID)->setPen(QPen(Qt::darkGreen)); break;
-    case 3: plot->graph(graphID)->setPen(QPen(Qt::magenta)); break;
-    case 4: plot->graph(graphID)->setPen(QPen(Qt::black)); break;
+    case 3: plot->graph(graphID)->setPen(QPen(Qt::darkGreen)); break;
+    case 4: plot->graph(graphID)->setPen(QPen(Qt::magenta)); break;
+    case 5: plot->graph(graphID)->setPen(QPen(Qt::black)); break;
     }
 
     plot->graph(graphID)->clearData();
@@ -217,9 +215,11 @@ void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
 void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
 {
     QPoint pt = mouse->pos();
-    QString msg;
-    msg.sprintf("(x, y) = (%f, %f)", ctplot->xAxis->pixelToCoord(pt.rx()), ctplot->yAxis->pixelToCoord(pt.ry()));
+    double x = ctplot->xAxis->pixelToCoord(pt.rx());
+    double y = ctplot->yAxis->pixelToCoord(pt.ry());
 
+    QString msg;
+    msg.sprintf("(x, y) = (%f, %f)", x, y);
     statusBar()->showMessage(msg);
 }
 
@@ -296,6 +296,8 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_y->setMaximum(file->GetDataSetSize()-1);
     ui->spinBox_x->setMinimum(0);
     ui->spinBox_x->setMaximum(file->GetDataSize()-1);
+    ui->spinBox_x2->setMinimum(0);
+    ui->spinBox_x2->setMaximum(file->GetDataSize()-1);
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
@@ -322,6 +324,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
 
     int xIndex = ana->FindXIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
+    ui->spinBox_x2->setValue(ui->spinBox_x2->maximum());
 
 }
 
@@ -350,6 +353,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     }
 
     ui->lineEdit_y->setText(QString::number(yValue)+ unitText);
+    ui->lineEdit_yName->setText(file->GetDataYName(arg1));
 
     Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1));
 
@@ -367,9 +371,16 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
 }
 
 void MainWindow::on_spinBox_x_valueChanged(int arg1){
-    statusBar()->showMessage("Changed x-Index.");
+    statusBar()->showMessage("Changed x-Index Start.");
     ui->lineEdit_x->setText(QString::number(file->GetDataX(arg1))+ " us");
     ana->SetStartFitIndex(arg1);
+    PlotFitFunc();
+}
+void MainWindow::on_spinBox_x2_valueChanged(int arg1)
+{
+    statusBar()->showMessage("Changed x-Index End.");
+    ui->lineEdit_x2->setText(QString::number(file->GetDataX(arg1))+ " us");
+    ana->SetEndFitIndex(arg1);
     PlotFitFunc();
 }
 
@@ -382,30 +393,27 @@ void MainWindow::PlotFitFunc(){
     ana->CalFitData(par);
     Plot(1, ana->GetData_x(), ana->GetFitData_y());
 
-    int xIndex = ui->spinBox_x->value();
-    double x = file->GetDataX(xIndex);
 
-    //Draw X-line
-    QVector<double> xline_y, xline_x;
+    //================Draw X-lines
+    int xIndex1 = ui->spinBox_x->value();
+    double x1 = file->GetDataX(xIndex1);
+    int xIndex2 = ui->spinBox_x2->value();
+    double x2 = file->GetDataX(xIndex2);
+    QVector<double> xline_y, xline_x1, xline_x2;
     double yMin = file->GetZMin();
     double yMax = file->GetZMax();
 
     double yRange = qMax(fabs(yMax), fabs(yMin));
 
-    //double yMean = (yMax + yMin)/2;
-    //double yWidth = (yMax - yMin)/2;
-    //
-    //yMin = yMean - yWidth*1.2;
-    //yMax = yMean + yWidth*1.2;
+    xline_y.push_back(-yRange);
+    xline_y.push_back(+yRange);
+    xline_x1.push_back(x1);
+    xline_x1.push_back(x1);
+    xline_x2.push_back(x2);
+    xline_x2.push_back(x2);
 
-    int size = ana->GetDataSize();
-    for(int i = 0; i < size; i++){
-        //double y = yMin + (yMax-yMin)*i/size;
-        double y = -yRange + 2*yRange*i/size;
-        xline_y.push_back(y);
-        xline_x.push_back(x);
-    }
-    Plot(2, xline_x, xline_y);
+    Plot(2, xline_x1, xline_y);
+    Plot(3, xline_x2, xline_y);
 
 }
 
@@ -474,6 +482,8 @@ void MainWindow::on_pushButton_Fit_clicked(){
     if( redFlag) ui->textEdit->setTextColor(QColor(255,0,0,255));
     ana->PrintVector(ana->GetSSRgrad(), "SSR grad");
     if( redFlag) ui->textEdit->setTextColor(QColor(0,0,0,255));
+
+    ana->PrintCoVarMatrix();
 
 
     Msg.sprintf("DF : %d, SSR: %f, delta: %e", ana->GetNDF(), ana->GetSSR(), ana->GetDelta() );
@@ -781,6 +791,7 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->pushButton_RestoreData->setEnabled(IO);
     ui->spinBox_y->setEnabled(IO);
     ui->spinBox_x->setEnabled(IO);
+    ui->spinBox_x2->setEnabled(IO);
     ui->checkBox_MeanCorr->setEnabled(IO);
     ui->verticalSlider_zOffset->setEnabled(IO);
     ui->verticalSlider_z->setEnabled(IO);
@@ -938,6 +949,9 @@ void MainWindow::on_comboBox_yLabelType_currentIndexChanged(int index)
     PlotContour(ui->verticalSlider_zOffset->value());
     //ctplot->replot();
 
+    fitResultPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
+    fitResultPlot->PlotData();
+
 }
 
 void MainWindow::on_actionConvert_Origin_Data_as_Single_X_CVS_triggered()
@@ -1015,3 +1029,4 @@ void MainWindow::on_actionSave_data_triggered()
 {
     file->SaveTxtData_row();
 }
+

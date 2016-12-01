@@ -36,6 +36,9 @@ void Analysis::Initialize(){
     zMin = 0;
     zMax = 0;
 
+    startIndex = 0;
+    endIndex = 0;
+
 }
 
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
@@ -96,7 +99,8 @@ int Analysis::Regression(QVector<double> par0)
     //Levenberg-Marquardt Algorithm
     fitFlag = 0;
     int xStart = this->startIndex;
-    int xEnd = this->n - 1;
+    //int xEnd = this->n - 1;
+    int xEnd = this->endIndex;
     int fitSize = xEnd - xStart + 1;
 
     this->p = par0.size();
@@ -205,7 +209,10 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     QString tmp;
     PrintVector(par0, "ini. par:");
 
-    tmp.sprintf("Fit Torr: %7.1e, Max Iteration: %d", torr, MaxIter);SendMsg(tmp);
+    tmp.sprintf("Fit Torr: %7.1e, Max Iteration: %d", torr, MaxIter);
+    SendMsg(tmp);
+    tmp.sprintf("Fit X-index (%d, %d) = (%f, %f) us ; DF = %d", startIndex, endIndex, xdata[startIndex], xdata[endIndex], DF);
+    SendMsg(tmp);
 
     nIter = 0;
     QVector<double> par = par0;
@@ -342,7 +349,8 @@ int Analysis::GnuFit(QVector<double> par)
 
     if( this->sol.isEmpty() ) return 1;
     int xStart = this->startIndex;
-    int xEnd = this->n - 1;
+    //int xEnd = this->n - 1;
+    int xEnd = this->endIndex;
     int fitSize = xEnd - xStart + 1;
     Matrix Y(fitSize,1);
     for(int i = 1; i <= fitSize ; i++) {
@@ -394,16 +402,17 @@ void Analysis::CalFitData(QVector<double> par){
 void Analysis::Print()
 {
     qDebug() << "======= Ana ==========";
-    qDebug("yIndex : %d, yValue : %f", yIndex, yValue);
-    qDebug("Data size : %d", n);
-    qDebug("par size : %d", p);
+    qDebug("         yIndex : %d, yValue : %f", yIndex, yValue);
+    qDebug("      Data size : %d", n);
+    qDebug("       par size : %d", p);
     qDebug("Start Fit Index : %d", startIndex);
-    qDebug("DF : %d", DF);
-    qDebug("Sample mean : %f", mean);
+    qDebug("  End Fit Index : %d", endIndex);
+    qDebug("             DF : %d", DF);
+    qDebug("    Sample mean : %f", mean);
     qDebug("Sample variance : %f", var);
-    qDebug("SSR : %f", SSR);
-    qDebug("fitFlag : %d", fitFlag);
-    qDebug("lambda : %f, delta : %f", lambda, delta);
+    qDebug("            SSR : %f", SSR);
+    qDebug("        fitFlag : %d", fitFlag);
+    qDebug("         lambda : %f, delta : %f", lambda, delta);
 
     PrintVector(sol, "sol:");
     PrintVector(dpar, "dpar:");
@@ -430,7 +439,54 @@ void Analysis::PrintVector(QVector<double> vec, QString str)
 
 }
 
-int Analysis::FindstartIndex(double goal){
+void Analysis::PrintMatrix(Matrix mat, QString str)
+{
+
+    int r = mat.GetRows();
+    int c = mat.GetCols();
+
+    QString tmp, msg;
+    msg.sprintf("%s(%d,%d) = ", str.toStdString().c_str(), r, c);
+    SendMsg(msg);
+
+    msg = "[" ;
+    for (int i = 1 ; i <= r ; i++){
+        if ( i > 1) msg += " " ;
+        for (int j = 1 ; j <= c-1; j++){
+            tmp.sprintf("%7.3f, ",mat(i,j));
+            msg += tmp;
+        }
+        if( i <= r -1) {
+            tmp.sprintf("%7.3f;", mat(i,c));
+        }else{
+            tmp.sprintf("%7.3f]", mat(i,c));
+        }
+        msg += tmp;
+        SendMsg(msg);
+        msg.clear();
+    }
+
+}
+
+void Analysis::PrintCoVarMatrix(){
+
+    int r = CoVar.GetRows();
+    int c = CoVar.GetCols();
+    Matrix mat(r, c);
+
+    for(int i = 1; i <= r; i++){
+        for( int j = 1; j <= c; j++){
+            double xy = CoVar(i,j);
+            double x  = CoVar(i,i);
+            double y  = CoVar(j,j);
+            mat(i,j) =  pow(xy,2) / x / y;
+        }
+    }
+
+    PrintMatrix(mat, "CoVaraince");
+}
+
+int Analysis::FindXIndex(double goal){
     int xIndex = 0;
     for(int i = 0; i < xdata.size() ; i++){
         if( xdata[i] >= goal){

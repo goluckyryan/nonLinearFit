@@ -30,6 +30,7 @@ public:
     void PlotSingleData(int plotID);
     QVector<double> ReSizeVector(QVector<double> vec);
     void SetFilePath(QString str){filePath = str;}
+    void SetPlotUnit(int unit){ this->plotUnit = unit;}
 
 signals:
     void SendMsg(QString str);
@@ -57,12 +58,14 @@ private:
 
     int dataSize;
     int parSize;
-    QVector<double> yValue;
     QVector<double> *fitPar;
     QVector<double> *fitParError;
     double *SSR;
 
+    FileIO * file;
+
     bool fixedSize;
+    int plotUnit;
 };
 
 #endif // FITRESULT_H

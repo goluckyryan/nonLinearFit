@@ -92,6 +92,8 @@ private slots:
 
     void on_actionSave_data_triggered();
 
+    void on_spinBox_x2_valueChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
