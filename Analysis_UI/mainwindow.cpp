@@ -235,6 +235,45 @@ void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
     statusBar()->showMessage(msg);
 }
 
+void MainWindow::SetXStartIndexByMouseClick(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot->xAxis->pixelToCoord(pt.rx());
+    int xIndex = file->GetXIndex(x);
+
+    ui->spinBox_x->setValue(xIndex);
+}
+
+void MainWindow::SetXEndIndexByMouseClick(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot->xAxis->pixelToCoord(pt.rx());
+    int xIndex = file->GetXIndex(x);
+
+    ui->spinBox_x2->setValue(xIndex);
+}
+
+void MainWindow::SetYIndexByMouseClick(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double y = ctplot->yAxis->pixelToCoord(pt.ry());
+
+    int yIndex = 0;
+    switch (ui->comboBox_yLabelType->currentIndex()) {
+    case 1:
+        yIndex = file->GetYIndex_HV(y);
+        break;
+    case 2:
+        yIndex = file->GetYIndex_HV(file->Mag2HV(y));
+        break;
+    default:
+        yIndex = file->GetYIndex_CV(y);
+        break;
+    }
+
+    ui->spinBox_y->setValue(yIndex);
+}
+
 void MainWindow::on_pushButton_OpenFile_clicked(){
 
     //close all planels
@@ -314,8 +353,10 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
+    connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXStartIndexByMouseClick(QMouseEvent*)));
+    //connect(plot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(SetXEndIndexByMouseClick(QMouseEvent*)));
     connect(ctplot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
-
+    connect(ctplot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClick(QMouseEvent*)));
     //========= Reset Data in fitResultDialog
     fitResultPlot->ClearData();
     fitResultPlot->SetDataSize(file);

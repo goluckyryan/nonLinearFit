@@ -40,11 +40,15 @@ private slots:
     void ChangeReactAxis(QCPAxis * axis);
     void ShowMousePositionInPlot(QMouseEvent * mouse);
     void ShowMousePositionInCTPlot(QMouseEvent * mouse);
+    void SetXStartIndexByMouseClick(QMouseEvent * mouse);
+    void SetXEndIndexByMouseClick(QMouseEvent * mouse);
+    void SetYIndexByMouseClick(QMouseEvent * mouse);
 
     void on_pushButton_OpenFile_clicked();
 
     void on_spinBox_y_valueChanged(int arg1);
     void on_spinBox_x_valueChanged(int arg1);
+    void on_spinBox_x2_valueChanged(int arg1);
 
     void on_lineEdit_a_returnPressed();
     void on_lineEdit_Ta_returnPressed();
@@ -63,8 +67,12 @@ private slots:
     void on_actionFit_Result_triggered();
     void on_actionB_Plot_triggered();
     void on_actionFFTW_Plot_triggered();
+
+    void on_actionSave_data_triggered();
     void on_actionSave_as_Single_X_CSV_triggered();
     void on_actionSave_as_Double_X_CSV_triggered();
+    void on_actionConvert_Origin_Data_as_Single_X_CVS_triggered();
+    void on_actionConvert_Origin_Data_as_Double_X_CVS_triggered();
 
     void setEnabledPlanel(bool IO);
 
@@ -79,20 +87,11 @@ private slots:
 
     void on_comboBox_yLabelType_currentIndexChanged(int index);
 
-    void on_actionConvert_Origin_Data_as_Single_X_CVS_triggered();
-    void on_actionConvert_Origin_Data_as_Double_X_CVS_triggered();
-
     void on_actionSave_Plot_as_PDF_triggered();
-
     void on_actionSave_B_Plot_as_PDF_triggered();
-
     void on_actionSave_Contour_Plot_as_PDF_triggered();
-
     void on_actionSave_Fit_Result_Plot_as_PDF_triggered();
 
-    void on_actionSave_data_triggered();
-
-    void on_spinBox_x2_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
