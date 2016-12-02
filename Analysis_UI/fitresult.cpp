@@ -28,7 +28,7 @@ FitResult::FitResult(QWidget *parent) :
     plot->yAxis2->setVisible(true);
     plot->yAxis2->setTickLabels(false);
     plot->yAxis2->setTicks(false);
-    plotUnit = 0;
+    plot->setAutoAddPlottableToLegend(true);
 
     //set 7 plots.
     for(int i = 0; i < 7 ; i++) {
@@ -55,7 +55,20 @@ FitResult::FitResult(QWidget *parent) :
     plot->graph(5)->setErrorPen(QPen(Qt::red));
     plot->graph(6)->setErrorPen(QPen(Qt::darkGreen));
 
+    //Set Plot Name
+    plot->graph(0)->setName("a");
+    plot->graph(1)->setName("Ta");
+    plot->graph(2)->setName("b");
+    plot->graph(3)->setName("Tb");
+    plot->graph(4)->setName("c");
+    plot->graph(5)->setName("Pol.");
+    plot->graph(6)->setName("SSR/ndf");
+
+    //Set Legend
+    //plot->legend->setVisible(true);
+
     fixedSize = 0;
+    plotUnit = 0;
 }
 
 FitResult::~FitResult()
@@ -117,6 +130,7 @@ void FitResult::SetDataSize(FileIO *file)
     msg.sprintf("Initaliate fitPar array. size : %d", n);
     SendMsg(msg);
 
+    plot->disconnect();
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowPlotValue(QMouseEvent*)));
 }
 
@@ -211,6 +225,16 @@ void FitResult::PlotData()
         break;
     }
     plot->xAxis->setRange(xMin, xMax);
+
+    if( plotUnit != 0){
+        plot->xAxis2->setTickLabels(false);
+        plot->xAxis2->setTicks(false);
+        plot->xAxis2->setLabel("");
+    }else{
+        plot->xAxis2->setTickLabels(true);
+        plot->xAxis2->setTicks(true);
+        plot->xAxis2->setLabel("y-Index");
+    }
 
     plot->replot();
 

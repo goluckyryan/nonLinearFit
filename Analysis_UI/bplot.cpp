@@ -80,6 +80,7 @@ void BPlot::SetData(FileIO *file)
 
     plot->graph(0)->clearData();
 
+    plot->disconnect();
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowPlotValue(QMouseEvent*)));
     connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYStart(QMouseEvent*)));
     connect(plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(SetYEnd(QMouseEvent*)));    
@@ -162,6 +163,16 @@ void BPlot::Plot()
 
     }
 
+    if( plotUnit != 0){
+        plot->xAxis2->setTickLabels(false);
+        plot->xAxis2->setTicks(false);
+        plot->xAxis2->setLabel("");
+    }else{
+        plot->xAxis2->setTickLabels(true);
+        plot->xAxis2->setTicks(true);
+        plot->xAxis2->setLabel("y-Index");
+    }
+
     plot->graph(0)->clearData();
     plot->yAxis->setRange(yMin, yMax);
 
@@ -201,6 +212,7 @@ void BPlot::on_spinBox_Start_valueChanged(int arg1)
     plot->yAxis->setLabel(yLabel);
 
     Plot();
+    RemovePlotItems();
 }
 
 void BPlot::on_spinBox_End_valueChanged(int arg1)
@@ -221,6 +233,7 @@ void BPlot::on_spinBox_End_valueChanged(int arg1)
     plot->yAxis->setLabel(yLabel);
 
     Plot();
+    RemovePlotItems();
 }
 
 void BPlot::on_pushButton_clicked()

@@ -386,6 +386,8 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
 
+    plot->disconnect();
+    ctplot->disconnect();
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
     connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXIndexByMouseClick(QMouseEvent*)));
     connect(ctplot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
