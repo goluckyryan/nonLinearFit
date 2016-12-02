@@ -306,6 +306,15 @@ void BPlot::FindZeros(QVector<double> x, QVector<double> y)
             zeros.push_back(x0);
         }
     }
+
+    QString msg ;
+    if( zeros.size() > 0){
+        msg.sprintf("Find Zero in (%7.4f, %7.4f) = %f", x[0],x[n-1], zeros[0]);
+    }else{
+        msg.sprintf("Find Zero in (%7.4f, %7.4f) = No Zeros.", x[0],x[n-1]);
+    }
+    SendMsg(msg);
+    ui->lineEdit_Msg->setText(msg);
 }
 
 void BPlot::SetYStart(QMouseEvent *mouse)
@@ -349,6 +358,11 @@ void BPlot::SetYEnd(QMouseEvent *mouse)
 
     //========== Create Find vector;
     QVector<double> tempX, tempY;
+    if( mouseYIndex1 > mouseYIndex2) {
+        int temp = mouseYIndex2;
+        mouseYIndex2 = mouseYIndex1;
+        mouseYIndex1 = temp;
+    }
     for(int i = mouseYIndex1 ; i <= mouseYIndex2; i++){
         tempX.push_back(this->x[i]);
         tempY.push_back(this->y[i]);
@@ -374,6 +388,9 @@ void BPlot::on_pushButton_Print_clicked()
 
     int ph = plot->geometry().height();
     int pw = plot->geometry().width();
+
+    //Clean the line
+    plot->graph(1)->clearData();
 
     bool ok = plot->savePdf(fileName, pw, ph );
 

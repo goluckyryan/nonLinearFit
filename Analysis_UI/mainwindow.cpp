@@ -40,12 +40,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ctplot->axisRect()->setupFullAxesBox(true);
     ctplot->xAxis->setLabel("time [us]");
     ctplot->yAxis->setLabel("Ctrl. Vol. [V]");
+
     //ctplot->setInteraction(QCP::iRangeZoom,true);
     //ctplot->yAxis2->setVisible(1);
     //ctplot->yAxis2->setLabel("index");
 
     colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
     colorMap->clearData();
+
+    //vertcal and horizontal lines on ctplot;
+    ctplot->addGraph();
+    ctplot->graph(0)->setPen(QPen(Qt::gray));
+    ctplot->graph(0)->clearData();
+    ctplot->addGraph();
+    ctplot->graph(1)->setPen(QPen(Qt::gray));
+    ctplot->graph(1)->clearData();
+
 
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
@@ -233,6 +243,33 @@ void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
     QString msg;
     msg.sprintf("(x, y) = (%7.4f, %7.4f), index = (%4d, %4d)", x, y, xIndex, yIndex);
     statusBar()->showMessage(msg);
+
+    //Plot a vertical line
+    QVector<double> lineX, lineY;
+    lineY.push_back(y);
+    lineY.push_back(y);
+    double xRange = ctplot->xAxis->range().maxRange;
+    double yRange = ctplot->yAxis->range().maxRange;
+    lineX.push_back(xRange);
+    lineX.push_back(-xRange);
+
+    ctplot->graph(0)->clearData();
+    ctplot->graph(0)->addData(lineX, lineY);
+
+    lineX.clear();
+    lineY.clear();
+    lineX.push_back(x);
+    lineX.push_back(x);
+    lineY.push_back(yRange);
+    lineY.push_back(-yRange);
+
+    ctplot->graph(1)->clearData();
+    ctplot->graph(1)->addData(lineX, lineY);
+
+    ctplot->replot();
+
+
+
 }
 
 void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
@@ -454,10 +491,7 @@ void MainWindow::PlotFitFunc(){
     int xIndex2 = ui->spinBox_x2->value();
     double x2 = file->GetDataX(xIndex2);
     QVector<double> xline_y, xline_x1, xline_x2;
-    double yMin = file->GetZMin();
-    double yMax = file->GetZMax();
-
-    double yRange = qMax(fabs(yMax), fabs(yMin));
+    double yRange = plot->yAxis->range().maxRange;
 
     xline_y.push_back(-yRange);
     xline_y.push_back(+yRange);
@@ -1059,6 +1093,10 @@ void MainWindow::on_actionSave_Contour_Plot_as_PDF_triggered()
 
     int ph = ctplot->geometry().height();
     int pw = ctplot->geometry().width();
+
+    //clear the lines;
+    ctplot->graph(0)->clearData();
+    ctplot->graph(1)->clearData();
 
     bool ok = ctplot->savePdf(fileName, pw, ph );
 
