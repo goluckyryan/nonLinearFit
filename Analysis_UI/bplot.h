@@ -44,6 +44,12 @@ private slots:
     void SetYStart(QMouseEvent * mouse);
     void SetYEnd(QMouseEvent * mouse);
 
+    void RemovePlotItems(){
+        plot->clearItems();
+        zeros.clear();
+        peaks.clear();
+    }
+
 
 private:
     Ui::BPlot *ui;
@@ -53,9 +59,11 @@ private:
     FileIO *file;
 
     QVector<double> x, y;
+    double yMin, yMax;
     int plotUnit;
 
     QVector<double> zeros;
+    QVector<double> peaks;
 
     int mouseYIndex1;
     int mouseYIndex2;

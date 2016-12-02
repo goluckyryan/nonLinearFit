@@ -248,10 +248,8 @@ void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
     QVector<double> lineX, lineY;
     lineY.push_back(y);
     lineY.push_back(y);
-    double xRange = ctplot->xAxis->range().maxRange;
-    double yRange = ctplot->yAxis->range().maxRange;
-    lineX.push_back(xRange);
-    lineX.push_back(-xRange);
+    lineX.push_back(ctplot->xAxis->range().lower);
+    lineX.push_back(ctplot->xAxis->range().upper);
 
     ctplot->graph(0)->clearData();
     ctplot->graph(0)->addData(lineX, lineY);
@@ -260,8 +258,8 @@ void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
     lineY.clear();
     lineX.push_back(x);
     lineX.push_back(x);
-    lineY.push_back(yRange);
-    lineY.push_back(-yRange);
+    lineY.push_back(ctplot->yAxis->range().lower);
+    lineY.push_back(ctplot->yAxis->range().upper);
 
     ctplot->graph(1)->clearData();
     ctplot->graph(1)->addData(lineX, lineY);
@@ -845,6 +843,10 @@ void MainWindow::PlotContour(double offset)
             //}
         }
     }
+
+    //Clean line, otherwise, the plot range will mess up;
+    ctplot->graph(0)->clearData();
+    ctplot->graph(1)->clearData();
 
     ctplot->rescaleAxes();
 

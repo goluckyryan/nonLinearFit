@@ -82,7 +82,11 @@ void BPlot::SetData(FileIO *file)
 
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowPlotValue(QMouseEvent*)));
     connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYStart(QMouseEvent*)));
-    connect(plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(SetYEnd(QMouseEvent*)));
+    connect(plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(SetYEnd(QMouseEvent*)));    
+    connect(plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(RemovePlotItems()));
+
+    zeros.clear();
+    peaks.clear();
 }
 
 void BPlot::Plot()
@@ -106,7 +110,6 @@ void BPlot::Plot()
 
     double dx = xdata[nx-1] - xdata[nx-2];
 
-    double yMin, yMax;
     double xMin, xMax;
     switch (plotUnit) {
     case 0:
@@ -127,6 +130,7 @@ void BPlot::Plot()
     }
     plot->xAxis->setRange(xMin, xMax);
 
+    yMin, yMax;
     int startI = 0;
     if( file->HasBackGround() ) startI = 1;
     for( int i = startI; i < ny; i++){
@@ -309,7 +313,7 @@ void BPlot::FindPeak(QVector<double> x, QVector<double> y)
 
 void BPlot::FindZeros(QString type,QVector<double> x, QVector<double> y)
 {
-    zeros.clear();
+    QVector<double> sols;
 
     int n = y.size();
     for( int i = 1; i < n; i++){
@@ -321,15 +325,25 @@ void BPlot::FindZeros(QString type,QVector<double> x, QVector<double> y)
         if( y1*y2 <= 0){
             double x0 = x1 - y1*(x2-x1)/(y2-y1);
             qDebug("%d | (%f, %f), (%f, %f) = %f", i, x1, y1, x2, y2, x0);
-            zeros.push_back(x0);
+            sols.push_back(x0);
+            //check x0 appeard in zeros, if not , save;
+            if( zeros.indexOf(x0)== -1 && type == "Zero(s)"){
+                zeros.push_back(x0);
+            }
+            if( peaks.indexOf(x0)== -1 && type == "Peak(s)"){
+                peaks.push_back(x0);
+            }
         }
     }
 
+    qDebug() << zeros;
+    qDebug() << sols;
+
     QString msg ;
-    if( zeros.size() > 0){
-        msg.sprintf("Find %s in (%7.4f, %7.4f) = %f", type.toStdString().c_str(), x[0],x[n-1], zeros[0]);
-        for(int i = 1; i < zeros.size() ; i++){
-            msg.append(" ," + QString::number(zeros[i]));
+    if( sols.size() > 0){
+        msg.sprintf("Find %s in (%7.4f, %7.4f) = %f", type.toStdString().c_str(), x[0],x[n-1], sols[0]);
+        for(int i = 1; i < sols.size() ; i++){
+            msg.append(" ," + QString::number(sols[i]));
         }
     }else{
         msg.sprintf("Find %s in (%7.4f, %7.4f) = No Zeros.", type.toStdString().c_str(), x[0],x[n-1]);
@@ -337,14 +351,36 @@ void BPlot::FindZeros(QString type,QVector<double> x, QVector<double> y)
     SendMsg(msg);
     ui->lineEdit_Msg->setText(msg);
 
-    //if( type == "Zero(s)"){
-    //    QCPItemLine *arrow = new QCPItemLine(plot);
-    //    plot->addItem(arrow);
-    //    arrow->start->setCoords(zeros[0], plot->yAxis->range().upper / 3);
-    //    arrow->end->setCoords(zeros[0], 0); // point to (4, 1.6) in x-y-plot coordinates
-    //    arrow->setHead(QCPLineEnding::esSpikeArrow);
-    //    plot->replot();
-    //}
+    if( type == "Zero(s)" && zeros.size()>0){
+        for(int i = 0; i < zeros.size(); i++){
+            //check if the zeros is shown
+            bool skipFlag = 0;
+            for( int j = 0; j < plot->itemCount(); j++){
+                if( j % 2 == 1) continue;
+                double test = ((plot->item(j)->positions())[0])->coords().rx();
+                if( test == zeros[i] ) skipFlag = 1;
+                //if( fabs(test - zeros[i]) < 0.001 ) skipFlag = 1;
+            }
+
+            if( skipFlag ) continue;
+
+            QCPItemText *textLabel = new QCPItemText(plot);
+            plot->addItem(textLabel);
+            textLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
+            textLabel->position->setCoords(zeros[i], yMax / 2);
+            QString tmp; tmp.sprintf("%7.3f", zeros[i]);
+            textLabel->setText(tmp);
+            textLabel->setRotation(-90);
+
+            QCPItemLine *arrow = new QCPItemLine(plot);
+            plot->addItem(arrow);
+            qDebug() << "items count : " << plot->itemCount();
+            arrow->start->setParentAnchor(textLabel->left);
+            arrow->end->setCoords(zeros[i], 0);
+            arrow->setHead(QCPLineEnding::esSpikeArrow);
+            plot->replot();
+        }
+    }
 
 }
 
@@ -397,9 +433,11 @@ void BPlot::SetYEnd(QMouseEvent *mouse)
         tempY.push_back(this->y[i]);
     }
 
-    FindZeros("Zero(s)", tempX, tempY);
+    if( mouse->button() == Qt::LeftButton){
+        FindZeros("Zero(s)", tempX, tempY);
+    }
 
-    if( zeros.size() == 0){
+    if( mouse->button() == Qt::RightButton){
         FindPeak(tempX, tempY);
     }
 
