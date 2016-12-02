@@ -19,6 +19,8 @@ BPlot::BPlot(QWidget *parent) :
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);
     plot->axisRect()->setRangeZoom(Qt::Vertical);
+    //plot->axisRect()->setRangeDrag(Qt::Horizontal);
+    //plot->axisRect()->setRangeZoom(Qt::Horizontal);
     plot->addGraph();
     plot->graph(0)->setPen(QPen(Qt::blue));
     plot->graph(0)->clearData();
@@ -289,7 +291,23 @@ void BPlot::ShowPlotValue(QMouseEvent *mouse)
     plot->replot();
 }
 
-void BPlot::FindZeros(QVector<double> x, QVector<double> y)
+void BPlot::FindPeak(QVector<double> x, QVector<double> y)
+{
+    if( x.size() < 3) return;
+    //use first derivative
+    QVector<double> xd, yd;
+    int n = y.size();
+    double dx = fabs(x[1] - x[0]);
+    for( int i = 1; i < n-1; i++ ){
+        xd.push_back(x[i]);
+        yd.push_back((y[i+1]-y[i-1])/2/dx);
+    }
+    FindZeros("Peak(s)",xd, yd);
+
+    //use weigthed quadratic fit to get the peak;
+}
+
+void BPlot::FindZeros(QString type,QVector<double> x, QVector<double> y)
 {
     zeros.clear();
 
@@ -309,12 +327,25 @@ void BPlot::FindZeros(QVector<double> x, QVector<double> y)
 
     QString msg ;
     if( zeros.size() > 0){
-        msg.sprintf("Find Zero in (%7.4f, %7.4f) = %f", x[0],x[n-1], zeros[0]);
+        msg.sprintf("Find %s in (%7.4f, %7.4f) = %f", type.toStdString().c_str(), x[0],x[n-1], zeros[0]);
+        for(int i = 1; i < zeros.size() ; i++){
+            msg.append(" ," + QString::number(zeros[i]));
+        }
     }else{
-        msg.sprintf("Find Zero in (%7.4f, %7.4f) = No Zeros.", x[0],x[n-1]);
+        msg.sprintf("Find %s in (%7.4f, %7.4f) = No Zeros.", type.toStdString().c_str(), x[0],x[n-1]);
     }
     SendMsg(msg);
     ui->lineEdit_Msg->setText(msg);
+
+    //if( type == "Zero(s)"){
+    //    QCPItemLine *arrow = new QCPItemLine(plot);
+    //    plot->addItem(arrow);
+    //    arrow->start->setCoords(zeros[0], plot->yAxis->range().upper / 3);
+    //    arrow->end->setCoords(zeros[0], 0); // point to (4, 1.6) in x-y-plot coordinates
+    //    arrow->setHead(QCPLineEnding::esSpikeArrow);
+    //    plot->replot();
+    //}
+
 }
 
 void BPlot::SetYStart(QMouseEvent *mouse)
@@ -354,8 +385,6 @@ void BPlot::SetYEnd(QMouseEvent *mouse)
         break;
     }
 
-    qDebug("(%d, %d)", mouseYIndex1, mouseYIndex2);
-
     //========== Create Find vector;
     QVector<double> tempX, tempY;
     if( mouseYIndex1 > mouseYIndex2) {
@@ -368,7 +397,11 @@ void BPlot::SetYEnd(QMouseEvent *mouse)
         tempY.push_back(this->y[i]);
     }
 
-    FindZeros(tempX, tempY);
+    FindZeros("Zero(s)", tempX, tempY);
+
+    if( zeros.size() == 0){
+        FindPeak(tempX, tempY);
+    }
 
 }
 

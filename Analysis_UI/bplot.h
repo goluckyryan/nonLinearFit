@@ -38,7 +38,8 @@ private slots:
 
     void ShowPlotValue(QMouseEvent* mousePos1);
 
-    void FindZeros(QVector<double> x, QVector<double> y);
+    void FindPeak(QVector<double> x, QVector<double> y);
+    void FindZeros(QString type, QVector<double> x, QVector<double> y);
 
     void SetYStart(QMouseEvent * mouse);
     void SetYEnd(QMouseEvent * mouse);
