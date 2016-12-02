@@ -23,6 +23,11 @@ BPlot::BPlot(QWidget *parent) :
     plot->graph(0)->setPen(QPen(Qt::blue));
     plot->graph(0)->clearData();
 
+    // indicator
+    plot->addGraph();
+    plot->graph(1)->setPen(QPen(Qt::gray));
+    plot->graph(1)->clearData();
+
     plotUnit = 0;
 
 }
@@ -31,7 +36,6 @@ BPlot::~BPlot()
 {
     delete ui;
     delete plot;
-
 }
 
 void BPlot::SetData(FileIO *file)
@@ -75,7 +79,8 @@ void BPlot::SetData(FileIO *file)
     plot->graph(0)->clearData();
 
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowPlotValue(QMouseEvent*)));
-
+    connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYStart(QMouseEvent*)));
+    connect(plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(SetYEnd(QMouseEvent*)));
 }
 
 void BPlot::Plot()
@@ -268,6 +273,89 @@ void BPlot::ShowPlotValue(QMouseEvent *mouse)
     QString msg;
     msg.sprintf("(x, y) = (%7.4f, %7.4f), y-index = %4d", x, y, yIndex);
     ui->lineEdit_Msg->setText(msg);
+
+    //========= PLot a line
+    QVector<double> lineX, lineY;
+    lineX.push_back(x);
+    lineX.push_back(x);
+
+    double yRange = plot->yAxis->range().maxRange;
+
+    lineY.push_back(yRange);
+    lineY.push_back(-yRange);
+
+    plot->graph(1)->clearData();
+    plot->graph(1)->addData(lineX, lineY);
+    plot->replot();
+}
+
+void BPlot::FindZeros(QVector<double> x, QVector<double> y)
+{
+    zeros.clear();
+
+    int n = y.size();
+    for( int i = 1; i < n; i++){
+        double y1 = y[i-1];
+        double y2 = y[i];
+        double x1 = x[i-1];
+        double x2 = x[i];
+
+        if( y1*y2 <= 0){
+            double x0 = x1 - y1*(x2-x1)/(y2-y1);
+            qDebug("%d | (%f, %f), (%f, %f) = %f", i, x1, y1, x2, y2, x0);
+            zeros.push_back(x0);
+        }
+    }
+}
+
+void BPlot::SetYStart(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot->xAxis->pixelToCoord(pt.rx());
+
+    mouseYIndex1 = 0;
+    switch (plotUnit) {
+    case 1:
+        mouseYIndex1 = file->GetYIndex_HV(x);
+        break;
+    case 2:
+        mouseYIndex1 = file->GetYIndex_HV(file->Mag2HV(x));
+        break;
+    default:
+        mouseYIndex1 = file->GetYIndex_CV(x);
+        break;
+    }
+}
+
+void BPlot::SetYEnd(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot->xAxis->pixelToCoord(pt.rx());
+
+    mouseYIndex2 = 0;
+    switch (plotUnit) {
+    case 1:
+        mouseYIndex2 = file->GetYIndex_HV(x);
+        break;
+    case 2:
+        mouseYIndex2 = file->GetYIndex_HV(file->Mag2HV(x));
+        break;
+    default:
+        mouseYIndex2 = file->GetYIndex_CV(x);
+        break;
+    }
+
+    qDebug("(%d, %d)", mouseYIndex1, mouseYIndex2);
+
+    //========== Create Find vector;
+    QVector<double> tempX, tempY;
+    for(int i = mouseYIndex1 ; i <= mouseYIndex2; i++){
+        tempX.push_back(this->x[i]);
+        tempY.push_back(this->y[i]);
+    }
+
+    FindZeros(tempX, tempY);
+
 }
 
 

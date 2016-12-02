@@ -36,7 +36,12 @@ private slots:
     void on_spinBox_End_valueChanged(int arg1);
     void on_pushButton_clicked();
 
-    void ShowPlotValue(QMouseEvent* mouse);
+    void ShowPlotValue(QMouseEvent* mousePos1);
+
+    void FindZeros(QVector<double> x, QVector<double> y);
+
+    void SetYStart(QMouseEvent * mouse);
+    void SetYEnd(QMouseEvent * mouse);
 
 
 private:
@@ -48,6 +53,11 @@ private:
 
     QVector<double> x, y;
     int plotUnit;
+
+    QVector<double> zeros;
+
+    int mouseYIndex1;
+    int mouseYIndex2;
 
 };
 
