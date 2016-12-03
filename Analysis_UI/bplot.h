@@ -48,8 +48,11 @@ private slots:
         plot->clearItems();
         zeros.clear();
         peaks.clear();
+        plot->replot();
     }
 
+    void AddArrows();
+    void on_pushButton_ClearArrows_clicked();
 
 private:
     Ui::BPlot *ui;

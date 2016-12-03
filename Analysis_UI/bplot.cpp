@@ -84,7 +84,7 @@ void BPlot::SetData(FileIO *file)
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowPlotValue(QMouseEvent*)));
     connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYStart(QMouseEvent*)));
     connect(plot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(SetYEnd(QMouseEvent*)));    
-    connect(plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(RemovePlotItems()));
+    //connect(plot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(RemovePlotItems()));
 
     zeros.clear();
     peaks.clear();
@@ -174,7 +174,10 @@ void BPlot::Plot()
     }
 
     plot->graph(0)->clearData();
-    plot->yAxis->setRange(yMin, yMax);
+
+    double yRange = 2*qMax(fabs(yMin), fabs(yMax));
+
+    plot->yAxis->setRange(-yRange, yRange);
 
     plot->graph(0)->addData(x,y);
 
@@ -328,6 +331,8 @@ void BPlot::FindZeros(QString type,QVector<double> x, QVector<double> y)
 {
     QVector<double> sols;
 
+    qDebug() << x;
+
     int n = y.size();
     for( int i = 1; i < n; i++){
         double y1 = y[i-1];
@@ -349,8 +354,8 @@ void BPlot::FindZeros(QString type,QVector<double> x, QVector<double> y)
         }
     }
 
-    qDebug() << zeros;
-    qDebug() << sols;
+    //qDebug() << zeros;
+    //qDebug() << sols;
 
     QString msg ;
     if( sols.size() > 0){
@@ -364,36 +369,7 @@ void BPlot::FindZeros(QString type,QVector<double> x, QVector<double> y)
     SendMsg(msg);
     ui->lineEdit_Msg->setText(msg);
 
-    if( type == "Zero(s)" && zeros.size()>0){
-        for(int i = 0; i < zeros.size(); i++){
-            //check if the zeros is shown
-            bool skipFlag = 0;
-            for( int j = 0; j < plot->itemCount(); j++){
-                if( j % 2 == 1) continue;
-                double test = ((plot->item(j)->positions())[0])->coords().rx();
-                if( test == zeros[i] ) skipFlag = 1;
-                //if( fabs(test - zeros[i]) < 0.001 ) skipFlag = 1;
-            }
-
-            if( skipFlag ) continue;
-
-            QCPItemText *textLabel = new QCPItemText(plot);
-            plot->addItem(textLabel);
-            textLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
-            textLabel->position->setCoords(zeros[i], yMax / 2);
-            QString tmp; tmp.sprintf("%7.3f", zeros[i]);
-            textLabel->setText(tmp);
-            textLabel->setRotation(-90);
-
-            QCPItemLine *arrow = new QCPItemLine(plot);
-            plot->addItem(arrow);
-            qDebug() << "items count : " << plot->itemCount();
-            arrow->start->setParentAnchor(textLabel->left);
-            arrow->end->setCoords(zeros[i], 0);
-            arrow->setHead(QCPLineEnding::esSpikeArrow);
-            plot->replot();
-        }
-    }
+    AddArrows();
 
 }
 
@@ -441,6 +417,7 @@ void BPlot::SetYEnd(QMouseEvent *mouse)
         mouseYIndex2 = mouseYIndex1;
         mouseYIndex1 = temp;
     }
+    qDebug("(%d, %d)", mouseYIndex1, mouseYIndex2);
     for(int i = mouseYIndex1 ; i <= mouseYIndex2; i++){
         tempX.push_back(this->x[i]);
         tempY.push_back(this->y[i]);
@@ -454,6 +431,88 @@ void BPlot::SetYEnd(QMouseEvent *mouse)
         FindPeak(tempX, tempY);
     }
 
+}
+
+void BPlot::AddArrows()
+{
+    if( zeros.size()>0){
+        for(int i = 0; i < zeros.size(); i++){
+            //check if the zeros is shown
+            bool skipFlag = 0;
+            for( int j = 0; j < plot->itemCount(); j++){
+                if( j % 2 == 1) continue;
+                double test = ((plot->item(j)->positions())[0])->coords().rx();
+                if( test == zeros[i] ) skipFlag = 1;
+                //if( fabs(test - zeros[i]) < 0.001 ) skipFlag = 1;
+            }
+
+            if( skipFlag ) continue;
+
+            QCPItemText *textLabel = new QCPItemText(plot);
+            plot->addItem(textLabel);
+            textLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
+            textLabel->position->setCoords(zeros[i], yMax/2);
+            QString tmp; tmp.sprintf("%7.3f", zeros[i]);
+            textLabel->setText(tmp);
+            textLabel->setRotation(-90);
+
+            QCPItemLine *arrow = new QCPItemLine(plot);
+            plot->addItem(arrow);
+            arrow->start->setParentAnchor(textLabel->left);
+            arrow->end->setCoords(zeros[i], 0);
+            arrow->setHead(QCPLineEnding::esSpikeArrow);
+            plot->replot();
+        }
+    }
+
+    if( peaks.size()>0){
+        for(int i = 0; i < peaks.size(); i++){
+            //check if the zeros is shown
+            bool skipFlag = 0;
+            for( int j = 0; j < plot->itemCount(); j++){
+                if( j % 2 == 1) continue;
+                double test = ((plot->item(j)->positions())[0])->coords().rx();
+                if( test == peaks[i] ) skipFlag = 1;
+                //if( fabs(test - zeros[i]) < 0.001 ) skipFlag = 1;
+            }
+
+            if( skipFlag ) continue;
+
+            double yOffset = 0;
+            double dx = fabs(x[1] - x[0]);
+            for( int k = 0; k < x.size(); k++){
+                if( fabs(x[k] - peaks[i]) < dx/2 ){
+                    yOffset = y[k];
+                    break;
+                }
+            }
+
+            QCPItemText *textLabel = new QCPItemText(plot);
+            plot->addItem(textLabel);
+            textLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
+            if( yOffset >= 0){
+                textLabel->position->setCoords(peaks[i], yOffset + yMax/2);
+            }else{
+                textLabel->position->setCoords(peaks[i], yOffset - yMax/2);
+            }
+            QString tmp; tmp.sprintf("%7.3f", peaks[i]);
+            textLabel->setText(tmp);
+            textLabel->setRotation(-90);
+
+            QCPItemLine *arrow = new QCPItemLine(plot);
+            plot->addItem(arrow);
+            if( yOffset >= 0 ){
+                arrow->start->setParentAnchor(textLabel->left);
+            }else{
+                arrow->start->setParentAnchor(textLabel->right);
+            }
+            arrow->end->setCoords(peaks[i], yOffset);
+            arrow->setHead(QCPLineEnding::esSpikeArrow);
+            plot->replot();
+        }
+    }
+
+    qDebug() << "items count : " << plot->itemCount();
 }
 
 
@@ -483,4 +542,9 @@ void BPlot::on_pushButton_Print_clicked()
     }else{
         SendMsg("Save Failed.");
     }
+}
+
+void BPlot::on_pushButton_ClearArrows_clicked()
+{
+    RemovePlotItems();
 }
