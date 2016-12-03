@@ -874,14 +874,19 @@ void MainWindow::on_actionB_Plot_triggered()
 
 void MainWindow::setEnabledPlanel(bool IO)
 {
+    ui->checkBox_AutoFit->setEnabled(IO);
+
     ui->actionB_Plot->setEnabled(IO);
     ui->actionFFTW_Plot->setEnabled(IO);
+    ui->actionFit_Result->setEnabled(IO);
+
     ui->pushButton_Fit->setEnabled(IO);
     ui->pushButton_FitAll->setEnabled(IO);
     ui->pushButton_reset->setEnabled(IO);
     ui->pushButton_save->setEnabled(IO);
     ui->pushButton_RestoreData->setEnabled(IO);
     ui->spinBox_y->setEnabled(IO);
+    ui->spinBox_BGIndex->setEnabled(IO);
     ui->spinBox_x->setEnabled(IO);
     ui->spinBox_x2->setEnabled(IO);
     ui->checkBox_MeanCorr->setEnabled(IO);
@@ -890,6 +895,17 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->checkBox_BGsub->setEnabled(IO);
     ui->spinBox_MovingAvg->setEnabled(IO);
     ui->comboBox_yLabelType->setEnabled(IO);
+
+    ui->actionConvert_Origin_Data_as_Double_X_CVS->setEnabled(IO);
+    ui->actionConvert_Origin_Data_as_Single_X_CVS->setEnabled(IO);
+    ui->actionSave_as_Double_X_CSV->setEnabled(IO);
+    ui->actionSave_as_Single_X_CSV->setEnabled(IO);
+    ui->actionSave_data->setEnabled(IO);
+
+    ui->actionSave_Plot_as_PDF->setEnabled(IO);
+    ui->actionSave_Contour_Plot_as_PDF->setEnabled(IO);
+    ui->actionSave_B_Plot_as_PDF->setEnabled(IO);
+    ui->actionSave_Fit_Result_Plot_as_PDF->setEnabled(IO);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)

@@ -669,7 +669,7 @@ void FileIO::SaveTxtData_row()
     int yStart = 0;
     if( hadBG ) yStart = bgIndex + 1;
     for( int y = yStart; y < ySize; y++){
-        tmp.sprintf("%*s,", nameLenght, yString[yStart].toStdString().c_str()); str = tmp;
+        tmp.sprintf("%*s,", nameLenght, yString[y].toStdString().c_str()); str = tmp;
         double bg = 0;
         for( int i = 0; i < xSize - 1 ; i++){
             if( hadBG ) bg = zData[y][i];
