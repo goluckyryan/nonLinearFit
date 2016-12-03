@@ -67,6 +67,16 @@ FFTPlot::FFTPlot(QWidget *parent) :
     plot_P->axisRect()->setRangeDrag(Qt::Horizontal);
     plot_P->axisRect()->setRangeZoom(Qt::Horizontal);
 
+    plot_A->addGraph();
+    plot_A->addGraph();
+    plot_A->graph(0)->setPen(QPen(Qt::black));
+    plot_A->graph(1)->setPen(QPen(Qt::black));
+    plot_P->addGraph();
+    plot_P->addGraph();
+    plot_P->graph(0)->setPen(QPen(Qt::black));
+    plot_P->graph(1)->setPen(QPen(Qt::black));
+
+
     filterID = 0;
     filterApplied = 0;
     filterChanged = 0;
@@ -438,6 +448,13 @@ void FFTPlot::on_pushButton_CalFFT_clicked()
 
     ContourPlot();
     RescalePlots();
+
+    plot_A->disconnect();
+    plot_P->disconnect();
+    connect(plot_A, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(GetPosOnPlotA(QMouseEvent*)));
+    connect(plot_P, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(GetPosOnPlotP(QMouseEvent*)));
+    connect(plot_A, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(GetPosOnPlotA(QMouseEvent*)));
+    connect(plot_P, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(GetPosOnPlotP(QMouseEvent*)));
 }
 
 void FFTPlot::on_checkBox_RemoveConstant_clicked()
@@ -796,6 +813,10 @@ void FFTPlot::on_checkBox_EnableY_clicked(bool checked)
     }
 
     needToCalFilterFuncY = 1;
+
+    plot_A->graph(1)->clearData();
+    plot_P->graph(1)->clearData();
+
     ContourPlot();
 }
 
@@ -857,3 +878,96 @@ void FFTPlot::on_lineEdit_YfreqL_editingFinished()
     ui->lineEdit_Msg->setText("The FFTW data did not changed. chlick \"Apply Filter\" ");
 
 }
+
+void FFTPlot::GetPosOnPlotA(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot_A->xAxis->pixelToCoord(pt.rx());
+    double y = plot_A->yAxis->pixelToCoord(pt.ry());
+
+    QPoint coord(x,y);
+
+    ShowLinesOnPlotA(coord);
+    ShowLinesOnPlotP(coord);
+
+    if( mouse->button() == Qt::LeftButton){
+        ui->horizontalSlider_freqH->setValue(fabs(x));
+        if(ui->checkBox_EnableY->isChecked()){
+            ui->verticalSlider_freqH->setValue(fabs(y));
+        }
+    }else if(mouse->button() == Qt::RightButton){
+        if( filterID == 3 || filterID == 4){
+            ui->horizontalSlider_freqL->setValue(fabs(x));
+            if(ui->checkBox_EnableY->isChecked()){
+                ui->verticalSlider_freqL->setValue(fabs(y));
+            }
+        }
+    }
+
+}
+
+void FFTPlot::GetPosOnPlotP(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot_P->xAxis->pixelToCoord(pt.rx());
+    double y = plot_P->yAxis->pixelToCoord(pt.ry());
+
+    QPoint coord(x,y);
+
+    ShowLinesOnPlotA(coord);
+    ShowLinesOnPlotP(coord);
+}
+
+void FFTPlot::ShowLinesOnPlotA(QPoint pt)
+{
+    QVector<double> lineX, lineY;
+    lineX.push_back(pt.rx());
+    lineX.push_back(pt.rx());
+
+    lineY.push_back(plot_A->yAxis->range().upper);
+    lineY.push_back(plot_A->yAxis->range().lower);
+
+    plot_A->graph(0)->clearData();
+    plot_A->graph(0)->addData(lineX, lineY);
+
+    if(ui->checkBox_EnableY->isChecked()){
+        lineX.clear();
+        lineY.clear();
+        lineX.push_back(plot_A->xAxis->range().upper);
+        lineX.push_back(plot_A->xAxis->range().lower);
+        lineY.push_back(pt.ry());
+        lineY.push_back(pt.ry());
+        plot_A->graph(1)->clearData();
+        plot_A->graph(1)->addData(lineX, lineY);
+    }
+
+    plot_A->replot();
+
+}
+
+void FFTPlot::ShowLinesOnPlotP(QPoint pt)
+{
+    QVector<double> lineX, lineY;
+    lineX.push_back(pt.rx());
+    lineX.push_back(pt.rx());
+
+    lineY.push_back(plot_P->yAxis->range().upper);
+    lineY.push_back(plot_P->yAxis->range().lower);
+
+    plot_P->graph(0)->clearData();
+    plot_P->graph(0)->addData(lineX, lineY);
+
+    if(ui->checkBox_EnableY->isChecked()){
+        lineX.clear();
+        lineY.clear();
+        lineX.push_back(plot_P->xAxis->range().upper);
+        lineX.push_back(plot_P->xAxis->range().lower);
+        lineY.push_back(pt.ry());
+        lineY.push_back(pt.ry());
+        plot_P->graph(1)->clearData();
+        plot_P->graph(1)->addData(lineX, lineY);
+    }
+
+    plot_P->replot();
+}
+

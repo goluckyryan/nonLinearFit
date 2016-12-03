@@ -61,6 +61,11 @@ private slots:
     void on_lineEdit_YfreqH_editingFinished();
     void on_lineEdit_YfreqL_editingFinished();
 
+    void GetPosOnPlotA(QMouseEvent * mouse);
+    void GetPosOnPlotP(QMouseEvent * mouse);
+    void ShowLinesOnPlotA(QPoint pt);
+    void ShowLinesOnPlotP(QPoint pt);
+
 private:
     Ui::FFTPlot *ui;
 
