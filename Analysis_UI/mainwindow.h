@@ -38,6 +38,7 @@ private slots:
 
     void RePlotPlots();
     void ChangeReactAxis(QCPAxis * axis);
+    void ChangeYAxis2Range(QCPRange range);
     void ShowMousePositionInPlot(QMouseEvent * mouse);
     void ShowMousePositionInCTPlot(QMouseEvent * mouse);
     void SetXIndexByMouseClick(QMouseEvent * mouse);

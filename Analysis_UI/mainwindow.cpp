@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->yAxis->setLabel("Voltage [a.u.]");
     plot->yAxis2->setVisible(true);
     plot->yAxis2->setTickLabels(false);
-    plot->yAxis2->setTicks(false);
+    plot->yAxis2->setTicks(true);
     plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);
@@ -34,6 +34,10 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->axisRect()->setRangeDragAxes(plot->xAxis, plot->yAxis);
     plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis);
 
+    //this sync yaxis2 range as yaxis
+    connect(plot->yAxis, SIGNAL(rangeChanged(QCPRange)), this , SLOT(ChangeYAxis2Range(QCPRange)));
+
+    //this can change the react axis
     //connect(plot, SIGNAL(axisClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(ChangeReactAxis(QCPAxis*)));
 
     ctplot = ui->customPlot_CT;
@@ -205,6 +209,11 @@ void MainWindow::ChangeReactAxis(QCPAxis *axis)
 {
     if( axis != plot->yAxis || axis != plot->yAxis2) return;
     plot->axisRect()->setRangeZoomAxes(plot->xAxis, axis);
+}
+
+void MainWindow::ChangeYAxis2Range(QCPRange range)
+{
+    plot->yAxis2->setRange( range);
 }
 
 void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
