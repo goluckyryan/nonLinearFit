@@ -6,6 +6,7 @@ FFTPlot::FFTPlot(QWidget *parent) :
     ui(new Ui::FFTPlot)
 {
     ui->setupUi(this);
+    this->setWindowFlags(Qt::Window);
 
     filterFuncX.clear();
     filterFuncY.clear();

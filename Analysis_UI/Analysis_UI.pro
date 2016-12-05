@@ -19,7 +19,7 @@ win32 {
 
     !contains(QMAKE_TARGET.arch, x86_64) {
         message("x86 build")
-        LIBS += "$$PWD/libfftw3-3_x32.dll"
+        LIBS += "$$PWD/libfftw3-3.dll"
         ## Windows x86 (32bit) specific build here
 
     } else {

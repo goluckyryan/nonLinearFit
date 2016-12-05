@@ -6,6 +6,7 @@ BPlot::BPlot(QWidget *parent) :
     ui(new Ui::BPlot)
 {
     ui->setupUi(this);
+    this->setWindowFlags(Qt::Window);
 
     plot = ui->plotArea;
     plot->xAxis->setLabel("Ctrl. Vol. [V]");

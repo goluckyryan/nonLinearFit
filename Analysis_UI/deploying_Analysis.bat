@@ -5,22 +5,32 @@ echo This is batch script for deploying Analysis in winodws
 Set desktop=%USERPROFILE%\Desktop
 echo Desktop PATH: %Desktop%
 echo =====================================================
-pause
+
+set /p bit="  32-bit or 64-bit Application? (32/64)"
 
 Set name=Analysis_UI.exe
-Set fftwLib=libfftw3-3_x64.dll
-Set origin=%Desktop%\nonLinearFit\build-Analysis_UI-Desktop_Qt_5_7_0_MSVC2015_64bit-Release\release
-Set destination=%Desktop%\Analysis_Release
-rem Set destination=C:\Users\Triplet-ESR\Desktop\kaka
-Set compiler=C:\Qt\5.7\msvc2015_64\bin\
+Set source=%Desktop%\nonLinearFit\Analysis_UI
+IF "%bit%"=="64" (
+	Set fftwLib=libfftw3-3_x64.dll
+	Set origin=%Desktop%\nonLinearFit\build-Analysis_UI-Desktop_Qt_5_7_0_MSVC2015_64bit-Release\release
+	Set compiler=C:\Qt\5.7\msvc2015_64\bin\
+	Set destination=%Desktop%\Analysis_Release_64
+)
+
+IF "%bit%"=="32" (
+	Set fftwLib=libfftw3-3.dll
+	Set origin=%Desktop%\nonLinearFit\build-Analysis_UI-Desktop_Qt_5_7_0_MinGW_32bit-Release\release
+	Set compiler=C:\Qt\5.7\mingw53_32\bin\
+	Set destination=%Desktop%\Analysis_Release_32
+)
 
 rem -----------------------------------------
 echo =====================================================
-echo Copy *.exe to %destination%
+echo %bit%-bit Application, Copy files to %destination%
 echo =====================================================
-xcopy %origin%\%name% %destination%
-xcopy %origin%\%fftwLib% %destination%
-pause
+xcopy /I/Y %origin%\%name% %destination%
+xcopy /I/Y %source%\%fftwLib% %origin%
+xcopy /I/Y %origin%\%fftwLib% %destination%
 
 rem -----------------------------------------
 echo =====================================================
@@ -34,4 +44,13 @@ IF "%deployFlag%"=="Y" (
 	echo %cd%
 	windeployqt.exe %destination%\%name%
 )
+
+IF "%bit%"=="32" (
+echo ***********************************
+echo When deploying 32-bit using minGW, some *.dll may be not copied.
+echo Please look at %compiler% to copy non-Qt *.dll
+echo ***********************************
+)
+
+echo --------------- bat script finished. ----------------
 pause

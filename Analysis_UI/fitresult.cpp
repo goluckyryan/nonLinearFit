@@ -11,6 +11,7 @@ FitResult::FitResult(QWidget *parent) :
 {
     ui->setupUi(this);
     plot = ui->widget;
+    this->setWindowFlags(Qt::Window);
 
     parSize = 4; // initial value
 
