@@ -149,7 +149,7 @@ void MainWindow::SetupPlots()
     plot->xAxis2->setRange(0, file->GetDataSize());
     double zRange1 = qMax(fabs(zMax), fabs(zMin));
     plot->yAxis->setRange(-zRange1, zRange1);
-    plot->yAxis2->setRange(-zRange1, zRange1);
+    //plot->yAxis2->setRange(-zRange1, zRange1);
 
     int multi = file->GetMultiIndex();
     QString yLabel;
@@ -500,10 +500,9 @@ void MainWindow::PlotFitFunc(){
     int xIndex2 = ui->spinBox_x2->value();
     double x2 = file->GetDataX(xIndex2);
     QVector<double> xline_y, xline_x1, xline_x2;
-    double yRange = plot->yAxis->range().maxRange;
 
-    xline_y.push_back(-yRange);
-    xline_y.push_back(+yRange);
+    xline_y.push_back(plot->yAxis->range().lower * 3);
+    xline_y.push_back(plot->yAxis->range().upper * 3);
     xline_x1.push_back(x1);
     xline_x1.push_back(x1);
     xline_x2.push_back(x2);
@@ -1097,6 +1096,10 @@ void MainWindow::on_actionSave_Plot_as_PDF_triggered()
 
     int ph = plot->geometry().height();
     int pw = plot->geometry().width();
+
+    //plot->graph(1)->clearData();
+    //plot->graph(2)->clearData();
+    //plot->graph(3)->clearData();
 
     bool ok = plot->savePdf(fileName, pw, ph );
 
