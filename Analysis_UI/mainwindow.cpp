@@ -581,7 +581,8 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
     ana->PrintCoVarMatrix();
 
-
+    Msg.sprintf("last Lambda : %e", ana->GetLambda());
+    Write2Log(Msg);
     Msg.sprintf("DF : %d, SSR: %f, delta: %e", ana->GetNDF(), ana->GetSSR(), ana->GetDelta() );
     Write2Log(Msg);
     double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
