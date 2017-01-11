@@ -164,10 +164,18 @@ void BPlot::Plot()
 
     }
 
+    //Integration of the plot
     double yRange_Int = 0;
     if( ui->checkBox_Integrate->isChecked()){
-        for(int i = 1; i < y.size(); i++){
-            y[i] += y[i-1];
+
+        if( file->IsYRevered() ){
+            for(int i = y.size() - 2 ; i >= 0; i--){
+                y[i] += y[i+1];
+            }
+        }else{
+            for(int i = 1; i < y.size(); i++){
+                y[i] += y[i-1];
+            }
         }
 
         for(int i = 0; i < y.size(); i++){
@@ -192,7 +200,6 @@ void BPlot::Plot()
     plot->yAxis->setRange(-yRange, yRange);
 
     plot->graph(0)->addData(x,y);
-
 
     plot->replot();
 
