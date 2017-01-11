@@ -54,6 +54,8 @@ private slots:
     void AddArrows();
     void on_pushButton_ClearArrows_clicked();
 
+    void on_checkBox_Integrate_clicked();
+
 private:
     Ui::BPlot *ui;
 

@@ -146,8 +146,8 @@ void BPlot::Plot()
         x.push_back(xValue);
         //integrated
         QVector<double> zdata = file->GetDataSetZ(i);
-        double sum = 0;
 
+        double sum = 0;
         for(int j = xStart; j <= xEnd ; j++){
             sum += zdata[j];
         }
@@ -164,6 +164,17 @@ void BPlot::Plot()
 
     }
 
+    double yRange_Int = 0;
+    if( ui->checkBox_Integrate->isChecked()){
+        for(int i = 1; i < y.size(); i++){
+            y[i] += y[i-1];
+        }
+
+        for(int i = 0; i < y.size(); i++){
+            if( fabs(y[i]) > yRange_Int ) yRange_Int = fabs(y[i]);
+        }
+    }
+
     if( plotUnit != 0){
         plot->xAxis2->setTickLabels(false);
         plot->xAxis2->setTicks(false);
@@ -177,10 +188,11 @@ void BPlot::Plot()
     plot->graph(0)->clearData();
 
     double yRange = 2*qMax(fabs(yMin), fabs(yMax));
-
+    if( ui->checkBox_Integrate->isChecked()) yRange = yRange_Int * 1.3 ;
     plot->yAxis->setRange(-yRange, yRange);
 
     plot->graph(0)->addData(x,y);
+
 
     plot->replot();
 
@@ -548,4 +560,9 @@ void BPlot::on_pushButton_Print_clicked()
 void BPlot::on_pushButton_ClearArrows_clicked()
 {
     RemovePlotItems();
+}
+
+void BPlot::on_checkBox_Integrate_clicked()
+{
+    Plot();
 }
