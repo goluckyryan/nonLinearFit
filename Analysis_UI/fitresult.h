@@ -52,6 +52,8 @@ private slots:
 
     void ShowPlotValue(QMouseEvent * mouse);
 
+    void CheckPlotComb();
+
 private:
     Ui::FitResult *ui;
     QCustomPlot * plot;
@@ -62,7 +64,9 @@ private:
     int parSize;
     QVector<double> *fitPar;
     QVector<double> *fitParError;
-    double *SSR;
+    double *chisq;
+
+    int plotComb;
 
     FileIO * file;
 

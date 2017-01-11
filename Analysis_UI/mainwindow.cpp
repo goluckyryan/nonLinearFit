@@ -561,6 +561,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
     int maxIter = ui->lineEdit_MaxIter->text().toInt();
     int torr = ui->lineEdit_TORR->text().toInt();
     //ana->Print();
+
     ana->Setlambda(lambda);
     ana->SetMaxInteration(maxIter);
     ana->SetTORR( pow(10,torr) );
@@ -571,7 +572,8 @@ void MainWindow::on_pushButton_Fit_clicked(){
     ana->PrintVector(ana->GetParError(), "error");
     //ana->PrintVector(ana->GetParPValue(), "p-Value");
     QVector<double> gradSSR = ana->GetSSRgrad();
-    bool redFlag = 0;
+
+    bool redFlag = 0; // reset redFlag
     for(int i = 0 ; i < gradSSR.size(); i++){
         redFlag |= std::abs(gradSSR[i]) > 0.02;
     }
@@ -594,6 +596,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
         Write2Log("!!!!!!!!!!!!!! fit not good.");
         ui->textEdit->setTextColor(QColor(0,0,0,255));
     }
+
     // update the parameter
     UpdateLineTextParameters(ana->GetParameters(), ana->GetParError());
 

@@ -6,12 +6,14 @@ FitResult::FitResult(QWidget *parent) :
     ui(new Ui::FitResult),
     fitPar(NULL),
     fitParError(NULL),
-    SSR(NULL),
+    chisq(NULL),
     file(NULL)
 {
     ui->setupUi(this);
     plot = ui->widget;
     this->setWindowFlags(Qt::Window);
+
+    plotComb = 0; // see CheckPlotComb()
 
     parSize = 4; // initial value
 
@@ -78,7 +80,7 @@ FitResult::~FitResult()
     delete plot;
     if( fitPar != NULL) delete [] fitPar;
     if( fitParError != NULL) delete [] fitParError;
-    if( SSR != NULL) delete SSR;
+    if( chisq != NULL) delete chisq;
 }
 
 void FitResult::ClearData()
@@ -86,11 +88,11 @@ void FitResult::ClearData()
     fixedSize = 0;
     if( fitPar != NULL) delete [] fitPar;
     if( fitParError != NULL) delete [] fitParError;
-    if( SSR != NULL) delete SSR;
+    if( chisq != NULL) delete chisq;
 
     fitPar = NULL;
     fitParError = NULL;
-    SSR = NULL;
+    chisq = NULL;
 
     file = NULL;
 
@@ -107,7 +109,7 @@ void FitResult::SetDataSize(FileIO *file)
     dataSize = n;
     fitPar = new QVector<double> [n];
     fitParError = new QVector<double> [n];
-    SSR = new double [n];
+    chisq = new double [n];
     plot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
     plot->xAxis2->setRange(0,n-1);
     if( file->HasBackGround()) plot->xAxis2->setRange(1,n-1);
@@ -124,7 +126,7 @@ void FitResult::SetDataSize(FileIO *file)
     for(int i = 0; i < n; i++){
         fitPar[i] = temp;
         fitParError[i] = temp;
-        SSR[i] = 0;
+        chisq[i] = 0;
     }
 
     QString msg;
@@ -190,7 +192,7 @@ void FitResult::FillData(Analysis *ana)
     fitPar[yIndex] = ReSizeVector(ana->GetParameters());
     fitParError[yIndex] = ReSizeVector(ana->GetParError());
     int nDF = ana->GetNDF();
-    SSR[yIndex] = ana->GetSSR()/nDF;
+    chisq[yIndex] = ana->GetSSR()/nDF/ana->GetSampleVariance();
 
 }
 
@@ -274,6 +276,7 @@ void FitResult::on_checkBox_a_clicked(bool checked)
         plot->graph(0)->clearData();
     }
     plot->replot();
+    CheckPlotComb();
 }
 
 void FitResult::on_checkBox_Ta_clicked(bool checked)
@@ -285,6 +288,7 @@ void FitResult::on_checkBox_Ta_clicked(bool checked)
         plot->graph(1)->clearData();
     }
     plot->replot();
+    CheckPlotComb();
 }
 
 void FitResult::on_checkBox_b_clicked(bool checked)
@@ -296,6 +300,7 @@ void FitResult::on_checkBox_b_clicked(bool checked)
         plot->graph(2)->clearData();
     }
     plot->replot();
+    CheckPlotComb();
 }
 
 void FitResult::on_checkBox_Tb_clicked(bool checked)
@@ -307,6 +312,7 @@ void FitResult::on_checkBox_Tb_clicked(bool checked)
         plot->graph(3)->clearData();
     }
     plot->replot();
+    CheckPlotComb();
 }
 
 void FitResult::on_checkBox_c_clicked(bool checked)
@@ -318,6 +324,7 @@ void FitResult::on_checkBox_c_clicked(bool checked)
         plot->graph(4)->clearData();
     }
     plot->replot();
+    CheckPlotComb();
 }
 
 void FitResult::on_checkBox_P_clicked(bool checked)
@@ -325,7 +332,6 @@ void FitResult::on_checkBox_P_clicked(bool checked)
     if( fixedSize == 0 ) return;
 
     if(checked){
-
         QVector<double> x, y, ye;
         int iStart = 0;
         if( file->HasBackGround()) iStart = file->GetBGIndex()+1;
@@ -359,6 +365,7 @@ void FitResult::on_checkBox_P_clicked(bool checked)
         plot->graph(5)->clearData();
     }
     plot->replot();
+    CheckPlotComb();
 
 }
 
@@ -366,7 +373,6 @@ void FitResult::on_checkBox_SSR_clicked(bool checked)
 {
     if( fixedSize == 0 ) return;
     if(checked){
-
         QVector<double> x, y;
         int iStart = 0;
         if( file->HasBackGround()) iStart = file->GetBGIndex()+1;
@@ -378,7 +384,7 @@ void FitResult::on_checkBox_SSR_clicked(bool checked)
             case 2: x.push_back(file->HV2Mag(xtemp));break;
             default: x.push_back(file->GetDataY_CV(i));break;
             }
-            y.push_back(SSR[i]);
+            y.push_back(chisq[i]);
         }
 
         plot->graph(6)->setData(x,y);
@@ -389,6 +395,7 @@ void FitResult::on_checkBox_SSR_clicked(bool checked)
         plot->graph(6)->clearData();
     }
     plot->replot();
+    CheckPlotComb();
 }
 
 void FitResult::on_pushButton_Save_clicked()
@@ -434,7 +441,7 @@ void FitResult::on_pushButton_Save_clicked()
             tmp.sprintf("%10.3f, ", fitParError[i][j]); lineout += tmp;
         }
 
-        tmp.sprintf("%10.3f \n", SSR[i]); lineout += tmp;
+        tmp.sprintf("%10.3f \n", chisq[i]); lineout += tmp;
 
         stream << lineout;
     }
@@ -444,7 +451,13 @@ void FitResult::on_pushButton_Save_clicked()
 
 void FitResult::on_pushButton_ResetScale_clicked()
 {
-    plot->yAxis->setRange(-120,120);
+    //CheckPlotComb();
+    qDebug() << "plotComb : " << plotComb << "," << file->GetZMin() << "," << file->GetZMax();
+    if( (plotComb & 2) == 2) plot->yAxis->setRange(-120,120);
+    if( (plotComb & 1) == 1) plot->yAxis->setRange(-0.2,3.0);
+    if( (plotComb & 64) == 64 || (plotComb & 16) == 16) {
+        plot->yAxis->setRange(file->GetZMin() * 1.2 ,file->GetZMax() * 1.2);
+    }
     plot->replot();
 }
 
@@ -480,6 +493,19 @@ void FitResult::ShowPlotValue(QMouseEvent *mouse)
     }
 
     ui->lineEdit_Msg->setText(msg);
+}
+
+void FitResult::CheckPlotComb()
+{
+    plotComb = 0;
+    if(ui->checkBox_a->isChecked()) plotComb += 64;
+    if(ui->checkBox_Ta->isChecked()) plotComb += 32;
+    if(ui->checkBox_b->isChecked()) plotComb += 16;
+    if(ui->checkBox_Tb->isChecked()) plotComb += 8;
+    if(ui->checkBox_c->isChecked()) plotComb += 4;
+    if(ui->checkBox_P->isChecked()) plotComb += 2;
+    if(ui->checkBox_SSR->isChecked()) plotComb += 1;
+
 }
 
 QVector<double> FitResult::ReSizeVector(QVector<double> vec){
