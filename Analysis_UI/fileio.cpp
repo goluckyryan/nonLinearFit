@@ -940,13 +940,13 @@ void FileIO::FouierBackward()
 
 QVector<double> FileIO::Shift(QVector<double> list, int d)
 {
-    int n = list.length();
-    QVector<double> temp = list.mid(n-d);
-    for( int i = n-1; i > d-1; i-- ){
-        list[i] = list[i-d];
-    }
+    int n = list.length();           // list = {0,1,2,3,4,5,6,7,8,9}. n = 10
+    QVector<double> temp = list.mid(n-d); //say, d = 5, store temp = {5,6,7,8,9}
+    for( int i = n-1; i > d-1; i-- ){ // from i = 9, list[9] = list[9-5 = 4]
+        list[i] = list[i-d];          //             list[8] = list[8-5 = 3]
+    }                                 //             list[5] = list[0]
     for( int i = 0; i < temp.length(); i++){
-        list[i] =  temp[i];
+        list[i] =  temp[i];           // replace list[i = 0 to 4] with temp.
     }
     return list;
 }
@@ -956,9 +956,9 @@ void FileIO::SwapFFTData(bool dir)
     // dir = 1 , forward swap; dir = 0, backward
 
     if( dir == 1){
-        SendMsg("Swap data.");
+        SendMsg("Swapping data.");
     }else{
-        SendMsg("UnSwap data.");
+        SendMsg("UnSwapping data.");
     }
 
     // Swap X-data
@@ -973,6 +973,8 @@ void FileIO::SwapFFTData(bool dir)
         fZDataA[i] = Shift(fZDataA[i], d);
         fZDataP[i] = Shift(fZDataP[i], d);
     }
+
+    SendMsg("Swapped X data.");
 
     // Swap Y-data
     if( ySize % 2 == 0){
@@ -1001,9 +1003,12 @@ void FileIO::SwapFFTData(bool dir)
         fZDataP[i] = tempP[i];
     }
 
+    SendMsg("Swapped Y data.");
+
     delete [] tempA;
     delete [] tempP;
 
+    SendMsg("Delete Temp data.");
 }
 
 void FileIO::FFTWFilters(int filterID, QVector<double> par, QVector<double>funcX, QVector<double> funcY, bool rev)
