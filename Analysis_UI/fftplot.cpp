@@ -14,10 +14,12 @@ FFTPlot::FFTPlot(QWidget *parent) :
     plot_X = ui->widget_X;
     plot_X->addGraph(); // id = 0 amp or phase
     plot_X->addGraph(); // id = 1 filter
-    plot_X->addGraph(); // id = 2 line
+    plot_X->addGraph(); // id = 2 x-line
+    plot_X->addGraph(); // id = 3 y-line
     plot_X->graph(0)->setPen(QPen(Qt::blue));
     plot_X->graph(1)->setPen(QPen(Qt::red));
     plot_X->graph(2)->setPen(QPen(Qt::gray));
+    plot_X->graph(3)->setPen(QPen(Qt::gray));
 
     plot_X->xAxis->setLabel("freq [kHz]");
     //plot_X->xAxis2->setVisible(true);
@@ -281,6 +283,9 @@ void FFTPlot::RescalePlots()
     }
     colorMap_P->rescaleDataRange();
 
+    colorMap_A->rescaleKeyAxis();
+    colorMap_P->rescaleKeyAxis();
+
     plot_A->replot();
     plot_P->replot();
 
@@ -290,6 +295,9 @@ void FFTPlot::RescalePlots()
     }else{
         plot_X->yAxis->setRangeLower(0);
     }
+
+    plot_X->rescaleAxes();
+
     plot_X->replot();
 }
 
@@ -441,7 +449,6 @@ void FFTPlot::on_pushButton_CalFFT_clicked()
     ui->radioButton_LowPassSharp->setChecked(true);
     on_radioButton_LowPassSharp_clicked();
 
-
     filterApplied = 0;
     filterChanged = 0;
     needToCalFilterFuncX = 0;
@@ -450,6 +457,7 @@ void FFTPlot::on_pushButton_CalFFT_clicked()
     ui->lineEdit_freqResol->setText("freq. Resol. = "+ QString::number( file->GetfResol() )+" kHz");
 
     ContourPlot();
+    //on_pushButton_ResetPlot_clicked();
     RescalePlots();
 
     plot_A->disconnect();
@@ -461,6 +469,8 @@ void FFTPlot::on_pushButton_CalFFT_clicked()
 
     plot_X->disconnect();
     connect(plot_X, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(GetPosOnPlotX(QMouseEvent*)));
+
+
 }
 
 void FFTPlot::on_checkBox_RemoveConstant_clicked()
@@ -910,6 +920,11 @@ void FFTPlot::GetPosOnPlotA(QMouseEvent *mouse)
         }
     }
 
+    QString msg;
+    msg.sprintf("X:%.0f, Y:%.0f", x,y);
+
+    ui->lineEdit_Msg->setText(msg);
+
 }
 
 void FFTPlot::GetPosOnPlotP(QMouseEvent *mouse)
@@ -938,11 +953,12 @@ void FFTPlot::GetPosOnPlotX(QMouseEvent *mouse)
 void FFTPlot::ShowLinesOnPlotA(QPoint pt)
 {
     QVector<double> lineX, lineY;
+
     lineX.push_back(pt.rx());
     lineX.push_back(pt.rx());
 
-    lineY.push_back(plot_A->yAxis->range().upper);
-    lineY.push_back(plot_A->yAxis->range().lower);
+    lineY.push_back(yMin);
+    lineY.push_back(yMax);
 
     plot_A->graph(0)->clearData();
     plot_A->graph(0)->addData(lineX, lineY);
@@ -950,8 +966,8 @@ void FFTPlot::ShowLinesOnPlotA(QPoint pt)
     if(ui->checkBox_EnableY->isChecked()){
         lineX.clear();
         lineY.clear();
-        lineX.push_back(plot_A->xAxis->range().upper);
-        lineX.push_back(plot_A->xAxis->range().lower);
+        lineX.push_back(xMax);
+        lineX.push_back(xMin);
         lineY.push_back(pt.ry());
         lineY.push_back(pt.ry());
         plot_A->graph(1)->clearData();
@@ -968,8 +984,8 @@ void FFTPlot::ShowLinesOnPlotP(QPoint pt)
     lineX.push_back(pt.rx());
     lineX.push_back(pt.rx());
 
-    lineY.push_back(plot_P->yAxis->range().upper);
-    lineY.push_back(plot_P->yAxis->range().lower);
+    lineY.push_back(yMin);
+    lineY.push_back(yMax);
 
     plot_P->graph(0)->clearData();
     plot_P->graph(0)->addData(lineX, lineY);
@@ -977,8 +993,8 @@ void FFTPlot::ShowLinesOnPlotP(QPoint pt)
     if(ui->checkBox_EnableY->isChecked()){
         lineX.clear();
         lineY.clear();
-        lineX.push_back(plot_P->xAxis->range().upper);
-        lineX.push_back(plot_P->xAxis->range().lower);
+        lineX.push_back(xMax);
+        lineX.push_back(xMin);
         lineY.push_back(pt.ry());
         lineY.push_back(pt.ry());
         plot_P->graph(1)->clearData();
@@ -999,6 +1015,15 @@ void FFTPlot::ShowLinesOnPlotX(QPoint pt)
 
     plot_X->graph(2)->clearData();
     plot_X->graph(2)->addData(lineX, lineY);
+
+    lineX.clear();
+    lineY.clear();
+    lineY.push_back(plot_X->yAxis->range().upper);
+    lineY.push_back(plot_X->yAxis->range().lower);
+    lineX.push_back(pt.rx());
+    lineX.push_back(pt.rx());
+    plot_X->graph(3)->clearData();
+    plot_X->graph(3)->addData(lineX, lineY);
 
     plot_X->replot();
 }
