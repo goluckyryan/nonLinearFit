@@ -63,8 +63,10 @@ private slots:
 
     void GetPosOnPlotA(QMouseEvent * mouse);
     void GetPosOnPlotP(QMouseEvent * mouse);
+    void GetPosOnPlotX(QMouseEvent * mouse);
     void ShowLinesOnPlotA(QPoint pt);
     void ShowLinesOnPlotP(QPoint pt);
+    void ShowLinesOnPlotX(QPoint pt);
 
 private:
     Ui::FFTPlot *ui;

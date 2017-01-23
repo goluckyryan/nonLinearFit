@@ -14,8 +14,10 @@ FFTPlot::FFTPlot(QWidget *parent) :
     plot_X = ui->widget_X;
     plot_X->addGraph(); // id = 0 amp or phase
     plot_X->addGraph(); // id = 1 filter
+    plot_X->addGraph(); // id = 2 line
     plot_X->graph(0)->setPen(QPen(Qt::blue));
     plot_X->graph(1)->setPen(QPen(Qt::red));
+    plot_X->graph(2)->setPen(QPen(Qt::gray));
 
     plot_X->xAxis->setLabel("freq [kHz]");
     //plot_X->xAxis2->setVisible(true);
@@ -456,6 +458,9 @@ void FFTPlot::on_pushButton_CalFFT_clicked()
     connect(plot_P, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(GetPosOnPlotP(QMouseEvent*)));
     connect(plot_A, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(GetPosOnPlotA(QMouseEvent*)));
     connect(plot_P, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(GetPosOnPlotP(QMouseEvent*)));
+
+    plot_X->disconnect();
+    connect(plot_X, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(GetPosOnPlotX(QMouseEvent*)));
 }
 
 void FFTPlot::on_checkBox_RemoveConstant_clicked()
@@ -919,6 +924,17 @@ void FFTPlot::GetPosOnPlotP(QMouseEvent *mouse)
     ShowLinesOnPlotP(coord);
 }
 
+void FFTPlot::GetPosOnPlotX(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot_X->xAxis->pixelToCoord(pt.rx());
+    double y = plot_X->yAxis->pixelToCoord(pt.ry());
+
+    QPoint coord(x,y);
+
+    ShowLinesOnPlotX(coord);
+}
+
 void FFTPlot::ShowLinesOnPlotA(QPoint pt)
 {
     QVector<double> lineX, lineY;
@@ -970,5 +986,20 @@ void FFTPlot::ShowLinesOnPlotP(QPoint pt)
     }
 
     plot_P->replot();
+}
+
+void FFTPlot::ShowLinesOnPlotX(QPoint pt)
+{
+    QVector<double> lineX, lineY;
+    lineY.push_back(pt.ry());
+    lineY.push_back(pt.ry());
+
+    lineX.push_back(plot_X->xAxis->range().upper);
+    lineX.push_back(plot_X->xAxis->range().lower);
+
+    plot_X->graph(2)->clearData();
+    plot_X->graph(2)->addData(lineX, lineY);
+
+    plot_X->replot();
 }
 
