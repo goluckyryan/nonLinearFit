@@ -159,7 +159,8 @@ void FFTPlot::EnablePlanels(bool IO)
 }
 
 void FFTPlot::SetPlots()
-{    
+{
+    SendMsg("Set Plots");
     enableSliderFunction = 0;
 
     xMin = file->GetfXMin();
@@ -213,10 +214,12 @@ void FFTPlot::SetPlots()
     ui->verticalSlider_freqL->setValue(0);
 
     enableSliderFunction = 1;
+
 }
 
 void FFTPlot::ContourPlot()
 {
+    SendMsg("Contour Plot of FFT data");
     if( needToCalFilterFuncX ) CalFilterFunctionX();
     if( needToCalFilterFuncY ) CalFilterFunctionY();
 
@@ -253,6 +256,8 @@ void FFTPlot::ContourPlot()
 
     dataA = NULL;
     dataP = NULL;
+    delete [] dataA;
+    delete [] dataP;
 
     plot_A->replot();
     plot_P->replot();
@@ -271,6 +276,7 @@ void FFTPlot::ContourPlot()
 
 void FFTPlot::RescalePlots()
 {
+    SendMsg("Rescale Plots");
     colorMap_A->setDataScaleType(QCPAxis::stLogarithmic);
     colorMap_A->setDataRange(QCPRange(1e-3,1));
     colorMap_A->rescaleDataRange();
@@ -303,6 +309,7 @@ void FFTPlot::RescalePlots()
 
 void FFTPlot::CalFilterFunctionX()
 {
+    SendMsg("Cal Filter Function X.");
     filterFuncX.clear();
 
     //================= x filter
@@ -362,6 +369,7 @@ void FFTPlot::CalFilterFunctionX()
 
 void FFTPlot::CalFilterFunctionY()
 {
+    SendMsg("Cal Filter Function Y.");
     filterFuncY.clear();
 
     //=================== y filter
@@ -439,15 +447,14 @@ void FFTPlot::on_pushButton_CalFFT_clicked()
     ui->checkBox_EnableY->setChecked(false);
     ui->checkBox_toAP->setChecked(true);
 
-
     enableSliderFunction = 0;
     ui->lineEdit_XfreqH->setText(QString::number(ui->horizontalSlider_freqH->value())+" kHz");
-    on_checkBox_EnableY_clicked(false);
-    on_checkBox_Reverse_clicked(false);
+    on_checkBox_EnableY_clicked(false, false);
+    on_checkBox_Reverse_clicked(false, false);
     enableSliderFunction = 1;
 
     ui->radioButton_LowPassSharp->setChecked(true);
-    on_radioButton_LowPassSharp_clicked();
+    on_radioButton_LowPassSharp_clicked(true); // plot
 
     filterApplied = 0;
     filterChanged = 0;
@@ -456,9 +463,9 @@ void FFTPlot::on_pushButton_CalFFT_clicked()
 
     ui->lineEdit_freqResol->setText("freq. Resol. = "+ QString::number( file->GetfResol() )+" kHz");
 
-    ContourPlot();
+    //ContourPlot();
     //on_pushButton_ResetPlot_clicked();
-    RescalePlots();
+    //RescalePlots();
 
     plot_A->disconnect();
     plot_P->disconnect();
@@ -600,7 +607,7 @@ void FFTPlot::on_pushButton_ResetPlot_clicked()
     RescalePlots();
 }
 
-void FFTPlot::on_radioButton_LowPassSharp_clicked()
+void FFTPlot::on_radioButton_LowPassSharp_clicked(bool plot)
 {
     ui->horizontalSlider_freqH->setMinimum(0);
     ui->horizontalSlider_freqL->setEnabled(0);
@@ -620,13 +627,17 @@ void FFTPlot::on_radioButton_LowPassSharp_clicked()
 
         ui->label_YfreqH->setText("freq.");
         ui->label_YfreqL->setText("");
+
+        needToCalFilterFuncY = 1;
     }
 
     filterID = 1;
     needToCalFilterFuncX = 1;
-    needToCalFilterFuncY = 1;
-    ContourPlot();
-    RescalePlots();
+
+    if( plot ){
+        ContourPlot();
+        RescalePlots();
+    }
 }
 
 void FFTPlot::on_radioButton_LowPass_clicked()
@@ -651,11 +662,13 @@ void FFTPlot::on_radioButton_LowPass_clicked()
 
         ui->label_YfreqH->setText("freq.");
         ui->label_YfreqL->setText("");
+
+        needToCalFilterFuncY = 1;
     }
 
     filterID = 2;
     needToCalFilterFuncX = 1;
-    needToCalFilterFuncY = 1;
+
     ContourPlot();
     RescalePlots();
 }
@@ -688,11 +701,13 @@ void FFTPlot::on_radioButton_BandPassSharp_clicked()
         ui->lineEdit_YfreqL->setEnabled(1);
         freq = ui->verticalSlider_freqL->value();
         ui->lineEdit_YfreqL->setText(QString::number(freq));
+
+        needToCalFilterFuncY = 1;
     }
 
     filterID = 3;
     needToCalFilterFuncX = 1;
-    needToCalFilterFuncY = 1;
+
     ContourPlot();
     RescalePlots();
 }
@@ -725,11 +740,13 @@ void FFTPlot::on_radioButton_Guassian_clicked()
 
         ui->lineEdit_XfreqL->setEnabled(1);
         ui->lineEdit_XfreqL->setText(QString::number(10));
+
+        needToCalFilterFuncY = 1;
     }
 
     filterID = 4;
     needToCalFilterFuncX = 1;
-    needToCalFilterFuncY = 1;
+
     ContourPlot();
     RescalePlots();
 }
@@ -761,7 +778,7 @@ void FFTPlot::on_checkBox_LogY_clicked(bool checked)
     plot_X->replot();
 }
 
-void FFTPlot::on_checkBox_Reverse_clicked(bool checked)
+void FFTPlot::on_checkBox_Reverse_clicked(bool checked, bool plot)
 {
     if( checked ){
         ui->radioButton_LowPassSharp->setText("High-Pass Sharp Filter");
@@ -779,7 +796,7 @@ void FFTPlot::on_checkBox_Reverse_clicked(bool checked)
     needToCalFilterFuncX = 1;
     needToCalFilterFuncY = 1;
 
-    ContourPlot();
+    if( plot ) ContourPlot();
 }
 
 void FFTPlot::on_checkBox_toAP_clicked()
@@ -788,7 +805,7 @@ void FFTPlot::on_checkBox_toAP_clicked()
     RescalePlots();
 }
 
-void FFTPlot::on_checkBox_EnableY_clicked(bool checked)
+void FFTPlot::on_checkBox_EnableY_clicked(bool checked, bool plot)
 {
     ui->checkBox_EnableY->setChecked(checked);
     ui->lineEdit_YfreqH->setEnabled(checked);
@@ -833,7 +850,7 @@ void FFTPlot::on_checkBox_EnableY_clicked(bool checked)
     plot_A->graph(1)->clearData();
     plot_P->graph(1)->clearData();
 
-    ContourPlot();
+    if( plot ) ContourPlot();
 }
 
 void FFTPlot::on_verticalSlider_freqH_valueChanged(int value)

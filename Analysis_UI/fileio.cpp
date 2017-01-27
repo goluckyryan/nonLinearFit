@@ -974,8 +974,6 @@ void FileIO::SwapFFTData(bool dir)
         fZDataP[i] = Shift(fZDataP[i], d);
     }
 
-    SendMsg("Swapped X data.");
-
     // Swap Y-data
     if( ySize % 2 == 0){
         d = ySize /2;
@@ -1003,12 +1001,8 @@ void FileIO::SwapFFTData(bool dir)
         fZDataP[i] = tempP[i];
     }
 
-    SendMsg("Swapped Y data.");
-
     delete [] tempA;
     delete [] tempP;
-
-    SendMsg("Delete Temp data.");
 }
 
 void FileIO::FFTWFilters(int filterID, QVector<double> par, QVector<double>funcX, QVector<double> funcY, bool rev)

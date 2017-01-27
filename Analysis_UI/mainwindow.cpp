@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     fftPlot = new FFTPlot(this);
     connect(fftPlot, SIGNAL(PlotData()), this, SLOT(RePlotPlots()));
+    connect(fftPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     savedSingleXCVS = 0;
 
@@ -342,6 +343,10 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
         fileName = fileNames[0];
     }
 
+    QString msg = "Openning file : ";
+    msg.append(fileName);
+    Write2Log(msg);
+
     //======== If no file selected.
     if(fileName == "") {
         statusBar()->showMessage("No file was selected.");
@@ -372,9 +377,8 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
         Write2Log("Cannot open file.");
         return;
     }
-    QString msg = "Opened file : ";
-    msg.append(fileName);
-    Write2Log(msg);
+
+    Write2Log("-------------------- data stored in memory");
 
     //========= once the file is opened, eanble planel, set checkBoxes to uncheck, etc...
     setEnabledPlanel(1);

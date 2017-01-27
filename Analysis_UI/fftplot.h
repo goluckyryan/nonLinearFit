@@ -28,6 +28,7 @@ public slots:
 
 signals:
     void PlotData();
+    void SendMsg(QString msg);
 
 private slots:
     void EnablePlanels(bool IO);
@@ -36,8 +37,8 @@ private slots:
 
     void on_checkBox_RemoveConstant_clicked();
 
-    void on_checkBox_Reverse_clicked(bool checked);
-    void on_checkBox_EnableY_clicked(bool checked);
+    void on_checkBox_Reverse_clicked(bool checked, bool plot = 1);
+    void on_checkBox_EnableY_clicked(bool checked, bool plot = 1);
 
     void on_horizontalSlider_freqH_valueChanged(int value);
     void on_horizontalSlider_freqL_valueChanged(int value);
@@ -48,7 +49,7 @@ private slots:
     void on_pushButton_ApplyFilter_clicked();
     void on_pushButton_FFTWBackward_clicked();
 
-    void on_radioButton_LowPassSharp_clicked();
+    void on_radioButton_LowPassSharp_clicked(bool plot = 1);
     void on_radioButton_LowPass_clicked();
     void on_radioButton_BandPassSharp_clicked();
     void on_radioButton_Guassian_clicked();
