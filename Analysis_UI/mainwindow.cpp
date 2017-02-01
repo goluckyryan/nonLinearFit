@@ -27,13 +27,12 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->yAxis2->setVisible(true);
     plot->yAxis2->setTickLabels(false);
     plot->yAxis2->setTicks(true);
-    plot->setInteraction(QCP::iRangeDrag,true);
+    //plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
-    plot->axisRect()->setRangeDrag(Qt::Vertical);
-    plot->axisRect()->setRangeZoom(Qt::Vertical);
+    //plot->axisRect()->setRangeDrag(Qt::Vertical);
+    //plot->axisRect()->setRangeZoom(Qt::Vertical);
     plot->axisRect()->setRangeZoom(Qt::Horizontal);
     connect(plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
-
 
     plot->axisRect()->setRangeDragAxes(plot->xAxis, plot->yAxis);
     plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis);
@@ -231,6 +230,7 @@ void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
     QString msg;
     msg.sprintf("(x, y) = (%7.4f, %7.4f), x-index = %4d", x, y, xIndex);
     statusBar()->showMessage(msg);
+
 }
 
 void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
