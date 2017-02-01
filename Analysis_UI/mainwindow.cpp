@@ -31,6 +31,9 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->setInteraction(QCP::iRangeZoom,true);
     plot->axisRect()->setRangeDrag(Qt::Vertical);
     plot->axisRect()->setRangeZoom(Qt::Vertical);
+    plot->axisRect()->setRangeZoom(Qt::Horizontal);
+    connect(plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
+
 
     plot->axisRect()->setRangeDragAxes(plot->xAxis, plot->yAxis);
     plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis);
@@ -460,6 +463,15 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     ui->lineEdit_yName->setText(file->GetDataYName(arg1));
 
     Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1));
+
+    //--- set x scroll bar
+    int rxMin = qRound(file->GetXMin());
+    int rxMax = qRound(file->GetXMax());
+    int delta = rxMax - rxMin;
+    ui->horizontalScrollBar->setMinimum(rxMin + delta/2);
+    ui->horizontalScrollBar->setMaximum(rxMin - delta/2);
+    ui->horizontalScrollBar->setPageStep(delta);
+    ui->horizontalScrollBar->setSingleStep(1);
 
     ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
     ana->SetY(arg1, file->GetDataY_CV(arg1));
@@ -1162,3 +1174,34 @@ void MainWindow::on_actionSave_data_triggered()
     file->SaveTxtData_row();
 }
 
+void MainWindow::xAxisChanged(QCPRange range)
+{
+    double xMin = file->GetXMin();
+    double xMax = file->GetXMax();
+    //regulate the xAxis
+    if( range.center() + range.size()/2 > xMax){
+        plot->xAxis->setRangeUpper(xMax);
+        range = plot->xAxis->range();
+    }
+
+    if( range.center() - range.size()/2 < xMin){
+        plot->xAxis->setRangeLower(xMin);
+        range = plot->xAxis->range();
+    }
+    //set scroll bar
+    int rxMin = qRound(file->GetXMin());
+    int rxMax = qRound(file->GetXMax());
+    int delta = qRound(range.size());
+    //qDebug() << delta << "," << rxMin + delta/2 << "," << rxMax - delta/2;
+    ui->horizontalScrollBar->setMinimum(rxMin + delta/2);
+    ui->horizontalScrollBar->setMaximum(rxMax - delta/2);
+    ui->horizontalScrollBar->setPageStep(delta);
+    ui->horizontalScrollBar->setValue(qRound(range.center()));
+}
+
+void MainWindow::on_horizontalScrollBar_sliderMoved(int position)
+{
+    //qDebug() << "bar: " << position;
+    plot->xAxis->setRange(position, plot->xAxis->range().size(), Qt::AlignCenter);
+    plot->replot();
+}

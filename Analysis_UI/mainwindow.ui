@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>961</width>
-    <height>606</height>
+    <height>642</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,6 +24,16 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="3" column="2">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>y-Index</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
     <item row="5" column="2">
      <widget class="QCheckBox" name="checkBox_BGsub">
       <property name="statusTip">
@@ -37,27 +47,10 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="2">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>y-Index</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
     <item row="5" column="3">
      <widget class="QSpinBox" name="spinBox_BGIndex">
       <property name="statusTip">
        <string>Select the data as background.</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="3">
-     <widget class="QSpinBox" name="spinBox_y">
-      <property name="statusTip">
-       <string>The id of the data.</string>
       </property>
      </widget>
     </item>
@@ -68,6 +61,13 @@
       </property>
       <property name="text">
        <string>Restore data</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QSpinBox" name="spinBox_y">
+      <property name="statusTip">
+       <string>The id of the data.</string>
       </property>
      </widget>
     </item>
@@ -84,7 +84,7 @@
       </property>
      </widget>
     </item>
-    <item row="7" column="0" colspan="15">
+    <item row="8" column="0" colspan="15">
      <widget class="QTextEdit" name="textEdit">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -108,16 +108,6 @@
       </property>
      </widget>
     </item>
-    <item row="6" column="14">
-     <widget class="QSlider" name="verticalSlider_z">
-      <property name="statusTip">
-       <string>Change the z-Range of the contour plot. This will not affect the data.</string>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
     <item row="5" column="5">
      <widget class="QLabel" name="label_3">
       <property name="text">
@@ -125,6 +115,26 @@
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4">
+     <widget class="QLineEdit" name="lineEdit_y">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="statusTip">
+       <string>The hall voltage of the data.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="14">
+     <widget class="QSlider" name="verticalSlider_z">
+      <property name="statusTip">
+       <string>Change the z-Range of the contour plot. This will not affect the data.</string>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
      </widget>
     </item>
@@ -154,16 +164,6 @@
       </property>
       <property name="value">
        <number>-1</number>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="4">
-     <widget class="QLineEdit" name="lineEdit_y">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="statusTip">
-       <string>The hall voltage of the data.</string>
       </property>
      </widget>
     </item>
@@ -212,17 +212,34 @@
       </property>
      </widget>
     </item>
-    <item row="6" column="3" colspan="4">
-     <widget class="QCustomPlot" name="customPlot" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>4</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
+    <item row="1" column="1" colspan="9">
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="statusTip">
+       <string>File path</string>
       </property>
      </widget>
     </item>
-    <item row="6" column="0" colspan="3">
+    <item row="2" column="1" colspan="6">
+     <widget class="QLineEdit" name="lineEdit_yName">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" rowspan="2">
+     <widget class="QPushButton" name="pushButton_OpenFile">
+      <property name="statusTip">
+       <string>Open a file.</string>
+      </property>
+      <property name="text">
+       <string>Open File</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" rowspan="2" colspan="3">
      <widget class="QGroupBox" name="groupBox">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -497,11 +514,11 @@
       <zorder>lineEdit_x2</zorder>
      </widget>
     </item>
-    <item row="6" column="8" colspan="5">
-     <widget class="QCustomPlot" name="customPlot_CT" native="true">
+    <item row="6" column="3" colspan="4">
+     <widget class="QCustomPlot" name="customPlot" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>3</horstretch>
+        <horstretch>4</horstretch>
         <verstretch>2</verstretch>
        </sizepolicy>
       </property>
@@ -576,30 +593,35 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="1" colspan="9">
-     <widget class="QLineEdit" name="lineEdit">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="statusTip">
-       <string>File path</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" rowspan="2">
-     <widget class="QPushButton" name="pushButton_OpenFile">
-      <property name="statusTip">
-       <string>Open a file.</string>
-      </property>
-      <property name="text">
-       <string>Open File</string>
+    <item row="6" column="8" colspan="5">
+     <widget class="QCustomPlot" name="customPlot_CT" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>3</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
       </property>
      </widget>
     </item>
-    <item row="2" column="1" colspan="6">
-     <widget class="QLineEdit" name="lineEdit_yName">
-      <property name="enabled">
-       <bool>false</bool>
+    <item row="7" column="3" colspan="4">
+     <widget class="QScrollBar" name="horizontalScrollBar">
+      <property name="minimum">
+       <number>0</number>
+      </property>
+      <property name="maximum">
+       <number>0</number>
+      </property>
+      <property name="singleStep">
+       <number>100</number>
+      </property>
+      <property name="pageStep">
+       <number>100</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>

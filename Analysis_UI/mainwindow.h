@@ -92,6 +92,9 @@ private slots:
     void on_actionSave_Contour_Plot_as_PDF_triggered();
     void on_actionSave_Fit_Result_Plot_as_PDF_triggered();
 
+    void xAxisChanged(QCPRange range);
+
+    void on_horizontalScrollBar_sliderMoved(int position);
 
 private:
     Ui::MainWindow *ui;
