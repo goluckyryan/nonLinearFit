@@ -40,7 +40,9 @@ SOURCES += main.cpp\
     fileio.cpp \
     bplot.cpp \
     fitresult.cpp \
-    fftplot.cpp
+    fftplot.cpp \
+    waveletanalysis.cpp \
+    waveletplot.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot.h \
@@ -51,12 +53,15 @@ HEADERS  += mainwindow.h \
     bplot.h \
     fitresult.h \
     fftw3.h \
-    fftplot.h
+    fftplot.h \
+    waveletanalysis.h \
+    waveletplot.h
 
 FORMS    += mainwindow.ui \
     bplot.ui \
     fitresult.ui \
-    fftplot.ui
+    fftplot.ui \
+    waveletplot.ui
 
 DISTFILES += \
     icon.ico

@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(fftPlot, SIGNAL(PlotData()), this, SLOT(RePlotPlots()));
     connect(fftPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
+    wPlot = new WaveletPlot(this);
+
     savedSingleXCVS = 0;
 
     plot = ui->customPlot;
@@ -80,6 +82,7 @@ MainWindow::~MainWindow(){
     delete fitResultPlot;
     delete bPlot;
     delete fftPlot;
+    delete wPlot;
 
     delete colorMap;
     delete plot;

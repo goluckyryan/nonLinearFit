@@ -12,6 +12,7 @@
 #include "fitresult.h"
 #include "bplot.h"
 #include "fftplot.h"
+#include "waveletplot.h"
 
 namespace Ui {
 class MainWindow;
@@ -101,6 +102,7 @@ private:
     FitResult * fitResultPlot;
     BPlot * bPlot;
     FFTPlot * fftPlot;
+    WaveletPlot * wPlot;
 
     QString Msg;
 
