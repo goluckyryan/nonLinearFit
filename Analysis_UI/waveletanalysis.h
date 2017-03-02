@@ -20,6 +20,10 @@ public:
     void PrintV(int s);
     void PrintW(int s);
 
+    QVector<double>* GetW() { return W; }
+    int GetM() {return M;}
+    int GetSize() {return size;}
+
 //signals:
 
 //public slots:

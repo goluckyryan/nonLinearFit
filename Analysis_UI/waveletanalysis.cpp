@@ -9,7 +9,7 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> a)
     V = new QVector<double> [M];
     W = new QVector<double> [M];
 
-    qDebug() << "--------------" << M;
+    qDebug() << size << "--------------" << M;
     for( int i = 0; i < size; i++){
         V[0].push_back(a[i]);
         W[0].push_back(0.);
@@ -33,8 +33,9 @@ void WaveletAnalysis::Decompose(){
         if( sizeV == 0) return;
 
         V[s+1].clear();
+        W[s+1].clear();
 
-        for(int k = 0; k < sizeV/2.+1; k++){
+        for(int k = 1; k < sizeV/2.+1; k++){
             double sum = 0;
             for(int l = 0; l < sizeV; l++){
                 sum += H0(2*k-l-1)*V[s][l];
@@ -51,6 +52,10 @@ void WaveletAnalysis::Decompose(){
     }
 
     qDebug() << "Decomposed, s =" << s;
+
+    //for( int r = 1; r < M ; r++){
+    //    qDebug() << "W(" << r << ") = " << W[r].size();
+    //}
 }
 
 void WaveletAnalysis::Recontruct(int s){

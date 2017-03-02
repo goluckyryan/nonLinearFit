@@ -101,6 +101,8 @@ private slots:
 
     void on_horizontalScrollBar_sliderMoved(int position);
 
+    void on_actionDWT_Plot_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;

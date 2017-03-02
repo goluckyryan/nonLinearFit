@@ -940,6 +940,7 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->actionB_Plot->setEnabled(IO);
     ui->actionFFTW_Plot->setEnabled(IO);
     ui->actionFit_Result->setEnabled(IO);
+    //ui->actionDWT_Plot->setEnabled(IO);
 
     ui->pushButton_Fit->setEnabled(IO);
     ui->pushButton_FitAll->setEnabled(IO);
@@ -1237,4 +1238,12 @@ void MainWindow::on_horizontalScrollBar_sliderMoved(int position)
     //qDebug() << "bar: " << position;
     plot->xAxis->setRange(position, plot->xAxis->range().size(), Qt::AlignCenter);
     plot->replot();
+}
+
+void MainWindow::on_actionDWT_Plot_triggered()
+{
+    if(wPlot->isHidden()){
+        wPlot->show();
+        wPlot->SetData(file);
+    }
 }

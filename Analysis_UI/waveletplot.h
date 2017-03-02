@@ -21,10 +21,13 @@ public:
 
     void SetData(FileIO * file);
 
+private slots:
+
 private:
     Ui::WaveletPlot *ui;
 
     QCustomPlot * plot;
+    QCPColorMap * colorMap;
 
     WaveletAnalysis * wave;
 
