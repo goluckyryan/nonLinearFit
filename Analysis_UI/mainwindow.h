@@ -13,6 +13,7 @@
 #include "bplot.h"
 #include "fftplot.h"
 #include "waveletplot.h"
+#include <QKeyEvent>
 
 namespace Ui {
 class MainWindow;
@@ -35,6 +36,9 @@ public:
     void UpdateLineTextParameters(QVector<double> par, QVector<double> epar);
 
 private slots:
+    void keyPressEvent(QKeyEvent *key);
+    void keyReleaseEvent(QKeyEvent *key);
+
     void Write2Log(QString str);
 
     void RePlotPlots();
@@ -114,6 +118,8 @@ private:
     Analysis *ana;
 
     bool savedSingleXCVS;
+
+    bool controlPressed;
 
 };
 

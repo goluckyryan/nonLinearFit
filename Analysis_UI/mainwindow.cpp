@@ -29,10 +29,11 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->yAxis2->setVisible(true);
     plot->yAxis2->setTickLabels(false);
     plot->yAxis2->setTicks(true);
-    //plot->setInteraction(QCP::iRangeDrag,true);
+    plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
     //plot->axisRect()->setRangeDrag(Qt::Vertical);
     //plot->axisRect()->setRangeZoom(Qt::Vertical);
+    plot->axisRect()->setRangeDrag(Qt::Horizontal);
     plot->axisRect()->setRangeZoom(Qt::Horizontal);
     connect(plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
 
@@ -74,6 +75,8 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->showMessage("Please open a file.");
 
     Write2Log("Directory: " + DATA_PATH);
+
+    controlPressed = 0;
 
 }
 
@@ -292,13 +295,15 @@ void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
     double x = plot->xAxis->pixelToCoord(pt.rx());
     int xIndex = file->GetXIndex(x);
 
-    if( mouse->button() == Qt::LeftButton){
-        ui->spinBox_x->setValue(xIndex);
-    }else if(mouse->button() == Qt::RightButton){
-        if( xIndex < ui->spinBox_x->value()){
-            xIndex = ui->spinBox_x2->maximum();
+    if( controlPressed){
+        if( mouse->button() == Qt::LeftButton){
+            ui->spinBox_x->setValue(xIndex);
+        }else if(mouse->button() == Qt::RightButton){
+            if( xIndex < ui->spinBox_x->value()){
+                xIndex = ui->spinBox_x2->maximum();
+            }
+            ui->spinBox_x2->setValue(xIndex);
         }
-        ui->spinBox_x2->setValue(xIndex);
     }
 
 }
@@ -832,6 +837,31 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> e
         ui->lineEdit_ec->setText(QString::number(epar[4]));
     }
 
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *key)
+{
+    if(key->key() == Qt::Key_Shift ){
+        //qDebug() << "Shift pressed";
+        plot->axisRect()->setRangeDrag(Qt::Vertical);
+        plot->axisRect()->setRangeZoom(Qt::Vertical);
+    }
+
+    if(key->key() == Qt::Key_Control){
+        controlPressed = 1;
+    }
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *key)
+{
+    if(key->key() == Qt::Key_Shift ){
+        plot->axisRect()->setRangeDrag(Qt::Horizontal);
+        plot->axisRect()->setRangeZoom(Qt::Horizontal);
+    }
+    if(key->key() == Qt::Key_Control){
+        //qDebug() << " Ctrl released";
+        controlPressed = 0;
+    }
 }
 
 void MainWindow::PlotContour(double offset)
