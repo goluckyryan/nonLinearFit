@@ -62,6 +62,9 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     x1 = -20;
     x2 = 50;
 
+    ui->pushButton_Clean->setEnabled(false);
+    ui->pushButton_Restore->setEnabled(false);
+
 }
 
 WaveletPlot::~WaveletPlot()
@@ -144,6 +147,8 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
 
     plot->graph(1)->clearData();
     plot->graph(1)->addData(x, y);
+    //wave->Recontruct();
+    //plot->graph(1)->addData(x, wave->GetV0oct(0));
     plot->rescaleAxes();
     plot->replot();
 
@@ -216,11 +221,17 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
             plot->rescaleAxes();
             plot->replot();
         }
+
+        ui->pushButton_Clean->setEnabled(true);
     }
 }
 
 void WaveletPlot::on_verticalSlider_Scale_valueChanged(int value)
 {
+    if( value == 0) {
+        ui->pushButton_Clean->setEnabled(false);
+        return;
+    }
     int val = ui->verticalSlider->value();
     on_verticalSlider_valueChanged(val);
 }
