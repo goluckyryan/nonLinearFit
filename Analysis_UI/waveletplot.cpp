@@ -23,9 +23,11 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_V->yAxis->setTickStep(1.);
 
     colorMap_W = new QCPColorMap(plot_W->xAxis, plot_W->yAxis);
-    colorMap_W->clearData();
     colorMap_V = new QCPColorMap(plot_V->xAxis, plot_V->yAxis);
+    colorMap_W->clearData();
     colorMap_V->clearData();
+    colorMap_W->setInterpolate(false);
+    colorMap_V->setInterpolate(false);
 
     QCPColorScale *colorScale_W = new QCPColorScale(plot_W);
     plot_W->plotLayout()->addElement(0, 1, colorScale_W);
@@ -165,11 +167,14 @@ void WaveletPlot::PlotWV()
 void WaveletPlot::on_verticalSlider_valueChanged(int value)
 {
     if( enableVerticalBar){
+        wave->RestoreData();
+
         ui->lineEdit_HT->setText(QString::number(value/100.));
         int sLimit = ui->verticalSlider_Scale->value();
         ui->lineEdit_sLimit->setText(QString::number(sLimit));
 
-        if( sLimit != 0){
+        if( !(sLimit == 0 || value == 0.)){
+            //qDebug() << "cal." << sLimit << "," << value;
             wave->HardThresholding(value/100., sLimit);
             SendMsg(wave->GetMsg());
 

@@ -6,13 +6,14 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> a)
     size = a.size();
     M = qFloor( qLn(size)/qLn(2.) )+1;
 
+    V0 = new QVector<double> [M];
+    W0 = new QVector<double> [M];
     V = new QVector<double> [M];
     W = new QVector<double> [M];
 
     for( int i = 0; i < size; i++){
-        origin.push_back(a[i]);
-        V[0].push_back(a[i]);
-        W[0].push_back(0.);
+        V0[0].push_back(a[i]);
+        W0[0].push_back(0.);
     }
 
     msg.sprintf("Array size = %d; Max scale = %d", size, M);
@@ -22,6 +23,9 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> a)
 }
 
 WaveletAnalysis::~WaveletAnalysis(){
+    if( V0 != NULL) delete [] V0;
+    if( W0 != NULL) delete [] W0;
+
     if( V != NULL) delete [] V;
     if( W != NULL) delete [] W;
 }
@@ -31,35 +35,54 @@ void WaveletAnalysis::Decompose(){
     WAbsMax = 0;
     for( s = 0; s < M-1 ; s++){
 
-        int sizeV = V[s].size();
+        int sizeV = V0[s].size();
         if( sizeV == 0) return;
 
-        V[s+1].clear();
-        W[s+1].clear();
+        V0[s+1].clear();
+        W0[s+1].clear();
 
         for(int k = 1; k < sizeV/2.+1; k++){
             double sum = 0;
             for(int l = 1; l <= sizeV; l++){
-                sum += H0(2*k-l)*V[s][l-1];
+                sum += H0(2*k-l)*V0[s][l-1];
             }
-            V[s+1].push_back(sum);
+            V0[s+1].push_back(sum);
 
             sum = 0;
             for(int l = 1; l <= sizeV; l++){
-                sum += H1(2*k-l)*V[s][l-1];
+                sum += H1(2*k-l)*V0[s][l-1];
             }
-            W[s+1].push_back(sum);
+            W0[s+1].push_back(sum);
+
             if( WAbsMax < sum) WAbsMax = sum;
         }
 
     }
 
+    RestoreData();
+
+    msg.clear();
     msg.sprintf("Decomposed scale = %d", s );
 
     //for(int s = 1; s < M; s++){
     //    PrintV(s);
     //    PrintW(s);
     //}
+
+}
+
+void WaveletAnalysis::RestoreData()
+{
+    for(int s = 1; s < M ; s++){
+
+        V[s].clear();
+        W[s].clear();
+
+        for(int k = 1; k <= V0[s].size(); k++){
+            V[s].push_back(V0[s][k-1]);
+            W[s].push_back(W0[s][k-1]);
+        }
+    }
 
 }
 
@@ -80,12 +103,13 @@ void WaveletAnalysis::Recontruct(){
         }
 
     }
-
     msg.sprintf("Reconstructed.");
 }
 
 void WaveletAnalysis::HardThresholding(double threshold, int sLimit)
 {
+    if( sLimit == 0 ) return;
+    if( threshold <= 0.0) return;
     for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
         for( int k = 0; k <= W[s].size(); k++){
             if( qAbs(W[s][k]) < threshold ) {
@@ -94,7 +118,7 @@ void WaveletAnalysis::HardThresholding(double threshold, int sLimit)
             }
         }
     }
-    msg.sprintf("Applied Hard Thresholding, level = %2.1f, scale = %s", threshold, sLimit);
+    msg.sprintf("Applied Hard Thresholding, level<%2.1f, scale>%d", threshold, sLimit);
 }
 
 void WaveletAnalysis::PrintV(int s)

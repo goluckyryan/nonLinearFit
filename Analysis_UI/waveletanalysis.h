@@ -16,6 +16,7 @@ public:
     ~WaveletAnalysis();
 
     void Decompose();
+    void RestoreData();
     void Recontruct();
     void HardThresholding(double threshold, int sLimit);
 
@@ -26,7 +27,11 @@ public:
     QVector<double>* GetV() { return V; }
     QVector<double> GetWoct(int s) { return W[s]; }
     QVector<double> GetVoct(int s) { return V[s]; }
-    QVector<double> GetVOrigin() { return origin; }
+
+    QVector<double>* GetW0() { return W0; }
+    QVector<double>* GetV0() { return V0; }
+    QVector<double> GetW0oct(int s) { return W0[s]; }
+    QVector<double> GetV0oct(int s) { return V0[s]; }
     int GetM() {return M;}
     int GetSize() {return size;}
     QString GetMsg() {return msg;}
@@ -61,8 +66,11 @@ private:
 
     QString msg;
 
-    QVector<double> origin;
+    //unchange copy
+    QVector<double> *V0;
+    QVector<double> *W0;
 
+    //gated copy
     QVector<double> *V;
     QVector<double> *W;
 
