@@ -941,7 +941,7 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->actionB_Plot->setEnabled(IO);
     ui->actionFFTW_Plot->setEnabled(IO);
     ui->actionFit_Result->setEnabled(IO);
-    //ui->actionDWT_Plot->setEnabled(IO);
+    ui->actionDWT_Plot->setEnabled(IO);
 
     ui->pushButton_Fit->setEnabled(IO);
     ui->pushButton_FitAll->setEnabled(IO);

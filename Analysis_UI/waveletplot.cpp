@@ -96,9 +96,9 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     int nx = wave->GetSize();
     int ny = wave->GetM();
     colorMap_W->data()->setRange(QCPRange(x[0],x[nx-1]), QCPRange(0,-ny));
-    colorMap_W->data()->setSize(nx, ny);
+    colorMap_W->data()->setSize(nx, ny+1);
     colorMap_V->data()->setRange(QCPRange(x[0],x[nx-1]), QCPRange(0,-ny));
-    colorMap_V->data()->setSize(nx, ny);
+    colorMap_V->data()->setSize(nx, ny+1);
 
     PlotWV();
 
@@ -106,6 +106,12 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     ui->verticalSlider->setSingleStep(1);
     ui->verticalSlider->setRange(0, zMax);
     ui->verticalSlider->setValue(0);
+    ui->lineEdit_HT->setText("0.0");
+
+    ui->verticalSlider_Scale->setSingleStep(1);
+    ui->verticalSlider_Scale->setRange(-ny+1, 0);
+    ui->verticalSlider_Scale->setValue(0);
+    ui->lineEdit_sLimit->setText("0");
 
     enableVerticalBar = 1;
 
@@ -124,7 +130,7 @@ void WaveletPlot::PlotWV()
     int ny = wave->GetM();
     //plot
     QVector<double> temp_W, temp_V;
-    for( int s = 1; s < ny; s++){
+    for( int s = 1; s < ny ; s++){
         //Filling space
         temp_W.clear();
         temp_V.clear();
@@ -159,19 +165,31 @@ void WaveletPlot::PlotWV()
 void WaveletPlot::on_verticalSlider_valueChanged(int value)
 {
     if( enableVerticalBar){
-        wave->HardThresholding(value/100.);
-        SendMsg(wave->GetMsg());
+        ui->lineEdit_HT->setText(QString::number(value/100.));
+        int sLimit = ui->verticalSlider_Scale->value();
+        ui->lineEdit_sLimit->setText(QString::number(sLimit));
 
-        wave->Recontruct();
-        SendMsg(wave->GetMsg());
+        if( sLimit != 0){
+            wave->HardThresholding(value/100., sLimit);
+            SendMsg(wave->GetMsg());
 
-        QVector<double> v0 = wave->GetVoct(0);
+            wave->Recontruct();
+            SendMsg(wave->GetMsg());
 
-        PlotWV();
+            QVector<double> v0 = wave->GetVoct(0);
 
-        plot->graph(1)->clearData();
-        plot->graph(1)->addData(file->GetDataSetX(), v0);
-        plot->rescaleAxes();
-        plot->replot();
+            PlotWV();
+
+            plot->graph(1)->clearData();
+            plot->graph(1)->addData(file->GetDataSetX(), v0);
+            plot->rescaleAxes();
+            plot->replot();
+        }
     }
+}
+
+void WaveletPlot::on_verticalSlider_Scale_valueChanged(int value)
+{
+    int val = ui->verticalSlider->value();
+    on_verticalSlider_valueChanged(val);
 }

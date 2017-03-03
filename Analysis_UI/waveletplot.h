@@ -29,6 +29,8 @@ private slots:
 
     void on_verticalSlider_valueChanged(int value);
 
+    void on_verticalSlider_Scale_valueChanged(int value);
+
 private:
     Ui::WaveletPlot *ui;
 

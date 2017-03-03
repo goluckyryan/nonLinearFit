@@ -84,9 +84,9 @@ void WaveletAnalysis::Recontruct(){
     msg.sprintf("Reconstructed.");
 }
 
-void WaveletAnalysis::HardThresholding(double threshold)
+void WaveletAnalysis::HardThresholding(double threshold, int sLimit)
 {
-    for( int s = 1;  s < M ; s++){
+    for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
         for( int k = 0; k <= W[s].size(); k++){
             if( qAbs(W[s][k]) < threshold ) {
                 //qDebug() << s << "," << k << "," << W[s][k];
@@ -94,7 +94,7 @@ void WaveletAnalysis::HardThresholding(double threshold)
             }
         }
     }
-    msg.sprintf("Applied Hard Thresholding, level = %2.1f", threshold);
+    msg.sprintf("Applied Hard Thresholding, level = %2.1f, scale = %s", threshold, sLimit);
 }
 
 void WaveletAnalysis::PrintV(int s)

@@ -17,7 +17,7 @@ public:
 
     void Decompose();
     void Recontruct();
-    void HardThresholding(double threshold);
+    void HardThresholding(double threshold, int sLimit);
 
     void PrintV(int s);
     void PrintW(int s);
