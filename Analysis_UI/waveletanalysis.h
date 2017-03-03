@@ -16,16 +16,21 @@ public:
     ~WaveletAnalysis();
 
     void Decompose();
-    void Recontruct(int s);
+    void Recontruct();
+    void HardThresholding(double threshold);
 
     void PrintV(int s);
     void PrintW(int s);
 
     QVector<double>* GetW() { return W; }
     QVector<double>* GetV() { return V; }
+    QVector<double> GetWoct(int s) { return W[s]; }
+    QVector<double> GetVoct(int s) { return V[s]; }
+    QVector<double> GetVOrigin() { return origin; }
     int GetM() {return M;}
     int GetSize() {return size;}
     QString GetMsg() {return msg;}
+    double GetWAbsMax() {return WAbsMax;}
 
 //signals:
 
@@ -49,18 +54,22 @@ private:
     }
 
     double H1(int n){
-        if(n == 0 ) return -1/2.;
-        if(n == 1 ) return  1/2.;
+        if(n == 0 ) return 1/2.;
+        if(n == 1 ) return -1/2.;
         return 0;
     }
 
     QString msg;
+
+    QVector<double> origin;
 
     QVector<double> *V;
     QVector<double> *W;
 
     int size;
     int M; // max scale
+
+    double WAbsMax;
 
 
 };

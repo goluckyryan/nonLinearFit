@@ -20,11 +20,14 @@ public:
     ~WaveletPlot();
 
     void SetData(FileIO *file, int yIndex);
+    void PlotWV();
 
 signals:
     void SendMsg(QString msg);
 
 private slots:
+
+    void on_verticalSlider_valueChanged(int value);
 
 private:
     Ui::WaveletPlot *ui;
@@ -41,6 +44,9 @@ private:
     WaveletAnalysis * wave;
 
     FileIO *file;
+
+    bool enableVerticalBar;
+
 };
 
 #endif // WAVELETPLOT_H

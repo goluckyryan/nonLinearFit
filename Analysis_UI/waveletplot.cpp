@@ -40,10 +40,14 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     colorMap_V->setGradient(QCPColorGradient::gpJet );
 
     plot = ui->plot;
-    plot->addGraph();
+    plot->addGraph(); //original data
+    plot->addGraph(); //denoised data
     plot->graph(0)->setPen(QPen(Qt::blue));
+    plot->graph(1)->setPen(QPen(Qt::red));
     plot->xAxis->setLabel("time [us]");
     plot->graph(0)->clearData();
+
+    enableVerticalBar = 0;
 
 }
 
@@ -64,7 +68,11 @@ WaveletPlot::~WaveletPlot()
 void WaveletPlot::SetData(FileIO *file, int yIndex)
 {
     this->file = file;
-    colorMap_W->clearData();
+
+    //QVector<double> y;
+    //for( int i = 0; i < qPow(2,5); i++){
+    //    y.push_back(qCos(i/5.));
+    //}
 
     QVector<double> y = file->GetDataSetZ(yIndex);
     QVector<double> x = file->GetDataSetX();
@@ -84,10 +92,7 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     wave->Decompose();
     SendMsg(wave->GetMsg());
 
-    QVector<double> * w = wave->GetW();
-    QVector<double> * v = wave->GetV();
-
-    //plot
+    //setPlot
     int nx = wave->GetSize();
     int ny = wave->GetM();
     colorMap_W->data()->setRange(QCPRange(x[0],x[nx-1]), QCPRange(0,-ny));
@@ -95,7 +100,29 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     colorMap_V->data()->setRange(QCPRange(x[0],x[nx-1]), QCPRange(0,-ny));
     colorMap_V->data()->setSize(nx, ny);
 
+    PlotWV();
 
+    int zMax = qCeil(wave->GetWAbsMax())*100;
+    ui->verticalSlider->setSingleStep(1);
+    ui->verticalSlider->setRange(0, zMax);
+    ui->verticalSlider->setValue(0);
+
+    enableVerticalBar = 1;
+
+    plot->graph(1)->clearData();
+    plot->graph(1)->addData(x, y);
+    plot->rescaleAxes();
+    plot->replot();
+
+}
+
+void WaveletPlot::PlotWV()
+{
+    QVector<double> * w = wave->GetW();
+    QVector<double> * v = wave->GetV();
+
+    int ny = wave->GetM();
+    //plot
     QVector<double> temp_W, temp_V;
     for( int s = 1; s < ny; s++){
         //Filling space
@@ -126,6 +153,25 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     delete [] w;
     v = NULL;
     delete [] v;
-
 }
 
+
+void WaveletPlot::on_verticalSlider_valueChanged(int value)
+{
+    if( enableVerticalBar){
+        wave->HardThresholding(value/100.);
+        SendMsg(wave->GetMsg());
+
+        wave->Recontruct();
+        SendMsg(wave->GetMsg());
+
+        QVector<double> v0 = wave->GetVoct(0);
+
+        PlotWV();
+
+        plot->graph(1)->clearData();
+        plot->graph(1)->addData(file->GetDataSetX(), v0);
+        plot->rescaleAxes();
+        plot->replot();
+    }
+}
