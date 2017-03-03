@@ -1,7 +1,7 @@
 #include "waveletanalysis.h"
 
 //WaveletAnalysis::WaveletAnalysis(QObject *parent) : QObject(parent)
-WaveletAnalysis::WaveletAnalysis(QVector<double> a)
+WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
 {
     size = a.size();
     M = qFloor( qLn(size)/qLn(2.) )+1;
@@ -10,10 +10,12 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> a)
     W0 = new QVector<double> [M];
     V = new QVector<double> [M];
     W = new QVector<double> [M];
+    X0 = new QVector<double> [M];
 
     for( int i = 0; i < size; i++){
         V0[0].push_back(a[i]);
         W0[0].push_back(0.);
+        X0[0].push_back(x[i]);
     }
 
     msg.sprintf("Array size = %d; Max scale = %d", size, M);
@@ -25,6 +27,7 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> a)
 WaveletAnalysis::~WaveletAnalysis(){
     if( V0 != NULL) delete [] V0;
     if( W0 != NULL) delete [] W0;
+    if( X0 != NULL) delete [] X0;
 
     if( V != NULL) delete [] V;
     if( W != NULL) delete [] W;
@@ -40,6 +43,7 @@ void WaveletAnalysis::Decompose(){
 
         V0[s+1].clear();
         W0[s+1].clear();
+        X0[s+1].clear();
 
         for(int k = 1; k <= sizeV/2.; k++){
             double sum = 0;
@@ -47,6 +51,12 @@ void WaveletAnalysis::Decompose(){
                 sum += H0(2*k-l)*V0[s][l-1];
             }
             V0[s+1].push_back(sum);
+
+            sum = 0;
+            for(int l = 1; l <= sizeV; l++){
+                sum += H0(2*k-l)*X0[s][l-1];
+            }
+            X0[s+1].push_back(sum);
 
             sum = 0;
             for(int l = 1; l <= sizeV; l++){
@@ -123,7 +133,19 @@ void WaveletAnalysis::HardThresholding(double threshold, int sLimit)
             }
         }
     }
-    msg.sprintf("Applied Hard Thresholding, level<%2.1f, scale>%d", threshold, sLimit);
+    msg.sprintf("Applied Hard Thresholding, level<%2.1f && scale>%d", threshold, sLimit);
+}
+
+void WaveletAnalysis::CleanOutsider(double x1, double x2, int sLimit)
+{
+    if( sLimit == 0 ) return;
+    for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
+        for( int k = 0; k <= W[s].size(); k++){
+            if( X0[s][k] < x1 || X0[s][k] > x2 ) {
+                W[s][k] = 0.;
+            }
+        }
+    }
 }
 
 void WaveletAnalysis::PrintV(int s, int flag)

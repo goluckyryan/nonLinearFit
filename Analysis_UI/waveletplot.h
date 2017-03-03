@@ -26,13 +26,18 @@ signals:
     void SendMsg(QString msg);
     void Replot();
 
+
 private slots:
 
     void on_verticalSlider_valueChanged(int value);
-
     void on_verticalSlider_Scale_valueChanged(int value);
 
     void on_ApplyHT_clicked();
+
+    void ShowMousePosition(QMouseEvent* mouse);
+    void SetLineByMouseClick(QMouseEvent* mouse);
+
+    void on_pushButton_Clean_clicked();
 
 private:
     Ui::WaveletPlot *ui;
@@ -44,7 +49,6 @@ private:
     QCPColorMap * colorMap_V;
 
     QCustomPlot * plot;
-    QCPColorMap * colorMap;
 
     WaveletAnalysis * wave;
 
@@ -52,6 +56,8 @@ private:
     int yIndex;
 
     bool enableVerticalBar;
+
+    double x1, x2;
 
 };
 

@@ -101,7 +101,7 @@ public slots:
     void MovingAvgonFFTW(int n);
 
     //Wavelet analysis
-    void ChangeZData(int yIndex, QVector<double> newZ);
+    int ChangeZData(int yIndex, QVector<double> newZ);
 
     double HV2Mag(double HV){
         double mag = 0;

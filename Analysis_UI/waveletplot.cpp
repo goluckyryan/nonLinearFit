@@ -15,6 +15,8 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_W->yAxis->setLabel("Octave");
     plot_W->yAxis->setAutoTickStep(false);
     plot_W->yAxis->setTickStep(1.);
+    connect(plot_W, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePosition(QMouseEvent*)));
+    connect(plot_W, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetLineByMouseClick(QMouseEvent*)));
 
     plot_V = ui->plot_V;
     plot_V->xAxis->setLabel("time [us]");
@@ -35,6 +37,13 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     colorMap_W->setColorScale(colorScale_W);
     colorMap_W->setGradient(QCPColorGradient::gpJet );
 
+    plot_W->addGraph(); // left line gate
+    plot_W->addGraph(); // right line gate
+    plot_W->graph(0)->setPen(QPen(Qt::white));
+    plot_W->graph(0)->clearData();
+    plot_W->graph(1)->setPen(QPen(Qt::white));
+    plot_W->graph(1)->clearData();
+
     QCPColorScale *colorScale_V = new QCPColorScale(plot_V);
     plot_V->plotLayout()->addElement(0, 1, colorScale_V);
     colorScale_V->setType(QCPAxis::atRight);
@@ -50,6 +59,8 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot->graph(0)->clearData();
 
     enableVerticalBar = 0;
+    x1 = -20;
+    x2 = 50;
 
 }
 
@@ -90,7 +101,7 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     SendMsg(msg);
 
     //wavelet decomposition
-    wave = new WaveletAnalysis(y);
+    wave = new WaveletAnalysis(x, y);
     SendMsg(wave->GetMsg());
     wave->Decompose();
     SendMsg(wave->GetMsg());
@@ -104,6 +115,19 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     colorMap_V->data()->setSize(nx, ny+1);
 
     PlotWV();
+
+    //set lines;
+    QVector<double> xline_y, xline_x1, xline_x2;
+    xline_y.push_back(-ny);
+    xline_y.push_back(0);
+    xline_x1.push_back(x1);
+    xline_x1.push_back(x1);
+    xline_x2.push_back(x2);
+    xline_x2.push_back(x2);
+    plot_W->graph(0)->addData(xline_x1, xline_y);
+    plot_W->graph(1)->addData(xline_x2, xline_y);
+    plot_W->replot();
+
 
     int zMax = qCeil(wave->GetWAbsMax())*100;
     ui->verticalSlider->setSingleStep(1);
@@ -177,11 +201,12 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
         if( !(sLimit == 0 || value == 0.)){
             //qDebug() << "cal." << sLimit << "," << value;
             wave->HardThresholding(value/100., sLimit);
-            SendMsg(wave->GetMsg());
+            //SendMsg(wave->GetMsg());
 
             wave->Recontruct();
-            SendMsg(wave->GetMsg());
+            //SendMsg(wave->GetMsg());
 
+            //TODO  Group as Replot();
             QVector<double> v0 = wave->GetVoct(0);
 
             PlotWV();
@@ -202,8 +227,76 @@ void WaveletPlot::on_verticalSlider_Scale_valueChanged(int value)
 
 void WaveletPlot::on_ApplyHT_clicked()
 {
-    file->ChangeZData(yIndex, wave->GetVoct(0));
+    int changed = file->ChangeZData(yIndex, wave->GetVoct(0));
     Replot();
 
-    qDebug() << "apply new data";
+    if( changed ){
+        QString msg;
+        msg.sprintf("Apply Hard Thresholding, level<%4s && scale>%2s", ui->lineEdit_HT->text(), ui->lineEdit_sLimit->text());
+        SendMsg(msg);
+    }
+}
+
+void WaveletPlot::ShowMousePosition(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot_W->xAxis->pixelToCoord(pt.rx());
+    double y = plot_W->yAxis->pixelToCoord(pt.ry());
+
+    int xIndex = file->GetXIndex(x);
+    int s =  qFloor( wave->GetM()+ y + 0.5) ;
+    double z = colorMap_W->data()->cell(xIndex, s );
+
+    QString msg;
+    msg.sprintf("(k, s, w) = (%7.4f, %7.4f, %7.4f), x-index = %4d", x, y, z, xIndex);
+    statusBar()->showMessage(msg);
+}
+
+void WaveletPlot::SetLineByMouseClick(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot_W->xAxis->pixelToCoord(pt.rx());
+
+    QVector<double> xline_y, xline_x1, xline_x2;
+    xline_y.push_back(-wave->GetM());
+    xline_y.push_back(0);
+
+    if( mouse->button() == Qt::LeftButton){
+        x1 = x;
+    }else if(mouse->button() == Qt::RightButton){
+        x2 = x;
+    }
+
+    xline_x1.push_back(x1);
+    xline_x1.push_back(x1);
+    plot_W->graph(0)->clearData();
+    plot_W->graph(0)->addData(xline_x1, xline_y);
+    xline_x2.push_back(x2);
+    xline_x2.push_back(x2);
+    plot_W->graph(1)->clearData();
+    plot_W->graph(1)->addData(xline_x2, xline_y);
+
+    plot_W->replot();
+}
+
+void WaveletPlot::on_pushButton_Clean_clicked()
+{
+    int sLimit = ui->verticalSlider_Scale->value();
+    if( sLimit == 0) return;
+    if( x1 < x2) {
+        wave->CleanOutsider(x1, x2, sLimit);
+    }else{
+        wave->CleanOutsider(x2, x1, sLimit);
+    }
+
+    wave->Recontruct();
+
+    QVector<double> v0 = wave->GetVoct(0);
+
+    PlotWV();
+
+    plot->graph(1)->clearData();
+    plot->graph(1)->addData(file->GetDataSetX(), v0);
+    plot->rescaleAxes();
+    plot->replot();
 }

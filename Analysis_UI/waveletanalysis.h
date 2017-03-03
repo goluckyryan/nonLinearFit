@@ -12,13 +12,14 @@ class WaveletAnalysis //: public QObject
 //    Q_OBJECT
 public:
     //explicit WaveletAnalysis(QObject *parent = 0);
-    WaveletAnalysis(QVector<double> a);
+    WaveletAnalysis(QVector<double> x, QVector<double> a);
     ~WaveletAnalysis();
 
     void Decompose();
     void RestoreData();
     void Recontruct();
     void HardThresholding(double threshold, int sLimit);
+    void CleanOutsider(double x1, double x2, int sLimit);
 
     void PrintV(int s, int flag = 0);
     void PrintV0(int s, int flag = 0);
@@ -74,6 +75,8 @@ private:
     //gated copy
     QVector<double> *V;
     QVector<double> *W;
+
+    QVector<double> *X0;
 
     int size;
     int M; // max scale

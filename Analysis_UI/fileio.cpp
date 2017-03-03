@@ -1087,16 +1087,18 @@ void FileIO::MovingAvgonFFTW(int n)
 
 }
 
-void FileIO::ChangeZData(int yIndex, QVector<double> newZ)
+int FileIO::ChangeZData(int yIndex, QVector<double> newZ)
 {
-    qDebug() << newZ.size() << ", " << zData[yIndex].size();
-    if( newZ.size() != zData[yIndex].size()) return;
+    //qDebug() << newZ.size() << ", " << zData[yIndex].size();
+    if( newZ.size() != zData[yIndex].size()) return 0;
 
-    qDebug() << "rewrite";
+    //qDebug() << "rewrite";
 
     for( int i = 0; i < zData[yIndex].size() ; i++){
         this->zData[yIndex][i] = newZ[i];
     }
+
+    return 1;
 }
 
 double FileIO::ExtractYValue(QString str, int index){
