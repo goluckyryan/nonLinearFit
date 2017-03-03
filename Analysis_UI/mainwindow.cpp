@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     wPlot = new WaveletPlot(this);
     connect(wPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)) );
+    connect(wPlot, SIGNAL(Replot()), this, SLOT(RePlotPlots()));
 
     savedSingleXCVS = 0;
 

@@ -20,7 +20,8 @@ public:
     void Recontruct();
     void HardThresholding(double threshold, int sLimit);
 
-    void PrintV(int s);
+    void PrintV(int s, int flag = 0);
+    void PrintV0(int s, int flag = 0);
     void PrintW(int s);
 
     QVector<double>* GetW() { return W; }

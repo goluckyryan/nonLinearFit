@@ -70,9 +70,10 @@ WaveletPlot::~WaveletPlot()
 void WaveletPlot::SetData(FileIO *file, int yIndex)
 {
     this->file = file;
+    this->yIndex = yIndex;
 
     //QVector<double> y;
-    //for( int i = 0; i < qPow(2,5); i++){
+    //for( int i = 0; i < qPow(2,5)+10; i++){
     //    y.push_back(qCos(i/5.));
     //}
 
@@ -197,4 +198,12 @@ void WaveletPlot::on_verticalSlider_Scale_valueChanged(int value)
 {
     int val = ui->verticalSlider->value();
     on_verticalSlider_valueChanged(val);
+}
+
+void WaveletPlot::on_ApplyHT_clicked()
+{
+    file->ChangeZData(yIndex, wave->GetVoct(0));
+    Replot();
+
+    qDebug() << "apply new data";
 }

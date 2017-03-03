@@ -100,6 +100,9 @@ public slots:
     void RemoveYConstant();
     void MovingAvgonFFTW(int n);
 
+    //Wavelet analysis
+    void ChangeZData(int yIndex, QVector<double> newZ);
+
     double HV2Mag(double HV){
         double mag = 0;
         for(int i = 0; i < hallPar.size() ; i++){

@@ -24,12 +24,15 @@ public:
 
 signals:
     void SendMsg(QString msg);
+    void Replot();
 
 private slots:
 
     void on_verticalSlider_valueChanged(int value);
 
     void on_verticalSlider_Scale_valueChanged(int value);
+
+    void on_ApplyHT_clicked();
 
 private:
     Ui::WaveletPlot *ui;
@@ -46,6 +49,7 @@ private:
     WaveletAnalysis * wave;
 
     FileIO *file;
+    int yIndex;
 
     bool enableVerticalBar;
 

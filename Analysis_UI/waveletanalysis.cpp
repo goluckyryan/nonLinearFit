@@ -41,7 +41,7 @@ void WaveletAnalysis::Decompose(){
         V0[s+1].clear();
         W0[s+1].clear();
 
-        for(int k = 1; k < sizeV/2.+1; k++){
+        for(int k = 1; k <= sizeV/2.; k++){
             double sum = 0;
             for(int l = 1; l <= sizeV; l++){
                 sum += H0(2*k-l)*V0[s][l-1];
@@ -56,6 +56,8 @@ void WaveletAnalysis::Decompose(){
 
             if( WAbsMax < sum) WAbsMax = sum;
         }
+
+        //PrintV0(s+1,1);
 
     }
 
@@ -78,10 +80,12 @@ void WaveletAnalysis::RestoreData()
         V[s].clear();
         W[s].clear();
 
-        for(int k = 1; k <= V0[s].size(); k++){
-            V[s].push_back(V0[s][k-1]);
-            W[s].push_back(W0[s][k-1]);
+        for(int k = 0; k < V0[s].size(); k++){
+            V[s].push_back(V0[s][k]);
+            W[s].push_back(W0[s][k]);
         }
+
+        //PrintV(s,1);
     }
 
 }
@@ -89,11 +93,9 @@ void WaveletAnalysis::RestoreData()
 void WaveletAnalysis::Recontruct(){
 
     for( int s = M-1; s > 0; s--){
-        //int sizeV = (V[s].size()-1) * 2;
-
         V[s-1].clear();
 
-        for(int l = 1; l <= V[s].size() * 2; l++){
+        for(int l = 1; l <= V0[s].size() * 2; l++){
             double sum = 0;
             for(int k = 1; k <= V[s].size(); k++){
                 sum += G0(l+1-2*k)*V[s][k-1];
@@ -102,7 +104,10 @@ void WaveletAnalysis::Recontruct(){
             V[s-1].push_back(sum);
         }
 
+        //PrintV(s-1,1);
     }
+
+
     msg.sprintf("Reconstructed.");
 }
 
@@ -121,9 +126,22 @@ void WaveletAnalysis::HardThresholding(double threshold, int sLimit)
     msg.sprintf("Applied Hard Thresholding, level<%2.1f, scale>%d", threshold, sLimit);
 }
 
-void WaveletAnalysis::PrintV(int s)
+void WaveletAnalysis::PrintV(int s, int flag)
 {
-    qDebug() << "V("<<s << ")" << V[s];
+    if( flag == 0){
+        qDebug() << "V("<<s << "," << V[s].size() << ")" << V[s];
+    }else{
+        qDebug() << "V("<<s << "," << V[s].size() << ")" ;
+    }
+}
+
+void WaveletAnalysis::PrintV0(int s, int flag)
+{
+    if( flag == 0){
+        qDebug() << "V0("<<s << "," << V0[s].size() << ")" << V0[s];
+    }else{
+        qDebug() << "V0("<<s << "," << V0[s].size() << ")" ;
+    }
 }
 
 void WaveletAnalysis::PrintW(int s)

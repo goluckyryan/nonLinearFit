@@ -64,15 +64,15 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
+    <item row="1" column="4" rowspan="5" colspan="2">
+     <widget class="QCustomPlot" name="plot" native="true"/>
+    </item>
+    <item row="4" column="1">
      <widget class="QPushButton" name="ApplyHT">
       <property name="text">
        <string>Apply Hard Thresholding</string>
       </property>
      </widget>
-    </item>
-    <item row="1" column="4" rowspan="5" colspan="2">
-     <widget class="QCustomPlot" name="plot" native="true"/>
     </item>
    </layout>
   </widget>

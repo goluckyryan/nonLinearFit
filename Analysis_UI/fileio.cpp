@@ -1087,6 +1087,18 @@ void FileIO::MovingAvgonFFTW(int n)
 
 }
 
+void FileIO::ChangeZData(int yIndex, QVector<double> newZ)
+{
+    qDebug() << newZ.size() << ", " << zData[yIndex].size();
+    if( newZ.size() != zData[yIndex].size()) return;
+
+    qDebug() << "rewrite";
+
+    for( int i = 0; i < zData[yIndex].size() ; i++){
+        this->zData[yIndex][i] = newZ[i];
+    }
+}
+
 double FileIO::ExtractYValue(QString str, int index){
     // when index == -1; is old CSV data, use the last one
 
