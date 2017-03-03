@@ -3,6 +3,7 @@
 
 //#include <QObject>
 #include <QVector>
+#include <QString>
 #include <QtMath>
 #include <QDebug>
 
@@ -21,8 +22,10 @@ public:
     void PrintW(int s);
 
     QVector<double>* GetW() { return W; }
+    QVector<double>* GetV() { return V; }
     int GetM() {return M;}
     int GetSize() {return size;}
+    QString GetMsg() {return msg;}
 
 //signals:
 
@@ -50,6 +53,8 @@ private:
         if(n == 1 ) return  1/2.;
         return 0;
     }
+
+    QString msg;
 
     QVector<double> *V;
     QVector<double> *W;

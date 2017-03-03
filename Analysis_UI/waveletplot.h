@@ -19,12 +19,21 @@ public:
     explicit WaveletPlot(QWidget *parent = 0);
     ~WaveletPlot();
 
-    void SetData(FileIO * file);
+    void SetData(FileIO *file, int yIndex);
+
+signals:
+    void SendMsg(QString msg);
 
 private slots:
 
 private:
     Ui::WaveletPlot *ui;
+
+    QCustomPlot * plot_W;
+    QCPColorMap * colorMap_W;
+
+    QCustomPlot * plot_V;
+    QCPColorMap * colorMap_V;
 
     QCustomPlot * plot;
     QCPColorMap * colorMap;

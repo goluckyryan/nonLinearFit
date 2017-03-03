@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>978</width>
+    <height>678</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QCustomPlot" name="plot" native="true">
+   <widget class="QCustomPlot" name="plot_W" native="true">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>60</y>
-      <width>471</width>
+      <x>190</x>
+      <y>50</y>
+      <width>361</width>
       <height>341</height>
      </rect>
     </property>
@@ -37,13 +37,33 @@
      <string>PushButton</string>
     </property>
    </widget>
+   <widget class="QCustomPlot" name="plot_V" native="true">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>50</y>
+      <width>371</width>
+      <height>341</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QCustomPlot" name="plot" native="true">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>400</y>
+      <width>371</width>
+      <height>231</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>978</width>
      <height>21</height>
     </rect>
    </property>

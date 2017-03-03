@@ -9,14 +9,14 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> a)
     V = new QVector<double> [M];
     W = new QVector<double> [M];
 
-    qDebug() << size << "--------------" << M;
     for( int i = 0; i < size; i++){
         V[0].push_back(a[i]);
         W[0].push_back(0.);
     }
 
-    //Should calculate G0, G1, H1, H2 and R for semi-orthonormal wavelet;
+    msg.sprintf("Array size = %d; Max scale = %d", size, M);
 
+    //Should calculate G0, G1, H1, H2 and R for semi-orthonormal wavelet;
 
 }
 
@@ -51,7 +51,7 @@ void WaveletAnalysis::Decompose(){
 
     }
 
-    qDebug() << "Decomposed, s =" << s;
+    msg.sprintf("Decomposed scale = %d", s );
 
     //for( int r = 1; r < M ; r++){
     //    qDebug() << "W(" << r << ") = " << W[r].size();

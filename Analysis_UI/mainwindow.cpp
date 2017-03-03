@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(fftPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     wPlot = new WaveletPlot(this);
+    connect(wPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)) );
 
     savedSingleXCVS = 0;
 
@@ -1244,6 +1245,7 @@ void MainWindow::on_actionDWT_Plot_triggered()
 {
     if(wPlot->isHidden()){
         wPlot->show();
-        wPlot->SetData(file);
+        int yIndex = ui->spinBox_y->value();
+        wPlot->SetData(file, yIndex);
     }
 }
