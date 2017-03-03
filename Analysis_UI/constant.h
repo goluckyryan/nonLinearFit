@@ -18,3 +18,15 @@ const double TIME1 = 5.0;  // start fitting time
 const double TIME2 = -3.0; // end time of sample mean and variance
 
 #endif // CONSTANT_H
+
+/**************************
+======== TODO--List =======
+***************************
+1, convert Dialog to mainwindow class ( need edit *.ui file outside Qt )
+2, moving average has bug
+3, better guest on par
+4, when B-plot did not open once, disable print
+5, calculate error-weighted mean
+6, undecimated DWT
+7, non-orthonormal DWT
+***************************/
