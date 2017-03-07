@@ -61,6 +61,8 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     enableVerticalBar = 0;
     x1 = -20;
     x2 = 50;
+    ui->lineEdit_x1->setText(QString::number(x1));
+    ui->lineEdit_x2->setText(QString::number(x2));
 
     ui->pushButton_Clean->setEnabled(false);
     ui->pushButton_Restore->setEnabled(false);
@@ -201,7 +203,6 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
 
         ui->lineEdit_HT->setText(QString::number(value/100.));
         int sLimit = ui->verticalSlider_Scale->value();
-        ui->lineEdit_sLimit->setText(QString::number(sLimit));
 
         if( !(sLimit == 0 || value == 0.)){
             //qDebug() << "cal." << sLimit << "," << value;
@@ -228,6 +229,7 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
 
 void WaveletPlot::on_verticalSlider_Scale_valueChanged(int value)
 {
+    ui->lineEdit_sLimit->setText(QString::number(value));
     if( value == 0) {
         ui->pushButton_Clean->setEnabled(false);
         return;
@@ -274,8 +276,10 @@ void WaveletPlot::SetLineByMouseClick(QMouseEvent *mouse)
 
     if( mouse->button() == Qt::LeftButton){
         x1 = x;
+        ui->lineEdit_x1->setText(QString::number(x1));
     }else if(mouse->button() == Qt::RightButton){
         x2 = x;
+        ui->lineEdit_x2->setText(QString::number(x2));
     }
 
     xline_x1.push_back(x1);
@@ -310,4 +314,25 @@ void WaveletPlot::on_pushButton_Clean_clicked()
     plot->graph(1)->addData(file->GetDataSetX(), v0);
     plot->rescaleAxes();
     plot->replot();
+}
+
+void WaveletPlot::on_lineEdit_sLimit_editingFinished()
+{
+    int value = ui->lineEdit_sLimit->text().toInt();
+    value = - qAbs(value);
+    ui->lineEdit_sLimit->setText(QString::number(value));
+    ui->verticalSlider_Scale->setValue(value);
+}
+
+void WaveletPlot::on_lineEdit_HT_editingFinished()
+{
+    double value = ui->lineEdit_HT->text().toDouble();
+    value = qAbs(value);
+    ui->verticalSlider->setValue(value*100);
+}
+
+void WaveletPlot::on_pushButton_Restore_clicked()
+{
+    wave->RestoreData();
+
 }

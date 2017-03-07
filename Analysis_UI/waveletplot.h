@@ -39,6 +39,12 @@ private slots:
 
     void on_pushButton_Clean_clicked();
 
+    void on_lineEdit_sLimit_editingFinished();
+
+    void on_lineEdit_HT_editingFinished();
+
+    void on_pushButton_Restore_clicked();
+
 private:
     Ui::WaveletPlot *ui;
 
