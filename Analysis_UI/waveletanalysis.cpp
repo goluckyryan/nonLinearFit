@@ -20,6 +20,29 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
 
     msg.sprintf("Array size = %d; Max scale = %d", size, M);
 
+}
+
+WaveletAnalysis::~WaveletAnalysis(){
+    if( V0 != NULL) delete [] V0;
+    if( W0 != NULL) delete [] W0;
+    if( X0 != NULL) delete [] X0;
+
+    if( V != NULL) delete [] V;
+    if( W != NULL) delete [] W;
+}
+
+void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
+{
+    this->waveletIndex = waveletIndex;
+    this->waveletPar = waveletPar;
+
+    G0(0); // cal parSize;
+
+    switch (waveletIndex) {
+    case 0: msg.sprintf("Haar wavelet"); break;
+    case 1: msg.sprintf("Daubechies wavelet %d", waveletPar); break;
+    }
+
     qDebug() << "=============== G0";
     for( int k = 0; k < parSize ; k++){
         qDebug() << k << " , " << G0(k);
@@ -38,26 +61,6 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
         qDebug() << k << " , " << H1(k);
     }
 */
-}
-
-WaveletAnalysis::~WaveletAnalysis(){
-    if( V0 != NULL) delete [] V0;
-    if( W0 != NULL) delete [] W0;
-    if( X0 != NULL) delete [] X0;
-
-    if( V != NULL) delete [] V;
-    if( W != NULL) delete [] W;
-}
-
-void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
-{
-    this->waveletIndex = waveletIndex;
-    this->waveletPar = waveletPar;
-
-    switch (waveletIndex) {
-    case 0: msg.sprintf("Haar wavelet"); break;
-    case 1: msg.sprintf("Daubechies wavelet %d", waveletPar); break;
-    }
 
 }
 
@@ -144,6 +147,7 @@ void WaveletAnalysis::Reconstruct(){
         for(int l = 1; l <= V0[s-1].size() ; l++){
             double sum = 0;
             for(int k = 0; k < V0[s].size(); k++){
+                if( l-1-2*k < 0 || l-1-2*k > parSize) continue;
                 sum += G0(l-1-2*k)*V[s][k];
                 sum += G1(l-1-2*k)*W[s][k];
             }

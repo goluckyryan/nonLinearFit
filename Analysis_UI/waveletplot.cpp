@@ -59,6 +59,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot->graph(0)->clearData();
 
     enableVerticalBar = 0;
+
     x1 = -20;
     x2 = 50;
     ui->lineEdit_x1->setText(QString::number(x1));
@@ -69,6 +70,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     ui->comboBox_Wavelet->addItems(WaveletList);
     ui->comboBox_Wavelet->setCurrentIndex(0);
     ui->spinBox_WaveletIndex->setEnabled(false);
+
 
     QStringList Thresholding;
     Thresholding << "Hard Threshold";
@@ -118,7 +120,7 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     plot->replot();
 
     QString msg;
-    msg.sprintf("==== Discrete Wavelet Analysis (Haar wavelet), y-Index = %d.", yIndex );
+    msg.sprintf("======== Discrete Wavelet Analysis, y-Index = %d.", yIndex );
     SendMsg(msg);
 
     //wavelet decomposition
@@ -369,11 +371,12 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
         ui->spinBox_WaveletIndex->setEnabled(false);
     }
 
-    //wave->setWaveletPar(index, 2);
-    //SendMsg(wave->GetMsg());
-    //wave->Decompose();
-    //SendMsg(wave->GetMsg());
-    //
-    //PlotWV();
+    if( wave == NULL ) return;
+    wave->setWaveletPar(index, 2);
+    SendMsg(wave->GetMsg());
+    wave->Decompose();
+    SendMsg(wave->GetMsg());
+
+    PlotWV();
 
 }

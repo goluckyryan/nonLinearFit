@@ -47,13 +47,12 @@ public:
 
 private:
     // this is specific for Haar wavelet
-    int G0(int k){
+    double G0(int k){
         QVector<double> g0;
+        g0.clear();
         if( waveletIndex == 0){ // Haar
-            //g0 << 1 << 1;
             g0 = {1,1};
         }
-
 
         if( waveletIndex == 1){ // Daubechies
             switch (waveletPar) {
@@ -95,7 +94,7 @@ private:
         }
         return 0;
     }
-    int G1(int k){
+    double G1(int k){
         //if( waveletIndex == 0){
         //    if(k == 0 ) return 1;
         //    if(k == 1 ) return -1;
