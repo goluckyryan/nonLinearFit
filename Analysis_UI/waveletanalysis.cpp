@@ -47,11 +47,11 @@ void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
     for( int k = 0; k < parSize ; k++){
         qDebug() << k << " , " << G0(k);
     }
-/*
     qDebug() << "=============== G1";
-    for( int k = -3; k < 3 ; k++){
+    for( int k = 2-parSize; k <= 1 ; k++){
         qDebug() << k << " , " << G1(k);
     }
+/*
     qDebug() << "=============== H0";
     for( int k = -3; k < 3 ; k++){
         qDebug() << k << " , " << H0(k);
@@ -149,6 +149,7 @@ void WaveletAnalysis::Reconstruct(){
             for(int k = 0; k < V0[s].size(); k++){
                 if( l-1-2*k < 0 || l-1-2*k > parSize) continue;
                 sum += G0(l-1-2*k)*V[s][k];
+                if( l-1-2*k > 1 || l-1-2*k < 2-parSize) continue;
                 sum += G1(l-1-2*k)*W[s][k];
             }
             V[s-1].push_back(sum);

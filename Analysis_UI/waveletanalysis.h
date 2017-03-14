@@ -95,12 +95,7 @@ private:
         return 0;
     }
     double G1(int k){
-        //if( waveletIndex == 0){
-        //    if(k == 0 ) return 1;
-        //    if(k == 1 ) return -1;
-        //}
-
-        return G0(k)*qPow(-1,k);
+        return G0(1-k)*qPow(-1,k);
     }
 
     double H0(int k){
