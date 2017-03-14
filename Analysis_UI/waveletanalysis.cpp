@@ -1,8 +1,10 @@
 #include "waveletanalysis.h"
 
 //WaveletAnalysis::WaveletAnalysis(QObject *parent) : QObject(parent)
-WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
+WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a, int waveletIndex)
 {
+    this->waveletIndex = waveletIndex;
+
     size = a.size();
     M = qFloor( qLn(size)/qLn(2.) )+1;
 
@@ -19,9 +21,24 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
     }
 
     msg.sprintf("Array size = %d; Max scale = %d", size, M);
-
-    //Should calculate G0, G1, H1, H2 and R for semi-orthonormal wavelet;
-
+/*
+    qDebug() << "=============== G0";
+    for( int k = -3; k < 3 ; k++){
+        qDebug() << k << " , " << G0(k);
+    }
+    qDebug() << "=============== G1";
+    for( int k = -3; k < 3 ; k++){
+        qDebug() << k << " , " << G1(k);
+    }
+    qDebug() << "=============== H0";
+    for( int k = -3; k < 3 ; k++){
+        qDebug() << k << " , " << H0(k);
+    }
+    qDebug() << "=============== H1";
+    for( int k = -3; k < 3 ; k++){
+        qDebug() << k << " , " << H1(k);
+    }
+*/
 }
 
 WaveletAnalysis::~WaveletAnalysis(){
@@ -45,29 +62,29 @@ void WaveletAnalysis::Decompose(){
         W0[s+1].clear();
         X0[s+1].clear();
 
-        for(int k = 1; k <= sizeV/2.; k++){
+        for(int k = 1; k <= sizeV/2.+1; k++){
             double sum = 0;
-            for(int l = 1; l <= sizeV; l++){
-                sum += H0(2*k-l)*V0[s][l-1];
+            for(int l = 0; l < sizeV; l++){
+                sum += H0(2*k-l-2)*V0[s][l];
             }
             V0[s+1].push_back(sum);
 
             sum = 0;
-            for(int l = 1; l <= sizeV; l++){
-                sum += H0(2*k-l)*X0[s][l-1];
+            for(int l = 0; l < sizeV; l++){
+                sum += H0(2*k-l-2)*X0[s][l];
             }
             X0[s+1].push_back(sum);
 
             sum = 0;
-            for(int l = 1; l <= sizeV; l++){
-                sum += H1(2*k-l)*V0[s][l-1];
+            for(int l = 0; l < sizeV; l++){
+                sum += H1(2*k-l-2)*V0[s][l];
             }
             W0[s+1].push_back(sum);
 
             if( WAbsMax < sum) WAbsMax = sum;
         }
 
-        //PrintV0(s+1,1);
+        PrintV0(s+1,1);
 
     }
 
@@ -85,6 +102,7 @@ void WaveletAnalysis::Decompose(){
 
 void WaveletAnalysis::RestoreData()
 {
+    //qDebug() << "=========================== RestoreData";
     for(int s = 1; s < M ; s++){
 
         V[s].clear();
@@ -95,28 +113,35 @@ void WaveletAnalysis::RestoreData()
             W[s].push_back(W0[s][k]);
         }
 
-        //PrintV(s,1);
+        //PrintV(s);
+        //PrintW(s);
     }
 
 }
 
-void WaveletAnalysis::Recontruct(){
+void WaveletAnalysis::Reconstruct(){
+
+    //qDebug() << "======================== Reconstruc";
 
     for( int s = M-1; s > 0; s--){
+        //qDebug() << "---------- " << s;
         V[s-1].clear();
 
-        for(int l = 1; l <= V0[s].size() * 2; l++){
+        //PrintV(s);
+        //PrintW(s);
+
+        for(int l = 1; l <= V0[s-1].size() ; l++){
             double sum = 0;
-            for(int k = 1; k <= V[s].size(); k++){
-                sum += G0(l+1-2*k)*V[s][k-1];
-                sum -= G1(l+1-2*k)*W[s][k-1];
+            for(int k = 0; k < V0[s].size(); k++){
+                sum += G0(l-1-2*k)*V[s][k];
+                sum += G1(l-1-2*k)*W[s][k];
             }
             V[s-1].push_back(sum);
         }
 
-        //PrintV(s-1,1);
-    }
+        //PrintV(s-1,0);
 
+    }
 
     msg.sprintf("Reconstructed.");
 }
@@ -171,3 +196,7 @@ void WaveletAnalysis::PrintW(int s)
     qDebug() << "W("<<s << ")" << W[s];
 }
 
+void WaveletAnalysis::PrintW0(int s)
+{
+    qDebug() << "W0("<<s << ")" << W0[s];
+}

@@ -12,18 +12,19 @@ class WaveletAnalysis //: public QObject
 //    Q_OBJECT
 public:
     //explicit WaveletAnalysis(QObject *parent = 0);
-    WaveletAnalysis(QVector<double> x, QVector<double> a);
+    WaveletAnalysis(QVector<double> x, QVector<double> a, int waveletIndex);
     ~WaveletAnalysis();
 
     void Decompose();
     void RestoreData();
-    void Recontruct();
+    void Reconstruct();
     void HardThresholding(double threshold, int sLimit);
     void CleanOutsider(double x1, double x2, int sLimit);
 
     void PrintV(int s, int flag = 0);
     void PrintV0(int s, int flag = 0);
     void PrintW(int s);
+    void PrintW0(int s);
 
     QVector<double>* GetW() { return W; }
     QVector<double>* GetV() { return V; }
@@ -45,25 +46,30 @@ public:
 
 private:
     // this is specific for Haar wavelet
-    int G0(int n){
-        if(n == 0 || n==1 ) return 1;
+    int G0(int k){
+        if( waveletIndex == 0){
+            if(k == 0 || k == 1 ) return 1;
+        }
         return 0;
     }
-    int G1(int n){
-        if(n == 0 ) return 1;
-        if(n == 1 ) return -1;
-        return 0;
+    int G1(int k){
+        //if( waveletIndex == 0){
+        //    if(k == 0 ) return 1;
+        //    if(k == 1 ) return -1;
+        //}
+
+        return G0(k)*qPow(-1,k);
     }
 
-    double H0(int n){
-        if(n == 0 || n==1 ) return 1/2.;
-        return 0;
+    double H0(int k){
+        //if(n == 0 || n==1 ) return 1/2.;
+        return 0.5*G0(-k);
     }
 
-    double H1(int n){
-        if(n == 0 ) return 1/2.;
-        if(n == 1 ) return -1/2.;
-        return 0;
+    double H1(int k){
+        //if(n == 0 ) return 1/2.;
+        //if(n == 1 ) return -1/2.;
+        return 0.5*qPow(-1,k)*G0(k+1);
     }
 
     QString msg;
@@ -78,6 +84,7 @@ private:
 
     QVector<double> *X0;
 
+    int waveletIndex;
     int size;
     int M; // max scale
 

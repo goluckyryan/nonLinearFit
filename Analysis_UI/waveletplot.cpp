@@ -64,6 +64,20 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     ui->lineEdit_x1->setText(QString::number(x1));
     ui->lineEdit_x2->setText(QString::number(x2));
 
+    QStringList WaveletList;
+    WaveletList << "Haar" << "Daubechies";
+    ui->comboBox_Wavelet->addItems(WaveletList);
+    ui->comboBox_Wavelet->setCurrentIndex(0);
+    ui->spinBox_WaveletIndex->setEnabled(false);
+
+    QStringList Thresholding;
+    Thresholding << "Hard Threshold";
+    Thresholding << "Hard + linear Octave";
+    Thresholding << "Soft Threshold (linear)";
+    Thresholding << "Soft Threshold (x^n)";
+    ui->comboBox_Thresholding->addItems(Thresholding);
+    ui->comboBox_Thresholding->setCurrentIndex(0);
+
     ui->pushButton_Clean->setEnabled(false);
     ui->pushButton_Restore->setEnabled(false);
 
@@ -89,7 +103,7 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     this->yIndex = yIndex;
 
     //QVector<double> y;
-    //for( int i = 0; i < qPow(2,5)+10; i++){
+    //for( int i = 0; i < qPow(2,4)+10; i++){
     //    y.push_back(qCos(i/5.));
     //}
 
@@ -106,7 +120,7 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     SendMsg(msg);
 
     //wavelet decomposition
-    wave = new WaveletAnalysis(x, y);
+    wave = new WaveletAnalysis(x, y, 0); // 0 for Haar
     SendMsg(wave->GetMsg());
     wave->Decompose();
     SendMsg(wave->GetMsg());
@@ -204,12 +218,12 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
         ui->lineEdit_HT->setText(QString::number(value/100.));
         int sLimit = ui->verticalSlider_Scale->value();
 
-        if( !(sLimit == 0 || value == 0.)){
+        if( !(sLimit == 0 || value == 0)){
             //qDebug() << "cal." << sLimit << "," << value;
             wave->HardThresholding(value/100., sLimit);
             //SendMsg(wave->GetMsg());
 
-            wave->Recontruct();
+            wave->Reconstruct();
             //SendMsg(wave->GetMsg());
 
             //TODO  Group as Replot();
@@ -304,7 +318,7 @@ void WaveletPlot::on_pushButton_Clean_clicked()
         wave->CleanOutsider(x2, x1, sLimit);
     }
 
-    wave->Recontruct();
+    wave->Reconstruct();
 
     QVector<double> v0 = wave->GetVoct(0);
 
