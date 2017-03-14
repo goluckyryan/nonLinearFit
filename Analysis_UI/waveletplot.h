@@ -45,6 +45,8 @@ private slots:
 
     void on_pushButton_Restore_clicked();
 
+    void on_comboBox_Wavelet_currentIndexChanged(int index);
+
 private:
     Ui::WaveletPlot *ui;
 

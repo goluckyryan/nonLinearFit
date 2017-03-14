@@ -107,6 +107,8 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     //    y.push_back(qCos(i/5.));
     //}
 
+    //QVector<double> y = file->GetDataSetZ(yIndex);
+    //QVector<double> x = file->GetDataSetX();
     QVector<double> y = file->GetDataSetZ(yIndex);
     QVector<double> x = file->GetDataSetX();
 
@@ -120,7 +122,12 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     SendMsg(msg);
 
     //wavelet decomposition
-    wave = new WaveletAnalysis(x, y, 0); // 0 for Haar
+    int waveletID  = ui->comboBox_Wavelet->currentIndex();
+    int waveletPar = 0;
+    if( waveletID == 1 ) waveletPar = ui->spinBox_WaveletIndex->value();
+    wave = new WaveletAnalysis(x, y); // 0 for Haar
+    SendMsg(wave->GetMsg());
+    wave->setWaveletPar(waveletID, waveletPar);
     SendMsg(wave->GetMsg());
     wave->Decompose();
     SendMsg(wave->GetMsg());
@@ -348,5 +355,25 @@ void WaveletPlot::on_lineEdit_HT_editingFinished()
 void WaveletPlot::on_pushButton_Restore_clicked()
 {
     wave->RestoreData();
+}
+
+void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
+{
+    qDebug() << "combox wavelet : " << index;
+    if(index == 1){
+        ui->spinBox_WaveletIndex->setMinimum(2);
+        ui->spinBox_WaveletIndex->setMaximum(12);
+        ui->spinBox_WaveletIndex->setValue(2);
+        ui->spinBox_WaveletIndex->setEnabled(true);
+    }else{
+        ui->spinBox_WaveletIndex->setEnabled(false);
+    }
+
+    //wave->setWaveletPar(index, 2);
+    //SendMsg(wave->GetMsg());
+    //wave->Decompose();
+    //SendMsg(wave->GetMsg());
+    //
+    //PlotWV();
 
 }

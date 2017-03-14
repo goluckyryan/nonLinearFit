@@ -1,10 +1,8 @@
 #include "waveletanalysis.h"
 
 //WaveletAnalysis::WaveletAnalysis(QObject *parent) : QObject(parent)
-WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a, int waveletIndex)
+WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
 {
-    this->waveletIndex = waveletIndex;
-
     size = a.size();
     M = qFloor( qLn(size)/qLn(2.) )+1;
 
@@ -21,11 +19,12 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a, int wavel
     }
 
     msg.sprintf("Array size = %d; Max scale = %d", size, M);
-/*
+
     qDebug() << "=============== G0";
-    for( int k = -3; k < 3 ; k++){
+    for( int k = 0; k < parSize ; k++){
         qDebug() << k << " , " << G0(k);
     }
+/*
     qDebug() << "=============== G1";
     for( int k = -3; k < 3 ; k++){
         qDebug() << k << " , " << G1(k);
@@ -48,6 +47,18 @@ WaveletAnalysis::~WaveletAnalysis(){
 
     if( V != NULL) delete [] V;
     if( W != NULL) delete [] W;
+}
+
+void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
+{
+    this->waveletIndex = waveletIndex;
+    this->waveletPar = waveletPar;
+
+    switch (waveletIndex) {
+    case 0: msg.sprintf("Haar wavelet"); break;
+    case 1: msg.sprintf("Daubechies wavelet %d", waveletPar); break;
+    }
+
 }
 
 void WaveletAnalysis::Decompose(){
