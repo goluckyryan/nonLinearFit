@@ -267,7 +267,7 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
             if( ui->comboBox_Thresholding->currentIndex() == 0){
                 wave->HardThresholding(value/100., sLimit);
             }
-            if( ui->comboBox_Thresholding->currentIndex() == 1){
+            if( ui->comboBox_Thresholding->currentIndex() == 2){
                 wave->SoftThresholding(value/100., sLimit);
             }
             //SendMsg(wave->GetMsg());
