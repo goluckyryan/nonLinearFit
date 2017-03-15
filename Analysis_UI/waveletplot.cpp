@@ -105,8 +105,8 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     this->yIndex = yIndex;
 
     //QVector<double> y;
-    //for( int i = 0; i < 500; i++){
-    //    y.push_back(i/20.);
+    //for( int i = 0; i < 1000; i++){
+    //    y.push_back(qCos(i/20.));
     //}
 
     QVector<double> y = file->GetDataSetZ(yIndex);
@@ -181,33 +181,41 @@ void WaveletPlot::PlotWV()
 {
     QVector<double> * w = wave->GetW();
     QVector<double> * v = wave->GetV();
-    QVector<double> * wk = wave->GetWk();
-    QVector<double> * vk = wave->GetVk();
+    QVector<int> * wk = wave->GetWk();
+    QVector<int> * vk = wave->GetVk();
 
+    int size = wave->GetSize();
     int ny = wave->GetM();
+
     //plot
     QVector<double> temp_W, temp_V;
     for( int s = 1; s < ny ; s++){
         //Filling space
         temp_W.clear();
         temp_V.clear();
+
+        //qDebug() << s << "," << w[s].size();
+
         for( int k = 0; k < w[s].size(); k++){
             if( wk[s][k] < 0 ) continue;
 
             for( int d = 0; d < qPow(2,s); d++){
-                temp_W.push_back( qAbs(w[s][k]) );
-            }
-        }
-        for( int k = 0; k < v[s].size(); k++){
-            if( vk[s][k] < 0 ) continue;
-            for( int d = 0; d < qPow(2,s); d++){
-                temp_V.push_back( qAbs(v[s][k]) );
+                temp_W.push_back( w[s][k] );
             }
         }
 
-        for( int k = 0; k < temp_W.size(); k++){
-            colorMap_W->data()->setCell(k,ny-s, temp_W[k]);
-            colorMap_V->data()->setCell(k,ny-s, temp_V[k]);
+        //if( s == 1) qDebug() << temp_W.size() << "--" << temp_W;
+
+        for( int k = 0; k < v[s].size(); k++){
+            if( vk[s][k] < 0 ) continue;
+            for( int d = 0; d < qPow(2,s); d++){
+                temp_V.push_back( v[s][k] );
+            }
+        }
+
+        for( int k = 0; k < size; k++){
+            colorMap_W->data()->setCell(k,ny-s, qAbs(temp_W[k]));
+            colorMap_V->data()->setCell(k,ny-s, qAbs(temp_V[k]));
         }
     }
 
@@ -268,6 +276,8 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
         }
 
         if( value == 0 || sLimit == 0){
+            //wave->Reconstruct();
+            PlotWV();
             PlotReconstructedData(1);
         }
 
@@ -292,7 +302,7 @@ void WaveletPlot::on_ApplyHT_clicked()
 
     if( changed ){
         QString msg;
-        msg.sprintf("Apply Hard Thresholding, level<%4s && scale>%2s", ui->lineEdit_HT->text(), ui->lineEdit_sLimit->text());
+        msg.sprintf("Apply Hard Thresholding, level<%4s && scale>%2s", ui->lineEdit_HT->text().toStdString().c_str(), ui->lineEdit_sLimit->text().toStdString().c_str());
         SendMsg(msg);
     }
 }
