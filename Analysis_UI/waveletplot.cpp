@@ -58,6 +58,18 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot->xAxis->setLabel("time [us]");
     plot->graph(0)->clearData();
 
+    plot_Woct = ui->plot_Woct;
+    plot_Woct->addGraph();
+    plot_Woct->graph(0)->setPen(QPen(Qt::blue));
+    plot_Woct->xAxis->setLabel("time [us]");
+    plot_Woct->graph(0)->clearData();
+
+    plot_Voct = ui->plot_Voct;
+    plot_Voct->addGraph();
+    plot_Voct->graph(0)->setPen(QPen(Qt::blue));
+    plot_Voct->xAxis->setLabel("time [us]");
+    plot_Voct->graph(0)->clearData();
+
     enableVerticalBar = 0;
 
     x1 = -20;
@@ -93,6 +105,8 @@ WaveletPlot::~WaveletPlot()
     delete colorMap_V;
     delete plot_V;
     delete plot;
+    delete plot_Woct;
+    delete plot_Voct;
 
     file = NULL;
 
@@ -253,6 +267,27 @@ void WaveletPlot::PlotReconstructedData(bool Original)
     plot->replot();
 }
 
+void WaveletPlot::PlotWVoct(int s)
+{
+    s = qAbs(s);
+    //qDebug() << "Plot WV oct " << s;
+    if( wave == NULL ) return;
+    QVector<double> v = wave->GetVoct(s);
+    QVector<double> w = wave->GetWoct(s);
+    QVector<double> x = file->GetDataSetX();
+
+    plot_Woct->graph(0)->clearData();
+    plot_Woct->graph(0)->addData(x, w);
+    plot_Woct->rescaleAxes();
+    plot_Woct->replot();
+
+    plot_Voct->graph(0)->clearData();
+    plot_Voct->graph(0)->addData(x, v);
+    plot_Voct->rescaleAxes();
+    plot_Voct->replot();
+
+}
+
 
 void WaveletPlot::on_verticalSlider_valueChanged(int value)
 {
@@ -298,6 +333,8 @@ void WaveletPlot::on_verticalSlider_Scale_valueChanged(int value)
     }
     int val = ui->verticalSlider->value();
     on_verticalSlider_valueChanged(val);
+
+    PlotWVoct(value);
 }
 
 void WaveletPlot::on_ApplyHT_clicked()

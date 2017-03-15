@@ -22,11 +22,11 @@ public:
     void SetData(FileIO *file, int yIndex);
     void PlotWV();
     void PlotReconstructedData(bool Original = 0);
+    void PlotWVoct(int s);
 
 signals:
     void SendMsg(QString msg);
     void Replot();
-
 
 private slots:
 
@@ -41,15 +41,12 @@ private slots:
     void on_pushButton_Clean_clicked();
 
     void on_lineEdit_sLimit_editingFinished();
-
     void on_lineEdit_HT_editingFinished();
 
     void on_pushButton_Restore_clicked();
 
     void on_comboBox_Wavelet_currentIndexChanged(int index);
-
     void on_spinBox_WaveletIndex_valueChanged(int arg1);
-
     void on_comboBox_Thresholding_currentIndexChanged(int index);
 
 private:
@@ -62,6 +59,8 @@ private:
     QCPColorMap * colorMap_V;
 
     QCustomPlot * plot;
+    QCustomPlot * plot_Woct;
+    QCustomPlot * plot_Voct;
 
     WaveletAnalysis * wave;
 
