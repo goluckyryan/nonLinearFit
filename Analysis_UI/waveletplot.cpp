@@ -264,7 +264,12 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
 
         if( !(sLimit == 0 || value == 0)){
             //qDebug() << "cal." << sLimit << "," << value/100.;
-            wave->HardThresholding(value/100., sLimit);
+            if( ui->comboBox_Thresholding->currentIndex() == 0){
+                wave->HardThresholding(value/100., sLimit);
+            }
+            if( ui->comboBox_Thresholding->currentIndex() == 1){
+                wave->SoftThresholding(value/100., sLimit);
+            }
             //SendMsg(wave->GetMsg());
 
             wave->Reconstruct();
@@ -428,4 +433,9 @@ void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
 
     PlotWV();
     PlotReconstructedData();
+}
+
+void WaveletPlot::on_comboBox_Thresholding_currentIndexChanged(int index)
+{
+
 }

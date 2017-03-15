@@ -50,6 +50,8 @@ private slots:
 
     void on_spinBox_WaveletIndex_valueChanged(int arg1);
 
+    void on_comboBox_Thresholding_currentIndexChanged(int index);
+
 private:
     Ui::WaveletPlot *ui;
 

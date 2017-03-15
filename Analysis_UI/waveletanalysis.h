@@ -20,6 +20,7 @@ public:
     void RestoreData();
     void Reconstruct();
     void HardThresholding(double threshold, int sLimit);
+    void SoftThresholding(double threshold, int sLimit);
     void CleanOutsider(double x1, double x2, int sLimit);
 
     void PrintArray(QVector<double> y, QString str, int s);

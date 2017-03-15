@@ -120,9 +120,9 @@ void WaveletAnalysis::Decompose(){
         X0[s+1].clear();
 
         bool startStore = 0;
-        for(int k = -parSize/2.; k <= sizeV/2.; k++){
+        for(int k = -parSize; k <= sizeV/2.; k++){
             double sum = 0;
-            for(int l = 0; l < Vk[s].size(); l++){
+            for(int l = 0; l < sizeV; l++){
                 double h0 = H0(2*k-Vk[s][l]);
                 if( h0 == 0) continue;
                 sum += h0*V0[s][l];
@@ -135,9 +135,9 @@ void WaveletAnalysis::Decompose(){
         }
 
         startStore = 0;
-        for(int k = -1; k <= parSize + sizeV/2.; k++){
+        for(int k = -parSize; k <= parSize + 10 + sizeV/2.; k++){
             double sum = 0;
-            for(int l = 0; l < Vk[s].size(); l++){
+            for(int l = 0; l < sizeV; l++){
                 double h1 = H1(2*k-Vk[s][l]);
                 if( h1 == 0) continue;
                 sum += H1(2*k-Vk[s][l])*V0[s][l];
@@ -148,7 +148,7 @@ void WaveletAnalysis::Decompose(){
                 W0[s+1].push_back(sum);
             }
 
-            if( WAbsMax < qAbs(sum)) WAbsMax = sum;
+            if( WAbsMax < qAbs(sum)) WAbsMax = qAbs(sum);
         }
 
         for(int k = 0; k <= sizeV/2.; k++){
@@ -156,11 +156,11 @@ void WaveletAnalysis::Decompose(){
             X0[s+1].push_back(X0[s][2*k]);
         }
 
-        int vkSize = Vk[s+1].size();
-        int wkSize = Wk[s+1].size();
-        qDebug("s= %d, Vk(%d, %d)= %d , V0 = %d, Wk(%d, %d) = %d , W0 = %d", \
-               s+1, Vk[s+1][0], Vk[s+1][vkSize-1] , Vk[s+1].size(), V0[s+1].size(), \
-                Wk[s+1][0], Wk[s+1][wkSize-1] , Wk[s+1].size(), W0[s+1].size() );
+        //int vkSize = Vk[s+1].size();
+        //int wkSize = Wk[s+1].size();
+        //qDebug("s= %d, Vk(%d, %d)= %d , V0 = %d, Wk(%d, %d) = %d , W0 = %d", \
+        //       s+1, Vk[s+1][0], Vk[s+1][vkSize-1] , Vk[s+1].size(), V0[s+1].size(), \
+        //        Wk[s+1][0], Wk[s+1][wkSize-1] , Wk[s+1].size(), W0[s+1].size() );
 
         //PrintArray(Vk[s+1], "Vk", s+1);
         //PrintArray(V0[s+1], "V0", s+1);
@@ -169,6 +169,9 @@ void WaveletAnalysis::Decompose(){
         //PrintArray(W0[s+1], "W0", s+1);
 
     }
+
+
+    qDebug() << "|W|_max = " << WAbsMax;
 
     RestoreData();
 
@@ -249,7 +252,6 @@ void WaveletAnalysis::HardThresholding(double threshold, int sLimit)
     for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
         for( int k = 0; k <= W[s].size(); k++){
             if( qAbs(W[s][k]) < threshold ) {
-                //qDebug() << s << "," << k << "," << W[s][k];
                 W[s][k] = 0.;
             }
         }
@@ -257,14 +259,39 @@ void WaveletAnalysis::HardThresholding(double threshold, int sLimit)
     msg.sprintf("Applied Hard Thresholding, level<%2.1f && scale>%d", threshold, sLimit);
 }
 
+void WaveletAnalysis::SoftThresholding(double threshold, int sLimit)
+{
+    if( sLimit == 0 ) return;
+    if( threshold <= 0.0) return;
+
+    for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
+        for( int k = 0; k <= W[s].size(); k++){
+            if( qAbs(W[s][k]) < threshold ) {
+                W[s][k] = 0.;
+            }else{
+                double temp = W[s][k];
+                if( temp > 0){
+                    W[s][k] =  WAbsMax * (qAbs(temp)-threshold) / (WAbsMax - threshold);
+                }else{
+                    W[s][k] =  -WAbsMax * (qAbs(temp)-threshold) / (WAbsMax - threshold);
+                }
+            }
+        }
+    }
+    msg.sprintf("Applied Soft Thresholding, level<%2.1f && scale>%d", threshold, sLimit);
+
+}
+
 void WaveletAnalysis::CleanOutsider(double x1, double x2, int sLimit)
 {
     // is incorrect
-    return;
+    //return;
     if( sLimit == 0 ) return;
     for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
-        for( int k = 0; k <= W[s].size(); k++){
-            if( X0[s][k] < x1 || X0[s][k] > x2 ) {
+        for( int k = 0; k <= Wk[s].size(); k++){
+            int j = Wk[s][k];
+            if( j < 0 || j > X0[s].size()) continue;
+            if( X0[s][j] < x1 || X0[s][j] > x2 ) {
                 W[s][k] = 0.;
             }
         }

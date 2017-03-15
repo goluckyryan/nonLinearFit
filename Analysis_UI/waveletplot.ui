@@ -60,7 +60,7 @@
     <item row="2" column="8">
      <widget class="QPushButton" name="ApplyHT">
       <property name="text">
-       <string>Apply Hard Thresholding</string>
+       <string>Apply Thresholding</string>
       </property>
      </widget>
     </item>
