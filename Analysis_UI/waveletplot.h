@@ -21,6 +21,7 @@ public:
 
     void SetData(FileIO *file, int yIndex);
     void PlotWV();
+    void PlotReconstructedData(bool Original = 0);
 
 signals:
     void SendMsg(QString msg);
@@ -46,6 +47,8 @@ private slots:
     void on_pushButton_Restore_clicked();
 
     void on_comboBox_Wavelet_currentIndexChanged(int index);
+
+    void on_spinBox_WaveletIndex_valueChanged(int arg1);
 
 private:
     Ui::WaveletPlot *ui;

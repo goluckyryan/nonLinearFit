@@ -22,13 +22,12 @@ public:
     void HardThresholding(double threshold, int sLimit);
     void CleanOutsider(double x1, double x2, int sLimit);
 
-    void PrintV(int s, int flag = 0);
-    void PrintV0(int s, int flag = 0);
-    void PrintW(int s);
-    void PrintW0(int s);
+    void PrintArray(QVector<double> y, QString str, int s);
 
     QVector<double>* GetW() { return W; }
     QVector<double>* GetV() { return V; }
+    QVector<double>* GetWk() { return Wk; }
+    QVector<double>* GetVk() { return Vk; }
     QVector<double> GetWoct(int s) { return W[s]; }
     QVector<double> GetVoct(int s) { return V[s]; }
 
@@ -112,14 +111,16 @@ private:
     QString msg;
 
     //unchange copy
-    QVector<double> *V0;
-    QVector<double> *W0;
+    QVector<double> *W0; // the detial
+    QVector<double> *V0; // the coarse
+    QVector<double> *Wk; // the k-value of w
+    QVector<double> *Vk; // the k-value of v
+    QVector<double> *X0; // the x-position
 
     //gated copy
     QVector<double> *V;
     QVector<double> *W;
 
-    QVector<double> *X0;
 
     int waveletIndex;
     int waveletPar;

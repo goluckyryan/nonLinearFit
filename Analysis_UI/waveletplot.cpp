@@ -105,12 +105,10 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     this->yIndex = yIndex;
 
     //QVector<double> y;
-    //for( int i = 0; i < qPow(2,4)+10; i++){
-    //    y.push_back(qCos(i/5.));
+    //for( int i = 0; i < 500; i++){
+    //    y.push_back(i/20.);
     //}
 
-    //QVector<double> y = file->GetDataSetZ(yIndex);
-    //QVector<double> x = file->GetDataSetX();
     QVector<double> y = file->GetDataSetZ(yIndex);
     QVector<double> x = file->GetDataSetX();
 
@@ -183,6 +181,8 @@ void WaveletPlot::PlotWV()
 {
     QVector<double> * w = wave->GetW();
     QVector<double> * v = wave->GetV();
+    QVector<double> * wk = wave->GetWk();
+    QVector<double> * vk = wave->GetVk();
 
     int ny = wave->GetM();
     //plot
@@ -192,8 +192,15 @@ void WaveletPlot::PlotWV()
         temp_W.clear();
         temp_V.clear();
         for( int k = 0; k < w[s].size(); k++){
+            if( wk[s][k] < 0 ) continue;
+
             for( int d = 0; d < qPow(2,s); d++){
                 temp_W.push_back( qAbs(w[s][k]) );
+            }
+        }
+        for( int k = 0; k < v[s].size(); k++){
+            if( vk[s][k] < 0 ) continue;
+            for( int d = 0; d < qPow(2,s); d++){
                 temp_V.push_back( qAbs(v[s][k]) );
             }
         }
@@ -218,6 +225,26 @@ void WaveletPlot::PlotWV()
     delete [] v;
 }
 
+void WaveletPlot::PlotReconstructedData(bool Original)
+{
+    QVector<double> y;
+    if( Original){
+         y = wave->GetV0oct(0);
+    }else{
+        y = wave->GetVoct(0);
+    }
+    QVector<double> x = file->GetDataSetX();
+
+    //qDebug() << y;
+
+    plot->graph(1)->clearData();
+    plot->graph(1)->addData(x, y);
+    //wave->Recontruct();
+    //plot->graph(1)->addData(x, wave->GetV0oct(0));
+    plot->rescaleAxes();
+    plot->replot();
+}
+
 
 void WaveletPlot::on_verticalSlider_valueChanged(int value)
 {
@@ -228,22 +255,20 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
         int sLimit = ui->verticalSlider_Scale->value();
 
         if( !(sLimit == 0 || value == 0)){
-            //qDebug() << "cal." << sLimit << "," << value;
+            //qDebug() << "cal." << sLimit << "," << value/100.;
             wave->HardThresholding(value/100., sLimit);
             //SendMsg(wave->GetMsg());
 
             wave->Reconstruct();
             //SendMsg(wave->GetMsg());
 
-            //TODO  Group as Replot();
-            QVector<double> v0 = wave->GetVoct(0);
-
             PlotWV();
+            PlotReconstructedData();
 
-            plot->graph(1)->clearData();
-            plot->graph(1)->addData(file->GetDataSetX(), v0);
-            plot->rescaleAxes();
-            plot->replot();
+        }
+
+        if( value == 0 || sLimit == 0){
+            PlotReconstructedData(1);
         }
 
         ui->pushButton_Clean->setEnabled(true);
@@ -255,7 +280,6 @@ void WaveletPlot::on_verticalSlider_Scale_valueChanged(int value)
     ui->lineEdit_sLimit->setText(QString::number(value));
     if( value == 0) {
         ui->pushButton_Clean->setEnabled(false);
-        return;
     }
     int val = ui->verticalSlider->value();
     on_verticalSlider_valueChanged(val);
@@ -332,11 +356,8 @@ void WaveletPlot::on_pushButton_Clean_clicked()
     QVector<double> v0 = wave->GetVoct(0);
 
     PlotWV();
+    PlotReconstructedData();
 
-    plot->graph(1)->clearData();
-    plot->graph(1)->addData(file->GetDataSetX(), v0);
-    plot->rescaleAxes();
-    plot->replot();
 }
 
 void WaveletPlot::on_lineEdit_sLimit_editingFinished()
@@ -377,6 +398,24 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
     wave->Decompose();
     SendMsg(wave->GetMsg());
 
-    PlotWV();
+    wave->Reconstruct();
 
+    PlotWV();
+    PlotReconstructedData();
+
+}
+
+void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
+{
+    if( wave == NULL ) return;
+    int waveletID = ui->comboBox_Wavelet->currentIndex();
+    wave->setWaveletPar(waveletID, arg1);
+    SendMsg(wave->GetMsg());
+    wave->Decompose();
+    SendMsg(wave->GetMsg());
+
+    wave->Reconstruct();
+
+    PlotWV();
+    PlotReconstructedData();
 }
