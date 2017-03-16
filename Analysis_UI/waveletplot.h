@@ -43,8 +43,6 @@ private slots:
     void on_lineEdit_sLimit_editingFinished();
     void on_lineEdit_HT_editingFinished();
 
-    void on_pushButton_Restore_clicked();
-
     void on_comboBox_Wavelet_currentIndexChanged(int index);
     void on_spinBox_WaveletIndex_valueChanged(int arg1);
     void on_comboBox_Thresholding_currentIndexChanged(int index);

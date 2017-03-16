@@ -62,12 +62,14 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_Woct->addGraph();
     plot_Woct->graph(0)->setPen(QPen(Qt::blue));
     plot_Woct->xAxis->setLabel("time [us]");
+    plot_Woct->yAxis->setLabel("Volatge [a.u.]");
     plot_Woct->graph(0)->clearData();
 
     plot_Voct = ui->plot_Voct;
     plot_Voct->addGraph();
     plot_Voct->graph(0)->setPen(QPen(Qt::blue));
     plot_Voct->xAxis->setLabel("time [us]");
+    plot_Voct->yAxis->setLabel("Volatge [a.u.]");
     plot_Voct->graph(0)->clearData();
 
     enableVerticalBar = 0;
@@ -93,7 +95,6 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     ui->comboBox_Thresholding->setCurrentIndex(0);
 
     ui->pushButton_Clean->setEnabled(false);
-    ui->pushButton_Restore->setEnabled(false);
 
 }
 
@@ -269,20 +270,58 @@ void WaveletPlot::PlotReconstructedData(bool Original)
 
 void WaveletPlot::PlotWVoct(int s)
 {
+    if( s == 0) {
+        plot_Woct->graph(0)->clearData();
+        plot_Voct->graph(0)->clearData();
+        plot_Woct->replot();
+        plot_Voct->replot();
+        return;
+    }
+
     s = qAbs(s);
     //qDebug() << "Plot WV oct " << s;
     if( wave == NULL ) return;
-    QVector<double> v = wave->GetVoct(s);
     QVector<double> w = wave->GetWoct(s);
+    QVector<double> v = wave->GetVoct(s);
     QVector<double> x = file->GetDataSetX();
+    QVector<int> wk = wave->GetWkoct(s);
+    QVector<int> vk = wave->GetVkoct(s);
+
+    QVector<double> vy, wy;
+
+    int n = x.size();
+
+    int count = 0;
+    for( int k = 0; k < w.size(); k++){
+        if( wk[k] < 0 ) continue;
+
+        for( int d = 0; d < qPow(2,s); d++){
+            wy.push_back( w[k] );
+            count ++;
+        }
+
+        if( count >= n) break;
+    }
+
+    count = 0;
+    for( int k = 0; k < v.size(); k++){
+        if( vk[k] < 0 ) continue;
+
+        for( int d = 0; d < qPow(2,s); d++){
+            vy.push_back( v[k] );
+            count ++;
+        }
+
+        if( count >= n) break;
+    }
 
     plot_Woct->graph(0)->clearData();
-    plot_Woct->graph(0)->addData(x, w);
+    plot_Woct->graph(0)->addData(x, wy);
     plot_Woct->rescaleAxes();
     plot_Woct->replot();
 
     plot_Voct->graph(0)->clearData();
-    plot_Voct->graph(0)->addData(x, v);
+    plot_Voct->graph(0)->addData(x, vy);
     plot_Voct->rescaleAxes();
     plot_Voct->replot();
 
@@ -302,6 +341,9 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
             if( ui->comboBox_Thresholding->currentIndex() == 0){
                 wave->HardThresholding(value/100., sLimit);
             }
+            if( ui->comboBox_Thresholding->currentIndex() == 1){
+                wave->HardThresholding(value/100., sLimit, 1);
+            }
             if( ui->comboBox_Thresholding->currentIndex() == 2){
                 wave->SoftThresholding(value/100., sLimit);
             }
@@ -311,6 +353,7 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
             //SendMsg(wave->GetMsg());
 
             PlotWV();
+            PlotWVoct(ui->verticalSlider_Scale->value());
             PlotReconstructedData();
 
         }
@@ -427,11 +470,6 @@ void WaveletPlot::on_lineEdit_HT_editingFinished()
     ui->verticalSlider->setValue(value*100);
 }
 
-void WaveletPlot::on_pushButton_Restore_clicked()
-{
-    wave->RestoreData();
-}
-
 void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
 {
     qDebug() << "combox wavelet : " << index;
@@ -452,9 +490,13 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
 
     wave->Reconstruct();
 
-    PlotWV();
-    PlotReconstructedData();
+    enableVerticalBar = false;
+    ui->verticalSlider->setValue(0);
+    enableVerticalBar = true;
 
+    PlotWV();
+    PlotWVoct(ui->verticalSlider_Scale->value());
+    PlotReconstructedData();
 }
 
 void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
@@ -468,7 +510,12 @@ void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
 
     wave->Reconstruct();
 
+    enableVerticalBar = false;
+    ui->verticalSlider->setValue(0);
+    enableVerticalBar = true;
+
     PlotWV();
+    PlotWVoct(ui->verticalSlider_Scale->value());
     PlotReconstructedData();
 }
 

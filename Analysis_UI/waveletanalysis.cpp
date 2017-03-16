@@ -245,13 +245,16 @@ void WaveletAnalysis::Reconstruct(){
     msg.sprintf("Reconstructed.");
 }
 
-void WaveletAnalysis::HardThresholding(double threshold, int sLimit)
+void WaveletAnalysis::HardThresholding(double threshold, int sLimit, int type)
 {
     if( sLimit == 0 ) return;
     if( threshold <= 0.0) return;
     for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
         for( int k = 0; k <= W[s].size(); k++){
-            if( qAbs(W[s][k]) < threshold ) {
+            if( type == 0 && qAbs(W[s][k]) < threshold ) {
+                W[s][k] = 0.;
+            }
+            if( type == 1 && qAbs(W[s][k]) < threshold*(1 - (s-1.0)*1.0/qAbs(sLimit)) ) {
                 W[s][k] = 0.;
             }
         }

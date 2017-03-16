@@ -19,7 +19,7 @@ public:
     void Decompose();
     void RestoreData();
     void Reconstruct();
-    void HardThresholding(double threshold, int sLimit);
+    void HardThresholding(double threshold, int sLimit, int type = 0);
     void SoftThresholding(double threshold, int sLimit);
     void CleanOutsider(double x1, double x2, int sLimit);
 
@@ -29,8 +29,10 @@ public:
     QVector<double>* GetV() { return V; }
     QVector<int>* GetWk() { return Wk; }
     QVector<int>* GetVk() { return Vk; }
-    QVector<double> GetWoct(int s) { return W[s]; }
     QVector<double> GetVoct(int s) { return V[s]; }
+    QVector<double> GetWoct(int s) { return W[s]; }
+    QVector<int> GetVkoct(int s) { return Vk[s]; }
+    QVector<int> GetWkoct(int s) { return Wk[s]; }
 
     QVector<double>* GetW0() { return W0; }
     QVector<double>* GetV0() { return V0; }
