@@ -112,7 +112,7 @@ void BPlot::Plot()
 
     double dx = xdata[nx-1] - xdata[nx-2];
 
-    double xMin, xMax;
+    double xMin = 0, xMax = 0;
     switch (plotUnit) {
     case 0:
         xMin = file->GetYMin_CV();
@@ -132,7 +132,8 @@ void BPlot::Plot()
     }
     plot->xAxis->setRange(xMin, xMax);
 
-    yMin, yMax;
+    yMin = 0;
+    yMax = 0;
     int startI = 0;
     if( file->HasBackGround() ) startI = 1;
     for( int i = startI; i < ny; i++){

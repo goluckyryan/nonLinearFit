@@ -209,7 +209,7 @@ void FitResult::PlotData()
     on_checkBox_P_clicked(ui->checkBox_P->isChecked());
     on_checkBox_SSR_clicked(ui->checkBox_SSR->isChecked());
 
-    double xMin, xMax;
+    double xMin = 0, xMax = 0;
     switch (plotUnit) {
     case 0:
         xMin = file->GetYMin_CV();
