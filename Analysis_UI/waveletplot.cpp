@@ -64,6 +64,8 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_Woct->xAxis->setLabel("time [us]");
     plot_Woct->yAxis->setLabel("Volatge [a.u.]");
     plot_Woct->graph(0)->clearData();
+    //plot_Woct->yAxis->setAutoTickStep(false);
+    //plot_Woct->yAxis->setTickStep(1.0);
 
     plot_Voct = ui->plot_Voct;
     plot_Voct->addGraph();
@@ -71,6 +73,8 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_Voct->xAxis->setLabel("time [us]");
     plot_Voct->yAxis->setLabel("Volatge [a.u.]");
     plot_Voct->graph(0)->clearData();
+    //plot_Voct->yAxis->setAutoTickStep(false);
+    //plot_Voct->yAxis->setTickStep(1.0);
 
     enableVerticalBar = 0;
 
@@ -90,7 +94,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     Thresholding << "Hard Threshold";
     Thresholding << "Hard + linear Octave";
     Thresholding << "Soft Threshold (linear)";
-    Thresholding << "Soft Threshold (x^n)";
+    //Thresholding << "Soft Threshold (x^n)";
     ui->comboBox_Thresholding->addItems(Thresholding);
     ui->comboBox_Thresholding->setCurrentIndex(0);
 
@@ -171,15 +175,15 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
 
 
     int zMax = qCeil(wave->GetWAbsMax())*100;
-    ui->verticalSlider->setSingleStep(1);
-    ui->verticalSlider->setRange(0, zMax);
-    ui->verticalSlider->setValue(0);
-    ui->lineEdit_HT->setText("0.0");
+    ui->verticalSlider_Threshold->setSingleStep(1);
+    ui->verticalSlider_Threshold->setRange(0, zMax);
+    ui->verticalSlider_Threshold->setValue(0);
+    ui->lineEdit_Threshold->setText("0.0");
 
-    ui->verticalSlider_Scale->setSingleStep(1);
-    ui->verticalSlider_Scale->setRange(-ny+1, 0);
-    ui->verticalSlider_Scale->setValue(0);
-    ui->lineEdit_sLimit->setText("0");
+    ui->verticalSlider_Octave->setSingleStep(1);
+    ui->verticalSlider_Octave->setRange(-ny+1, 0);
+    ui->verticalSlider_Octave->setValue(0);
+    ui->lineEdit_Octave->setText("0");
 
     enableVerticalBar = 1;
 
@@ -252,9 +256,9 @@ void WaveletPlot::PlotReconstructedData(bool Original)
 {
     QVector<double> y;
     if( Original){
-         y = wave->GetV0oct(0);
+         y = wave->GetV0octave(0);
     }else{
-        y = wave->GetVoct(0);
+        y = wave->GetVoctave(0);
     }
     QVector<double> x = file->GetDataSetX();
 
@@ -268,9 +272,9 @@ void WaveletPlot::PlotReconstructedData(bool Original)
     plot->replot();
 }
 
-void WaveletPlot::PlotWVoct(int s)
+void WaveletPlot::PlotWVoctave(int octave)
 {
-    if( s == 0) {
+    if( octave == 0) {
         plot_Woct->graph(0)->clearData();
         plot_Voct->graph(0)->clearData();
         plot_Woct->replot();
@@ -278,14 +282,14 @@ void WaveletPlot::PlotWVoct(int s)
         return;
     }
 
-    s = qAbs(s);
+    octave = qAbs(octave);
     //qDebug() << "Plot WV oct " << s;
     if( wave == NULL ) return;
-    QVector<double> w = wave->GetWoct(s);
-    QVector<double> v = wave->GetVoct(s);
+    QVector<double> w = wave->GetWoctave(octave);
+    QVector<double> v = wave->GetVoctave(octave);
     QVector<double> x = file->GetDataSetX();
-    QVector<int> wk = wave->GetWkoct(s);
-    QVector<int> vk = wave->GetVkoct(s);
+    QVector<int> wk = wave->GetWkoctave(octave);
+    QVector<int> vk = wave->GetVkoctave(octave);
 
     QVector<double> vy, wy;
 
@@ -295,7 +299,7 @@ void WaveletPlot::PlotWVoct(int s)
     for( int k = 0; k < w.size(); k++){
         if( wk[k] < 0 ) continue;
 
-        for( int d = 0; d < qPow(2,s); d++){
+        for( int d = 0; d < qPow(2,octave); d++){
             wy.push_back( w[k] );
             count ++;
         }
@@ -307,7 +311,7 @@ void WaveletPlot::PlotWVoct(int s)
     for( int k = 0; k < v.size(); k++){
         if( vk[k] < 0 ) continue;
 
-        for( int d = 0; d < qPow(2,s); d++){
+        for( int d = 0; d < qPow(2,octave); d++){
             vy.push_back( v[k] );
             count ++;
         }
@@ -328,13 +332,13 @@ void WaveletPlot::PlotWVoct(int s)
 }
 
 
-void WaveletPlot::on_verticalSlider_valueChanged(int value)
+void WaveletPlot::on_verticalSlider_Threshold_valueChanged(int value)
 {
     if( enableVerticalBar){
         wave->RestoreData();
 
-        ui->lineEdit_HT->setText(QString::number(value/100.));
-        int sLimit = ui->verticalSlider_Scale->value();
+        ui->lineEdit_Threshold->setText(QString::number(value/100.));
+        int sLimit = ui->verticalSlider_Octave->value();
 
         if( !(sLimit == 0 || value == 0)){
             //qDebug() << "cal." << sLimit << "," << value/100.;
@@ -353,7 +357,7 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
             //SendMsg(wave->GetMsg());
 
             PlotWV();
-            PlotWVoct(ui->verticalSlider_Scale->value());
+            PlotWVoctave(ui->verticalSlider_Octave->value());
             PlotReconstructedData();
 
         }
@@ -364,30 +368,36 @@ void WaveletPlot::on_verticalSlider_valueChanged(int value)
             PlotReconstructedData(1);
         }
 
-        ui->pushButton_Clean->setEnabled(true);
+        //ui->pushButton_Clean->setEnabled(true);
     }
 }
 
-void WaveletPlot::on_verticalSlider_Scale_valueChanged(int value)
+void WaveletPlot::on_verticalSlider_Octave_valueChanged(int value)
 {
-    ui->lineEdit_sLimit->setText(QString::number(value));
+    ui->lineEdit_Octave->setText(QString::number(value));
     if( value == 0) {
         ui->pushButton_Clean->setEnabled(false);
+        ui->verticalSlider_Threshold->setEnabled(false);
+        ui->lineEdit_Threshold->setEnabled(false);
+    }else{
+        ui->pushButton_Clean->setEnabled(true);
+        ui->verticalSlider_Threshold->setEnabled(true);
+        ui->lineEdit_Threshold->setEnabled(true);
     }
-    int val = ui->verticalSlider->value();
-    on_verticalSlider_valueChanged(val);
+    int val = ui->verticalSlider_Threshold->value();
+    on_verticalSlider_Threshold_valueChanged(val);
 
-    PlotWVoct(value);
+    PlotWVoctave(value);
 }
 
-void WaveletPlot::on_ApplyHT_clicked()
+void WaveletPlot::on_pushButton_ApplyThreshold_clicked()
 {
-    int changed = file->ChangeZData(yIndex, wave->GetVoct(0));
+    int changed = file->ChangeZData(yIndex, wave->GetVoctave(0));
     Replot();
 
     if( changed ){
         QString msg;
-        msg.sprintf("Apply Hard Thresholding, level<%4s && scale>%2s", ui->lineEdit_HT->text().toStdString().c_str(), ui->lineEdit_sLimit->text().toStdString().c_str());
+        msg.sprintf("Apply Hard Thresholding, level<%4s && scale>%2s", ui->lineEdit_Threshold->text().toStdString().c_str(), ui->lineEdit_Octave->text().toStdString().c_str());
         SendMsg(msg);
     }
 }
@@ -438,7 +448,7 @@ void WaveletPlot::SetLineByMouseClick(QMouseEvent *mouse)
 
 void WaveletPlot::on_pushButton_Clean_clicked()
 {
-    int sLimit = ui->verticalSlider_Scale->value();
+    int sLimit = ui->verticalSlider_Octave->value();
     if( sLimit == 0) return;
     if( x1 < x2) {
         wave->CleanOutsider(x1, x2, sLimit);
@@ -448,26 +458,26 @@ void WaveletPlot::on_pushButton_Clean_clicked()
 
     wave->Reconstruct();
 
-    QVector<double> v0 = wave->GetVoct(0);
+    QVector<double> v0 = wave->GetVoctave(0);
 
     PlotWV();
     PlotReconstructedData();
 
 }
 
-void WaveletPlot::on_lineEdit_sLimit_editingFinished()
+void WaveletPlot::on_lineEdit_Octave_editingFinished()
 {
-    int value = ui->lineEdit_sLimit->text().toInt();
+    int value = ui->lineEdit_Octave->text().toInt();
     value = - qAbs(value);
-    ui->lineEdit_sLimit->setText(QString::number(value));
-    ui->verticalSlider_Scale->setValue(value);
+    ui->lineEdit_Octave->setText(QString::number(value));
+    ui->verticalSlider_Octave->setValue(value);
 }
 
-void WaveletPlot::on_lineEdit_HT_editingFinished()
+void WaveletPlot::on_lineEdit_Threshold_editingFinished()
 {
-    double value = ui->lineEdit_HT->text().toDouble();
+    double value = ui->lineEdit_Threshold->text().toDouble();
     value = qAbs(value);
-    ui->verticalSlider->setValue(value*100);
+    ui->verticalSlider_Threshold->setValue(value*100);
 }
 
 void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
@@ -491,11 +501,12 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
     wave->Reconstruct();
 
     enableVerticalBar = false;
-    ui->verticalSlider->setValue(0);
+    ui->verticalSlider_Threshold->setValue(0);
+    ui->lineEdit_Threshold->setText("0.0");
     enableVerticalBar = true;
 
     PlotWV();
-    PlotWVoct(ui->verticalSlider_Scale->value());
+    PlotWVoctave(ui->verticalSlider_Octave->value());
     PlotReconstructedData();
 }
 
@@ -511,15 +522,51 @@ void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
     wave->Reconstruct();
 
     enableVerticalBar = false;
-    ui->verticalSlider->setValue(0);
+    ui->verticalSlider_Threshold->setValue(0);
+    ui->lineEdit_Threshold->setText("0.0");
     enableVerticalBar = true;
 
     PlotWV();
-    PlotWVoct(ui->verticalSlider_Scale->value());
+    PlotWVoctave(ui->verticalSlider_Octave->value());
     PlotReconstructedData();
 }
 
-void WaveletPlot::on_comboBox_Thresholding_currentIndexChanged(int index)
+void WaveletPlot::on_comboBox_Thresholding_currentIndexChanged()
 {
+    int value = ui->verticalSlider_Threshold->value();
+    on_verticalSlider_Threshold_valueChanged(value);
+}
 
+void WaveletPlot::on_lineEdit_x1_editingFinished()
+{
+    double x = ui->lineEdit_x1->text().toDouble();
+    QVector<double> xline_y, xline_x1;
+    xline_y.push_back(-wave->GetM());
+    xline_y.push_back(0);
+
+    x1 = x;
+
+    xline_x1.push_back(x1);
+    xline_x1.push_back(x1);
+    plot_W->graph(0)->clearData();
+    plot_W->graph(0)->addData(xline_x1, xline_y);
+
+    plot_W->replot();
+}
+
+void WaveletPlot::on_lineEdit_x2_editingFinished()
+{
+    double x = ui->lineEdit_x2->text().toDouble();
+    QVector<double> xline_y, xline_x2;
+    xline_y.push_back(-wave->GetM());
+    xline_y.push_back(0);
+
+    x2 = x;
+
+    xline_x2.push_back(x2);
+    xline_x2.push_back(x2);
+    plot_W->graph(1)->clearData();
+    plot_W->graph(1)->addData(xline_x2, xline_y);
+
+    plot_W->replot();
 }

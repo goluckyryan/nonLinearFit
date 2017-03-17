@@ -22,7 +22,7 @@ public:
     void SetData(FileIO *file, int yIndex);
     void PlotWV();
     void PlotReconstructedData(bool Original = 0);
-    void PlotWVoct(int s);
+    void PlotWVoctave(int octave);
 
 signals:
     void SendMsg(QString msg);
@@ -30,22 +30,24 @@ signals:
 
 private slots:
 
-    void on_verticalSlider_valueChanged(int value);
-    void on_verticalSlider_Scale_valueChanged(int value);
-
-    void on_ApplyHT_clicked();
-
     void ShowMousePosition(QMouseEvent* mouse);
     void SetLineByMouseClick(QMouseEvent* mouse);
 
+    void on_verticalSlider_Threshold_valueChanged(int value);
+    void on_verticalSlider_Octave_valueChanged(int value);
+
+    void on_pushButton_ApplyThreshold_clicked();
     void on_pushButton_Clean_clicked();
 
-    void on_lineEdit_sLimit_editingFinished();
-    void on_lineEdit_HT_editingFinished();
+    void on_lineEdit_Octave_editingFinished();
+    void on_lineEdit_Threshold_editingFinished();
 
     void on_comboBox_Wavelet_currentIndexChanged(int index);
     void on_spinBox_WaveletIndex_valueChanged(int arg1);
-    void on_comboBox_Thresholding_currentIndexChanged(int index);
+    void on_comboBox_Thresholding_currentIndexChanged();
+
+    void on_lineEdit_x1_editingFinished();
+    void on_lineEdit_x2_editingFinished();
 
 private:
     Ui::WaveletPlot *ui;

@@ -245,29 +245,29 @@ void WaveletAnalysis::Reconstruct(){
     msg.sprintf("Reconstructed.");
 }
 
-void WaveletAnalysis::HardThresholding(double threshold, int sLimit, int type)
+void WaveletAnalysis::HardThresholding(double threshold, int octave, int type)
 {
-    if( sLimit == 0 ) return;
+    if( octave == 0 ) return;
     if( threshold <= 0.0) return;
-    for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
+    for( int s = 1 ;  s <= qAbs(octave) ; s++){
         for( int k = 0; k <= W[s].size(); k++){
             if( type == 0 && qAbs(W[s][k]) < threshold ) {
                 W[s][k] = 0.;
             }
-            if( type == 1 && qAbs(W[s][k]) < threshold*(1 - (s-1.0)*1.0/qAbs(sLimit)) ) {
+            if( type == 1 && qAbs(W[s][k]) < threshold*(1 - (s-1.0)*1.0/qAbs(octave)) ) {
                 W[s][k] = 0.;
             }
         }
     }
-    msg.sprintf("Applied Hard Thresholding, level<%2.1f && scale>%d", threshold, sLimit);
+    msg.sprintf("Applied Hard Thresholding, level<%2.1f && scale>%d", threshold, octave);
 }
 
-void WaveletAnalysis::SoftThresholding(double threshold, int sLimit)
+void WaveletAnalysis::SoftThresholding(double threshold, int octave)
 {
-    if( sLimit == 0 ) return;
+    if( octave == 0 ) return;
     if( threshold <= 0.0) return;
 
-    for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
+    for( int s = 1 ;  s <= qAbs(octave) ; s++){
         for( int k = 0; k <= W[s].size(); k++){
             if( qAbs(W[s][k]) < threshold ) {
                 W[s][k] = 0.;
@@ -281,16 +281,16 @@ void WaveletAnalysis::SoftThresholding(double threshold, int sLimit)
             }
         }
     }
-    msg.sprintf("Applied Soft Thresholding, level<%2.1f && scale>%d", threshold, sLimit);
+    msg.sprintf("Applied Soft Thresholding, level<%2.1f && scale>%d", threshold, octave);
 
 }
 
-void WaveletAnalysis::CleanOutsider(double x1, double x2, int sLimit)
+void WaveletAnalysis::CleanOutsider(double x1, double x2, int octave)
 {
     // is incorrect
     //return;
-    if( sLimit == 0 ) return;
-    for( int s = 1 ;  s <= qAbs(sLimit) ; s++){
+    if( octave == 0 ) return;
+    for( int s = 1 ;  s <= qAbs(octave) ; s++){
         for( int k = 0; k <= Wk[s].size(); k++){
             int j = Wk[s][k];
             if( j < 0 || j > X0[s].size()) continue;
@@ -301,7 +301,7 @@ void WaveletAnalysis::CleanOutsider(double x1, double x2, int sLimit)
     }
 }
 
-void WaveletAnalysis::PrintArray(QVector<double> y, QString str, int s)
+void WaveletAnalysis::PrintArray(QVector<double> y, QString str, int octave)
 {
-    qDebug() << str << "(" << s << "," << y.size() <<")" << y;
+    qDebug() << str << "(" << octave << "," << y.size() <<")" << y;
 }

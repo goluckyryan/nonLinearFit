@@ -19,12 +19,12 @@
      <widget class="QComboBox" name="comboBox_Thresholding"/>
     </item>
     <item row="2" column="4" colspan="2">
-     <widget class="QLineEdit" name="lineEdit_sLimit"/>
+     <widget class="QLineEdit" name="lineEdit_Octave"/>
     </item>
     <item row="2" column="3">
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>oct-Limit</string>
+       <string>octave</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -32,7 +32,7 @@
      </widget>
     </item>
     <item row="1" column="4">
-     <widget class="QSlider" name="verticalSlider_Scale">
+     <widget class="QSlider" name="verticalSlider_Octave">
       <property name="minimum">
        <number>0</number>
       </property>
@@ -42,17 +42,17 @@
      </widget>
     </item>
     <item row="3" column="4" colspan="2">
-     <widget class="QLineEdit" name="lineEdit_HT"/>
+     <widget class="QLineEdit" name="lineEdit_Threshold"/>
     </item>
     <item row="3" column="8">
-     <widget class="QPushButton" name="ApplyHT">
+     <widget class="QPushButton" name="pushButton_ApplyThreshold">
       <property name="text">
        <string>Apply Thresholding</string>
       </property>
      </widget>
     </item>
     <item row="1" column="5">
-     <widget class="QSlider" name="verticalSlider">
+     <widget class="QSlider" name="verticalSlider_Threshold">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>

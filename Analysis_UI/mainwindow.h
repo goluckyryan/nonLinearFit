@@ -84,7 +84,7 @@ private slots:
     void on_pushButton_RestoreData_clicked();
     void on_checkBox_MeanCorr_clicked(bool checked);
     void on_checkBox_BGsub_clicked(bool checked);
-    void on_spinBox_BGIndex_valueChanged(int arg1);
+    void on_spinBox_BGIndex_valueChanged();
     void on_spinBox_MovingAvg_valueChanged(int arg1);
     
     void on_verticalSlider_z_sliderMoved(int position);

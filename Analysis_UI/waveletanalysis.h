@@ -19,25 +19,25 @@ public:
     void Decompose();
     void RestoreData();
     void Reconstruct();
-    void HardThresholding(double threshold, int sLimit, int type = 0);
-    void SoftThresholding(double threshold, int sLimit);
-    void CleanOutsider(double x1, double x2, int sLimit);
+    void HardThresholding(double threshold, int octave, int type = 0);
+    void SoftThresholding(double threshold, int octave);
+    void CleanOutsider(double x1, double x2, int octave);
 
-    void PrintArray(QVector<double> y, QString str, int s);
+    void PrintArray(QVector<double> y, QString str, int octave);
 
     QVector<double>* GetW() { return W; }
     QVector<double>* GetV() { return V; }
     QVector<int>* GetWk() { return Wk; }
     QVector<int>* GetVk() { return Vk; }
-    QVector<double> GetVoct(int s) { return V[s]; }
-    QVector<double> GetWoct(int s) { return W[s]; }
-    QVector<int> GetVkoct(int s) { return Vk[s]; }
-    QVector<int> GetWkoct(int s) { return Wk[s]; }
+    QVector<double> GetVoctave(int s) { return V[s]; }
+    QVector<double> GetWoctave(int s) { return W[s]; }
+    QVector<int> GetVkoctave(int s) { return Vk[s]; }
+    QVector<int> GetWkoctave(int s) { return Wk[s]; }
 
     QVector<double>* GetW0() { return W0; }
     QVector<double>* GetV0() { return V0; }
-    QVector<double> GetW0oct(int s) { return W0[s]; }
-    QVector<double> GetV0oct(int s) { return V0[s]; }
+    QVector<double> GetW0octave(int s) { return W0[s]; }
+    QVector<double> GetV0octave(int s) { return V0[s]; }
     int GetM() {return M;}
     int GetSize() {return size;}
     QString GetMsg() {return msg;}

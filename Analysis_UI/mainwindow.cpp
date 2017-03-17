@@ -1005,7 +1005,7 @@ void MainWindow::on_checkBox_BGsub_clicked(bool checked)
 
 }
 
-void MainWindow::on_spinBox_BGIndex_valueChanged(int arg1)
+void MainWindow::on_spinBox_BGIndex_valueChanged()
 {
     on_checkBox_BGsub_clicked(1);
 }
