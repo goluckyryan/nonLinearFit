@@ -1212,6 +1212,7 @@ void MainWindow::on_actionSave_data_triggered()
 
 void MainWindow::xAxisChanged(QCPRange range)
 {
+    if( file == NULL ) return;
     double xMin = file->GetXMin();
     double xMax = file->GetXMax();
     //regulate the xAxis
