@@ -42,6 +42,7 @@ public:
     int GetSize() {return size;}
     QString GetMsg() {return msg;}
     double GetWAbsMax() {return WAbsMax;}
+    int GetWaveletNumberOfKind() {return numberOfKind;}
 
 //signals:
 
@@ -54,6 +55,7 @@ private:
         }
         return 0;
     }
+    //The following formula are for Orthonormal wavelet.
     double G1(int k){
         return G0(1-k)*qPow(-1,k);
     }
@@ -83,6 +85,7 @@ private:
 
 
     int waveletIndex;
+    int numberOfKind;
     int waveletPar;
     int parSize;
     int size;

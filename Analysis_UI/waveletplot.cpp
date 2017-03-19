@@ -84,7 +84,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     ui->lineEdit_x2->setText(QString::number(x2));
 
     QStringList WaveletList;
-    WaveletList << "Haar" << "Daubechies";
+    WaveletList << "Haar" << "Daubechies" << "Symlet" << "Coiflet";
     ui->comboBox_Wavelet->addItems(WaveletList);
     ui->comboBox_Wavelet->setCurrentIndex(0);
     ui->spinBox_WaveletIndex->setEnabled(false);
@@ -99,6 +99,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     ui->comboBox_Thresholding->setCurrentIndex(0);
 
     ui->pushButton_Clean->setEnabled(false);
+    ui->verticalSlider_Threshold->setEnabled(false);
 
 }
 
@@ -482,23 +483,29 @@ void WaveletPlot::on_lineEdit_Threshold_editingFinished()
 
 void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
 {
+    if( wave == NULL) return;
     qDebug() << "combox wavelet : " << index;
-    if(index == 1){
-        ui->spinBox_WaveletIndex->setMinimum(2);
-        ui->spinBox_WaveletIndex->setMaximum(12);
-        ui->spinBox_WaveletIndex->setValue(2);
-        ui->spinBox_WaveletIndex->setEnabled(true);
-    }else{
-        ui->spinBox_WaveletIndex->setEnabled(false);
-    }
 
-    if( wave == NULL ) return;
     wave->setWaveletPar(index, 2);
     SendMsg(wave->GetMsg());
     wave->Decompose();
     SendMsg(wave->GetMsg());
-
     wave->Reconstruct();
+
+    int numberOfKind = wave->GetWaveletNumberOfKind();
+    if(index == 1 || index == 2){
+        ui->spinBox_WaveletIndex->setMinimum(2);
+        ui->spinBox_WaveletIndex->setMaximum(numberOfKind);
+        ui->spinBox_WaveletIndex->setValue(2);
+        ui->spinBox_WaveletIndex->setEnabled(true);
+    }else if(index == 3){
+        ui->spinBox_WaveletIndex->setMinimum(1);
+        ui->spinBox_WaveletIndex->setMaximum(numberOfKind);
+        ui->spinBox_WaveletIndex->setValue(1);
+        ui->spinBox_WaveletIndex->setEnabled(true);
+    }else{
+        ui->spinBox_WaveletIndex->setEnabled(false);
+    }
 
     enableVerticalBar = false;
     ui->verticalSlider_Threshold->setValue(0);
