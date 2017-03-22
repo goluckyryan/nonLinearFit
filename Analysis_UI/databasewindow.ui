@@ -68,41 +68,48 @@
        <string>Data</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0" rowspan="5">
-        <widget class="QTableView" name="dataView"/>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="pushButton_open">
-         <property name="text">
-          <string>Open</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <widget class="QPushButton" name="pushButton_addDataEntry">
          <property name="text">
           <string>Add Entry</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="1" column="0" rowspan="5">
+        <widget class="QTableView" name="dataView"/>
+       </item>
+       <item row="3" column="1">
         <widget class="QPushButton" name="pushButton_deleteDataEntry">
          <property name="text">
           <string>Delete Entry</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="1" column="1">
+        <widget class="QPushButton" name="pushButton_open">
+         <property name="text">
+          <string>Open</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
         <widget class="QPushButton" name="pushButton_revertData">
          <property name="text">
           <string>Revert</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="5" column="1">
         <widget class="QPushButton" name="pushButton_submitData">
          <property name="text">
           <string>Submit</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="checkBox">
+         <property name="text">
+          <string>Recent Data on top</string>
          </property>
         </widget>
        </item>
@@ -141,7 +148,7 @@
       <property name="title">
        <string>Chemical</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1,0,0,0">
+      <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1,0">
        <item row="1" column="0">
         <widget class="QComboBox" name="comboBox_chemical"/>
        </item>

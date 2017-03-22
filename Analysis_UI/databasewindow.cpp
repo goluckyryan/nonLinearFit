@@ -47,6 +47,10 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     ShowTable("Data");
 
     updateChemicalCombox("Chemical");
+
+    ui->checkBox->setChecked(true);
+    ui->dataView->sortByColumn(2, Qt::DescendingOrder);
+
 }
 
 DataBaseWindow::~DataBaseWindow()
@@ -321,4 +325,13 @@ void DataBaseWindow::on_pushButton_open_clicked()
     }
 
     this->hide();
+}
+
+void DataBaseWindow::on_checkBox_clicked(bool checked)
+{
+    if( checked ) {
+        ui->dataView->sortByColumn(2, Qt::DescendingOrder);
+    }else{
+        ui->dataView->sortByColumn(2, Qt::AscendingOrder);
+    }
 }
