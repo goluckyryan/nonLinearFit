@@ -14,6 +14,15 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     QStringList tableList = db.tables();
     qDebug() << tableList;
 
+    QStringList dataColName = GetTableColName("Data");
+    for(int i = 0; i < dataColName.size() ; i++){
+        if( dataColName[i] == "PATH"){
+            dataPathCol = i;
+            qDebug("data Path Col : %d", i);
+            break;
+        }
+    }
+
     //===================== set up the sample-table
     sample = new QSqlRelationalTableModel(ui->sampleView);
     SetupSampleTableView();
@@ -31,7 +40,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "NAME"));
     ui->dataView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
     ui->dataView->setItemDelegateForColumn(2, new DateFormatDelegate());
-    ui->dataView->setItemDelegateForColumn(5, new OpenFileDelegate());
+    ui->dataView->setItemDelegateForColumn(dataPathCol, new OpenFileDelegate());
     ui->dataView->horizontalHeader()->model()->setHeaderData(1, Qt::Horizontal, "Sample");
 
     ui->dataView->setColumnWidth(1, 100);
@@ -79,6 +88,19 @@ int DataBaseWindow::GetTableColNumber(QString tableName)
     return query.record().count();
 }
 
+QStringList DataBaseWindow::GetTableColName(QString tableName)
+{
+    QSqlQuery query;
+    query.exec("SELECT *FROM " + tableName);
+
+    int col = query.record().count();
+    QStringList fieldNameList;
+    for(int j = 0; j< col; j++){
+        fieldNameList << query.record().fieldName(j);
+    }
+    return fieldNameList;
+}
+
 void DataBaseWindow::ShowTable(QString tableName)
 {
     QSqlQuery query;
@@ -94,11 +116,7 @@ void DataBaseWindow::ShowTable(QString tableName)
     qDebug() << msg;
     msg.clear();
 
-    QStringList fieldNameList;
-    for(int j = 0; j< col; j++){
-        fieldNameList << query.record().fieldName(j);
-    }
-
+    QStringList fieldNameList = GetTableColName(tableName);
     qDebug() << fieldNameList;
 
     query.first();
@@ -277,7 +295,7 @@ void DataBaseWindow::on_pushButton_addDataEntry_clicked()
 
     //set default data
     QDate date;
-    data->setData(sample->index(row, 2), date.currentDate().toString("yyyy-MM-dd"));
+    data->setData(data->index(row, 2), date.currentDate().toString("yyyy-MM-dd"));
 }
 
 void DataBaseWindow::on_pushButton_deleteDataEntry_clicked()
@@ -313,7 +331,7 @@ void DataBaseWindow::on_pushButton_submitData_clicked()
 void DataBaseWindow::on_pushButton_open_clicked()
 {
     QModelIndex current = ui->dataView->selectionModel()->currentIndex(); // the "current" item
-    QString dataName = data->index(current.row(), 5).data().toString();
+    QString dataName = data->index(current.row(), dataPathCol).data().toString();
 
     //check is it absolute path or relativePath
     QString dataNameFirst = dataName.split("/")[0];

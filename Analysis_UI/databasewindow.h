@@ -25,6 +25,7 @@ public:
 
     QStringList GetTableColEntries(QString tableName, int col);
     int GetTableColNumber(QString tableName);
+    QStringList GetTableColName(QString tableName);
 
     void ShowTable(QString tableName);
 
@@ -62,6 +63,8 @@ private:
     QSqlRelationalTableModel *data;
 
     QSqlDatabase db;
+
+    int dataPathCol;
 
     TableEditor *editorChemical;
     TableEditor *editorHost;
