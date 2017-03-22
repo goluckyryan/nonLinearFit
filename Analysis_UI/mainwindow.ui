@@ -24,6 +24,56 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="8" column="8" rowspan="6" colspan="5">
+     <widget class="QCustomPlot" name="customPlot_PlotB" native="true"/>
+    </item>
+    <item row="9" column="13" colspan="2">
+     <widget class="QSpinBox" name="spinBox_x1_B"/>
+    </item>
+    <item row="11" column="13" colspan="2">
+     <widget class="QSpinBox" name="spinBox_x2_B"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QPushButton" name="pushButton_OpenFile">
+      <property name="statusTip">
+       <string>Open a file.</string>
+      </property>
+      <property name="text">
+       <string>Open File</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="pushButton_DataBase">
+      <property name="text">
+       <string>DataBase</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0" rowspan="5" colspan="8">
+     <widget class="QTextEdit" name="textEdit">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>150</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+     </widget>
+    </item>
     <item row="2" column="1" colspan="6">
      <widget class="QLineEdit" name="lineEdit_yName">
       <property name="enabled">
@@ -48,19 +98,6 @@
       </property>
      </widget>
     </item>
-    <item row="6" column="2">
-     <widget class="QCheckBox" name="checkBox_BGsub">
-      <property name="statusTip">
-       <string>Substraction of the background. The background is one of the data.</string>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::RightToLeft</enum>
-      </property>
-      <property name="text">
-       <string>BG sub.</string>
-      </property>
-     </widget>
-    </item>
     <item row="7" column="13">
      <widget class="QSlider" name="verticalSlider_zOffset">
       <property name="statusTip">
@@ -74,13 +111,6 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="3">
-     <widget class="QSpinBox" name="spinBox_y">
-      <property name="statusTip">
-       <string>The id of the data.</string>
-      </property>
-     </widget>
-    </item>
     <item row="6" column="0">
      <widget class="QPushButton" name="pushButton_RestoreData">
       <property name="statusTip">
@@ -91,47 +121,33 @@
       </property>
      </widget>
     </item>
-    <item row="9" column="0" colspan="15">
-     <widget class="QTextEdit" name="textEdit">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>150</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Courier New</family>
-       </font>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOn</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QCheckBox" name="checkBox_AutoFit">
+    <item row="4" column="3">
+     <widget class="QSpinBox" name="spinBox_y">
       <property name="statusTip">
-       <string>When enabled, changed y-Index will also fit the data.</string>
-      </property>
-      <property name="text">
-       <string>Auto-fit</string>
+       <string>The id of the data.</string>
       </property>
      </widget>
     </item>
-    <item row="6" column="5">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Moving Avg.</string>
+    <item row="6" column="2">
+     <widget class="QCheckBox" name="checkBox_BGsub">
+      <property name="statusTip">
+       <string>Substraction of the background. The background is one of the data.</string>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>BG sub.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="14">
+     <widget class="QSlider" name="verticalSlider_z">
+      <property name="statusTip">
+       <string>Change the z-Range of the contour plot. This will not affect the data.</string>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
      </widget>
     </item>
@@ -145,13 +161,13 @@
       </property>
      </widget>
     </item>
-    <item row="7" column="14">
-     <widget class="QSlider" name="verticalSlider_z">
-      <property name="statusTip">
-       <string>Change the z-Range of the contour plot. This will not affect the data.</string>
+    <item row="6" column="5">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Moving Avg.</string>
       </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
@@ -174,13 +190,35 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1" colspan="9">
-     <widget class="QLineEdit" name="lineEdit">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
+    <item row="4" column="0">
+     <widget class="QCheckBox" name="checkBox_AutoFit">
       <property name="statusTip">
-       <string>File path</string>
+       <string>When enabled, changed y-Index will also fit the data.</string>
+      </property>
+      <property name="text">
+       <string>Auto-fit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="3" colspan="4">
+     <widget class="QScrollBar" name="horizontalScrollBar">
+      <property name="minimum">
+       <number>0</number>
+      </property>
+      <property name="maximum">
+       <number>0</number>
+      </property>
+      <property name="singleStep">
+       <number>100</number>
+      </property>
+      <property name="pageStep">
+       <number>100</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -191,6 +229,16 @@
       </property>
       <property name="text">
        <string>Mean Corr.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" colspan="9">
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="statusTip">
+       <string>File path</string>
       </property>
      </widget>
     </item>
@@ -229,28 +277,6 @@
       </property>
      </widget>
     </item>
-    <item row="8" column="3" colspan="4">
-     <widget class="QScrollBar" name="horizontalScrollBar">
-      <property name="minimum">
-       <number>0</number>
-      </property>
-      <property name="maximum">
-       <number>0</number>
-      </property>
-      <property name="singleStep">
-       <number>100</number>
-      </property>
-      <property name="pageStep">
-       <number>100</number>
-      </property>
-      <property name="value">
-       <number>0</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
     <item row="7" column="8" colspan="5">
      <widget class="QCustomPlot" name="customPlot_CT" native="true">
       <property name="sizePolicy">
@@ -259,6 +285,75 @@
         <verstretch>2</verstretch>
        </sizepolicy>
       </property>
+     </widget>
+    </item>
+    <item row="1" column="10" rowspan="6" colspan="5">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Fit Control</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="3" column="1">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Max Iteration</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="lineEdit_lambda">
+         <property name="statusTip">
+          <string>The fit parameter of the LMA. -1 = system calculated. 0 = Gauss Newtonian method; inf = Greatest Decense method.</string>
+         </property>
+         <property name="text">
+          <string>-1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>lamda</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="lineEdit_MaxIter">
+         <property name="statusTip">
+          <string>Maximum number of iteration.</string>
+         </property>
+         <property name="text">
+          <string>300</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QLineEdit" name="lineEdit_TORR">
+         <property name="statusTip">
+          <string>Fitting tolerance or accuracy of the SSR.</string>
+         </property>
+         <property name="text">
+          <string>-6</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>TORR : 10^</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item row="7" column="3" colspan="4">
@@ -546,89 +641,20 @@
       <zorder>lineEdit_x2</zorder>
      </widget>
     </item>
-    <item row="1" column="10" rowspan="6" colspan="5">
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="title">
-       <string>Fit Control</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="3" column="1">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Max Iteration</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLineEdit" name="lineEdit_lambda">
-         <property name="statusTip">
-          <string>The fit parameter of the LMA. -1 = system calculated. 0 = Gauss Newtonian method; inf = Greatest Decense method.</string>
-         </property>
-         <property name="text">
-          <string>-1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string>lamda</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QLineEdit" name="lineEdit_MaxIter">
-         <property name="statusTip">
-          <string>Maximum number of iteration.</string>
-         </property>
-         <property name="text">
-          <string>300</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QLineEdit" name="lineEdit_TORR">
-         <property name="statusTip">
-          <string>Fitting tolerance or accuracy of the SSR.</string>
-         </property>
-         <property name="text">
-          <string>-6</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="label_10">
-         <property name="text">
-          <string>TORR : 10^</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QPushButton" name="pushButton_DataBase">
-      <property name="text">
-       <string>DataBase</string>
+    <item row="10" column="13" colspan="2">
+     <widget class="QLineEdit" name="lineEdit_x1_B">
+      <property name="enabled">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="pushButton_OpenFile">
-      <property name="statusTip">
-       <string>Open a file.</string>
+    <item row="12" column="13" colspan="2">
+     <widget class="QLineEdit" name="lineEdit_x2_B">
+      <property name="enabled">
+       <bool>false</bool>
       </property>
-      <property name="text">
-       <string>Open File</string>
+      <property name="readOnly">
+       <bool>false</bool>
       </property>
      </widget>
     </item>

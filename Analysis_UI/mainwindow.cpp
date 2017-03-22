@@ -53,6 +53,18 @@ MainWindow::MainWindow(QWidget *parent) :
     //this can change the react axis
     //connect(plot, SIGNAL(axisClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(ChangeReactAxis(QCPAxis*)));
 
+    plotB = ui->customPlot_PlotB;
+    plotB->xAxis->setLabel("Ctrl. Vol. [V]");
+    plotB->yAxis->setLabel("Voltage [a.u.]");
+    plotB->xAxis2->setLabel("y-Index");
+    plotB->xAxis2->setVisible(true);
+    plotB->yAxis2->setVisible(true);
+    plotB->yAxis2->setTickLabels(false);
+    plotB->yAxis2->setTicks(false);
+    plotB->addGraph();
+    plotB->graph(0)->setPen(QPen(Qt::blue));
+    plotB->graph(0)->clearData();
+
     ctplot = ui->customPlot_CT;
     ctplot->axisRect()->setupFullAxesBox(true);
     ctplot->xAxis->setLabel("time [us]");
@@ -73,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ctplot->graph(1)->setPen(QPen(Qt::gray));
     ctplot->graph(1)->clearData();
 
-
+    //=================
     ana = new Analysis();
     connect(ana, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
@@ -97,6 +109,7 @@ MainWindow::~MainWindow(){
     delete colorMap;
     delete plot;
     delete ctplot;
+    delete plotB;
 
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
@@ -161,7 +174,7 @@ void MainWindow::SetupPlots()
     ctplot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
     colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
 
-    //================= PLot
+    //================= Plot
     plot->xAxis->setRange(xMin, xMax);
     plot->xAxis2->setVisible(true);
     plot->xAxis2->setRange(0, file->GetDataSize());
@@ -176,12 +189,15 @@ void MainWindow::SetupPlots()
     if( multi == 6) yLabel = "Voltage [uV]";
     if( multi == 9) yLabel = "Voltage [nV]";
     plot->yAxis->setLabel(yLabel);
+    plotB->yAxis->setLabel(yLabel);
 
     if( file->HasBackGround()){
         ui->spinBox_y->setValue(1);
     }else{
         ui->spinBox_y->setValue(0);
     }
+
+
 
 }
 
@@ -201,10 +217,13 @@ void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y){
     }
 
     plot->graph(graphID)->clearData();
-
     plot->graph(graphID)->addData(x, y);
-
     plot->replot();
+
+}
+
+void MainWindow::PlotB()
+{
 
 }
 
@@ -293,8 +312,6 @@ void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
     ctplot->graph(1)->addData(lineX, lineY);
 
     ctplot->replot();
-
-
 
 }
 
@@ -392,6 +409,11 @@ void MainWindow::OpenFile(QString fileName, int kind)
     ui->spinBox_x2->setMaximum(file->GetDataSize()-1);
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
+    ui->spinBox_x1_B->setMinimum(0);
+    ui->spinBox_x1_B->setMaximum(file->GetDataSize()-1);
+    ui->spinBox_x2_B->setMinimum(0);
+    ui->spinBox_x2_B->setMaximum(file->GetDataSize()-1);
+
 
     plot->disconnect();
     ctplot->disconnect();

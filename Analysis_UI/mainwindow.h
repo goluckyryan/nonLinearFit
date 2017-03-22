@@ -30,6 +30,7 @@ public:
 
     void SetupPlots();
     void Plot(int graphID, QVector<double> x, QVector<double> y);
+    void PlotB();
     void PlotFitFunc();
     void PlotContour(double offset);
 
@@ -119,6 +120,7 @@ private:
     QCustomPlot *plot;
     QCustomPlot *ctplot;
     QCPColorMap * colorMap;
+    QCustomPlot *plotB;
 
     FileIO *file;
     Analysis *ana;
