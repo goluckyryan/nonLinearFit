@@ -660,9 +660,6 @@ void MainWindow::on_pushButton_reset_clicked()
     if( file == NULL) return;
     statusBar()->showMessage("Reset parameters to default values.");
 
-    ui->lineEdit_Ta->setText("20");
-    ui->lineEdit_Tb->setText("80");
-
     double c = ana->GetSampleMean();
     ui->lineEdit_c->setText(QString::number(c));
 
@@ -676,8 +673,12 @@ void MainWindow::on_pushButton_reset_clicked()
         b = tmp;
     }
 
+    double Ta = ana->FindXFromYAfterTZero(0);
+
     ui->lineEdit_a->setText(QString::number(a));
     ui->lineEdit_b->setText(QString::number(b));
+    ui->lineEdit_Ta->setText(QString::number(Ta));
+    ui->lineEdit_Tb->setText("80");
 
     ui->lineEdit_ea->setText("");
     ui->lineEdit_eTa->setText("");

@@ -57,8 +57,14 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
     zMin = zdata[0];
     zMax = zdata[0];
     for(int i = 1; i < n; i++ ){
-        if( zMin > zdata[i] ) zMin = zdata[i];
-        if( zMax < zdata[i] ) zMax = zdata[i];
+        if( zMin > zdata[i] ) {
+            zMin = zdata[i];
+            zMinIndex = i;
+        }
+        if( zMax < zdata[i] ) {
+            zMax = zdata[i];
+            zMaxIndex = i;
+        }
     }
 
 }
@@ -495,4 +501,28 @@ int Analysis::FindXIndex(double goal){
         }
     }
     return xIndex;
+}
+
+double Analysis::FindXFromYAfterTZero(double y)
+{
+    int xIndex = 0;
+
+    int zIndex = qMin(zMaxIndex, zMinIndex);
+    double maxValue = qMax(zMax, qAbs(zMin));
+
+    //qDebug("zMin: %f, zMax: %f, var: %f ", zMin, zMax, var);
+
+    if( maxValue < var ) return 20;
+
+    for( int i = zIndex ; i < xdata.size()-1; i++){
+        if( (zdata[i]-y) * (zdata[i+1]-y) < 0 ){
+            //qDebug() << i << "," << xdata[i] << ", " << y << "," << zdata[i] << ", " << zdata[i+1];
+            xIndex = i;
+            break;
+        }
+    }
+
+    if( xIndex == xdata.size()-2) return 20; // defalut value for not find
+
+    return xdata[xIndex];
 }

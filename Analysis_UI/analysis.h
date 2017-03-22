@@ -80,6 +80,8 @@ public slots:
     double GetDataYValue() {return yValue;}
     double GetDataYMin(){return zMin;}
     double GetDataYMax(){return zMax;}
+    double GetDataYMinIndex(){return zMinIndex;}
+    double GetDataYMaxIndex(){return zMaxIndex;}
 
     void Print();
     void PrintVector(QVector<double> vec, QString str);
@@ -91,6 +93,7 @@ public slots:
     }
 
     int FindXIndex(double goal);
+    double FindXFromYAfterTZero(double y);
 
 private:
     QString Msg;
@@ -106,6 +109,7 @@ private:
     Matrix CoVar;
 
     double zMin, zMax;
+    double zMinIndex, zMaxIndex;
 
     int MaxIter, nIter;
     double SSR;
