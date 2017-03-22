@@ -53,7 +53,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
 
     //ShowTable("Chemical");
     //ShowTable("Sample");
-    ShowTable("Data");
+    //ShowTable("Data");
 
     updateChemicalCombox("Chemical");
 

@@ -9,6 +9,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    this->showMaximized();
+
     dbWindow = new DataBaseWindow();
     connect(dbWindow, SIGNAL(ReturnFilePath(QString)), this, SLOT(OpenFile(QString)));
 
