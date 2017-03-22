@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDebug>
 #include <QVector>
+#include <QKeyEvent>
 #include "matrix.h"
 #include "analysis.h"
 #include "qcustomplot.h"
@@ -13,7 +14,7 @@
 #include "bplot.h"
 #include "fftplot.h"
 #include "waveletplot.h"
-#include <QKeyEvent>
+#include "databasewindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -49,6 +50,7 @@ private slots:
     void SetXIndexByMouseClick(QMouseEvent * mouse);
     void SetYIndexByMouseClick(QMouseEvent * mouse);
 
+    void OpenFile(QString fileName, int kind = 0);
     void on_pushButton_OpenFile_clicked();
 
     void on_spinBox_y_valueChanged(int arg1);
@@ -103,6 +105,8 @@ private slots:
 
     void on_actionDWT_Plot_triggered();
 
+    void on_pushButton_DataBase_clicked();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
@@ -118,6 +122,7 @@ private:
 
     FileIO *file;
     Analysis *ana;
+    DataBaseWindow * dbWindow;
 
     bool savedSingleXCVS;
 

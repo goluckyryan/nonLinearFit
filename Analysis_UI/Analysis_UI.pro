@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -42,7 +42,11 @@ SOURCES += main.cpp\
     fitresult.cpp \
     fftplot.cpp \
     waveletanalysis.cpp \
-    waveletplot.cpp
+    waveletplot.cpp \
+    openfiledelegate.cpp \
+    dateformatdelegate.cpp \
+    databasewindow.cpp \
+    tableeditor.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot.h \
@@ -55,13 +59,18 @@ HEADERS  += mainwindow.h \
     fftw3.h \
     fftplot.h \
     waveletanalysis.h \
-    waveletplot.h
+    waveletplot.h \
+    openfiledelegate.h \
+    dateformatdelegate.h \
+    databasewindow.h \
+    tableeditor.h
 
 FORMS    += mainwindow.ui \
     bplot.ui \
     fitresult.ui \
     fftplot.ui \
-    waveletplot.ui
+    waveletplot.ui \
+    databasewindow.ui
 
 DISTFILES += \
     icon.ico

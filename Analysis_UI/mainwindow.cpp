@@ -9,6 +9,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    dbWindow = new DataBaseWindow();
+    connect(dbWindow, SIGNAL(ReturnFilePath(QString)), this, SLOT(OpenFile(QString)));
+
     fitResultPlot = new FitResult(this);
     connect(fitResultPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
@@ -95,6 +98,8 @@ MainWindow::~MainWindow(){
 
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
+
+    delete dbWindow;
 
 }
 
@@ -331,31 +336,8 @@ void MainWindow::SetYIndexByMouseClick(QMouseEvent *mouse)
     ui->spinBox_y->setValue(yIndex);
 }
 
-void MainWindow::on_pushButton_OpenFile_clicked(){
-
-    //close all planels
-    if(fitResultPlot->isVisible()) fitResultPlot->hide();
-    if(bPlot->isVisible()) bPlot->hide();
-    if(fftPlot->isVisible()) fftPlot->hide();
-    ui->checkBox_AutoFit->setChecked(false);
-    savedSingleXCVS = 0;
-    Write2Log("##########################################");
-
-
-    QFileDialog fileDialog(this);
-    QStringList filters;
-    //======== set allowed data structure.
-    filters << "Row-wise (*txt *dat *.*)" << "Double-X CSV(*.csv)" << "Col-wise (*.txt *.dat *.csv *.*)" ;
-    fileDialog.setNameFilters(filters);
-    fileDialog.setReadOnly(1);
-    fileDialog.setDirectory(DATA_PATH);
-    QString fileName;
-    //======== Open read the first file
-    if( fileDialog.exec()) {
-        QStringList fileNames = fileDialog.selectedFiles();
-        fileName = fileNames[0];
-    }
-
+void MainWindow::OpenFile(QString fileName, int kind)
+{
     QString msg = "Openning file : ";
     msg.append(fileName);
     Write2Log(msg);
@@ -378,11 +360,11 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     file->OpenHV2MagParametersFile();
 
     //======== read data structure according to the seleteced data format.
-    if( fileDialog.selectedNameFilter() == filters[1]){
+    if( kind == 1){
         file->OpenCSVData();
-    }else if(fileDialog.selectedNameFilter() == filters[2]){
+    }else if( kind == 2){
         file->OpenTxtData_col();
-    }else if(fileDialog.selectedNameFilter() == filters[0]){
+    }else if( kind == 0){
         file->OpenTxtData_row();
     }
     //======== if some shit happen, abort.
@@ -395,10 +377,7 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
 
     //========= once the file is opened, eanble planel, set checkBoxes to uncheck, etc...
     setEnabledPlanel(1);
-    if( fileDialog.selectedNameFilter() == filters[1]){
-        ui->comboBox_yLabelType->setEnabled(0);
-        ui->comboBox_yLabelType->setCurrentIndex(0);
-    }
+
     ui->checkBox_BGsub->setChecked(0);
     ui->checkBox_MeanCorr->setChecked(0);
     ui->spinBox_MovingAvg->setValue(-1);
@@ -442,6 +421,49 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
     int xIndex = ana->FindXIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
     ui->spinBox_x2->setValue(ui->spinBox_x2->maximum());
+}
+
+void MainWindow::on_pushButton_OpenFile_clicked(){
+
+    //close all planels
+    if(fitResultPlot->isVisible()) fitResultPlot->hide();
+    if(bPlot->isVisible()) bPlot->hide();
+    if(fftPlot->isVisible()) fftPlot->hide();
+    ui->checkBox_AutoFit->setChecked(false);
+    savedSingleXCVS = 0;
+    Write2Log("##########################################");
+
+
+    QFileDialog fileDialog(this);
+    QStringList filters;
+    //======== set allowed data structure.
+    filters << "Row-wise (*txt *dat *.*)" << "Double-X CSV(*.csv)" << "Col-wise (*.txt *.dat *.csv *.*)" ;
+    fileDialog.setNameFilters(filters);
+    fileDialog.setReadOnly(1);
+    fileDialog.setDirectory(DATA_PATH);
+    QString fileName;
+    //======== Open read the first file
+    if( fileDialog.exec()) {
+        QStringList fileNames = fileDialog.selectedFiles();
+        fileName = fileNames[0];
+    }
+
+    //======== read data structure according to the seleteced data format.
+    int kind = 0;
+    if( fileDialog.selectedNameFilter() == filters[1]){
+        kind = 1;
+    }else if(fileDialog.selectedNameFilter() == filters[2]){
+        kind = 2;
+    }else if(fileDialog.selectedNameFilter() == filters[0]){
+        kind = 0;
+    }
+
+    if( fileDialog.selectedNameFilter() == filters[1]){
+        ui->comboBox_yLabelType->setEnabled(0);
+        ui->comboBox_yLabelType->setCurrentIndex(0);
+    }
+
+    OpenFile(fileName, kind);
 
 }
 
@@ -1249,5 +1271,12 @@ void MainWindow::on_actionDWT_Plot_triggered()
         wPlot->show();
         int yIndex = ui->spinBox_y->value();
         wPlot->SetData(file, yIndex);
+    }
+}
+
+void MainWindow::on_pushButton_DataBase_clicked()
+{
+    if(dbWindow->isHidden()){
+        dbWindow->show();
     }
 }
