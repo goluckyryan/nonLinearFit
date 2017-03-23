@@ -42,6 +42,7 @@ private slots:
     void keyReleaseEvent(QKeyEvent *key);
 
     void Write2Log(QString str);
+    void setEnabledPlanel(bool IO);
 
     void PlotAllPlots();
 
@@ -51,10 +52,13 @@ private slots:
 
     void ChangeReactAxis(QCPAxis * axis);
     void ChangeYAxis2Range(QCPRange range);
-    void ShowMousePositionInPlot(QMouseEvent * mouse);
-    void ShowMousePositionInCTPlot(QMouseEvent * mouse);
+    void ShowMousePositionInTimePlot(QMouseEvent * mouse);
+    void ShowMousePositionInContourPlot(QMouseEvent * mouse);
+    void ShowMousePositionInBFieldPlot(QMouseEvent * mouse);
     void SetXIndexByMouseClick(QMouseEvent * mouse);
     void SetYIndexByMouseClick(QMouseEvent * mouse);
+    void timePlotXAxisChanged(QCPRange range);
+    void on_horizontalScrollBar_sliderMoved(int position);
 
     void on_spinBox_y_valueChanged(int arg1);
     void on_spinBox_x_valueChanged(int arg1);
@@ -85,7 +89,6 @@ private slots:
     void on_actionConvert_Origin_Data_as_Single_X_CVS_triggered();
     void on_actionConvert_Origin_Data_as_Double_X_CVS_triggered();
 
-    void setEnabledPlanel(bool IO);
 
     void on_pushButton_RestoreData_clicked();
     void on_checkBox_MeanCorr_clicked(bool checked);
@@ -103,9 +106,8 @@ private slots:
     void on_actionSave_Contour_Plot_as_PDF_triggered();
     void on_actionSave_Fit_Result_Plot_as_PDF_triggered();
 
-    void xAxisChanged(QCPRange range);
-
-    void on_horizontalScrollBar_sliderMoved(int position);
+    void on_spinBox_x1_B_valueChanged(int arg1);
+    void on_spinBox_x2_B_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
@@ -127,6 +129,7 @@ private:
 
     bool savedSingleXCVS;
     bool allowTimePlot;
+    bool allowBFieldPlot;
     bool controlPressed;
 
 };

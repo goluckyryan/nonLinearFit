@@ -46,24 +46,12 @@ MainWindow::MainWindow(QWidget *parent) :
     timePlot->yAxis2->setTicks(true);
     timePlot->setInteraction(QCP::iRangeDrag,true);
     timePlot->setInteraction(QCP::iRangeZoom,true);
-    //plot->axisRect()->setRangeDrag(Qt::Vertical);
-    //plot->axisRect()->setRangeZoom(Qt::Vertical);
     timePlot->axisRect()->setRangeDrag(Qt::Horizontal);
     timePlot->axisRect()->setRangeZoom(Qt::Horizontal);
-    connect(timePlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
-
     timePlot->axisRect()->setRangeDragAxes(timePlot->xAxis, timePlot->yAxis);
     timePlot->axisRect()->setRangeZoomAxes(timePlot->xAxis, timePlot->yAxis);
 
-    //this sync yaxis2 range as yaxis
-    connect(timePlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this , SLOT(ChangeYAxis2Range(QCPRange)));
-
-    //this can change the react axis
-    //connect(plot, SIGNAL(axisClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(ChangeReactAxis(QCPAxis*)));
-
     bFieldPlot = ui->customPlot_PlotB;
-    bFieldPlot->xAxis->setLabel("Ctrl. Vol. [V]");
-    bFieldPlot->yAxis->setLabel("Voltage [a.u.]");
     bFieldPlot->xAxis2->setLabel("y-Index");
     bFieldPlot->xAxis2->setVisible(true);
     bFieldPlot->yAxis2->setVisible(true);
@@ -71,17 +59,17 @@ MainWindow::MainWindow(QWidget *parent) :
     bFieldPlot->yAxis2->setTicks(false);
     bFieldPlot->setInteraction(QCP::iRangeDrag,true);
     bFieldPlot->setInteraction(QCP::iRangeZoom,true);
+    bFieldPlot->axisRect()->setRangeDrag(Qt::Horizontal);
+    bFieldPlot->axisRect()->setRangeZoom(Qt::Horizontal);
     bFieldPlot->addGraph();
     bFieldPlot->graph(0)->setPen(QPen(Qt::blue));
+    bFieldPlot->addGraph();
+    bFieldPlot->graph(1)->setPen(QPen(Qt::gray));
 
     contourPlot = ui->customPlot_CT;
     contourPlot->axisRect()->setupFullAxesBox(true);
     contourPlot->xAxis->setLabel("time [us]");
     contourPlot->yAxis->setLabel("Ctrl. Vol. [V]");
-
-    //ctplot->setInteraction(QCP::iRangeZoom,true);
-    //ctplot->yAxis2->setVisible(1);
-    //ctplot->yAxis2->setLabel("index");
 
     colorMap = new QCPColorMap(contourPlot->xAxis, contourPlot->yAxis);
     colorMap->clearData();
@@ -238,6 +226,7 @@ void MainWindow::PlotTimePlot(int graphID, QVector<double> x, QVector<double> y)
 
 void MainWindow::PlotBFieldPlot()
 {
+    if (!allowBFieldPlot) return;
     QVector<double> x, y;
     QVector<double> xdata = file->GetDataSetX();
 
@@ -340,7 +329,7 @@ void MainWindow::PlotAllPlots()
 {
     on_spinBox_y_valueChanged(ui->spinBox_y->value());
     PlotContourPlot(ui->verticalSlider_zOffset->value());
-    PlotBFieldPlot();
+    on_spinBox_x1_B_valueChanged(bPlot->FindstartIndex(-1));
     bPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
     bPlot->Plot();
 }
@@ -356,7 +345,7 @@ void MainWindow::ChangeYAxis2Range(QCPRange range)
     timePlot->yAxis2->setRange( range);
 }
 
-void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
+void MainWindow::ShowMousePositionInTimePlot(QMouseEvent *mouse)
 {
 
     QPoint pt = mouse->pos();
@@ -370,7 +359,7 @@ void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
 
 }
 
-void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
+void MainWindow::ShowMousePositionInContourPlot(QMouseEvent *mouse)
 {
     QPoint pt = mouse->pos();
     double x = contourPlot->xAxis->pixelToCoord(pt.rx());
@@ -416,6 +405,44 @@ void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
 
     contourPlot->replot();
 
+}
+
+void MainWindow::ShowMousePositionInBFieldPlot(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = bFieldPlot->xAxis->pixelToCoord(pt.rx());
+    double y = bFieldPlot->yAxis->pixelToCoord(pt.ry());
+
+    int yIndex = 0;
+    switch (ui->comboBox_yLabelType->currentIndex()) {
+    case 1:
+        yIndex = file->GetYIndex_HV(x);
+        break;
+    case 2:
+        yIndex = file->GetYIndex_HV(file->Mag2HV(x));
+        break;
+    default:
+        yIndex = file->GetYIndex_CV(x);
+        break;
+    }
+
+    QString msg;
+    msg.sprintf("(x, y) = (%7.4f, %7.4f), y-index = %4d", x, y, yIndex);
+    statusBar()->showMessage(msg);
+
+    //========= PLot a line
+    QVector<double> lineX, lineY;
+    lineX.push_back(x);
+    lineX.push_back(x);
+
+    double yRange = bFieldPlot->yAxis->range().maxRange;
+
+    lineY.push_back(yRange);
+    lineY.push_back(-yRange);
+
+    bFieldPlot->graph(1)->clearData();
+    bFieldPlot->graph(1)->addData(lineX, lineY);
+    bFieldPlot->replot();
 }
 
 void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
@@ -519,11 +546,18 @@ void MainWindow::OpenFile(QString fileName, int kind)
 
     //set connection
     timePlot->disconnect();
-    contourPlot->disconnect();
-    connect(timePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
+    connect(timePlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(timePlotXAxisChanged(QCPRange)));
+    connect(timePlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this , SLOT(ChangeYAxis2Range(QCPRange)));
+    connect(timePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInTimePlot(QMouseEvent*)));
     connect(timePlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXIndexByMouseClick(QMouseEvent*)));
-    connect(contourPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
+
+    contourPlot->disconnect();
+    connect(contourPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInContourPlot(QMouseEvent*)));
     connect(contourPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClick(QMouseEvent*)));
+
+    bFieldPlot->disconnect();
+    connect(bFieldPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInBFieldPlot(QMouseEvent*)));
+
     //========= Reset Data in fitResultDialog
     fitResultPlot->ClearData();
     fitResultPlot->SetDataSize(file);
@@ -537,10 +571,12 @@ void MainWindow::OpenFile(QString fileName, int kind)
     ui->spinBox_x2_B->setMinimum(0);
     ui->spinBox_x2_B->setMaximum(file->GetDataSize()-1);
 
+    allowBFieldPlot = false;
     ui->spinBox_x1_B->setValue(bPlot->FindstartIndex(-1));
     ui->spinBox_x2_B->setValue(bPlot->FindstartIndex(20));
     ui->lineEdit_x1_B->setText(QString::number(-1));
     ui->lineEdit_x2_B->setText(QString::number(20));
+    allowBFieldPlot = true;
 
     //======== SetData to fftPlot
     fftPlot->SetData(file);
@@ -1002,6 +1038,8 @@ void MainWindow::keyPressEvent(QKeyEvent *key)
         //qDebug() << "Shift pressed";
         timePlot->axisRect()->setRangeDrag(Qt::Vertical);
         timePlot->axisRect()->setRangeZoom(Qt::Vertical);
+        bFieldPlot->axisRect()->setRangeDrag(Qt::Vertical);
+        bFieldPlot->axisRect()->setRangeZoom(Qt::Vertical);
     }
 
     if(key->key() == Qt::Key_Control){
@@ -1014,6 +1052,8 @@ void MainWindow::keyReleaseEvent(QKeyEvent *key)
     if(key->key() == Qt::Key_Shift ){
         timePlot->axisRect()->setRangeDrag(Qt::Horizontal);
         timePlot->axisRect()->setRangeZoom(Qt::Horizontal);
+        bFieldPlot->axisRect()->setRangeDrag(Qt::Horizontal);
+        bFieldPlot->axisRect()->setRangeZoom(Qt::Horizontal);
     }
     if(key->key() == Qt::Key_Control){
         //qDebug() << " Ctrl released";
@@ -1369,7 +1409,7 @@ void MainWindow::on_actionSave_data_triggered()
     file->SaveTxtData_row();
 }
 
-void MainWindow::xAxisChanged(QCPRange range)
+void MainWindow::timePlotXAxisChanged(QCPRange range)
 {
     if( file == NULL ) return;
     double xMin = file->GetXMin();
@@ -1393,6 +1433,10 @@ void MainWindow::xAxisChanged(QCPRange range)
     ui->horizontalScrollBar->setMaximum(rxMax - delta/2);
     ui->horizontalScrollBar->setPageStep(delta);
     ui->horizontalScrollBar->setValue(qRound(range.center()));
+
+    //Set xAxis2
+    timePlot->xAxis2->setRangeLower(ana->FindXIndex(timePlot->xAxis->range().lower));
+    timePlot->xAxis2->setRangeUpper(ana->FindXIndex(timePlot->xAxis->range().upper));
 }
 
 void MainWindow::on_horizontalScrollBar_sliderMoved(int position)
@@ -1416,4 +1460,44 @@ void MainWindow::on_pushButton_DataBase_clicked()
     if(dbWindow->isHidden()){
         dbWindow->show();
     }
+}
+
+void MainWindow::on_spinBox_x1_B_valueChanged(int arg1)
+{
+    QVector<double> xData = this->file->GetDataSetX();
+
+    if( arg1 >= xData.length() ) return;
+    int arg2 = ui->spinBox_x2_B->value();
+    if( arg2 >= xData.length() ) return;
+
+    double xStart = xData[arg1];
+    double xEnd = xData[arg2];
+    ui->lineEdit_x1_B->setText(QString::number(xStart)+" us");
+    ui->spinBox_x2_B->setMinimum(arg1);
+
+    QString yLabel;
+    yLabel.sprintf("Integrated Vol. x = (%4.1f, %4.1f) us [a.u.]", xStart, xEnd);
+    bFieldPlot->yAxis->setLabel(yLabel);
+
+    PlotBFieldPlot();
+}
+
+void MainWindow::on_spinBox_x2_B_valueChanged(int arg1)
+{
+    QVector<double> xData = this->file->GetDataSetX();
+
+    if( arg1 >= xData.length() ) return;
+    int arg2 = ui->spinBox_x1_B->value();
+    if( arg2 >= xData.length() ) return;
+
+    double xStart = xData[arg2];
+    double xEnd = xData[arg1];
+    ui->lineEdit_x2_B->setText(QString::number(xEnd)+" us");
+    ui->spinBox_x1_B->setMaximum(arg1);
+
+    QString yLabel;
+    yLabel.sprintf("Integrated Vol. x = (%4.1f, %4.1f) us [a.u.]", xStart, xEnd);
+    bFieldPlot->yAxis->setLabel(yLabel);
+
+    PlotBFieldPlot();
 }
