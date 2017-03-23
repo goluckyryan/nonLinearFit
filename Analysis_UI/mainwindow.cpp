@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     file(NULL)
 {
     ui->setupUi(this);
-    //this->showMaximized();
+    this->showMaximized();
 
     dbWindow = new DataBaseWindow();
     Write2Log(dbWindow->GetMsg());
