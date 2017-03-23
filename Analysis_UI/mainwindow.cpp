@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     bFieldPlot->xAxis2->setVisible(true);
     bFieldPlot->yAxis2->setVisible(true);
     bFieldPlot->yAxis2->setTickLabels(false);
-    bFieldPlot->yAxis2->setTicks(false);
+    bFieldPlot->yAxis2->setTicks(true);
     bFieldPlot->setInteraction(QCP::iRangeDrag,true);
     bFieldPlot->setInteraction(QCP::iRangeZoom,true);
     bFieldPlot->axisRect()->setRangeDrag(Qt::Horizontal);
@@ -94,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     controlPressed = false;
     allowTimePlot = false;
+    allowBFieldPlot = false;
 }
 
 MainWindow::~MainWindow(){
@@ -295,7 +296,6 @@ void MainWindow::PlotBFieldPlot()
 
     }
 
-
     if( plotUnit != 0){
         bFieldPlot->xAxis2->setTickLabels(false);
         bFieldPlot->xAxis2->setTicks(false);
@@ -318,6 +318,21 @@ void MainWindow::PlotBFieldPlot()
 
 }
 
+void MainWindow::PlotBFieldXLine(double x)
+{
+    QVector<double> lineX, lineY;
+    lineX.push_back(x);
+    lineX.push_back(x);
+
+    double yRange = bFieldPlot->yAxis->range().maxRange;
+
+    lineY.push_back(yRange);
+    lineY.push_back(-yRange);
+
+    bFieldPlot->graph(1)->clearData();
+    bFieldPlot->graph(1)->addData(lineX, lineY);
+    bFieldPlot->replot();
+}
 
 void MainWindow::Write2Log(QString str){
     ui->textEdit->append(str);
@@ -340,7 +355,7 @@ void MainWindow::ChangeReactAxis(QCPAxis *axis)
     timePlot->axisRect()->setRangeZoomAxes(timePlot->xAxis, axis);
 }
 
-void MainWindow::ChangeYAxis2Range(QCPRange range)
+void MainWindow::timePlotChangeYAxis2Range(QCPRange range)
 {
     timePlot->yAxis2->setRange( range);
 }
@@ -431,18 +446,7 @@ void MainWindow::ShowMousePositionInBFieldPlot(QMouseEvent *mouse)
     statusBar()->showMessage(msg);
 
     //========= PLot a line
-    QVector<double> lineX, lineY;
-    lineX.push_back(x);
-    lineX.push_back(x);
-
-    double yRange = bFieldPlot->yAxis->range().maxRange;
-
-    lineY.push_back(yRange);
-    lineY.push_back(-yRange);
-
-    bFieldPlot->graph(1)->clearData();
-    bFieldPlot->graph(1)->addData(lineX, lineY);
-    bFieldPlot->replot();
+    PlotBFieldXLine(x);
 }
 
 void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
@@ -547,7 +551,7 @@ void MainWindow::OpenFile(QString fileName, int kind)
     //set connection
     timePlot->disconnect();
     connect(timePlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(timePlotXAxisChanged(QCPRange)));
-    connect(timePlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this , SLOT(ChangeYAxis2Range(QCPRange)));
+    connect(timePlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(timePlotChangeYAxis2Range(QCPRange)));
     connect(timePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInTimePlot(QMouseEvent*)));
     connect(timePlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXIndexByMouseClick(QMouseEvent*)));
 
@@ -556,6 +560,8 @@ void MainWindow::OpenFile(QString fileName, int kind)
     connect(contourPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClick(QMouseEvent*)));
 
     bFieldPlot->disconnect();
+    connect(bFieldPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(bFieldPlotXAxisChanged(QCPRange)));
+    connect(bFieldPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(bFieldPlotChangeYAxis2Range(QCPRange)));
     connect(bFieldPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInBFieldPlot(QMouseEvent*)));
 
     //========= Reset Data in fitResultDialog
@@ -1415,12 +1421,12 @@ void MainWindow::timePlotXAxisChanged(QCPRange range)
     double xMin = file->GetXMin();
     double xMax = file->GetXMax();
     //regulate the xAxis
-    if( range.center() + range.size()/2 > xMax){
+    if( range.upper > xMax){
         timePlot->xAxis->setRangeUpper(xMax);
         range = timePlot->xAxis->range();
     }
 
-    if( range.center() - range.size()/2 < xMin){
+    if( range.lower < xMin){
         timePlot->xAxis->setRangeLower(xMin);
         range = timePlot->xAxis->range();
     }
@@ -1437,6 +1443,53 @@ void MainWindow::timePlotXAxisChanged(QCPRange range)
     //Set xAxis2
     timePlot->xAxis2->setRangeLower(ana->FindXIndex(timePlot->xAxis->range().lower));
     timePlot->xAxis2->setRangeUpper(ana->FindXIndex(timePlot->xAxis->range().upper));
+}
+
+void MainWindow::bFieldPlotXAxisChanged(QCPRange range)
+{
+    if( file == NULL ) return;
+    double xMin = 0;
+    double xMax = 0;
+    int plotUnit = ui->comboBox_yLabelType->currentIndex();
+    switch (plotUnit) {
+    case 0:
+        xMin = file->GetYMin_CV();
+        xMax = file->GetYMax_CV();
+        break;
+    case 1:
+        xMin = file->GetYMin_HV();
+        xMax = file->GetYMax_HV();
+        break;
+    case 2:
+        xMin = file->HV2Mag(file->GetYMin_HV());
+        xMax = file->HV2Mag(file->GetYMax_HV());
+        break;
+    }
+    //regulate the xAxis
+    if( range.upper > xMax){
+        bFieldPlot->xAxis->setRangeUpper(xMax);
+        range = bFieldPlot->xAxis->range();
+    }
+
+    if( range.lower < xMin){
+        bFieldPlot->xAxis->setRangeLower(xMin);
+        range = bFieldPlot->xAxis->range();
+    }
+
+    // change xAxis2
+    if(plotUnit == 0){
+        if(file->IsYRevered()){
+            bFieldPlot->xAxis2->setRangeUpper(file->FindIndex(file->GetDataSetY(), 0.01, range.lower, 0));
+            bFieldPlot->xAxis2->setRangeLower(file->FindIndex(file->GetDataSetY(), 0.01, range.upper, 1));
+        }else{
+            //bFieldPlot->xAxis2->setRangeUpper();
+        }
+    }
+}
+
+void MainWindow::bFieldPlotChangeYAxis2Range(QCPRange range)
+{
+    bFieldPlot->yAxis2->setRange( range);
 }
 
 void MainWindow::on_horizontalScrollBar_sliderMoved(int position)

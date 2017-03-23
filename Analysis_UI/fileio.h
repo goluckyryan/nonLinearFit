@@ -116,6 +116,8 @@ public slots:
         return (mag - hallPar[0])/hallPar[1];
     }
 
+    int FindIndex(QVector<double> vec, double torr, double goal, bool dir);
+
 private:
     QVector<double> xData; // time data
     QVector<double> yData_CV; // Control Voltage
@@ -168,7 +170,6 @@ private:
 
     void CalMeanVector();
     void RescaleZData();
-    int FindIndex(QVector<double> vec, double torr, double goal, bool dir);
 };
 
 #endif // FILEIO_H

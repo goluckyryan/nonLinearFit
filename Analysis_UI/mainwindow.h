@@ -31,6 +31,7 @@ public:
     void SetupPlots();
     void PlotTimePlot(int graphID, QVector<double> x, QVector<double> y);
     void PlotBFieldPlot();
+    void PlotBFieldXLine(double x);
     void PlotFitFuncAndXLines();
     void PlotContourPlot(double offset);
 
@@ -51,14 +52,17 @@ private slots:
     void OpenFile(QString fileName, int kind = 0);
 
     void ChangeReactAxis(QCPAxis * axis);
-    void ChangeYAxis2Range(QCPRange range);
     void ShowMousePositionInTimePlot(QMouseEvent * mouse);
     void ShowMousePositionInContourPlot(QMouseEvent * mouse);
-    void ShowMousePositionInBFieldPlot(QMouseEvent * mouse);
     void SetXIndexByMouseClick(QMouseEvent * mouse);
     void SetYIndexByMouseClick(QMouseEvent * mouse);
-    void timePlotXAxisChanged(QCPRange range);
     void on_horizontalScrollBar_sliderMoved(int position);
+    void timePlotXAxisChanged(QCPRange range);
+    void timePlotChangeYAxis2Range(QCPRange range);
+
+    void bFieldPlotXAxisChanged(QCPRange range);
+    void bFieldPlotChangeYAxis2Range(QCPRange range);
+    void ShowMousePositionInBFieldPlot(QMouseEvent * mouse);
 
     void on_spinBox_y_valueChanged(int arg1);
     void on_spinBox_x_valueChanged(int arg1);
