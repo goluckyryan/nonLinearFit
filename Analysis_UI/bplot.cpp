@@ -54,10 +54,8 @@ void BPlot::SetData(FileIO *file)
     ui->spinBox_Start->setMaximum(n-1);
     ui->spinBox_End->setMaximum(n-1);
 
-    QVector<double> xdata = file->GetDataSetX();
-
-    int xStart = FindstartIndex(xdata, -1);
-    int xEnd = FindstartIndex(xdata, 20);
+    int xStart = FindstartIndex(-1);
+    int xEnd = FindstartIndex(20);
 
     ui->spinBox_Start->setValue(xStart);
     ui->spinBox_End->setValue(xEnd);
@@ -68,11 +66,7 @@ void BPlot::SetData(FileIO *file)
     x.clear();
     y.clear();
 
-    if(file->IsYRevered()) {
-        plot->xAxis2->setRangeReversed(1);
-    }else{
-        plot->xAxis2->setRangeReversed(0);
-    }
+    plot->xAxis2->setRangeReversed(file->IsYRevered());
 
     n = file->GetDataSetSize();
     plot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
@@ -206,8 +200,10 @@ void BPlot::Plot()
 
 }
 
-int BPlot::FindstartIndex(QVector<double> xdata, double goal)
+int BPlot::FindstartIndex(double goal)
 {
+    QVector<double> xdata = file->GetDataSetX();
+
     int xIndex = 0;
     for(int i = 0; i < xdata.size() ; i++){
         if( xdata[i] >= goal){

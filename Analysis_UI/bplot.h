@@ -23,7 +23,7 @@ public:
     void SetPlotUnit(int unit){ this->plotUnit = unit;}
     void SetupPlot(double xMin, double xMax);
     void Plot();
-    int FindstartIndex(QVector<double> xdata, double goal);    
+    int FindstartIndex(double goal);
 
 signals:
     void SendMsg(QString msg);

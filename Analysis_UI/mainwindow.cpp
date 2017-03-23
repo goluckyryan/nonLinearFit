@@ -69,9 +69,10 @@ MainWindow::MainWindow(QWidget *parent) :
     bFieldPlot->yAxis2->setVisible(true);
     bFieldPlot->yAxis2->setTickLabels(false);
     bFieldPlot->yAxis2->setTicks(false);
+    bFieldPlot->setInteraction(QCP::iRangeDrag,true);
+    bFieldPlot->setInteraction(QCP::iRangeZoom,true);
     bFieldPlot->addGraph();
     bFieldPlot->graph(0)->setPen(QPen(Qt::blue));
-    bFieldPlot->graph(0)->clearData();
 
     contourPlot = ui->customPlot_CT;
     contourPlot->axisRect()->setupFullAxesBox(true);
@@ -185,7 +186,7 @@ void MainWindow::SetupPlots()
     //================= Plot
     timePlot->xAxis->setRange(xMin, xMax);
     timePlot->xAxis2->setVisible(true);
-    timePlot->xAxis2->setRange(0, file->GetDataSize());
+    timePlot->xAxis2->setRange(0, file->GetDataSize()-1);
     double zRange1 = qMax(fabs(zMax), fabs(zMin));
     timePlot->yAxis->setRange(-zRange1, zRange1);
     //plot->yAxis2->setRange(-zRange1, zRange1);
@@ -196,8 +197,13 @@ void MainWindow::SetupPlots()
     if( multi == 3) yLabel = "Voltage [mV]";
     if( multi == 6) yLabel = "Voltage [uV]";
     if( multi == 9) yLabel = "Voltage [nV]";
-    timePlot->yAxis->setLabel(yLabel);
+    timePlot->yAxis->setLabel("Integrated " + yLabel);
+
     bFieldPlot->yAxis->setLabel(yLabel);
+    bFieldPlot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
+    bFieldPlot->xAxis2->setRangeReversed(file->IsYRevered());
+    bFieldPlot->xAxis2->setRange(0, file->GetDataSetSize()-1);
+    if( file->HasBackGround() ) bFieldPlot->xAxis2->setRange(1,file->GetDataSetSize()-1);
 
     allowTimePlot = false;
     if( file->HasBackGround()){
@@ -230,8 +236,96 @@ void MainWindow::PlotTimePlot(int graphID, QVector<double> x, QVector<double> y)
 
 }
 
-void MainWindow::PlotB()
+void MainWindow::PlotBFieldPlot()
 {
+    QVector<double> x, y;
+    QVector<double> xdata = file->GetDataSetX();
+
+    int xStart = ui->spinBox_x1_B->value();
+    int xEnd = ui->spinBox_x2_B->value();
+
+    int nx = xdata.size();
+    int ny = file->GetDataSetSize();
+
+    if( xStart >= nx || xEnd >= nx) return;
+    if( xStart > xEnd ) return;
+
+    double dx = xdata[nx-1] - xdata[nx-2];
+
+    double xMin = 0, xMax = 0;
+    int plotUnit = ui->comboBox_yLabelType->currentIndex();
+    switch (plotUnit) {
+    case 0:
+        xMin = file->GetYMin_CV();
+        xMax = file->GetYMax_CV();
+        bFieldPlot->xAxis->setLabel("Ctrl. Vol. [V]");
+        break;
+    case 1:
+        xMin = file->GetYMin_HV();
+        xMax = file->GetYMax_HV();
+        bFieldPlot->xAxis->setLabel("Hall Vol. [mV]");
+        break;
+    case 2:
+        xMin = file->HV2Mag(file->GetYMin_HV());
+        xMax = file->HV2Mag(file->GetYMax_HV());
+        bFieldPlot->xAxis->setLabel("B-field [mT]");
+        break;
+    }
+    bFieldPlot->xAxis->setRange(xMin, xMax);
+
+    int yMin = 0;
+    int yMax = 0;
+    int startI = 0;
+    if( file->HasBackGround() ) startI = 1;
+    for( int i = startI; i < ny; i++){
+        double xValue = 0;
+        switch (plotUnit) {
+        case 0:xValue = file->GetDataY_CV(i);break;
+        case 1:xValue = file->GetDataY_HV(i);break;
+        case 2:xValue = file->HV2Mag(file->GetDataY_HV(i));break;
+        }
+
+        x.push_back(xValue);
+        //integrated
+        QVector<double> zdata = file->GetDataSetZ(i);
+
+        double sum = 0;
+        for(int j = xStart; j <= xEnd ; j++){
+            sum += zdata[j];
+        }
+        sum = sum*dx;
+
+        if( i == 0) {
+            yMin = sum;
+            yMax = sum;
+        }
+        if( yMin > sum ) yMin = sum;
+        if( yMax < sum ) yMax = sum;
+
+        y.push_back(sum);
+
+    }
+
+
+    if( plotUnit != 0){
+        bFieldPlot->xAxis2->setTickLabels(false);
+        bFieldPlot->xAxis2->setTicks(false);
+        bFieldPlot->xAxis2->setLabel("");
+    }else{
+        bFieldPlot->xAxis2->setTickLabels(true);
+        bFieldPlot->xAxis2->setTicks(true);
+        bFieldPlot->xAxis2->setLabel("y-Index");
+    }
+
+    bFieldPlot->graph(0)->clearData();
+
+    double yRange = 2*qMax(fabs(yMin), fabs(yMax));
+    bFieldPlot->yAxis->setRange(-yRange, yRange);
+
+    bFieldPlot->graph(0)->addData(x,y);
+
+    //bFieldPlot->rescaleAxes();
+    bFieldPlot->replot();
 
 }
 
@@ -246,6 +340,7 @@ void MainWindow::PlotAllPlots()
 {
     on_spinBox_y_valueChanged(ui->spinBox_y->value());
     PlotContourPlot(ui->verticalSlider_zOffset->value());
+    PlotBFieldPlot();
     bPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
     bPlot->Plot();
 }
@@ -417,10 +512,6 @@ void MainWindow::OpenFile(QString fileName, int kind)
     ui->spinBox_x2->setMaximum(file->GetDataSize()-1);
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
-    ui->spinBox_x1_B->setMinimum(0);
-    ui->spinBox_x1_B->setMaximum(file->GetDataSize()-1);
-    ui->spinBox_x2_B->setMinimum(0);
-    ui->spinBox_x2_B->setMaximum(file->GetDataSize()-1);
 
     int xIndex = ana->FindXIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
@@ -440,6 +531,17 @@ void MainWindow::OpenFile(QString fileName, int kind)
 
     //======== Plot B-plot, need to be done before PlotAllPlots()
     bPlot->SetData(file);
+
+    ui->spinBox_x1_B->setMinimum(0);
+    ui->spinBox_x1_B->setMaximum(file->GetDataSize()-1);
+    ui->spinBox_x2_B->setMinimum(0);
+    ui->spinBox_x2_B->setMaximum(file->GetDataSize()-1);
+
+    ui->spinBox_x1_B->setValue(bPlot->FindstartIndex(-1));
+    ui->spinBox_x2_B->setValue(bPlot->FindstartIndex(20));
+    ui->lineEdit_x1_B->setText(QString::number(-1));
+    ui->lineEdit_x2_B->setText(QString::number(20));
+
     //======== SetData to fftPlot
     fftPlot->SetData(file);
 
@@ -1023,6 +1125,9 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->actionSave_Contour_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_B_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_Fit_Result_Plot_as_PDF->setEnabled(IO);
+
+    ui->spinBox_x1_B->setEnabled(IO);
+    ui->spinBox_x2_B->setEnabled(IO);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
@@ -1168,6 +1273,7 @@ void MainWindow::on_comboBox_yLabelType_currentIndexChanged(int index)
 
     bPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
     bPlot->Plot();
+    PlotBFieldPlot();
 
     colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
 

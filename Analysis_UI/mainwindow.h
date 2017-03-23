@@ -30,7 +30,7 @@ public:
 
     void SetupPlots();
     void PlotTimePlot(int graphID, QVector<double> x, QVector<double> y);
-    void PlotB();
+    void PlotBFieldPlot();
     void PlotFitFuncAndXLines();
     void PlotContourPlot(double offset);
 
