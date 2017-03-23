@@ -29,10 +29,10 @@ public:
     ~MainWindow();
 
     void SetupPlots();
-    void Plot(int graphID, QVector<double> x, QVector<double> y);
+    void PlotTimePlot(int graphID, QVector<double> x, QVector<double> y);
     void PlotB();
-    void PlotFitFunc();
-    void PlotContour(double offset);
+    void PlotFitFuncAndXLines();
+    void PlotContourPlot(double offset);
 
     QVector<double> GetParametersFromLineText();
     void UpdateLineTextParameters(QVector<double> par, QVector<double> epar);
@@ -43,16 +43,18 @@ private slots:
 
     void Write2Log(QString str);
 
-    void RePlotPlots();
+    void PlotAllPlots();
+
+    void on_pushButton_DataBase_clicked();
+    void on_pushButton_OpenFile_clicked();
+    void OpenFile(QString fileName, int kind = 0);
+
     void ChangeReactAxis(QCPAxis * axis);
     void ChangeYAxis2Range(QCPRange range);
     void ShowMousePositionInPlot(QMouseEvent * mouse);
     void ShowMousePositionInCTPlot(QMouseEvent * mouse);
     void SetXIndexByMouseClick(QMouseEvent * mouse);
     void SetYIndexByMouseClick(QMouseEvent * mouse);
-
-    void OpenFile(QString fileName, int kind = 0);
-    void on_pushButton_OpenFile_clicked();
 
     void on_spinBox_y_valueChanged(int arg1);
     void on_spinBox_x_valueChanged(int arg1);
@@ -65,7 +67,7 @@ private slots:
     void on_lineEdit_c_returnPressed();
 
     void on_pushButton_Fit_clicked();
-    void on_pushButton_reset_clicked();
+    void on_pushButton_resetPars_clicked();
     void on_pushButton_save_clicked();
     void on_pushButton_FitAll_clicked();
 
@@ -75,6 +77,7 @@ private slots:
     void on_actionFit_Result_triggered();
     void on_actionB_Plot_triggered();
     void on_actionFFTW_Plot_triggered();
+    void on_actionDWT_Plot_triggered();
 
     void on_actionSave_data_triggered();
     void on_actionSave_as_Single_X_CSV_triggered();
@@ -104,10 +107,6 @@ private slots:
 
     void on_horizontalScrollBar_sliderMoved(int position);
 
-    void on_actionDWT_Plot_triggered();
-
-    void on_pushButton_DataBase_clicked();
-
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
@@ -117,17 +116,17 @@ private:
 
     QString Msg;
 
-    QCustomPlot *plot;
-    QCustomPlot *ctplot;
+    QCustomPlot *timePlot;
+    QCustomPlot *contourPlot;
     QCPColorMap * colorMap;
-    QCustomPlot *plotB;
+    QCustomPlot *bFieldPlot;
 
     FileIO *file;
     Analysis *ana;
     DataBaseWindow * dbWindow;
 
     bool savedSingleXCVS;
-
+    bool allowTimePlot;
     bool controlPressed;
 
 };

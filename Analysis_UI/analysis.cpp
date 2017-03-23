@@ -56,6 +56,8 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
     //finding local zMin, zMax;
     zMin = zdata[0];
     zMax = zdata[0];
+    zMinIndex = 0;
+    zMaxIndex = 0;
     for(int i = 1; i < n; i++ ){
         if( zMin > zdata[i] ) {
             zMin = zdata[i];
@@ -67,6 +69,8 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
         }
     }
 
+    int x1 = FindXIndex(TIME2);
+    MeanAndvariance(0, x1);
 }
 
 void Analysis::MeanAndvariance(int index_1, int index_2)
@@ -507,10 +511,18 @@ double Analysis::FindXFromYAfterTZero(double y)
 {
     int xIndex = 0;
 
-    int zIndex = qMin(zMaxIndex, zMinIndex);
-    double maxValue = qMax(zMax, qAbs(zMin));
+    int zIndex = 0;
+    double maxValue = 0;
+    if( qAbs(zMax) > qAbs(zMin)) {
+        zIndex = zMaxIndex;
+        maxValue = zMax;
+    }else{
+        zIndex = zMinIndex;
+        maxValue = qAbs(zMin);
+    }
 
-    //qDebug("zMin: %f, zMax: %f, var: %f ", zMin, zMax, var);
+    //qDebug("zMinIndex: %d, zMaxIndex: %d, zIndex: %d", zMinIndex, zMaxIndex, zIndex);
+    //qDebug("zMin: %f, zMax: %f, var: %f", zMin, zMax, var);
 
     if( maxValue < var ) return 20;
 

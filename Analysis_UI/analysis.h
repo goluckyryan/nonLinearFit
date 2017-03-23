@@ -109,7 +109,7 @@ private:
     Matrix CoVar;
 
     double zMin, zMax;
-    double zMinIndex, zMaxIndex;
+    int zMinIndex, zMaxIndex;
 
     int MaxIter, nIter;
     double SSR;

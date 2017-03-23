@@ -1,3 +1,13 @@
+/******************************
+ * Program flow:
+ * 1) on_pushButton_DataBase_clicked(), or
+      on_pushButton_OpenFile_clicked(), then
+      OpenFile()
+ * 2) in OpenFile(),
+      there is SetupPlots()
+      then in on_check_BGsub_clicked(), which contain PlotAllPlots()
+ * 3) User control
+******************************/
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -6,10 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     file(NULL)
 {
-
     ui->setupUi(this);
-
-    this->showMaximized();
+    //this->showMaximized();
 
     dbWindow = new DataBaseWindow();
     connect(dbWindow, SIGNAL(ReturnFilePath(QString)), this, SLOT(OpenFile(QString)));
@@ -21,69 +29,69 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(bPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     fftPlot = new FFTPlot(this);
-    connect(fftPlot, SIGNAL(PlotData()), this, SLOT(RePlotPlots()));
+    connect(fftPlot, SIGNAL(PlotData()), this, SLOT(PlotAllPlots()));
     connect(fftPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
 
     wPlot = new WaveletPlot(this);
     connect(wPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)) );
-    connect(wPlot, SIGNAL(Replot()), this, SLOT(RePlotPlots()));
+    connect(wPlot, SIGNAL(Replot()), this, SLOT(PlotAllPlots()));
 
     savedSingleXCVS = 0;
 
-    plot = ui->customPlot;
-    plot->xAxis->setLabel("time [us]");
-    plot->yAxis->setLabel("Voltage [a.u.]");
-    plot->yAxis2->setVisible(true);
-    plot->yAxis2->setTickLabels(false);
-    plot->yAxis2->setTicks(true);
-    plot->setInteraction(QCP::iRangeDrag,true);
-    plot->setInteraction(QCP::iRangeZoom,true);
+    timePlot = ui->customPlot;
+    timePlot->xAxis->setLabel("time [us]");
+    timePlot->yAxis->setLabel("Voltage [a.u.]");
+    timePlot->yAxis2->setVisible(true);
+    timePlot->yAxis2->setTickLabels(false);
+    timePlot->yAxis2->setTicks(true);
+    timePlot->setInteraction(QCP::iRangeDrag,true);
+    timePlot->setInteraction(QCP::iRangeZoom,true);
     //plot->axisRect()->setRangeDrag(Qt::Vertical);
     //plot->axisRect()->setRangeZoom(Qt::Vertical);
-    plot->axisRect()->setRangeDrag(Qt::Horizontal);
-    plot->axisRect()->setRangeZoom(Qt::Horizontal);
-    connect(plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
+    timePlot->axisRect()->setRangeDrag(Qt::Horizontal);
+    timePlot->axisRect()->setRangeZoom(Qt::Horizontal);
+    connect(timePlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
 
-    plot->axisRect()->setRangeDragAxes(plot->xAxis, plot->yAxis);
-    plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis);
+    timePlot->axisRect()->setRangeDragAxes(timePlot->xAxis, timePlot->yAxis);
+    timePlot->axisRect()->setRangeZoomAxes(timePlot->xAxis, timePlot->yAxis);
 
     //this sync yaxis2 range as yaxis
-    connect(plot->yAxis, SIGNAL(rangeChanged(QCPRange)), this , SLOT(ChangeYAxis2Range(QCPRange)));
+    connect(timePlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this , SLOT(ChangeYAxis2Range(QCPRange)));
 
     //this can change the react axis
     //connect(plot, SIGNAL(axisClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(ChangeReactAxis(QCPAxis*)));
 
-    plotB = ui->customPlot_PlotB;
-    plotB->xAxis->setLabel("Ctrl. Vol. [V]");
-    plotB->yAxis->setLabel("Voltage [a.u.]");
-    plotB->xAxis2->setLabel("y-Index");
-    plotB->xAxis2->setVisible(true);
-    plotB->yAxis2->setVisible(true);
-    plotB->yAxis2->setTickLabels(false);
-    plotB->yAxis2->setTicks(false);
-    plotB->addGraph();
-    plotB->graph(0)->setPen(QPen(Qt::blue));
-    plotB->graph(0)->clearData();
+    bFieldPlot = ui->customPlot_PlotB;
+    bFieldPlot->xAxis->setLabel("Ctrl. Vol. [V]");
+    bFieldPlot->yAxis->setLabel("Voltage [a.u.]");
+    bFieldPlot->xAxis2->setLabel("y-Index");
+    bFieldPlot->xAxis2->setVisible(true);
+    bFieldPlot->yAxis2->setVisible(true);
+    bFieldPlot->yAxis2->setTickLabels(false);
+    bFieldPlot->yAxis2->setTicks(false);
+    bFieldPlot->addGraph();
+    bFieldPlot->graph(0)->setPen(QPen(Qt::blue));
+    bFieldPlot->graph(0)->clearData();
 
-    ctplot = ui->customPlot_CT;
-    ctplot->axisRect()->setupFullAxesBox(true);
-    ctplot->xAxis->setLabel("time [us]");
-    ctplot->yAxis->setLabel("Ctrl. Vol. [V]");
+    contourPlot = ui->customPlot_CT;
+    contourPlot->axisRect()->setupFullAxesBox(true);
+    contourPlot->xAxis->setLabel("time [us]");
+    contourPlot->yAxis->setLabel("Ctrl. Vol. [V]");
 
     //ctplot->setInteraction(QCP::iRangeZoom,true);
     //ctplot->yAxis2->setVisible(1);
     //ctplot->yAxis2->setLabel("index");
 
-    colorMap = new QCPColorMap(ctplot->xAxis, ctplot->yAxis);
+    colorMap = new QCPColorMap(contourPlot->xAxis, contourPlot->yAxis);
     colorMap->clearData();
 
     //vertcal and horizontal lines on ctplot;
-    ctplot->addGraph();
-    ctplot->graph(0)->setPen(QPen(Qt::gray));
-    ctplot->graph(0)->clearData();
-    ctplot->addGraph();
-    ctplot->graph(1)->setPen(QPen(Qt::gray));
-    ctplot->graph(1)->clearData();
+    contourPlot->addGraph();
+    contourPlot->graph(0)->setPen(QPen(Qt::gray));
+    contourPlot->graph(0)->clearData();
+    contourPlot->addGraph();
+    contourPlot->graph(1)->setPen(QPen(Qt::gray));
+    contourPlot->graph(1)->clearData();
 
     //=================
     ana = new Analysis();
@@ -95,8 +103,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     Write2Log("Directory: " + DATA_PATH);
 
-    controlPressed = 0;
-
+    controlPressed = false;
+    allowTimePlot = false;
 }
 
 MainWindow::~MainWindow(){
@@ -107,9 +115,9 @@ MainWindow::~MainWindow(){
     delete wPlot;
 
     delete colorMap;
-    delete plot;
-    delete ctplot;
-    delete plotB;
+    delete timePlot;
+    delete contourPlot;
+    delete bFieldPlot;
 
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
@@ -142,14 +150,14 @@ void MainWindow::SetupPlots()
     //colorMap->setTightBoundary(false);
     //colorMap->setAntialiased(true);
 
-    ctplot->xAxis->setRange(xMin, xMax);
-    ctplot->yAxis->setRange(yMin, yMax);
+    contourPlot->xAxis->setRange(xMin, xMax);
+    contourPlot->yAxis->setRange(yMin, yMax);
 
     colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
 
-    QCPColorScale *colorScale = new QCPColorScale(ctplot);
+    QCPColorScale *colorScale = new QCPColorScale(contourPlot);
     //ctplot->plotLayout()->clear();
-    ctplot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+    contourPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
     colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
     colorMap->setColorScale(colorScale); // associate the color map with the color scale
 
@@ -170,16 +178,16 @@ void MainWindow::SetupPlots()
     ui->verticalSlider_z->setSingleStep(qCeil(zRange/100.));
     ui->verticalSlider_z->setValue(zRange);
 
-    QCPMarginGroup *marginGroup = new QCPMarginGroup(ctplot);
-    ctplot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    QCPMarginGroup *marginGroup = new QCPMarginGroup(contourPlot);
+    contourPlot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
     colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
 
     //================= Plot
-    plot->xAxis->setRange(xMin, xMax);
-    plot->xAxis2->setVisible(true);
-    plot->xAxis2->setRange(0, file->GetDataSize());
+    timePlot->xAxis->setRange(xMin, xMax);
+    timePlot->xAxis2->setVisible(true);
+    timePlot->xAxis2->setRange(0, file->GetDataSize());
     double zRange1 = qMax(fabs(zMax), fabs(zMin));
-    plot->yAxis->setRange(-zRange1, zRange1);
+    timePlot->yAxis->setRange(-zRange1, zRange1);
     //plot->yAxis2->setRange(-zRange1, zRange1);
 
     int multi = file->GetMultiIndex();
@@ -188,37 +196,37 @@ void MainWindow::SetupPlots()
     if( multi == 3) yLabel = "Voltage [mV]";
     if( multi == 6) yLabel = "Voltage [uV]";
     if( multi == 9) yLabel = "Voltage [nV]";
-    plot->yAxis->setLabel(yLabel);
-    plotB->yAxis->setLabel(yLabel);
+    timePlot->yAxis->setLabel(yLabel);
+    bFieldPlot->yAxis->setLabel(yLabel);
 
+    allowTimePlot = false;
     if( file->HasBackGround()){
         ui->spinBox_y->setValue(1);
     }else{
         ui->spinBox_y->setValue(0);
     }
-
-
+    allowTimePlot = true;
 
 }
 
-void MainWindow::Plot(int graphID, QVector<double> x, QVector<double> y){
+void MainWindow::PlotTimePlot(int graphID, QVector<double> x, QVector<double> y){
 
-    while( plot->graphCount() < graphID+1){
-        plot->addGraph();
+    while( timePlot->graphCount() < graphID+1){
+        timePlot->addGraph();
     }
 
     switch (graphID) {
-    case 0: plot->graph(graphID)->setPen(QPen(Qt::blue)); break;
-    case 1: plot->graph(graphID)->setPen(QPen(Qt::red)); break;
-    case 2: plot->graph(graphID)->setPen(QPen(Qt::darkGreen)); break;
-    case 3: plot->graph(graphID)->setPen(QPen(Qt::darkGreen)); break;
-    case 4: plot->graph(graphID)->setPen(QPen(Qt::magenta)); break;
-    case 5: plot->graph(graphID)->setPen(QPen(Qt::black)); break;
+    case 0: timePlot->graph(graphID)->setPen(QPen(Qt::blue)); break;
+    case 1: timePlot->graph(graphID)->setPen(QPen(Qt::red)); break;
+    case 2: timePlot->graph(graphID)->setPen(QPen(Qt::darkGreen)); break;
+    case 3: timePlot->graph(graphID)->setPen(QPen(Qt::darkGreen)); break;
+    case 4: timePlot->graph(graphID)->setPen(QPen(Qt::magenta)); break;
+    case 5: timePlot->graph(graphID)->setPen(QPen(Qt::black)); break;
     }
 
-    plot->graph(graphID)->clearData();
-    plot->graph(graphID)->addData(x, y);
-    plot->replot();
+    timePlot->graph(graphID)->clearData();
+    timePlot->graph(graphID)->addData(x, y);
+    timePlot->replot();
 
 }
 
@@ -234,31 +242,31 @@ void MainWindow::Write2Log(QString str){
     ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
 }
 
-void MainWindow::RePlotPlots()
+void MainWindow::PlotAllPlots()
 {
     on_spinBox_y_valueChanged(ui->spinBox_y->value());
-    PlotContour(ui->verticalSlider_zOffset->value());
+    PlotContourPlot(ui->verticalSlider_zOffset->value());
     bPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
     bPlot->Plot();
 }
 
 void MainWindow::ChangeReactAxis(QCPAxis *axis)
 {
-    if( axis != plot->yAxis || axis != plot->yAxis2) return;
-    plot->axisRect()->setRangeZoomAxes(plot->xAxis, axis);
+    if( axis != timePlot->yAxis || axis != timePlot->yAxis2) return;
+    timePlot->axisRect()->setRangeZoomAxes(timePlot->xAxis, axis);
 }
 
 void MainWindow::ChangeYAxis2Range(QCPRange range)
 {
-    plot->yAxis2->setRange( range);
+    timePlot->yAxis2->setRange( range);
 }
 
 void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
 {
 
     QPoint pt = mouse->pos();
-    double x = plot->xAxis->pixelToCoord(pt.rx());
-    double y = plot->yAxis->pixelToCoord(pt.ry());
+    double x = timePlot->xAxis->pixelToCoord(pt.rx());
+    double y = timePlot->yAxis->pixelToCoord(pt.ry());
     int xIndex = file->GetXIndex(x);
 
     QString msg;
@@ -270,8 +278,8 @@ void MainWindow::ShowMousePositionInPlot(QMouseEvent *mouse)
 void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
 {
     QPoint pt = mouse->pos();
-    double x = ctplot->xAxis->pixelToCoord(pt.rx());
-    double y = ctplot->yAxis->pixelToCoord(pt.ry());
+    double x = contourPlot->xAxis->pixelToCoord(pt.rx());
+    double y = contourPlot->yAxis->pixelToCoord(pt.ry());
 
     int xIndex = file->GetXIndex(x);
     int yIndex = 0;
@@ -295,30 +303,30 @@ void MainWindow::ShowMousePositionInCTPlot(QMouseEvent *mouse)
     QVector<double> lineX, lineY;
     lineY.push_back(y);
     lineY.push_back(y);
-    lineX.push_back(ctplot->xAxis->range().lower);
-    lineX.push_back(ctplot->xAxis->range().upper);
+    lineX.push_back(contourPlot->xAxis->range().lower);
+    lineX.push_back(contourPlot->xAxis->range().upper);
 
-    ctplot->graph(0)->clearData();
-    ctplot->graph(0)->addData(lineX, lineY);
+    contourPlot->graph(0)->clearData();
+    contourPlot->graph(0)->addData(lineX, lineY);
 
     lineX.clear();
     lineY.clear();
     lineX.push_back(x);
     lineX.push_back(x);
-    lineY.push_back(ctplot->yAxis->range().lower);
-    lineY.push_back(ctplot->yAxis->range().upper);
+    lineY.push_back(contourPlot->yAxis->range().lower);
+    lineY.push_back(contourPlot->yAxis->range().upper);
 
-    ctplot->graph(1)->clearData();
-    ctplot->graph(1)->addData(lineX, lineY);
+    contourPlot->graph(1)->clearData();
+    contourPlot->graph(1)->addData(lineX, lineY);
 
-    ctplot->replot();
+    contourPlot->replot();
 
 }
 
 void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
 {
     QPoint pt = mouse->pos();
-    double x = plot->xAxis->pixelToCoord(pt.rx());
+    double x = timePlot->xAxis->pixelToCoord(pt.rx());
     int xIndex = file->GetXIndex(x);
 
     if( controlPressed){
@@ -337,7 +345,7 @@ void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
 void MainWindow::SetYIndexByMouseClick(QMouseEvent *mouse)
 {
     QPoint pt = mouse->pos();
-    double y = ctplot->yAxis->pixelToCoord(pt.ry());
+    double y = contourPlot->yAxis->pixelToCoord(pt.ry());
 
     int yIndex = 0;
     switch (ui->comboBox_yLabelType->currentIndex()) {
@@ -414,21 +422,24 @@ void MainWindow::OpenFile(QString fileName, int kind)
     ui->spinBox_x2_B->setMinimum(0);
     ui->spinBox_x2_B->setMaximum(file->GetDataSize()-1);
 
+    int xIndex = ana->FindXIndex(TIME1);
+    ui->spinBox_x->setValue(xIndex);
+    ui->spinBox_x2->setValue(ui->spinBox_x2->maximum());
 
-    plot->disconnect();
-    ctplot->disconnect();
-    connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
-    connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXIndexByMouseClick(QMouseEvent*)));
-    connect(ctplot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
-    connect(ctplot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClick(QMouseEvent*)));
+    //set connection
+    timePlot->disconnect();
+    contourPlot->disconnect();
+    connect(timePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInPlot(QMouseEvent*)));
+    connect(timePlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXIndexByMouseClick(QMouseEvent*)));
+    connect(contourPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInCTPlot(QMouseEvent*)));
+    connect(contourPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClick(QMouseEvent*)));
     //========= Reset Data in fitResultDialog
     fitResultPlot->ClearData();
     fitResultPlot->SetDataSize(file);
     fitResultPlot->SetFilePath(file->GetFilePath());
 
-    //======== Plot B-plot
+    //======== Plot B-plot, need to be done before PlotAllPlots()
     bPlot->SetData(file);
-
     //======== SetData to fftPlot
     fftPlot->SetData(file);
 
@@ -437,14 +448,11 @@ void MainWindow::OpenFile(QString fileName, int kind)
 
     //========================= Plot
     if( file->HasBackGround()){
-        on_checkBox_BGsub_clicked(true);
+        on_checkBox_BGsub_clicked(true); // this contain PlotAllPlots()
     }else{
         on_checkBox_BGsub_clicked(false);
     }
 
-    int xIndex = ana->FindXIndex(TIME1);
-    ui->spinBox_x->setValue(xIndex);
-    ui->spinBox_x2->setValue(ui->spinBox_x2->maximum());
 }
 
 void MainWindow::on_pushButton_OpenFile_clicked(){
@@ -492,8 +500,9 @@ void MainWindow::on_pushButton_OpenFile_clicked(){
 }
 
 
-void MainWindow::on_spinBox_y_valueChanged(int arg1){
-
+void MainWindow::on_spinBox_y_valueChanged(int arg1)
+{
+    if( !allowTimePlot ) return;
     statusBar()->showMessage("Changed y-Index.");
 
     ui->spinBox_y->setValue(arg1);
@@ -518,7 +527,9 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     ui->lineEdit_y->setText(QString::number(yValue)+ unitText);
     ui->lineEdit_yName->setText(file->GetDataYName(arg1));
 
-    Plot(0, file->GetDataSetX(), file->GetDataSetZ(arg1));
+    ana->SetY(arg1, file->GetDataY_CV(arg1));
+    ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
+    PlotTimePlot(0, file->GetDataSetX(), file->GetDataSetZ(arg1));
 
     //--- set x scroll bar
     int rxMin = qRound(file->GetXMin());
@@ -529,41 +540,36 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1){
     ui->horizontalScrollBar->setPageStep(delta);
     ui->horizontalScrollBar->setSingleStep(1);
 
-    ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
-    ana->SetY(arg1, file->GetDataY_CV(arg1));
     if( ui->checkBox_AutoFit->isChecked()) {
-        on_pushButton_reset_clicked();
+        on_pushButton_resetPars_clicked();
         on_pushButton_Fit_clicked();
     }else{
-        PlotFitFunc();
+        PlotFitFuncAndXLines();
     }
-
-    int x1 = ana->FindXIndex(TIME2);
-    ana->MeanAndvariance(0, x1);
 }
 
 void MainWindow::on_spinBox_x_valueChanged(int arg1){
     statusBar()->showMessage("Changed x-Index Start.");
     ui->lineEdit_x->setText(QString::number(file->GetDataX(arg1))+ " us");
     ana->SetStartFitIndex(arg1);
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 }
 void MainWindow::on_spinBox_x2_valueChanged(int arg1)
 {
     statusBar()->showMessage("Changed x-Index End.");
     ui->lineEdit_x2->setText(QString::number(file->GetDataX(arg1))+ " us");
     ana->SetEndFitIndex(arg1);
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 }
 
-void MainWindow::PlotFitFunc(){
+void MainWindow::PlotFitFuncAndXLines(){
 
     if( file == NULL) return;
 
     QVector<double> par = GetParametersFromLineText();
 
     ana->CalFitData(par);
-    Plot(1, ana->GetData_x(), ana->GetFitData_y());
+    PlotTimePlot(1, ana->GetData_x(), ana->GetFitData_y());
 
 
     //================Draw X-lines
@@ -573,41 +579,41 @@ void MainWindow::PlotFitFunc(){
     double x2 = file->GetDataX(xIndex2);
     QVector<double> xline_y, xline_x1, xline_x2;
 
-    xline_y.push_back(plot->yAxis->range().lower * 3);
-    xline_y.push_back(plot->yAxis->range().upper * 3);
+    xline_y.push_back(timePlot->yAxis->range().lower * 3);
+    xline_y.push_back(timePlot->yAxis->range().upper * 3);
     xline_x1.push_back(x1);
     xline_x1.push_back(x1);
     xline_x2.push_back(x2);
     xline_x2.push_back(x2);
 
-    Plot(2, xline_x1, xline_y);
-    Plot(3, xline_x2, xline_y);
+    PlotTimePlot(2, xline_x1, xline_y);
+    PlotTimePlot(3, xline_x2, xline_y);
 
 }
 
 void MainWindow::on_lineEdit_a_returnPressed(){
     statusBar()->showMessage("Changed parameter a.");
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 }
 
 void MainWindow::on_lineEdit_Ta_returnPressed(){
     statusBar()->showMessage("Changed parameter Ta.");
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 }
 
 void MainWindow::on_lineEdit_b_returnPressed(){
     statusBar()->showMessage("Changed parameter b.");
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 }
 
 void MainWindow::on_lineEdit_Tb_returnPressed(){
     statusBar()->showMessage("Changed parameter Tb.");
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 }
 void MainWindow::on_lineEdit_c_returnPressed()
 {
     statusBar()->showMessage("Changed parameter c.");
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 }
 
 
@@ -672,14 +678,14 @@ void MainWindow::on_pushButton_Fit_clicked(){
     // update the parameter
     UpdateLineTextParameters(ana->GetParameters(), ana->GetParError());
 
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 
     fitResultPlot->FillData(ana);
     fitResultPlot->PlotData();
 
 }
 
-void MainWindow::on_pushButton_reset_clicked()
+void MainWindow::on_pushButton_resetPars_clicked()
 {
     if( file == NULL) return;
     statusBar()->showMessage("Reset parameters to default values.");
@@ -712,7 +718,7 @@ void MainWindow::on_pushButton_reset_clicked()
     ui->lineEdit_P->setText("");
     ui->lineEdit_eP->setText("");
 
-    PlotFitFunc();
+    PlotFitFuncAndXLines();
 }
 
 void MainWindow::on_pushButton_save_clicked()
@@ -742,10 +748,10 @@ void MainWindow::on_pushButton_FitAll_clicked()
 
     for( int yIndex = yStartIndex; yIndex < n ; yIndex ++){
     //for( int yIndex = 100; yIndex < 300 ; yIndex ++){
-        on_pushButton_reset_clicked();
+        on_pushButton_resetPars_clicked();
         on_spinBox_y_valueChanged(yIndex);
         on_pushButton_Fit_clicked();
-        PlotFitFunc();
+        PlotFitFuncAndXLines();
         //Sleep(500);
         str.sprintf("Fitting #%d / %d , saved %d", yIndex + 1, n, count + 1);
         progress.setLabelText(str);
@@ -892,8 +898,8 @@ void MainWindow::keyPressEvent(QKeyEvent *key)
 {
     if(key->key() == Qt::Key_Shift ){
         //qDebug() << "Shift pressed";
-        plot->axisRect()->setRangeDrag(Qt::Vertical);
-        plot->axisRect()->setRangeZoom(Qt::Vertical);
+        timePlot->axisRect()->setRangeDrag(Qt::Vertical);
+        timePlot->axisRect()->setRangeZoom(Qt::Vertical);
     }
 
     if(key->key() == Qt::Key_Control){
@@ -904,8 +910,8 @@ void MainWindow::keyPressEvent(QKeyEvent *key)
 void MainWindow::keyReleaseEvent(QKeyEvent *key)
 {
     if(key->key() == Qt::Key_Shift ){
-        plot->axisRect()->setRangeDrag(Qt::Horizontal);
-        plot->axisRect()->setRangeZoom(Qt::Horizontal);
+        timePlot->axisRect()->setRangeDrag(Qt::Horizontal);
+        timePlot->axisRect()->setRangeZoom(Qt::Horizontal);
     }
     if(key->key() == Qt::Key_Control){
         //qDebug() << " Ctrl released";
@@ -913,7 +919,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *key)
     }
 }
 
-void MainWindow::PlotContour(double offset)
+void MainWindow::PlotContourPlot(double offset)
 {
     int yIndexStart = 0;
     if( file->HasBackGround()) yIndexStart = 1;
@@ -957,12 +963,12 @@ void MainWindow::PlotContour(double offset)
     }
 
     //Clean line, otherwise, the plot range will mess up;
-    ctplot->graph(0)->clearData();
-    ctplot->graph(1)->clearData();
+    contourPlot->graph(0)->clearData();
+    contourPlot->graph(1)->clearData();
 
-    ctplot->rescaleAxes();
+    contourPlot->rescaleAxes();
 
-    ctplot->replot();
+    contourPlot->replot();
 }
 
 void MainWindow::on_actionFit_Result_triggered()
@@ -993,7 +999,7 @@ void MainWindow::setEnabledPlanel(bool IO)
 
     ui->pushButton_Fit->setEnabled(IO);
     ui->pushButton_FitAll->setEnabled(IO);
-    ui->pushButton_reset->setEnabled(IO);
+    ui->pushButton_resetPars->setEnabled(IO);
     ui->pushButton_save->setEnabled(IO);
     ui->pushButton_RestoreData->setEnabled(IO);
     ui->spinBox_y->setEnabled(IO);
@@ -1031,7 +1037,7 @@ void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
 
     file->ManipulateData(id, bgIndex);
 
-    RePlotPlots();
+    PlotAllPlots();
 
 }
 
@@ -1048,7 +1054,7 @@ void MainWindow::on_checkBox_BGsub_clicked(bool checked)
 
     file->ManipulateData(id, bgYIndex);
 
-    RePlotPlots();
+    PlotAllPlots();
 
 }
 
@@ -1060,7 +1066,7 @@ void MainWindow::on_spinBox_BGIndex_valueChanged()
 void MainWindow::on_verticalSlider_z_sliderMoved(int position)
 {
     colorMap->setDataRange(QCPRange(-position, position));
-    ctplot->replot();
+    contourPlot->replot();
 }
 
 void MainWindow::on_actionFFTW_Plot_triggered()
@@ -1086,12 +1092,12 @@ void MainWindow::on_pushButton_RestoreData_clicked()
     ui->verticalSlider_zOffset->setValue(0);
     ui->spinBox_MovingAvg->setValue(-1);
 
-    RePlotPlots();
+    PlotAllPlots();
 }
 
 void MainWindow::on_verticalSlider_zOffset_sliderMoved(int position)
 {
-    PlotContour(position);
+    PlotContourPlot(position);
 }
 
 void MainWindow::on_spinBox_MovingAvg_valueChanged(int arg1)
@@ -1113,7 +1119,7 @@ void MainWindow::on_spinBox_MovingAvg_valueChanged(int arg1)
 
     file->ManipulateData(id, bgIndex, arg1);
 
-    RePlotPlots();
+    PlotAllPlots();
 }
 
 void MainWindow::on_actionSave_as_Single_X_CSV_triggered()
@@ -1137,24 +1143,24 @@ void MainWindow::on_comboBox_yLabelType_currentIndexChanged(int index)
     QString unitText = " V";
     int yIndex = ui->spinBox_y->value();
     if(index == 0){ //Control Volatge
-        ctplot->yAxis->setLabel("Ctrl. Vol. [V]");
-        ctplot->yAxis->setRange(yMin, yMax);
+        contourPlot->yAxis->setLabel("Ctrl. Vol. [V]");
+        contourPlot->yAxis->setRange(yMin, yMax);
         unitText = " V";
         ui->lineEdit_y->setText(QString::number(file->GetDataY_CV(yIndex))+ unitText);
 
     }else if(index == 1){ // Hall Volatage
-        ctplot->yAxis->setLabel("Hall Vol. [mV]");
+        contourPlot->yAxis->setLabel("Hall Vol. [mV]");
         yMin = file->GetYMin_HV();
         yMax = file->GetYMax_HV();
-        ctplot->yAxis->setRange(yMin, yMax);
+        contourPlot->yAxis->setRange(yMin, yMax);
         unitText = " mV";
         ui->lineEdit_y->setText(QString::number(file->GetDataY_HV(yIndex))+ unitText);
 
     }else if(index == 2){ // Magnetic field [T]
-        ctplot->yAxis->setLabel("B-field [mT]");
+        contourPlot->yAxis->setLabel("B-field [mT]");
         yMin = file->HV2Mag(file->GetYMin_HV());
         yMax = file->HV2Mag(file->GetYMax_HV());
-        ctplot->yAxis->setRange(yMin, yMax);
+        contourPlot->yAxis->setRange(yMin, yMax);
         unitText = " mT";
         ui->lineEdit_y->setText(QString::number(file->HV2Mag(file->GetDataY_HV(yIndex)))+ unitText);
 
@@ -1165,7 +1171,7 @@ void MainWindow::on_comboBox_yLabelType_currentIndexChanged(int index)
 
     colorMap->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
 
-    PlotContour(ui->verticalSlider_zOffset->value());
+    PlotContourPlot(ui->verticalSlider_zOffset->value());
     //ctplot->replot();
 
     fitResultPlot->SetPlotUnit(ui->comboBox_yLabelType->currentIndex());
@@ -1197,14 +1203,14 @@ void MainWindow::on_actionSave_Plot_as_PDF_triggered()
 
     if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
 
-    int ph = plot->geometry().height();
-    int pw = plot->geometry().width();
+    int ph = timePlot->geometry().height();
+    int pw = timePlot->geometry().width();
 
     //plot->graph(1)->clearData();
     //plot->graph(2)->clearData();
     //plot->graph(3)->clearData();
 
-    bool ok = plot->savePdf(fileName, pw, ph );
+    bool ok = timePlot->savePdf(fileName, pw, ph );
 
     if( ok ){
         Write2Log("Saved Single-Data Plot as " + fileName);
@@ -1226,14 +1232,14 @@ void MainWindow::on_actionSave_Contour_Plot_as_PDF_triggered()
 
     if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
 
-    int ph = ctplot->geometry().height();
-    int pw = ctplot->geometry().width();
+    int ph = contourPlot->geometry().height();
+    int pw = contourPlot->geometry().width();
 
     //clear the lines;
-    ctplot->graph(0)->clearData();
-    ctplot->graph(1)->clearData();
+    contourPlot->graph(0)->clearData();
+    contourPlot->graph(1)->clearData();
 
-    bool ok = ctplot->savePdf(fileName, pw, ph );
+    bool ok = contourPlot->savePdf(fileName, pw, ph );
 
     if( ok ){
         Write2Log("Saved Contour Plot as " + fileName);
@@ -1264,13 +1270,13 @@ void MainWindow::xAxisChanged(QCPRange range)
     double xMax = file->GetXMax();
     //regulate the xAxis
     if( range.center() + range.size()/2 > xMax){
-        plot->xAxis->setRangeUpper(xMax);
-        range = plot->xAxis->range();
+        timePlot->xAxis->setRangeUpper(xMax);
+        range = timePlot->xAxis->range();
     }
 
     if( range.center() - range.size()/2 < xMin){
-        plot->xAxis->setRangeLower(xMin);
-        range = plot->xAxis->range();
+        timePlot->xAxis->setRangeLower(xMin);
+        range = timePlot->xAxis->range();
     }
     //set scroll bar
     int rxMin = qRound(file->GetXMin());
@@ -1286,8 +1292,8 @@ void MainWindow::xAxisChanged(QCPRange range)
 void MainWindow::on_horizontalScrollBar_sliderMoved(int position)
 {
     //qDebug() << "bar: " << position;
-    plot->xAxis->setRange(position, plot->xAxis->range().size(), Qt::AlignCenter);
-    plot->replot();
+    timePlot->xAxis->setRange(position, timePlot->xAxis->range().size(), Qt::AlignCenter);
+    timePlot->replot();
 }
 
 void MainWindow::on_actionDWT_Plot_triggered()
