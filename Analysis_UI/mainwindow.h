@@ -63,6 +63,7 @@ private slots:
     void bFieldPlotXAxisChanged(QCPRange range);
     void bFieldPlotChangeYAxis2Range(QCPRange range);
     void ShowMousePositionInBFieldPlot(QMouseEvent * mouse);
+    void SetYIndexByMouseClickInBFieldPlot(QMouseEvent * mouse);
 
     void on_spinBox_y_valueChanged(int arg1);
     void on_spinBox_x_valueChanged(int arg1);

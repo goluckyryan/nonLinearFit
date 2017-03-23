@@ -421,7 +421,7 @@ void FileIO::OpenTxtData_row(){
                 xData.push_back((lineList[i]).toDouble()) ;
             }
         }else{
-            double temp = ExtractYValue(lineList[0],2);
+            double temp = ExtractYValue(lineList[0],0);
             yString.push_back(lineList[0]);
             yData_CV.push_back(temp);
             temp = ExtractYValue(lineList[0],1);

@@ -219,6 +219,7 @@ void MainWindow::SetupPlots()
     connect(bFieldPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(bFieldPlotXAxisChanged(QCPRange)));
     connect(bFieldPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(bFieldPlotChangeYAxis2Range(QCPRange)));
     connect(bFieldPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInBFieldPlot(QMouseEvent*)));
+    connect(bFieldPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClickInBFieldPlot(QMouseEvent*)));
 
 
 }
@@ -468,6 +469,27 @@ void MainWindow::ShowMousePositionInBFieldPlot(QMouseEvent *mouse)
 
     //========= PLot a line
     PlotBFieldXLine(x);
+}
+
+void MainWindow::SetYIndexByMouseClickInBFieldPlot(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double y = bFieldPlot->xAxis->pixelToCoord(pt.rx());
+
+    int yIndex = 0;
+    switch (ui->comboBox_yLabelType->currentIndex()) {
+    case 1:
+        yIndex = file->GetYIndex_HV(y);
+        break;
+    case 2:
+        yIndex = file->GetYIndex_HV(file->Mag2HV(y));
+        break;
+    default:
+        yIndex = file->GetYIndex_CV(y);
+        break;
+    }
+
+    ui->spinBox_y->setValue(yIndex);
 }
 
 void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
