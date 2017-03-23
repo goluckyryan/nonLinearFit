@@ -93,7 +93,6 @@ private slots:
     void on_actionConvert_Origin_Data_as_Single_X_CVS_triggered();
     void on_actionConvert_Origin_Data_as_Double_X_CVS_triggered();
 
-
     void on_pushButton_RestoreData_clicked();
     void on_checkBox_MeanCorr_clicked(bool checked);
     void on_checkBox_BGsub_clicked(bool checked);
@@ -106,12 +105,12 @@ private slots:
     void on_comboBox_yLabelType_currentIndexChanged(int index);
 
     void on_actionSave_Plot_as_PDF_triggered();
-    void on_actionSave_B_Plot_as_PDF_triggered();
     void on_actionSave_Contour_Plot_as_PDF_triggered();
-    void on_actionSave_Fit_Result_Plot_as_PDF_triggered();
+    void on_actionSave_BFieldPlot_as_PDF_triggered();
 
     void on_spinBox_x1_B_valueChanged(int arg1);
     void on_spinBox_x2_B_valueChanged(int arg1);
+
 
 private:
     Ui::MainWindow *ui;

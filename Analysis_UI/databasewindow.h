@@ -23,6 +23,8 @@ public:
     explicit DataBaseWindow(QWidget *parent = 0);
     ~DataBaseWindow();
 
+    QString GetMsg() {return msg;}
+
     QStringList GetTableColEntries(QString tableName, int col);
     int GetTableColNumber(QString tableName);
     QStringList GetTableColName(QString tableName);
@@ -30,7 +32,8 @@ public:
     void ShowTable(QString tableName);
 
 signals:
-    QString ReturnFilePath(QString filePath);
+    void ReturnFilePath(QString filePath);
+    void SendMsg(QString msg);
 
 private slots:
     void SetupSampleTableView();
@@ -69,6 +72,8 @@ private:
     TableEditor *editorChemical;
     TableEditor *editorHost;
     TableEditor *editorSolvent;
+
+    QString msg;
 };
 
 #endif // DATABASEWINDOW_H

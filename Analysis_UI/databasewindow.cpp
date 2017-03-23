@@ -13,6 +13,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     qDebug() << "database open? " << db.open();
     QStringList tableList = db.tables();
     qDebug() << tableList;
+    msg = "database opened : " + DB_PATH;
 
     QStringList dataColName = GetTableColName("Data");
     for(int i = 0; i < dataColName.size() ; i++){

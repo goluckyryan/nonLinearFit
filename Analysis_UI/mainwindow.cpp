@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //this->showMaximized();
 
     dbWindow = new DataBaseWindow();
+    Write2Log(dbWindow->GetMsg());
+    connect(dbWindow, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
     connect(dbWindow, SIGNAL(ReturnFilePath(QString)), this, SLOT(OpenFile(QString)));
 
     fitResultPlot = new FitResult(this);
@@ -201,6 +203,23 @@ void MainWindow::SetupPlots()
         ui->spinBox_y->setValue(0);
     }
     allowTimePlot = true;
+
+    //set connection
+    timePlot->disconnect();
+    connect(timePlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(timePlotXAxisChanged(QCPRange)));
+    connect(timePlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(timePlotChangeYAxis2Range(QCPRange)));
+    connect(timePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInTimePlot(QMouseEvent*)));
+    connect(timePlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXIndexByMouseClick(QMouseEvent*)));
+
+    contourPlot->disconnect();
+    connect(contourPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInContourPlot(QMouseEvent*)));
+    connect(contourPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClick(QMouseEvent*)));
+
+    bFieldPlot->disconnect();
+    connect(bFieldPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(bFieldPlotXAxisChanged(QCPRange)));
+    connect(bFieldPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(bFieldPlotChangeYAxis2Range(QCPRange)));
+    connect(bFieldPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInBFieldPlot(QMouseEvent*)));
+
 
 }
 
@@ -420,6 +439,8 @@ void MainWindow::ShowMousePositionInContourPlot(QMouseEvent *mouse)
 
     contourPlot->replot();
 
+    PlotBFieldXLine(y);
+
 }
 
 void MainWindow::ShowMousePositionInBFieldPlot(QMouseEvent *mouse)
@@ -548,22 +569,6 @@ void MainWindow::OpenFile(QString fileName, int kind)
     ui->spinBox_x->setValue(xIndex);
     ui->spinBox_x2->setValue(ui->spinBox_x2->maximum());
 
-    //set connection
-    timePlot->disconnect();
-    connect(timePlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(timePlotXAxisChanged(QCPRange)));
-    connect(timePlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(timePlotChangeYAxis2Range(QCPRange)));
-    connect(timePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInTimePlot(QMouseEvent*)));
-    connect(timePlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetXIndexByMouseClick(QMouseEvent*)));
-
-    contourPlot->disconnect();
-    connect(contourPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInContourPlot(QMouseEvent*)));
-    connect(contourPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetYIndexByMouseClick(QMouseEvent*)));
-
-    bFieldPlot->disconnect();
-    connect(bFieldPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(bFieldPlotXAxisChanged(QCPRange)));
-    connect(bFieldPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(bFieldPlotChangeYAxis2Range(QCPRange)));
-    connect(bFieldPlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePositionInBFieldPlot(QMouseEvent*)));
-
     //========= Reset Data in fitResultDialog
     fitResultPlot->ClearData();
     fitResultPlot->SetDataSize(file);
@@ -580,8 +585,8 @@ void MainWindow::OpenFile(QString fileName, int kind)
     allowBFieldPlot = false;
     ui->spinBox_x1_B->setValue(bPlot->FindstartIndex(-1));
     ui->spinBox_x2_B->setValue(bPlot->FindstartIndex(20));
-    ui->lineEdit_x1_B->setText(QString::number(-1));
-    ui->lineEdit_x2_B->setText(QString::number(20));
+    ui->lineEdit_x1_B->setText("-1 us");
+    ui->lineEdit_x2_B->setText("20 us");
     allowBFieldPlot = true;
 
     //======== SetData to fftPlot
@@ -1169,7 +1174,7 @@ void MainWindow::setEnabledPlanel(bool IO)
 
     ui->actionSave_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_Contour_Plot_as_PDF->setEnabled(IO);
-    ui->actionSave_B_Plot_as_PDF->setEnabled(IO);
+    ui->actionSave_BFieldPlot_as_PDF->setEnabled(IO);
     ui->actionSave_Fit_Result_Plot_as_PDF->setEnabled(IO);
 
     ui->spinBox_x1_B->setEnabled(IO);
@@ -1365,7 +1370,7 @@ void MainWindow::on_actionSave_Plot_as_PDF_triggered()
     bool ok = timePlot->savePdf(fileName, pw, ph );
 
     if( ok ){
-        Write2Log("Saved Single-Data Plot as " + fileName);
+        Write2Log("Saved Time-Plot as " + fileName);
     }else{
         Write2Log("Save Failed.");
     }
@@ -1394,20 +1399,10 @@ void MainWindow::on_actionSave_Contour_Plot_as_PDF_triggered()
     bool ok = contourPlot->savePdf(fileName, pw, ph );
 
     if( ok ){
-        Write2Log("Saved Contour Plot as " + fileName);
+        Write2Log("Saved Contour-Plot as " + fileName);
     }else{
         Write2Log("Save Failed.");
     }
-}
-
-void MainWindow::on_actionSave_B_Plot_as_PDF_triggered()
-{
-    bPlot->on_pushButton_Print_clicked();
-}
-
-void MainWindow::on_actionSave_Fit_Result_Plot_as_PDF_triggered()
-{
-    fitResultPlot->on_pushButton_SavePlot_clicked();
 }
 
 void MainWindow::on_actionSave_data_triggered()
@@ -1553,4 +1548,32 @@ void MainWindow::on_spinBox_x2_B_valueChanged(int arg1)
     bFieldPlot->yAxis->setLabel(yLabel);
 
     PlotBFieldPlot();
+}
+
+void MainWindow::on_actionSave_BFieldPlot_as_PDF_triggered()
+{
+    QFileDialog fileDialog(this);
+    fileDialog.setNameFilter("pdf (*pdf)");
+    fileDialog.setDirectory(DESKTOP_PATH);
+    fileDialog.setReadOnly(0);
+    QString fileName;
+    if( fileDialog.exec()){
+        fileName = fileDialog.selectedFiles()[0];
+    }
+
+    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+
+    int ph = bFieldPlot->geometry().height();
+    int pw = bFieldPlot->geometry().width();
+
+    //clear the lines;
+    bFieldPlot->graph(1)->clearData();
+
+    bool ok = bFieldPlot->savePdf(fileName, pw, ph );
+
+    if( ok ){
+        Write2Log("Saved B-field Plot as " + fileName);
+    }else{
+        Write2Log("Save Failed.");
+    }
 }

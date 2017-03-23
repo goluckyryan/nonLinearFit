@@ -678,8 +678,7 @@
     </property>
     <addaction name="actionSave_Plot_as_PDF"/>
     <addaction name="actionSave_Contour_Plot_as_PDF"/>
-    <addaction name="actionSave_B_Plot_as_PDF"/>
-    <addaction name="actionSave_Fit_Result_Plot_as_PDF"/>
+    <addaction name="actionSave_BFieldPlot_as_PDF"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -753,9 +752,9 @@
     <string>Convert Origin Data as Double-X CVS</string>
    </property>
   </action>
-  <action name="actionSave_B_Plot_as_PDF">
+  <action name="actionSave_BFieldPlot_as_PDF">
    <property name="text">
-    <string>Save B-Plot as PDF</string>
+    <string>Save B-Field-Plot as PDF</string>
    </property>
   </action>
   <action name="actionSave_Fit_Result_Plot_as_PDF">
@@ -765,12 +764,12 @@
   </action>
   <action name="actionSave_Contour_Plot_as_PDF">
    <property name="text">
-    <string>Save Contour Plot as PDF</string>
+    <string>Save Contour-Plot as PDF</string>
    </property>
   </action>
   <action name="actionSave_Plot_as_PDF">
    <property name="text">
-    <string>Save Single Data Plot as PDF</string>
+    <string>Save Time-Plot as PDF</string>
    </property>
   </action>
   <action name="actionSave_data">
