@@ -273,9 +273,9 @@ void FileIO::OpenCSVData(){
 
 }
 
-void FileIO::OpenTxtData_col() // great problem in this function. not updated for long time.
+void FileIO::OpenTxtData_col() // don't have BG data check this function. not updated for long time.
 {
-    this->colwise = 0;
+    this->colwise = 1;
 
     myfile->seek(0);
 
@@ -307,6 +307,9 @@ void FileIO::OpenTxtData_col() // great problem in this function. not updated fo
         z[i] = new double [xSize];
     }
 
+    multi = 3;
+    yData_CV.clear();
+    xData.clear();
     myfile->seek(0);
     int rows = 0;
     while(stream.readLineInto(&line)){
@@ -322,7 +325,7 @@ void FileIO::OpenTxtData_col() // great problem in this function. not updated fo
                 yData_HV.push_back(temp);
             }
         }else{
-            xData.push_back((lineList[0]).toDouble()) ;
+            xData.push_back((lineList[0]).toDouble() * 1e6) ;
             int yIndex = 0;
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 z[yIndex][rows-2] = (lineList[i]).toDouble();
@@ -596,7 +599,8 @@ void FileIO::SaveCSV(bool doubleX, bool origin)
     for(int i = yStart; i < ySize-1; i++){
         //tmp.sprintf("%10.4f,", yData[i]); str += tmp;
         QString ytext = yString[i];
-        tmp.sprintf("%s,", ytext.toStdString().c_str()); str += tmp;
+        tmp.sprintf("%s", ytext.toStdString().c_str()); str += tmp;
+        tmp.sprintf("_%7.3fmT,", HV2Mag(yData_HV[i])); str += tmp;
         if( doubleX ) str += " X,";
     }
     tmp.sprintf("%s\n", yString[ySize-1].toStdString().c_str()); str += tmp;
@@ -1102,32 +1106,25 @@ int FileIO::ChangeZData(int yIndex, QVector<double> newZ)
 }
 
 double FileIO::ExtractYValue(QString str, int index){
-    // when index == -1; is old CSV data, use the last one
+    // when index == 0; find  V, the Control voltage
+    // when index == 1; find mV, the Hall voltage
 
     QStringList strList = str.split("_");
-
-    if( index >= strList.length() || index == -1) {
-        index = strList.length() - 1;
-    }else{
-        index = strList.length() - index; // the 0 is for data name;
-    }
-
-    //check charectors, to remove non interger
-    QString temp = strList[index];
-    int pos = temp.length();
-    for( int i = 0; i < temp.length(); i++ ){
-        if( temp[i].isLetter()) {
-            pos = i;
-            break;
+    QString temp;
+    for( int i = 0; i < strList.size(); i++){
+        if( index == 0 && strList[i].right(2) != "mV" && strList[i].right(1) == "V" ) {
+            temp = strList[i];
+            temp.chop(1);
+        }
+        if( index == 1 && strList[i].right(2) == "mV"){
+            temp = strList[i];
+            temp.chop(2);
         }
     }
-
-    temp.chop(temp.length()-pos);
 
     //qDebug()<< index << "|" << strList[index] << ", " << pos << " = " << temp << ", " << temp.toDouble();
 
     return temp.toDouble();
-
 }
 
 double FileIO::FindMax(QVector<double> vec)
