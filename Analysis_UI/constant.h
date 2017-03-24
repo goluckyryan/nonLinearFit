@@ -29,8 +29,7 @@ const double TIME2 = -3.0; // end time of sample mean and variance
 1, convert Dialog to mainwindow class ( need edit *.ui file outside Qt )
 2, moving average has bug
 3, better guest on par
-4, when B-plot did not open once, disable print
-5, calculate error-weighted mean
-6, undecimated DWT
-7, non-orthonormal DWT
+4, calculate error-weighted mean
+5, undecimated DWT
+6, non-orthonormal DWT
 ***************************/

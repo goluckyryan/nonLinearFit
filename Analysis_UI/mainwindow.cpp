@@ -21,8 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     dbWindow = new DataBaseWindow();
     Write2Log(dbWindow->GetMsg());
-    connect(dbWindow, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
-    connect(dbWindow, SIGNAL(ReturnFilePath(QString)), this, SLOT(OpenFile(QString)));
+    if( dbWindow->IsDBOpened() ){
+        connect(dbWindow, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
+        connect(dbWindow, SIGNAL(ReturnFilePath(QString)), this, SLOT(OpenFile(QString)));
+    }else{
+        ui->pushButton_DataBase->setEnabled(false);
+    }
 
     fitResultPlot = new FitResult(this);
     connect(fitResultPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));

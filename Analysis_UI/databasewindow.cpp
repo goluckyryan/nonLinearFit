@@ -8,12 +8,26 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     ui->setupUi(this);
 
     db = QSqlDatabase::addDatabase("QSQLITE");
+    if( QFile::exists(DB_PATH) ){
+        msg = "database exist : " + DB_PATH;
+        isDBOpened = true;
+    }else{
+        msg = "No database : " + DB_PATH;
+        isDBOpened = false;
+        //TODO created a db
+        return;
+    }
+
     db.setDatabaseName(DB_PATH);
-    qDebug() << db.databaseName();
-    qDebug() << "database open? " << db.open();
+    db.open();
+    if( !db.isOpen()){
+        msg = "Database open Error : " + DB_PATH;
+        isDBOpened = false;
+        return;
+    }
+
     QStringList tableList = db.tables();
     qDebug() << tableList;
-    msg = "database opened : " + DB_PATH;
 
     QStringList dataColName = GetTableColName("Data");
     for(int i = 0; i < dataColName.size() ; i++){

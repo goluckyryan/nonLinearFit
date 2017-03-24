@@ -30,6 +30,7 @@ public:
     QStringList GetTableColName(QString tableName);
 
     void ShowTable(QString tableName);
+    bool IsDBOpened() {return isDBOpened;}
 
 signals:
     void ReturnFilePath(QString filePath);
@@ -74,6 +75,7 @@ private:
     TableEditor *editorSolvent;
 
     QString msg;
+    bool isDBOpened;
 };
 
 #endif // DATABASEWINDOW_H
