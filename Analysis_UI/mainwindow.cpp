@@ -471,8 +471,21 @@ void MainWindow::ShowMousePositionInBFieldPlot(QMouseEvent *mouse)
     msg.sprintf("(x, y) = (%7.4f, %7.4f), y-index = %4d", x, y, yIndex);
     statusBar()->showMessage(msg);
 
-    //========= PLot a line
+    //========= Plot a line
     PlotBFieldXLine(x);
+
+    //========= Plot a line in contour
+    QVector<double> lineX, lineY;
+    lineY.push_back(x);
+    lineY.push_back(x);
+    lineX.push_back(contourPlot->xAxis->range().lower);
+    lineX.push_back(contourPlot->xAxis->range().upper);
+
+    contourPlot->graph(0)->clearData();
+    contourPlot->graph(0)->addData(lineX, lineY);
+
+    contourPlot->replot();
+
 }
 
 void MainWindow::SetYIndexByMouseClickInBFieldPlot(QMouseEvent *mouse)
@@ -719,6 +732,8 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1)
         on_pushButton_resetPars_clicked();
         on_pushButton_Fit_clicked();
     }else{
+        int xIndex = ana->FindXIndex( TIME1 );
+        ui->spinBox_x->setValue(xIndex);
         PlotFitFuncAndXLines();
     }
 }
@@ -746,10 +761,10 @@ void MainWindow::PlotFitFuncAndXLines(){
     ana->CalFitData(par);
     PlotTimePlot(1, ana->GetData_x(), ana->GetFitData_y());
 
-
     //================Draw X-lines
     int xIndex1 = ui->spinBox_x->value();
     double x1 = file->GetDataX(xIndex1);
+    qDebug() << " x1 : " << x1;
     int xIndex2 = ui->spinBox_x2->value();
     double x2 = file->GetDataX(xIndex2);
     QVector<double> xline_y, xline_x1, xline_x2;
