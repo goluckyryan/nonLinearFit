@@ -104,6 +104,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     helpDialog = new QDialog(this);
     HelpLabel = new QLabel();
+    helpDialog->setWindowTitle("Help");
+
+    QImage image(":/HelpPic/MainWindow1.PNG");
+    picNumber = 1;
+    HelpLabel->setPixmap(QPixmap::fromImage(image));
+
+    QPushButton * next = new QPushButton("Next");
+    connect(next, SIGNAL(pressed()) , this, SLOT(HelpPicNext()));
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(helpDialog);
+    mainLayout->addWidget(HelpLabel);
+    mainLayout->addWidget(next);
 }
 
 MainWindow::~MainWindow(){
@@ -1625,21 +1637,6 @@ void MainWindow::on_actionSave_BFieldPlot_as_PDF_triggered()
 
 void MainWindow::on_actionHelp_triggered()
 {
-    //helpDialog->resize(500, 500);
-    helpDialog->setWindowTitle("Help");
-
-
-    QImage image(":/HelpPic/MainWindow1.PNG");
-    picNumber = 1;
-    HelpLabel->setPixmap(QPixmap::fromImage(image));
-
-    QPushButton * next = new QPushButton("Next");
-    connect(next, SIGNAL(pressed()) , this, SLOT(HelpPicNext()));
-
-    QVBoxLayout *mainLayout = new QVBoxLayout(helpDialog);
-    mainLayout->addWidget(HelpLabel);
-    mainLayout->addWidget(next);
-
     if( helpDialog->isHidden() ){
         helpDialog->show();
     }
