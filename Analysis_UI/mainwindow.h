@@ -115,6 +115,8 @@ private slots:
 
     void on_actionHelp_triggered();
 
+    void HelpPicNext();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
@@ -139,6 +141,8 @@ private:
     bool controlPressed;
 
     QDialog * helpDialog;
+    int picNumber;
+    QLabel * HelpLabel;
 
 };
 

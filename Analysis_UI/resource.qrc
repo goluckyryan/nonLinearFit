@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>HelpPic/DWT.PNG</file>
+        <file>HelpPic/FFTW1.PNG</file>
+        <file>HelpPic/FFTW2.PNG</file>
+        <file>HelpPic/MainWindow1.PNG</file>
+        <file>HelpPic/MainWindow2.PNG</file>
+    </qresource>
+</RCC>

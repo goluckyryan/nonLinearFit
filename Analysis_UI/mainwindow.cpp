@@ -103,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
     allowBFieldPlot = false;
 
     helpDialog = new QDialog(this);
+    HelpLabel = new QLabel();
 }
 
 MainWindow::~MainWindow(){
@@ -122,6 +123,7 @@ MainWindow::~MainWindow(){
 
     delete dbWindow;
 
+    delete HelpLabel;
     delete helpDialog;
 }
 
@@ -1623,26 +1625,60 @@ void MainWindow::on_actionSave_BFieldPlot_as_PDF_triggered()
 
 void MainWindow::on_actionHelp_triggered()
 {
-    //helpDialog->setWindowFlags(Qt::WindowCloseButtonHint);
-    //helpDialog->setGeometry(helpDialog->geometry().x(), helpDialog->geometry().y(), 500, 500);
-    helpDialog->resize(500, 500);
+    //helpDialog->resize(500, 500);
     helpDialog->setWindowTitle("Help");
 
-    QLabel * label = new QLabel();
-    label->setText("Start :"
-                   "1) Open file or Database \n"
-                   "2) Set y-Index in Contour-Plot or B-Plot \n"
-                   "3) Set x-Index-1 using Crtl + left-mouse \n"
-                   "4) Set x-Index-2 using Crtl + right-mouse \n"
-                   "5) Set intial fit parameters");
-    QFont font;
-    font.setPointSize(20);
-    label->setFont(font);
 
-    QHBoxLayout *mainLayout = new QHBoxLayout(helpDialog);
-    mainLayout->addWidget(label);
+    QImage image(":/HelpPic/MainWindow1.PNG");
+    picNumber = 1;
+    HelpLabel->setPixmap(QPixmap::fromImage(image));
+
+    QPushButton * next = new QPushButton("Next");
+    connect(next, SIGNAL(pressed()) , this, SLOT(HelpPicNext()));
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(helpDialog);
+    mainLayout->addWidget(HelpLabel);
+    mainLayout->addWidget(next);
 
     if( helpDialog->isHidden() ){
         helpDialog->show();
+    }
+}
+
+void MainWindow::HelpPicNext()
+{
+    if( picNumber == 5){
+        QImage image(":/HelpPic/MainWindow1.PNG");
+        HelpLabel->setPixmap(QPixmap::fromImage(image));
+        picNumber = 1;
+        return;
+    }
+
+    if( picNumber == 1){
+        QImage image(":/HelpPic/MainWindow2.PNG");
+        HelpLabel->setPixmap(QPixmap::fromImage(image));
+        picNumber = 2;
+        return;
+    }
+
+    if( picNumber == 2){
+        QImage image(":/HelpPic/FFTW1.PNG");
+        HelpLabel->setPixmap(QPixmap::fromImage(image));
+        picNumber = 3;
+        return;
+    }
+
+    if( picNumber == 3){
+        QImage image(":/HelpPic/FFTW2.PNG");
+        HelpLabel->setPixmap(QPixmap::fromImage(image));
+        picNumber = 4;
+        return;
+    }
+
+    if( picNumber == 4){
+        QImage image(":/HelpPic/DWT.PNG");
+        HelpLabel->setPixmap(QPixmap::fromImage(image));
+        picNumber = 5;
+        return;
     }
 }
