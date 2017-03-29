@@ -43,23 +43,9 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     SetupSampleTableView();
 
 
-    //====================== set up the data-table
+    //====================== set up the data-table    
     data = new QSqlRelationalTableModel(this);
-    data->setTable("Data");
-    data->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    data->select();
-    ui->dataView->setModel(data);
-    ui->dataView->resizeColumnsToContents();
-
-    int sampleIdx = data->fieldIndex("Sample");
-    data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "NAME"));
-    ui->dataView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
-    ui->dataView->setItemDelegateForColumn(2, new DateFormatDelegate());
-    ui->dataView->setItemDelegateForColumn(dataPathCol, new OpenFileDelegate());
-    ui->dataView->horizontalHeader()->model()->setHeaderData(1, Qt::Horizontal, "Sample");
-
-    ui->dataView->setColumnWidth(1, 100);
-    ui->dataView->setColumnWidth(2, 100);
+    SetupDataTableView();
 
     //====================== Other things
     editorChemical = NULL;
@@ -170,9 +156,9 @@ void DataBaseWindow::SetupSampleTableView()
     //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
     ui->sampleView->setSelectionMode(QAbstractItemView::SingleSelection);
     //for some unknown reasons, the column header names are needed to rename;
-    ui->sampleView->horizontalHeader()->model()->setHeaderData(2, Qt::Horizontal, "Chemical");
-    ui->sampleView->horizontalHeader()->model()->setHeaderData(3, Qt::Horizontal, "Host");
-    ui->sampleView->horizontalHeader()->model()->setHeaderData(4, Qt::Horizontal, "Solvent");
+    sample->setHeaderData(2, Qt::Horizontal, "Chemical");
+    sample->setHeaderData(3, Qt::Horizontal, "Host");
+    sample->setHeaderData(4, Qt::Horizontal, "Solvent");
 
     ui->sampleView->setColumnWidth(1, 100);
     ui->sampleView->setColumnWidth(2, 100);
@@ -181,6 +167,47 @@ void DataBaseWindow::SetupSampleTableView()
     ui->sampleView->setColumnWidth(6, 100);
 
     //connect(ui->pushButton_sumbitSample, SIGNAL(clicked()), this, SLOT(submit()));
+}
+
+void DataBaseWindow::SetupDataTableView()
+{
+    data->clear();
+    data->setTable("Data");
+    data->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    //data->setJoinMode( QSqlRelationalTableModel::LeftJoin );
+
+    data->setHeaderData(3, Qt::Horizontal, "Acq.\nRate");
+    data->setHeaderData(4, Qt::Horizontal, "Temp.\n[K]");
+    data->setHeaderData(5, Qt::Horizontal, "Time\nRange[us]");
+
+
+
+    data->select();
+
+    ui->dataView->setModel(data);
+    ui->dataView->resizeColumnsToContents();
+
+    int sampleIdx = data->fieldIndex("Sample");
+    if(ui->checkBox_showChemical->isChecked() == false){
+        data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "NAME"));
+        data->setHeaderData(1, Qt::Horizontal, "Sample");
+    }else{
+        data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "Chemical"));
+        data->setHeaderData(1, Qt::Horizontal, "Chemcial");
+    }
+    ui->dataView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
+    ui->dataView->setItemDelegateForColumn(2, new DateFormatDelegate());
+    ui->dataView->setItemDelegateForColumn(dataPathCol, new OpenFileDelegate());
+
+    ui->dataView->setColumnWidth(1, 100);
+    ui->dataView->setColumnWidth(2, 100);
+
+    if( ui->checkBox->isChecked()) {
+        ui->dataView->sortByColumn(2, Qt::DescendingOrder);
+    }else{
+        ui->dataView->sortByColumn(2, Qt::AscendingOrder);
+    }
+
 }
 
 void DataBaseWindow::updateChemicalCombox(QString tableName)
@@ -360,11 +387,12 @@ void DataBaseWindow::on_pushButton_open_clicked()
     this->hide();
 }
 
-void DataBaseWindow::on_checkBox_clicked(bool checked)
+void DataBaseWindow::on_checkBox_clicked()
 {
-    if( checked ) {
-        ui->dataView->sortByColumn(2, Qt::DescendingOrder);
-    }else{
-        ui->dataView->sortByColumn(2, Qt::AscendingOrder);
-    }
+    SetupDataTableView();
+}
+
+void DataBaseWindow::on_checkBox_showChemical_clicked()
+{
+    SetupDataTableView();
 }

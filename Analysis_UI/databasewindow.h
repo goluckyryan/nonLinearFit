@@ -38,6 +38,8 @@ signals:
 
 private slots:
     void SetupSampleTableView();
+    void SetupDataTableView();
+
     void updateChemicalCombox(QString tableName);
 
     void on_comboBox_chemical_currentTextChanged(const QString &arg1);
@@ -59,7 +61,9 @@ private slots:
 
     void on_pushButton_open_clicked();
 
-    void on_checkBox_clicked(bool checked);
+    void on_checkBox_clicked();
+
+    void on_checkBox_showChemical_clicked();
 
 private:
     Ui::DataBaseWindow *ui;
