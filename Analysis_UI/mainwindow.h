@@ -113,6 +113,8 @@ private slots:
     void on_spinBox_x2_B_valueChanged(int arg1);
 
 
+    void on_actionHelp_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
@@ -135,6 +137,8 @@ private:
     bool allowTimePlot;
     bool allowBFieldPlot;
     bool controlPressed;
+
+    QDialog * helpDialog;
 
 };
 

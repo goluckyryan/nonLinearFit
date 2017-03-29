@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     file(NULL)
 {
     ui->setupUi(this);
-    this->showMaximized();
+    //this->showMaximized();
 
     dbWindow = new DataBaseWindow();
     Write2Log(dbWindow->GetMsg());
@@ -101,6 +101,8 @@ MainWindow::MainWindow(QWidget *parent) :
     controlPressed = false;
     allowTimePlot = false;
     allowBFieldPlot = false;
+
+    helpDialog = new QDialog(this);
 }
 
 MainWindow::~MainWindow(){
@@ -120,6 +122,7 @@ MainWindow::~MainWindow(){
 
     delete dbWindow;
 
+    delete helpDialog;
 }
 
 void MainWindow::SetupPlots()
@@ -764,7 +767,6 @@ void MainWindow::PlotFitFuncAndXLines(){
     //================Draw X-lines
     int xIndex1 = ui->spinBox_x->value();
     double x1 = file->GetDataX(xIndex1);
-    qDebug() << " x1 : " << x1;
     int xIndex2 = ui->spinBox_x2->value();
     double x2 = file->GetDataX(xIndex2);
     QVector<double> xline_y, xline_x1, xline_x2;
@@ -1616,5 +1618,31 @@ void MainWindow::on_actionSave_BFieldPlot_as_PDF_triggered()
         Write2Log("Saved B-field Plot as " + fileName);
     }else{
         Write2Log("Save Failed.");
+    }
+}
+
+void MainWindow::on_actionHelp_triggered()
+{
+    //helpDialog->setWindowFlags(Qt::WindowCloseButtonHint);
+    //helpDialog->setGeometry(helpDialog->geometry().x(), helpDialog->geometry().y(), 500, 500);
+    helpDialog->resize(500, 500);
+    helpDialog->setWindowTitle("Help");
+
+    QLabel * label = new QLabel();
+    label->setText("Start :"
+                   "1) Open file or Database \n"
+                   "2) Set y-Index in Contour-Plot or B-Plot \n"
+                   "3) Set x-Index-1 using Crtl + left-mouse \n"
+                   "4) Set x-Index-2 using Crtl + right-mouse \n"
+                   "5) Set intial fit parameters");
+    QFont font;
+    font.setPointSize(20);
+    label->setFont(font);
+
+    QHBoxLayout *mainLayout = new QHBoxLayout(helpDialog);
+    mainLayout->addWidget(label);
+
+    if( helpDialog->isHidden() ){
+        helpDialog->show();
     }
 }

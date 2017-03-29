@@ -73,4 +73,9 @@ FORMS    += mainwindow.ui \
     databasewindow.ui
 
 DISTFILES += \
-    icon.ico
+    icon.ico \
+    HelpPic/DWT.PNG \
+    HelpPic/FFTW1.PNG \
+    HelpPic/FFTW2.PNG \
+    HelpPic/MainWindow1.PNG \
+    HelpPic/MainWindow2.PNG

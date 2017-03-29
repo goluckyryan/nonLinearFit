@@ -706,6 +706,7 @@
    <addaction name="actionB_Plot"/>
    <addaction name="actionFFTW_Plot"/>
    <addaction name="actionDWT_Plot"/>
+   <addaction name="actionHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionFit_Result">
@@ -780,6 +781,11 @@
   <action name="actionDWT_Plot">
    <property name="text">
     <string>DWT Plot</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
    </property>
   </action>
  </widget>
