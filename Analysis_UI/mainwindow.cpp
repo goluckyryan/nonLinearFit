@@ -1644,7 +1644,7 @@ void MainWindow::on_actionHelp_triggered()
 
 void MainWindow::HelpPicNext()
 {
-    if( picNumber == 5){
+    if( picNumber == 6){
         QImage image(":/HelpPic/MainWindow1.PNG");
         HelpLabel->setPixmap(QPixmap::fromImage(image));
         picNumber = 1;
@@ -1654,28 +1654,35 @@ void MainWindow::HelpPicNext()
     if( picNumber == 1){
         QImage image(":/HelpPic/MainWindow2.PNG");
         HelpLabel->setPixmap(QPixmap::fromImage(image));
-        picNumber = 2;
+        picNumber ++;
         return;
     }
 
     if( picNumber == 2){
-        QImage image(":/HelpPic/FFTW1.PNG");
+        QImage image(":/HelpPic/MainWindow3.PNG");
         HelpLabel->setPixmap(QPixmap::fromImage(image));
-        picNumber = 3;
+        picNumber ++;
         return;
     }
 
     if( picNumber == 3){
-        QImage image(":/HelpPic/FFTW2.PNG");
+        QImage image(":/HelpPic/FFTW1.PNG");
         HelpLabel->setPixmap(QPixmap::fromImage(image));
-        picNumber = 4;
+        picNumber ++;
         return;
     }
 
     if( picNumber == 4){
+        QImage image(":/HelpPic/FFTW2.PNG");
+        HelpLabel->setPixmap(QPixmap::fromImage(image));
+        picNumber ++;
+        return;
+    }
+
+    if( picNumber == 5){
         QImage image(":/HelpPic/DWT.PNG");
         HelpLabel->setPixmap(QPixmap::fromImage(image));
-        picNumber = 5;
+        picNumber ++;
         return;
     }
 }
