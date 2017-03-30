@@ -6,6 +6,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     ui(new Ui::DataBaseWindow)
 {
     ui->setupUi(this);
+    this->resize(1300, 600);
 
     db = QSqlDatabase::addDatabase("QSQLITE");
     if( QFile::exists(DB_PATH) ){
@@ -176,11 +177,12 @@ void DataBaseWindow::SetupDataTableView()
     data->setEditStrategy(QSqlTableModel::OnManualSubmit);
     //data->setJoinMode( QSqlRelationalTableModel::LeftJoin );
 
-    data->setHeaderData(3, Qt::Horizontal, "Acq.\nRate");
-    data->setHeaderData(4, Qt::Horizontal, "Temp.\n[K]");
-    data->setHeaderData(5, Qt::Horizontal, "Time\nRange[us]");
-
-
+    data->setHeaderData(3, Qt::Horizontal, "Laser\nWaveLenght [nm]");
+    data->setHeaderData(4, Qt::Horizontal, "Repeat.\nRate");
+    data->setHeaderData(5, Qt::Horizontal, "Average");
+    data->setHeaderData(6, Qt::Horizontal, "Point");
+    data->setHeaderData(7, Qt::Horizontal, "Temp.\n[K]");
+    data->setHeaderData(8, Qt::Horizontal, "Time\nRange[us]");
 
     data->select();
 
