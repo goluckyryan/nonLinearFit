@@ -710,7 +710,8 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1)
     if( !allowTimePlot ) return;
     statusBar()->showMessage("Changed y-Index.");
 
-    ui->spinBox_y->setValue(arg1);
+    //ui->spinBox_y->setValue(arg1);
+
     QString unitText = " V";
     double yValue = 0;
     switch (ui->comboBox_yLabelType->currentIndex()) {
@@ -734,6 +735,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1)
 
     ana->SetY(arg1, file->GetDataY_CV(arg1));
     ana->SetData(file->GetDataSetX(), file->GetDataSetZ(arg1));
+    Write2Log(" y-Index = " + QString::number(arg1) + ", Sample S.D. : " + QString::number(sqrt(ana->GetSampleVariance())));
     PlotTimePlot(0, file->GetDataSetX(), file->GetDataSetZ(arg1));
 
     //--- set x scroll bar
