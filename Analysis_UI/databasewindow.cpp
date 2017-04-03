@@ -186,7 +186,8 @@ void DataBaseWindow::SetupDataTableView()
     data->setEditStrategy(QSqlTableModel::OnManualSubmit);
     //data->setJoinMode( QSqlRelationalTableModel::LeftJoin );
 
-    data->setHeaderData(3, Qt::Horizontal, "Laser\nWaveLenght [nm]");
+    data->setHeaderData(3, Qt::Horizontal, "Laser");
+    //data->setHeaderData(3, Qt::Horizontal, "Laser\nWaveLenght [nm]");
     data->setHeaderData(4, Qt::Horizontal, "Repeat.\nRate");
     data->setHeaderData(5, Qt::Horizontal, "Average");
     data->setHeaderData(6, Qt::Horizontal, "Point");
@@ -206,12 +207,17 @@ void DataBaseWindow::SetupDataTableView()
         data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "Chemical"));
         data->setHeaderData(1, Qt::Horizontal, "Chemcial");
     }
+    int laserIdx = data->fieldIndex("Laser");
+    data->setRelation(laserIdx, QSqlRelation("Laser", "Name", "Name"));
+
+    int dateIdx = data->fieldIndex("Date");
     ui->dataView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
-    ui->dataView->setItemDelegateForColumn(2, new DateFormatDelegate());
+    ui->dataView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate());
     ui->dataView->setItemDelegateForColumn(dataPathCol, new OpenFileDelegate());
 
-    ui->dataView->setColumnWidth(1, 100);
-    ui->dataView->setColumnWidth(2, 100);
+    ui->dataView->setColumnWidth(sampleIdx, 100);
+    ui->dataView->setColumnWidth(dateIdx, 100);
+    ui->dataView->setColumnWidth(laserIdx, 60);
 
     if( ui->checkBox_sortData->isChecked()) {
         ui->dataView->sortByColumn(2, Qt::DescendingOrder);
