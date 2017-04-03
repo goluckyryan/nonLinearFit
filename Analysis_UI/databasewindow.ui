@@ -14,55 +14,8 @@
    <string>Sample DataBase</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,4,4" columnstretch="2,1,0">
-    <item row="2" column="0" colspan="3">
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="title">
-       <string>Sample</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_2" columnstretch="8,1">
-       <item row="4" column="1">
-        <widget class="QPushButton" name="pushButton_sumitSample">
-         <property name="text">
-          <string>Submit</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QPushButton" name="pushButton_revertSample">
-         <property name="text">
-          <string>Revert</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="pushButton_deleteSampleEntry">
-         <property name="text">
-          <string>Delete Entry</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="pushButton_selectSample">
-         <property name="text">
-          <string>Select</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="pushButton_addSampleEntry">
-         <property name="text">
-          <string>Add Entry</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" rowspan="5">
-        <widget class="QTableView" name="sampleView"/>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="3" column="0" colspan="3">
+   <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,4,4" columnstretch="2,1,0">
+    <item row="4" column="0" colspan="3">
      <widget class="QGroupBox" name="groupBox_3">
       <property name="title">
        <string>Data</string>
@@ -123,6 +76,92 @@
       </layout>
      </widget>
     </item>
+    <item row="0" column="0" rowspan="3">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Chemical</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1,0">
+       <item row="1" column="0">
+        <widget class="QComboBox" name="comboBox_chemical"/>
+       </item>
+       <item row="0" column="1" rowspan="2">
+        <widget class="QLabel" name="label_Picture">
+         <property name="text">
+          <string>picture</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLineEdit" name="lineEdit_ChemicalFormula"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pushButton_editChemical">
+         <property name="text">
+          <string>Edit Chemical</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="3">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Sample</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2" columnstretch="8,1,0,0">
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pushButton_selectSample">
+         <property name="text">
+          <string>Select</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="pushButton_deleteSampleEntry">
+         <property name="text">
+          <string>Delete Entry</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QPushButton" name="pushButton_sumitSample">
+         <property name="text">
+          <string>Submit</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="pushButton_revertSample">
+         <property name="text">
+          <string>Revert</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="pushButton_addSampleEntry">
+         <property name="text">
+          <string>Add Entry</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" rowspan="5">
+        <widget class="QTableView" name="sampleView"/>
+       </item>
+       <item row="0" column="1" rowspan="5">
+        <widget class="QLabel" name="label_spectrum">
+         <property name="text">
+          <string>Spectrum</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
     <item row="0" column="1">
      <spacer name="horizontalSpacer">
       <property name="orientation">
@@ -150,36 +189,11 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0" rowspan="2">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="title">
-       <string>Chemical</string>
+    <item row="2" column="2">
+     <widget class="QPushButton" name="pushButton_editLaser">
+      <property name="text">
+       <string>Edit Laser</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1,0">
-       <item row="1" column="0">
-        <widget class="QComboBox" name="comboBox_chemical"/>
-       </item>
-       <item row="0" column="1" rowspan="2">
-        <widget class="QLabel" name="label_Picture">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLineEdit" name="lineEdit_ChemicalFormula"/>
-       </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="pushButton_editChemical">
-         <property name="text">
-          <string>Edit Chemical</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
    </layout>

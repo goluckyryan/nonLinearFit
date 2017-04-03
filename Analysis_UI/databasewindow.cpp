@@ -52,6 +52,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     editorChemical = NULL;
     editorHost = NULL;
     editorSolvent = NULL;
+    editorLaser = NULL;
 
     //ShowTable("Chemical");
     //ShowTable("Sample");
@@ -154,6 +155,7 @@ void DataBaseWindow::SetupSampleTableView()
     ui->sampleView->resizeColumnsToContents();
     ui->sampleView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
     ui->sampleView->setItemDelegateForColumn(6, new DateFormatDelegate() );
+    ui->sampleView->setItemDelegateForColumn(9, new OpenFileDelegate() );
     //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
     ui->sampleView->setSelectionMode(QAbstractItemView::SingleSelection);
     //for some unknown reasons, the column header names are needed to rename;
@@ -397,4 +399,18 @@ void DataBaseWindow::on_checkBox_clicked()
 void DataBaseWindow::on_checkBox_showChemical_clicked()
 {
     SetupDataTableView();
+}
+
+void DataBaseWindow::on_pushButton_editLaser_clicked()
+{
+    editorLaser = new TableEditor("Laser");
+    editorLaser->show();
+}
+
+void DataBaseWindow::on_sampleView_clicked(const QModelIndex &index)
+{
+    QString spectrumPath = DATA_PATH + sample->index(index.row(), 9).data().toString();
+    QImage image(spectrumPath);
+    QImage scaledImage = image.scaledToHeight( ui->sampleView->geometry().height() );
+    ui->label_spectrum->setPixmap(QPixmap::fromImage(scaledImage));
 }

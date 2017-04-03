@@ -65,6 +65,10 @@ private slots:
 
     void on_checkBox_showChemical_clicked();
 
+    void on_pushButton_editLaser_clicked();
+
+    void on_sampleView_clicked(const QModelIndex &index);
+
 private:
     Ui::DataBaseWindow *ui;
     QSqlRelationalTableModel *sample;
@@ -77,6 +81,7 @@ private:
     TableEditor *editorChemical;
     TableEditor *editorHost;
     TableEditor *editorSolvent;
+    TableEditor *editorLaser;
 
     QString msg;
     bool isDBOpened;
