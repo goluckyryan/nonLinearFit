@@ -61,8 +61,7 @@ private slots:
 
     void on_pushButton_open_clicked();
 
-    void on_checkBox_clicked();
-
+    void on_checkBox_sortData_clicked();
     void on_checkBox_showChemical_clicked();
 
     void on_pushButton_editLaser_clicked();
@@ -77,6 +76,7 @@ private:
     QSqlDatabase db;
 
     int dataPathCol;
+    int maxImageSize;
 
     TableEditor *editorChemical;
     TableEditor *editorHost;

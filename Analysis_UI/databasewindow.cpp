@@ -8,6 +8,8 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     ui->setupUi(this);
     this->resize(1300, 600);
 
+    maxImageSize = 250;
+
     db = QSqlDatabase::addDatabase("QSQLITE");
     if( QFile::exists(DB_PATH) ){
         msg = "database exist : " + DB_PATH;
@@ -43,9 +45,14 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     sample = new QSqlRelationalTableModel(ui->sampleView);
     SetupSampleTableView();
 
+    connect(ui->sampleView->selectionModel(),
+            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this,
+            SLOT(on_sampleView_clicked(QModelIndex))
+            );
 
     //====================== set up the data-table    
-    data = new QSqlRelationalTableModel(this);
+    data = new QSqlRelationalTableModel(ui->dataView);
     SetupDataTableView();
 
     //====================== Other things
@@ -60,7 +67,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
 
     updateChemicalCombox("Chemical");
 
-    ui->checkBox->setChecked(true);
+    ui->checkBox_sortData->setChecked(true);
     ui->dataView->sortByColumn(2, Qt::DescendingOrder);
 
 }
@@ -206,7 +213,7 @@ void DataBaseWindow::SetupDataTableView()
     ui->dataView->setColumnWidth(1, 100);
     ui->dataView->setColumnWidth(2, 100);
 
-    if( ui->checkBox->isChecked()) {
+    if( ui->checkBox_sortData->isChecked()) {
         ui->dataView->sortByColumn(2, Qt::DescendingOrder);
     }else{
         ui->dataView->sortByColumn(2, Qt::AscendingOrder);
@@ -229,6 +236,7 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
         data->setFilter("");
         ui->lineEdit_ChemicalFormula->setText("-----");
         ui->label_Picture->clear();
+        ui->label_Picture->setText("Chemical Structure");
         return;
     }
 
@@ -242,16 +250,22 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
             ui->lineEdit_ChemicalFormula->setText(formulaList[i]);
             QString picPath = ChemicalPicture_PATH + picNameList[i];
             QImage image(picPath);
-            //QImage scaledImage = image.scaledToHeight(100);
-            ui->label_Picture->setPixmap(QPixmap::fromImage(image));
+            //ui->label_Picture->setPixmap(QPixmap::fromImage(image));
+            int imageSize = image.height();
+            if( imageSize > maxImageSize) imageSize = maxImageSize;
+            QImage scaledImage = image.scaledToHeight(imageSize);
+            ui->label_Picture->setPixmap(QPixmap::fromImage(scaledImage));
             break;
         }
     }
 
     //select sample
     QString filter = "Chemical='" + arg1 + "'";
-    qDebug() << filter  ;
+    //qDebug() << filter  ;
     sample->setFilter(filter);
+
+    on_sampleView_clicked(ui->sampleView->model()->index(0,1));
+
 }
 
 void DataBaseWindow::on_pushButton_editChemical_clicked()
@@ -391,7 +405,7 @@ void DataBaseWindow::on_pushButton_open_clicked()
     this->hide();
 }
 
-void DataBaseWindow::on_checkBox_clicked()
+void DataBaseWindow::on_checkBox_sortData_clicked()
 {
     SetupDataTableView();
 }
@@ -409,8 +423,10 @@ void DataBaseWindow::on_pushButton_editLaser_clicked()
 
 void DataBaseWindow::on_sampleView_clicked(const QModelIndex &index)
 {
+    //qDebug() << index;
     QString spectrumPath = DATA_PATH + sample->index(index.row(), 9).data().toString();
     QImage image(spectrumPath);
-    QImage scaledImage = image.scaledToHeight( ui->sampleView->geometry().height() );
+    QImage scaledImage = image.scaledToHeight( maxImageSize );
     ui->label_spectrum->setPixmap(QPixmap::fromImage(scaledImage));
 }
+
