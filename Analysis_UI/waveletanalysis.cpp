@@ -206,9 +206,11 @@ void WaveletAnalysis::Decompose(){
         }
 
         qDebug("calculate the x-position for each octave");
-        for(int k = 0; k <= sizeV/2.; k++){
+        for(int k = 0; k < sizeV/2.; k++){
+            if( 2*k >= X0[s].size()) continue;
             X0[s+1].push_back(X0[s][2*k]);
         }
+
 
         //int vkSize = Vk[s+1].size();
         //int wkSize = Wk[s+1].size();
