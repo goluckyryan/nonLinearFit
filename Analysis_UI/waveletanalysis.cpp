@@ -164,12 +164,14 @@ void WaveletAnalysis::Decompose(){
         int sizeV = V0[s].size();
         if( sizeV == 0) return;
 
+        qDebug("clear vector arrays V0, W0, Vk, Wk, X0");
         V0[s+1].clear();
         W0[s+1].clear();
         Vk[s+1].clear();
         Wk[s+1].clear();
         X0[s+1].clear();
 
+        qDebug("calculate low pass filter bank");
         bool startStore = 0;
         for(int k = -parSize; k <= sizeV/2.; k++){
             double sum = 0;
@@ -185,6 +187,7 @@ void WaveletAnalysis::Decompose(){
             }
         }
 
+        qDebug("calculate hight pass filter bank");
         startStore = 0;
         for(int k = -parSize; k <= parSize + 10 + sizeV/2.; k++){
             double sum = 0;
@@ -202,8 +205,8 @@ void WaveletAnalysis::Decompose(){
             if( WAbsMax < qAbs(sum)) WAbsMax = qAbs(sum);
         }
 
+        qDebug("calculate the x-position for each octave");
         for(int k = 0; k <= sizeV/2.; k++){
-
             X0[s+1].push_back(X0[s][2*k]);
         }
 
@@ -220,7 +223,6 @@ void WaveletAnalysis::Decompose(){
         //PrintArray(W0[s+1], "W0", s+1);
 
     }
-
 
     qDebug() << "|W|_max = " << WAbsMax;
 
