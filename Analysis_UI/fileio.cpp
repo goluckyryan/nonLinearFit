@@ -130,7 +130,7 @@ void FileIO::OpenHV2MagParametersFile()
 
 }
 
-void FileIO::OpenCSVData(){
+void FileIO::OpenDoubleXCSVData(){
 
     //TODO add myfile->isOpen check
 
@@ -273,7 +273,7 @@ void FileIO::OpenCSVData(){
 
 }
 
-void FileIO::OpenTxtData_col() // don't have BG data check this function. not updated for long time.
+void FileIO::OpenTxtData_col()
 {
     this->colwise = 1;
 
@@ -301,22 +301,24 @@ void FileIO::OpenTxtData_col() // don't have BG data check this function. not up
     // get Data
     zData = new QVector<double> [ySize];
     backUpData = new QVector<double> [ySize];
+    fZDataA = new QVector<double> [ySize];
+    fZDataP = new QVector<double> [ySize];
     double ** z ;
     z = new double *[ySize];
     for(int i = 0; i < ySize; i++){
         z[i] = new double [xSize];
     }
 
+    //get data
     multi = 3;
     yData_CV.clear();
     xData.clear();
     myfile->seek(0);
     int rows = 0;
-    while(stream.readLineInto(&line)){
+    while(stream.readLineInto(&line) && rows <= xSize + 1){
         rows ++;
         QStringList lineList = line.split(",");
-        if( rows == 1){ // get xDatax
-
+        if( rows == 1){ // get yDatax
             for( int i = 1 ; i < lineList.size() ; i++ ){
                 yString.push_back(lineList[i]);
                 double temp = ExtractYValue(lineList[i]);
@@ -328,7 +330,7 @@ void FileIO::OpenTxtData_col() // don't have BG data check this function. not up
             xData.push_back((lineList[0]).toDouble() * 1e6) ;
             int yIndex = 0;
             for( int i = 1 ; i < lineList.size() ; i++ ){
-                z[yIndex][rows-2] = (lineList[i]).toDouble();
+                z[yIndex][rows-2] = (lineList[i]).toDouble() * pow(10,3);
                 yIndex++;
             }
         }
@@ -357,10 +359,35 @@ void FileIO::OpenTxtData_col() // don't have BG data check this function. not up
     xMax = FindMax(xData);
     xStep = xData[1]-xData[0];
 
-    yMin_CV = FindMin(yData_CV);
-    yMax_CV = FindMax(yData_CV);
+    //=============== check is BG data exist by checking Hall voltage
+    QVector<double> newYData_CV = yData_CV;
+    QVector<double> newYData_HV = yData_HV;
 
-    if(yData_CV[0] > yData_CV[1]) yRevered = 1;
+    //if control voltage == 0 V it is bg
+    bgIndex = -1;
+    for( int i = 0; i < ySize; i++){
+        if( yData_CV[i] == 0){
+            bgIndex = i;
+        }else{
+            break;
+        }
+    }
+
+    if( bgIndex != -1){
+        hadBG = 1;
+        newYData_CV.remove(0);
+        newYData_HV.remove(0);
+    }
+
+    yMax_CV = FindMax(newYData_CV);
+    yMin_CV = FindMin(newYData_CV);
+    yMax_HV = FindMax(newYData_HV);
+    yMin_HV = FindMin(newYData_HV);
+
+    yStep_CV = fabs(yData_CV[ySize-1]- yData_CV[ySize-2]);
+    yStep_HV = fabs(yData_HV[ySize-1]- yData_HV[ySize-2]);
+
+    if(newYData_HV[0] > newYData_HV[1]) yRevered = 1;
 
     openState = 1;
 
@@ -1122,7 +1149,7 @@ double FileIO::ExtractYValue(QString str, int index){
         }
     }
 
-    //qDebug()<< index << "|" << strList[index] << ", " << pos << " = " << temp << ", " << temp.toDouble();
+    //qDebug()<< strList << ", "  << temp << ", " << temp.toDouble();
 
     return temp.toDouble();
 }

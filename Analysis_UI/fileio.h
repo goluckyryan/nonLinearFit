@@ -23,7 +23,7 @@ public:
 
     void OpenHV2MagParametersFile();
     void OpenSaveFileforFit();
-    void OpenCSVData();
+    void OpenDoubleXCSVData();
     void OpenTxtData_col();
     void OpenTxtData_row();
     void SaveFitResult(Analysis *ana);

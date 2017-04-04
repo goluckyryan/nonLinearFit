@@ -591,7 +591,7 @@ void MainWindow::OpenFile(QString fileName, int kind)
 
     //======== read data structure according to the seleteced data format.
     if( kind == 1){
-        file->OpenCSVData();
+        file->OpenDoubleXCSVData();
     }else if( kind == 2){
         file->OpenTxtData_col();
     }else if( kind == 0){
