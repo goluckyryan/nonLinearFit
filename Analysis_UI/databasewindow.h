@@ -66,7 +66,7 @@ private slots:
 
     void on_pushButton_editLaser_clicked();
 
-    void on_sampleView_clicked(const QModelIndex &index);
+    void showSampleSpectrum(const QModelIndex &index);
 
 private:
     Ui::DataBaseWindow *ui;

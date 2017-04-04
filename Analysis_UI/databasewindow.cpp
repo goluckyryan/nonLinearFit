@@ -48,7 +48,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     connect(ui->sampleView->selectionModel(),
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this,
-            SLOT(on_sampleView_clicked(QModelIndex))
+            SLOT(showSampleSpectrum(QModelIndex))
             );
 
     //====================== set up the data-table    
@@ -269,8 +269,10 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
     QString filter = "Chemical='" + arg1 + "'";
     //qDebug() << filter  ;
     sample->setFilter(filter);
+    ui->label_spectrum->clear();
+    ui->label_spectrum->setText("Sample Picture.");
 
-    on_sampleView_clicked(ui->sampleView->model()->index(0,1));
+    //showSampleSpectrum(ui->sampleView->model()->index(0,1));
 
 }
 
@@ -427,9 +429,20 @@ void DataBaseWindow::on_pushButton_editLaser_clicked()
     editorLaser->show();
 }
 
-void DataBaseWindow::on_sampleView_clicked(const QModelIndex &index)
+void DataBaseWindow::showSampleSpectrum(const QModelIndex &index)
 {
-    //qDebug() << index;
+    QString chemicalName = "'" +  sample->index(index.row(), 2).data().toString() + "'";
+    QSqlQuery query;
+    query.exec("SELECT PicPath From Chemical WHERE Chemical.NAME = " + chemicalName);
+    query.last();
+    QString chemicalPicPath = ChemicalPicture_PATH + query.value(0).toString();
+    qDebug() << chemicalPicPath;
+    QImage chemicalPic(chemicalPicPath);
+    int imageSize = chemicalPic.height();
+    if( imageSize > maxImageSize ) imageSize = maxImageSize;
+    QImage scaledChemicalPic = chemicalPic.scaledToHeight(imageSize);
+    ui->label_Picture->setPixmap(QPixmap::fromImage(scaledChemicalPic));
+
     QString spectrumPath = DATA_PATH + sample->index(index.row(), 9).data().toString();
     QImage image(spectrumPath);
     QImage scaledImage = image.scaledToHeight( maxImageSize );
