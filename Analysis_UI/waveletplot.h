@@ -68,6 +68,7 @@ private:
     int yIndex;
 
     bool enableVerticalBar;
+    bool enableSpinBoxWaveletIndex;
 
     double x1, x2;
 

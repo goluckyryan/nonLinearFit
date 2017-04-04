@@ -492,6 +492,7 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
     SendMsg(wave->GetMsg());
     wave->Reconstruct();
 
+    enableSpinBoxWaveletIndex = false;
     int numberOfKind = wave->GetWaveletNumberOfKind();
     if(index == 1 || index == 2){
         ui->spinBox_WaveletIndex->setMinimum(2);
@@ -506,6 +507,7 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
     }else{
         ui->spinBox_WaveletIndex->setEnabled(false);
     }
+    enableSpinBoxWaveletIndex = true;
 
     enableVerticalBar = false;
     ui->verticalSlider_Threshold->setValue(0);
@@ -519,6 +521,7 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
 
 void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
 {
+    if( enableSpinBoxWaveletIndex == false ) return;
     if( wave == NULL ) return;
     int waveletID = ui->comboBox_Wavelet->currentIndex();
     wave->setWaveletPar(waveletID, arg1);

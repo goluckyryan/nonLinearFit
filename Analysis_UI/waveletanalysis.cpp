@@ -156,7 +156,9 @@ void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
 
 }
 
-void WaveletAnalysis::Decompose(){
+void WaveletAnalysis::Decompose()
+{
+    //qDebug() << "=========================== Decompose";
     int s;
     WAbsMax = 0;
     for( s = 0; s < M-1 ; s++){
@@ -164,14 +166,14 @@ void WaveletAnalysis::Decompose(){
         int sizeV = V0[s].size();
         if( sizeV == 0) return;
 
-        qDebug("clear vector arrays V0, W0, Vk, Wk, X0");
+        //qDebug("clear vector arrays V0, W0, Vk, Wk, X0");
         V0[s+1].clear();
         W0[s+1].clear();
         Vk[s+1].clear();
         Wk[s+1].clear();
         X0[s+1].clear();
 
-        qDebug("calculate low pass filter bank");
+        //qDebug("calculate low pass filter bank");
         bool startStore = 0;
         for(int k = -parSize; k <= sizeV/2.; k++){
             double sum = 0;
@@ -187,7 +189,7 @@ void WaveletAnalysis::Decompose(){
             }
         }
 
-        qDebug("calculate hight pass filter bank");
+        //qDebug("calculate hight pass filter bank");
         startStore = 0;
         for(int k = -parSize; k <= parSize + 10 + sizeV/2.; k++){
             double sum = 0;
@@ -205,7 +207,7 @@ void WaveletAnalysis::Decompose(){
             if( WAbsMax < qAbs(sum)) WAbsMax = qAbs(sum);
         }
 
-        qDebug("calculate the x-position for each octave");
+        //qDebug("calculate the x-position for each octave");
         for(int k = 0; k < sizeV/2.; k++){
             if( 2*k >= X0[s].size()) break;
             X0[s+1].push_back(X0[s][2*k]);
@@ -226,7 +228,7 @@ void WaveletAnalysis::Decompose(){
 
     }
 
-    qDebug() << "|W|_max = " << WAbsMax;
+    //qDebug() << "|W|_max = " << WAbsMax;
 
     RestoreData();
 
@@ -267,7 +269,7 @@ void WaveletAnalysis::RestoreData()
 
 void WaveletAnalysis::Reconstruct(){
 
-    //qDebug() << "======================== Reconstruc";
+    //qDebug() << "======================== Reconstruct";
 
     for( int s = M-1; s > 0; s--){
         //qDebug() << "---------- " << s;
