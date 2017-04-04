@@ -417,10 +417,11 @@ void FileIO::OpenTxtData_row(){
     //============= get number of rows and cols;
     ySize = -1;
     while(stream.readLineInto(&line)){
-        ySize ++;
-        QStringList lineList = line.split(",");
+        if( line.left(4) == "####" ) break;
 
+        ySize ++;
         if( ySize == 0){ // get yDatax
+            QStringList lineList = line.split(",");
             xSize = lineList.size()-1;
         }
     }
@@ -439,7 +440,7 @@ void FileIO::OpenTxtData_row(){
     myfile->seek(0);
     int rows = 0;
     int yIndex = 0;
-    while(stream.readLineInto(&line)){
+    while(stream.readLineInto(&line) && rows <= ySize ){
         rows ++;
         QStringList lineList = line.split(",");
 
