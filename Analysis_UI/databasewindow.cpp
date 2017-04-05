@@ -56,11 +56,6 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     SetupDataTableView();
 
     //====================== Other things
-    editorChemical = NULL;
-    editorHost = NULL;
-    editorSolvent = NULL;
-    editorLaser = NULL;
-
     //ShowTable("Chemical");
     //ShowTable("Sample");
     //ShowTable("Data");
@@ -156,27 +151,31 @@ void DataBaseWindow::SetupSampleTableView()
     int chemicalIdx = sample->fieldIndex("Chemical");
     sample->setRelation(chemicalIdx, QSqlRelation("Chemical", "NAME", "NAME"));
     int hostIdx = sample->fieldIndex("Host");
-    sample->setRelation(hostIdx, QSqlRelation("Host", "NAME", "NAME"));
+    //sample->setRelation(hostIdx, QSqlRelation("Host", "NAME", "NAME"));
     int solventIdx = sample->fieldIndex("Solvent");
     sample->setRelation(solventIdx, QSqlRelation("Solvent", "NAME", "NAME"));
+    int dateIdx = sample->fieldIndex("Date");
+    int specPathIdx = sample->fieldIndex("SpectrumPath");
 
     ui->sampleView->setModel(sample);
     ui->sampleView->resizeColumnsToContents();
     ui->sampleView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
-    ui->sampleView->setItemDelegateForColumn(6, new DateFormatDelegate() );
-    ui->sampleView->setItemDelegateForColumn(9, new OpenFileDelegate() );
+    ui->sampleView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate() );
+    ui->sampleView->setItemDelegateForColumn(specPathIdx, new OpenFileDelegate() );
     //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
     ui->sampleView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->sampleView->setColumnHidden(hostIdx, true);
+
     //for some unknown reasons, the column header names are needed to rename;
-    sample->setHeaderData(2, Qt::Horizontal, "Chemical");
-    sample->setHeaderData(3, Qt::Horizontal, "Host");
-    sample->setHeaderData(4, Qt::Horizontal, "Solvent");
+    sample->setHeaderData(chemicalIdx, Qt::Horizontal, "Chemical");
+    //sample->setHeaderData(3, Qt::Horizontal, "Host");
+    sample->setHeaderData(solventIdx, Qt::Horizontal, "Solvent");
 
     ui->sampleView->setColumnWidth(1, 100);
-    ui->sampleView->setColumnWidth(2, 100);
-    ui->sampleView->setColumnWidth(3, 100);
-    ui->sampleView->setColumnWidth(4, 100);
-    ui->sampleView->setColumnWidth(6, 100);
+    ui->sampleView->setColumnWidth(chemicalIdx, 100);
+    //ui->sampleView->setColumnWidth(3, 100);
+    ui->sampleView->setColumnWidth(solventIdx, 100);
+    ui->sampleView->setColumnWidth(dateIdx, 100);
 
     //connect(ui->pushButton_sumbitSample, SIGNAL(clicked()), this, SLOT(submit()));
 }
@@ -231,10 +230,10 @@ void DataBaseWindow::SetupDataTableView()
 
 void DataBaseWindow::updateChemicalCombox(QString tableName)
 {
-    QStringList hostList = GetTableColEntries(tableName, 1);
+    QStringList chemicalList = GetTableColEntries(tableName, 1);
     ui->comboBox_chemical->clear();
     ui->comboBox_chemical->addItem("All");
-    ui->comboBox_chemical->addItems(hostList);
+    ui->comboBox_chemical->addItems(chemicalList);
 }
 
 void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1)

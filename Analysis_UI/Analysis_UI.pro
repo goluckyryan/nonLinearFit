@@ -45,8 +45,7 @@ SOURCES += main.cpp\
     waveletplot.cpp \
     openfiledelegate.cpp \
     dateformatdelegate.cpp \
-    databasewindow.cpp \
-    tableeditor.cpp
+    databasewindow.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot.h \
@@ -62,8 +61,7 @@ HEADERS  += mainwindow.h \
     waveletplot.h \
     openfiledelegate.h \
     dateformatdelegate.h \
-    databasewindow.h \
-    tableeditor.h
+    databasewindow.h
 
 FORMS    += mainwindow.ui \
     bplot.ui \

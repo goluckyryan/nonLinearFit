@@ -9,7 +9,6 @@
 #include "constant.h"
 #include "dateformatdelegate.h"
 #include "openfiledelegate.h"
-#include "tableeditor.h"
 
 namespace Ui {
 class DataBaseWindow;
@@ -61,11 +60,6 @@ private:
 
     int dataPathCol;
     int maxImageSize;
-
-    TableEditor *editorChemical;
-    TableEditor *editorHost;
-    TableEditor *editorSolvent;
-    TableEditor *editorLaser;
 
     QString msg;
     bool isDBOpened;
