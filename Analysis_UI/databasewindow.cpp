@@ -150,8 +150,6 @@ void DataBaseWindow::SetupSampleTableView()
     //set relation, so that can choose directly on the table
     int chemicalIdx = sample->fieldIndex("Chemical");
     sample->setRelation(chemicalIdx, QSqlRelation("Chemical", "NAME", "NAME"));
-    int hostIdx = sample->fieldIndex("Host");
-    //sample->setRelation(hostIdx, QSqlRelation("Host", "NAME", "NAME"));
     int solventIdx = sample->fieldIndex("Solvent");
     sample->setRelation(solventIdx, QSqlRelation("Solvent", "NAME", "NAME"));
     int dateIdx = sample->fieldIndex("Date");
@@ -164,16 +162,13 @@ void DataBaseWindow::SetupSampleTableView()
     ui->sampleView->setItemDelegateForColumn(specPathIdx, new OpenFileDelegate() );
     //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
     ui->sampleView->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->sampleView->setColumnHidden(hostIdx, true);
 
     //for some unknown reasons, the column header names are needed to rename;
     sample->setHeaderData(chemicalIdx, Qt::Horizontal, "Chemical");
-    //sample->setHeaderData(3, Qt::Horizontal, "Host");
     sample->setHeaderData(solventIdx, Qt::Horizontal, "Solvent");
 
     ui->sampleView->setColumnWidth(1, 100);
     ui->sampleView->setColumnWidth(chemicalIdx, 100);
-    //ui->sampleView->setColumnWidth(3, 100);
     ui->sampleView->setColumnWidth(solventIdx, 100);
     ui->sampleView->setColumnWidth(dateIdx, 100);
 

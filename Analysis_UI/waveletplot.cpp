@@ -541,7 +541,7 @@ void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
     PlotReconstructedData();
 }
 
-void WaveletPlot::on_comboBox_Thresholding_currentIndexChanged()
+void WaveletPlot::on_comboBox_Thresholding_currentIndexChanged(int index)
 {
     int value = ui->verticalSlider_Threshold->value();
     on_verticalSlider_Threshold_valueChanged(value);
