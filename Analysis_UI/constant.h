@@ -1,25 +1,26 @@
 #ifndef CONSTANT_H
 #define CONSTANT_H
 
+#include "constant.h"
 #include <QString>
 #include <QStandardPaths>
 
-const QString DESKTOP_PATH = QStandardPaths::locate(QStandardPaths::DesktopLocation, QString(), QStandardPaths::LocateDirectory);
-const QString HOME_PATH = QStandardPaths::locate(QStandardPaths::HomeLocation, QString(), QStandardPaths::LocateDirectory);
-const QString DATA_PATH = HOME_PATH + "ESR_Data_201610/";
-const QString HALL_DIR_PATH = DATA_PATH + "Hall_data/";
-const QString ChemicalPicture_PATH = DATA_PATH + "Chemical_Pic/";
-const QString SamplePicture_PATH = DATA_PATH + "ESR_Sample_Pic/";
-const QString HALL_PATH = HALL_DIR_PATH + "Hall_pars.txt";
-const QString LOG_PATH = DATA_PATH + "DAQ_Log";
-const QString DB_PATH = DATA_PATH + "database.db";
+// any global variabel has to be defined in constant.h and constant.cpp
 
-//const QString APP_PATH = DESKTOP_PATH + "SampleDatabase/";
+extern const QString DESKTOP_PATH ;
+extern const QString HOME_PATH ;
+//extern const QString CONFIG_PATH ;
 
-const double TORRGRAD = 1e-1; //torrenlence for grad of SSR
+extern QString DATA_PATH ;
+extern QString CHEMICAL_PIC_PATH ;
+extern QString SAMPLE_PIC_PATH ;
+extern QString HALL_PATH ;
+extern QString LOG_PATH ;
+extern QString DB_PATH ;
 
-const double TIME1 = 5.0;  // start fitting time
-const double TIME2 = -3.0; // end time of sample mean and variance
+extern double TORRGRAD ;
+extern double TIME1 ;
+extern double TIME2 ;
 
 #endif // CONSTANT_H
 

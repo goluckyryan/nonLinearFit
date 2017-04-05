@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     //this->showMaximized();
-    loadConfigurationFile( CONFIG_PATH );
+    loadConfigurationFile();
 
     dbWindow = new DataBaseWindow();
     Write2Log(dbWindow->GetMsg());
@@ -1690,8 +1690,10 @@ void MainWindow::HelpPicNext()
     }
 }
 
-void MainWindow::loadConfigurationFile(QString path)
+void MainWindow::loadConfigurationFile()
 {
+    const QString APP_PATH = QApplication::applicationDirPath();
+    QString path = APP_PATH + "/AnalysisProgram.ini";
     if( QFile::exists(path) ){
         Write2Log("Configuration file found :" + path);
     }else{
@@ -1715,19 +1717,19 @@ void MainWindow::loadConfigurationFile(QString path)
     while(stream.readLineInto(&line) && line.left(1) != "#"){
         lineList = line.split(" ");
         //qDebug() << lineList[0] << ", " << lineList[lineList.size()-1];
-        if( lineList[0] == "DATA_PATH") A_DATA_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "DB_PATH") A_DB_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "HALL_PATH") A_HALL_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "LOG_PATH") A_LOG_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "ChemicalPicture_PATH") A_CHEMICAL_PIC_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "SamplePicture_PATH") A_SAMPLE_PIC_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "DATA_PATH") DATA_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "DB_PATH") DB_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "HALL_PATH") HALL_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "LOG_PATH") LOG_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "ChemicalPicture_PATH") CHEMICAL_PIC_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "SamplePicture_PATH") SAMPLE_PIC_PATH = lineList[lineList.size()-1];
     }
 
-    qDebug() << A_DATA_PATH;
-    qDebug() << A_CHEMICAL_PIC_PATH;
-    qDebug() << A_SAMPLE_PIC_PATH;
-    qDebug() << A_HALL_PATH;
-    qDebug() << A_LOG_PATH;
-    qDebug() << A_DB_PATH;
+    //qDebug() << DATA_PATH;
+    //qDebug() << CHEMICAL_PIC_PATH;
+    //qDebug() << SAMPLE_PIC_PATH;
+    //qDebug() << HALL_PATH;
+    //qDebug() << LOG_PATH;
+    //qDebug() << DB_PATH;
 
 }
