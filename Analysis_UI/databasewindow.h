@@ -44,27 +44,11 @@ private slots:
 
     void on_comboBox_chemical_currentTextChanged(const QString &arg1);
 
-    void on_pushButton_editChemical_clicked();
-    void on_pushButton_editHost_clicked();
-    void on_pushButton_editSolvent_clicked();
-
     void on_pushButton_selectSample_clicked();
-    void on_pushButton_addSampleEntry_clicked();
-    void on_pushButton_deleteSampleEntry_clicked();
-    void on_pushButton_revertSample_clicked();
-    void on_pushButton_sumitSample_clicked();
-
-    void on_pushButton_addDataEntry_clicked();
-    void on_pushButton_deleteDataEntry_clicked();
-    void on_pushButton_revertData_clicked();
-    void on_pushButton_submitData_clicked();
-
     void on_pushButton_open_clicked();
 
     void on_checkBox_sortData_clicked();
     void on_checkBox_showChemical_clicked();
-
-    void on_pushButton_editLaser_clicked();
 
     void showSampleSpectrum(const QModelIndex &index);
 
@@ -85,6 +69,7 @@ private:
 
     QString msg;
     bool isDBOpened;
+    bool enableChemicalFilter;
 };
 
 #endif // DATABASEWINDOW_H

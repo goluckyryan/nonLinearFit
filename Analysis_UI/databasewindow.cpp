@@ -6,7 +6,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     ui(new Ui::DataBaseWindow)
 {
     ui->setupUi(this);
-    this->resize(1300, 600);
+    //this->resize(1300, 600);
 
     maxImageSize = 250;
 
@@ -69,6 +69,8 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
 
     ui->checkBox_sortData->setChecked(true);
     ui->dataView->sortByColumn(2, Qt::DescendingOrder);
+
+    enableChemicalFilter = true;
 
 }
 
@@ -250,7 +252,6 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
     QStringList formulaList = GetTableColEntries("Chemical", 2);
     QStringList picNameList = GetTableColEntries("Chemical", 3);
 
-
     for(int i = 0; i < nameList.size(); i ++ ){
         if( nameList[i] == arg1) {
             ui->lineEdit_ChemicalFormula->setText(formulaList[i]);
@@ -265,6 +266,7 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
         }
     }
 
+    if( !enableChemicalFilter ) return;
     //select sample
     QString filter = "Chemical='" + arg1 + "'";
     //qDebug() << filter  ;
@@ -273,32 +275,6 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
     ui->label_spectrum->setText("Sample Picture.");
 
     //showSampleSpectrum(ui->sampleView->model()->index(0,1));
-
-}
-
-void DataBaseWindow::on_pushButton_editChemical_clicked()
-{
-    editorChemical = new TableEditor("Chemical");
-    disconnect(editorChemical);
-    connect(editorChemical, SIGNAL(closed(QString)), this, SLOT(updateChemicalCombox(QString)));
-    connect(editorChemical, SIGNAL(closed(QString)), this, SLOT(SetupSampleTableView()));
-    editorChemical->show();
-}
-
-void DataBaseWindow::on_pushButton_editHost_clicked()
-{
-    editorHost = new TableEditor("Host");
-    disconnect(editorHost);
-    connect(editorHost, SIGNAL(closed(QString)), this, SLOT(SetupSampleTableView()));
-    editorHost->show();
-}
-
-void DataBaseWindow::on_pushButton_editSolvent_clicked()
-{
-    editorSolvent = new TableEditor("Solvent");
-    disconnect(editorSolvent);
-    connect(editorSolvent, SIGNAL(closed(QString)), this, SLOT(SetupSampleTableView()));
-    editorSolvent->show();
 }
 
 void DataBaseWindow::on_pushButton_selectSample_clicked()
@@ -309,91 +285,6 @@ void DataBaseWindow::on_pushButton_selectSample_clicked()
     QString filter = "Sample='" + sampleName + "'";
     qDebug() << filter;
     data->setFilter(filter);
-}
-
-void DataBaseWindow::on_pushButton_addSampleEntry_clicked()
-{
-    int row = sample->rowCount();
-    sample->insertRow(row);
-    ui->sampleView->scrollToBottom();
-
-    //set default data
-    QString sampleName = "Sample-" + QString::number(row+1);
-    sample->setData(sample->index(row,1), sampleName);
-    QDate date;
-    sample->setData(sample->index(row, 6), date.currentDate().toString("yyyy-MM-dd"));
-}
-
-void DataBaseWindow::on_pushButton_deleteSampleEntry_clicked()
-{
-    QModelIndex current = ui->sampleView->selectionModel()->currentIndex(); // the "current" item
-    sample->removeRow(current.row());
-
-    QString msg;
-    msg.sprintf("Deleted Row #%d.", current.row()+1);
-    statusBar()->showMessage(msg);
-}
-
-void DataBaseWindow::on_pushButton_revertSample_clicked()
-{
-    sample->revertAll();
-    sample->submitAll();
-
-    statusBar()->showMessage("revert add/delete.");
-}
-
-void DataBaseWindow::on_pushButton_sumitSample_clicked()
-{
-    //sample->database().transaction();
-    if (sample->submitAll()) {
-    //    sample->database().commit();
-        statusBar()->showMessage("Sample Database wriiten.");
-    } else {
-        sample->database().rollback();
-        QMessageBox::warning(this, tr("Cached Table"),
-                             tr("The database reported an error: %1").arg(sample->lastError().text()));
-    }
-}
-
-void DataBaseWindow::on_pushButton_addDataEntry_clicked()
-{
-    int row = data->rowCount();
-    data->insertRow(row);
-    ui->dataView->scrollToBottom();
-
-    //set default data
-    QDate date;
-    data->setData(data->index(row, 2), date.currentDate().toString("yyyy-MM-dd"));
-}
-
-void DataBaseWindow::on_pushButton_deleteDataEntry_clicked()
-{
-    QModelIndex current = ui->dataView->selectionModel()->currentIndex();
-    data->removeRow(current.row());
-
-    QString msg;
-    msg.sprintf("Deleted Row #%d.", current.row()+1);
-    statusBar()->showMessage(msg);
-}
-
-void DataBaseWindow::on_pushButton_revertData_clicked()
-{
-    data->revertAll();
-    sample->submitAll();
-
-    statusBar()->showMessage("revert add/delete.");
-}
-
-void DataBaseWindow::on_pushButton_submitData_clicked()
-{
-    //sample->database().transaction();
-    if (data->submitAll()){
-        statusBar()->showMessage("Data Database wriiten.");
-    } else {
-        data->database().rollback();
-        QMessageBox::warning(this, tr("Cached Table"),
-                             tr("The database reported an error: %1").arg(data->lastError().text()));
-    }
 }
 
 void DataBaseWindow::on_pushButton_open_clicked()
@@ -423,17 +314,12 @@ void DataBaseWindow::on_checkBox_showChemical_clicked()
     SetupDataTableView();
 }
 
-void DataBaseWindow::on_pushButton_editLaser_clicked()
-{
-    editorLaser = new TableEditor("Laser");
-    editorLaser->show();
-}
-
 void DataBaseWindow::showSampleSpectrum(const QModelIndex &index)
 {
-    QString chemicalName = "'" +  sample->index(index.row(), 2).data().toString() + "'";
+    // find the chemical picture
+    QString chemicalName = sample->index(index.row(), 2).data().toString();
     QSqlQuery query;
-    query.exec("SELECT PicPath From Chemical WHERE Chemical.NAME = " + chemicalName);
+    query.exec("SELECT PicPath From Chemical WHERE Chemical.NAME = '" + chemicalName + "'");
     query.last();
     QString chemicalPicPath = ChemicalPicture_PATH + query.value(0).toString();
     qDebug() << chemicalPicPath;
@@ -443,6 +329,17 @@ void DataBaseWindow::showSampleSpectrum(const QModelIndex &index)
     QImage scaledChemicalPic = chemicalPic.scaledToHeight(imageSize);
     ui->label_Picture->setPixmap(QPixmap::fromImage(scaledChemicalPic));
 
+    // set the chemical combox
+    enableChemicalFilter = false;
+    for(int i = 1; i < ui->comboBox_chemical->count(); i++ ){
+        if( ui->comboBox_chemical->itemText(i) == chemicalName ){
+            ui->comboBox_chemical->setCurrentIndex(i);
+            break;
+        }
+    }
+    enableChemicalFilter = true;
+
+    // set the spectrum picture
     QString spectrumPath = DATA_PATH + sample->index(index.row(), 9).data().toString();
     QImage image(spectrumPath);
     QImage scaledImage = image.scaledToHeight( maxImageSize );
