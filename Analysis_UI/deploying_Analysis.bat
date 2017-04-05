@@ -10,6 +10,7 @@ set /p bit="  32-bit or 64-bit Application? (32/64)"
 set /p version="   version? (5_7_0)"
 
 Set name=Analysis_UI.exe
+Set configFile=AnalysisProgram.ini
 Set source=%Desktop%\nonLinearFit\Analysis_UI
 IF "%bit%"=="64" (
 	Set fftwLib=libfftw3-3_x64.dll
@@ -30,8 +31,9 @@ echo =====================================================
 echo %bit%-bit Application, Copy files to %destination%
 echo =====================================================
 xcopy /I/Y %origin%\%name% %destination%
-xcopy /I/Y %source%\%fftwLib% %origin%
+rem xcopy /I/Y %source%\%fftwLib% %origin%
 xcopy /I/Y %origin%\%fftwLib% %destination%
+xcopy /I/Y %origin%\%configFile% %destination%
 
 rem -----------------------------------------
 echo =====================================================
