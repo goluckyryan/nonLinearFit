@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     //this->showMaximized();
+    loadConfigurationFile( CONFIG_PATH );
 
     dbWindow = new DataBaseWindow();
     Write2Log(dbWindow->GetMsg());
@@ -1687,4 +1688,46 @@ void MainWindow::HelpPicNext()
         picNumber ++;
         return;
     }
+}
+
+void MainWindow::loadConfigurationFile(QString path)
+{
+    if( QFile::exists(path) ){
+        Write2Log("Configuration file found :" + path);
+    }else{
+        Write2Log("Configuration not found. | " + path);
+        return;
+    }
+
+    QFile configFile(path);
+    configFile.open(QIODevice::ReadOnly);
+    if( configFile.isOpen() ){
+        Write2Log("Configuration file openned.");
+    }else{
+        Write2Log("Configuration file fail to open.");
+        return;
+    }
+
+    QTextStream stream(&configFile);
+    QString line;
+    QStringList lineList;
+
+    while(stream.readLineInto(&line) && line.left(1) != "#"){
+        lineList = line.split(" ");
+        //qDebug() << lineList[0] << ", " << lineList[lineList.size()-1];
+        if( lineList[0] == "DATA_PATH") A_DATA_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "DB_PATH") A_DB_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "HALL_PATH") A_HALL_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "LOG_PATH") A_LOG_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "ChemicalPicture_PATH") A_CHEMICAL_PIC_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "SamplePicture_PATH") A_SAMPLE_PIC_PATH = lineList[lineList.size()-1];
+    }
+
+    qDebug() << A_DATA_PATH;
+    qDebug() << A_CHEMICAL_PIC_PATH;
+    qDebug() << A_SAMPLE_PIC_PATH;
+    qDebug() << A_HALL_PATH;
+    qDebug() << A_LOG_PATH;
+    qDebug() << A_DB_PATH;
+
 }

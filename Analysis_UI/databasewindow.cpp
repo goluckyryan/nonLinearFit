@@ -10,7 +10,6 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
 
     maxImageSize = 250;
 
-    db = QSqlDatabase::addDatabase("QSQLITE");
     if( QFile::exists(DB_PATH) ){
         msg = "database exist : " + DB_PATH;
         isDBOpened = true;
@@ -21,6 +20,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
         return;
     }
 
+    db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(DB_PATH);
     db.open();
     if( !db.isOpen()){

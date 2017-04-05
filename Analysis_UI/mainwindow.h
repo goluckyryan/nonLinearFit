@@ -117,6 +117,8 @@ private slots:
 
     void HelpPicNext();
 
+    void loadConfigurationFile(QString path);
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
