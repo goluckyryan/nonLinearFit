@@ -6,7 +6,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     ui(new Ui::DataBaseWindow)
 {
     ui->setupUi(this);
-    //this->resize(1300, 600);
+    this->resize(1300, 1000);
 
     maxImageSize = 250;
 
@@ -322,7 +322,7 @@ void DataBaseWindow::showSamplePicture(const QModelIndex &index)
     query.exec("SELECT PicPath From Chemical WHERE Chemical.NAME = '" + chemicalName + "'");
     query.last();
     QString chemicalPicPath = CHEMICAL_PIC_PATH + query.value(0).toString();
-    if( !QFile::exists(chemicalPicPath) ){
+    if( !QFile::exists(chemicalPicPath) || chemicalPicPath.right(1) == "/"){
         ui->label_ChemPicture->setText("no image found.\nPlease check the file location.");
     }else{
         QImage chemicalPic(chemicalPicPath);
@@ -345,7 +345,7 @@ void DataBaseWindow::showSamplePicture(const QModelIndex &index)
     // set the sample picture
     int pathIdx = sample->fieldIndex("PicPath");
     QString samplePicPath = DATA_PATH + sample->index(index.row(), pathIdx).data().toString();
-    if( !QFile::exists(samplePicPath)){
+    if( !QFile::exists(samplePicPath) || samplePicPath.right(1) == "/"){
         ui->label_SamplePic->setText("no image found.\nPlease check the file location.");
     }else{
         QImage samplePic(samplePicPath);
@@ -356,7 +356,7 @@ void DataBaseWindow::showSamplePicture(const QModelIndex &index)
     // set the sample spectrum
     pathIdx = sample->fieldIndex("SpectrumPath");
     QString spectrumPicPath = DATA_PATH + sample->index(index.row(), pathIdx).data().toString();
-    if( !QFile::exists(spectrumPicPath)){
+    if( !QFile::exists(spectrumPicPath) || spectrumPicPath.right(1) == "/"){
         ui->label_SampleSpectrum->setText("no image found.\nPlease check the file location.");
     }else{
         QImage spectrumPic(spectrumPicPath);
