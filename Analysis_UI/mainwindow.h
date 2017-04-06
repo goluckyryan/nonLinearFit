@@ -118,7 +118,7 @@ private slots:
 
     void HelpPicNext();
 
-    void loadConfigurationFile();
+    int loadConfigurationFile();
 
 private:
     Ui::MainWindow *ui;

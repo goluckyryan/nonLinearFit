@@ -18,7 +18,23 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     //this->showMaximized();
-    loadConfigurationFile();
+    int configFileFlag  = loadConfigurationFile();
+
+    if(configFileFlag == 1) {
+        QMessageBox msgBox;
+        msgBox.setText("The configuration file not exist.\n"
+                       "please check the ProgramConfiguration.ini exist on Desktop.");
+        msgBox.exec();
+    }else if(configFileFlag == 2){
+        QMessageBox msgBox;
+        msgBox.setText("The configuration file fail to open.");
+        msgBox.exec();
+    }else if(configFileFlag == 3){
+        QMessageBox msgBox;
+        msgBox.setText("Some items are missing in configuration file.");
+        msgBox.exec();
+    }
+
 
     dbWindow = new DataBaseWindow();
     Write2Log(dbWindow->GetMsg());
@@ -1695,16 +1711,14 @@ void MainWindow::HelpPicNext()
     }
 }
 
-void MainWindow::loadConfigurationFile()
+int MainWindow::loadConfigurationFile()
 {
-    //const QString APP_PATH = QApplication::applicationDirPath();
-    //QString path = APP_PATH + "/AnalysisProgram.ini";
-    QString path = DESKTOP_PATH + "/AnalysisProgram.ini";
+    QString path = DESKTOP_PATH + "/ProgramsConfiguration.ini";
     if( QFile::exists(path) ){
         Write2Log("Configuration file found :" + path);
     }else{
         Write2Log("Configuration not found. | " + path);
-        return;
+        return 1;
     }
 
     QFile configFile(path);
@@ -1713,25 +1727,48 @@ void MainWindow::loadConfigurationFile()
         Write2Log("Configuration file openned.");
     }else{
         Write2Log("Configuration file fail to open.");
-        return;
+        return 2;
     }
 
     QTextStream stream(&configFile);
     QString line;
     QStringList lineList;
 
+    int itemCount = 0;
+
     while(stream.readLineInto(&line) ){
         if( line.left(1) == "#" ) continue;
         lineList = line.split(" ");
         //qDebug() << lineList[0] << ", " << lineList[lineList.size()-1];
-        if( lineList[0] == "DATA_PATH") DATA_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "DB_PATH") DB_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "HALL_PATH") HALL_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "LOG_PATH") LOG_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "ChemicalPicture_PATH") CHEMICAL_PIC_PATH = lineList[lineList.size()-1];
-        if( lineList[0] == "SamplePicture_PATH") SAMPLE_PIC_PATH = lineList[lineList.size()-1];
+        if( lineList[0] == "DATA_PATH") {
+            DATA_PATH = lineList[lineList.size()-1];
+            itemCount ++;
+        }
+        if( lineList[0] == "DB_PATH") {
+            DB_PATH = lineList[lineList.size()-1];
+            itemCount ++;
+        }
+        if( lineList[0] == "HALL_PATH") {
+            HALL_PATH = lineList[lineList.size()-1];
+            itemCount ++;
+        }
+        if( lineList[0] == "LOG_PATH") {
+            LOG_PATH = lineList[lineList.size()-1];
+            itemCount ++;
+        }
+        if( lineList[0] == "ChemicalPicture_PATH") {
+            CHEMICAL_PIC_PATH = lineList[lineList.size()-1];
+            itemCount ++;
+        }
+        if( lineList[0] == "SamplePicture_PATH") {
+            SAMPLE_PIC_PATH = lineList[lineList.size()-1];
+            itemCount ++;
+        }
     }
 
+    if( itemCount != 6){
+        return 3;
+    }
     //qDebug() << DATA_PATH;
     //qDebug() << CHEMICAL_PIC_PATH;
     //qDebug() << SAMPLE_PIC_PATH;
@@ -1739,4 +1776,5 @@ void MainWindow::loadConfigurationFile()
     //qDebug() << LOG_PATH;
     //qDebug() << DB_PATH;
 
+    return 0;
 }
