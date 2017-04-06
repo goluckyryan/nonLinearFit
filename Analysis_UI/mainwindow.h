@@ -41,6 +41,7 @@ public:
 private slots:
     void keyPressEvent(QKeyEvent *key);
     void keyReleaseEvent(QKeyEvent *key);
+    void dropEvent(QDropEvent* event);
 
     void Write2Log(QString str);
     void setEnabledPlanel(bool IO);

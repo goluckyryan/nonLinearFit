@@ -48,7 +48,7 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     connect(ui->sampleView->selectionModel(),
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this,
-            SLOT(showSampleSpectrum(QModelIndex))
+            SLOT(showSamplePicture(QModelIndex))
             );
 
     //====================== set up the data-table    
@@ -153,12 +153,14 @@ void DataBaseWindow::SetupSampleTableView()
     int solventIdx = sample->fieldIndex("Solvent");
     sample->setRelation(solventIdx, QSqlRelation("Solvent", "NAME", "NAME"));
     int dateIdx = sample->fieldIndex("Date");
+    int picPathIdx = sample->fieldIndex("PicPath");
     int specPathIdx = sample->fieldIndex("SpectrumPath");
 
     ui->sampleView->setModel(sample);
     ui->sampleView->resizeColumnsToContents();
     ui->sampleView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
     ui->sampleView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate() );
+    ui->sampleView->setItemDelegateForColumn(picPathIdx, new OpenFileDelegate() );
     ui->sampleView->setItemDelegateForColumn(specPathIdx, new OpenFileDelegate() );
     //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
     ui->sampleView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -237,8 +239,8 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
         sample->setFilter("");
         data->setFilter("");
         ui->lineEdit_ChemicalFormula->setText("-----");
-        ui->label_Picture->clear();
-        ui->label_Picture->setText("Chemical Structure");
+        ui->label_ChemPicture->clear();
+        ui->label_ChemPicture->setText("Chemical Structure");
         return;
     }
 
@@ -256,9 +258,9 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
                 int imageSize = image.height();
                 if( imageSize > maxImageSize) imageSize = maxImageSize;
                 QImage scaledImage = image.scaledToHeight(imageSize);
-                ui->label_Picture->setPixmap(QPixmap::fromImage(scaledImage));
+                ui->label_ChemPicture->setPixmap(QPixmap::fromImage(scaledImage));
             }else{
-                ui->label_Picture->setText("no image found.\nPlease check the file location.");
+                ui->label_ChemPicture->setText("no image found.\nPlease check the file location.");
             }
             break;
         }
@@ -269,8 +271,8 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
     QString filter = "Chemical='" + arg1 + "'";
     //qDebug() << filter  ;
     sample->setFilter(filter);
-    ui->label_spectrum->clear();
-    ui->label_spectrum->setText("Sample Picture.");
+    ui->label_SamplePic->clear();
+    ui->label_SamplePic->setText("Sample Picture.");
 
     //showSampleSpectrum(ui->sampleView->model()->index(0,1));
 }
@@ -312,7 +314,7 @@ void DataBaseWindow::on_checkBox_showChemical_clicked()
     SetupDataTableView();
 }
 
-void DataBaseWindow::showSampleSpectrum(const QModelIndex &index)
+void DataBaseWindow::showSamplePicture(const QModelIndex &index)
 {
     // find the chemical picture
     QString chemicalName = sample->index(index.row(), 2).data().toString();
@@ -321,13 +323,13 @@ void DataBaseWindow::showSampleSpectrum(const QModelIndex &index)
     query.last();
     QString chemicalPicPath = CHEMICAL_PIC_PATH + query.value(0).toString();
     if( !QFile::exists(chemicalPicPath) ){
-        ui->label_Picture->setText("no image found.\nPlease check the file location.");
+        ui->label_ChemPicture->setText("no image found.\nPlease check the file location.");
     }else{
         QImage chemicalPic(chemicalPicPath);
         int imageSize = chemicalPic.height();
         if( imageSize > maxImageSize ) imageSize = maxImageSize;
         QImage scaledChemicalPic = chemicalPic.scaledToHeight(imageSize);
-        ui->label_Picture->setPixmap(QPixmap::fromImage(scaledChemicalPic));
+        ui->label_ChemPicture->setPixmap(QPixmap::fromImage(scaledChemicalPic));
     }
 
     // set the chemical combox
@@ -340,15 +342,26 @@ void DataBaseWindow::showSampleSpectrum(const QModelIndex &index)
     }
     enableChemicalFilter = true;
 
-    // set the spectrum picture
-    int pathIdx = sample->fieldIndex("SpectrumPath");
-    QString spectrumPath = DATA_PATH + sample->index(index.row(), pathIdx).data().toString();
-    if( !QFile::exists(spectrumPath)){
-        ui->label_spectrum->setText("no image found.\nPlease check the file location.");
+    // set the sample picture
+    int pathIdx = sample->fieldIndex("PicPath");
+    QString samplePicPath = DATA_PATH + sample->index(index.row(), pathIdx).data().toString();
+    if( !QFile::exists(samplePicPath)){
+        ui->label_SamplePic->setText("no image found.\nPlease check the file location.");
     }else{
-        QImage image(spectrumPath);
-        QImage scaledImage = image.scaledToHeight( maxImageSize );
-        ui->label_spectrum->setPixmap(QPixmap::fromImage(scaledImage));
+        QImage samplePic(samplePicPath);
+        QImage scaledSamplePic = samplePic.scaledToHeight( maxImageSize );
+        ui->label_SamplePic->setPixmap(QPixmap::fromImage(scaledSamplePic));
+    }
+
+    // set the sample spectrum
+    pathIdx = sample->fieldIndex("SpectrumPath");
+    QString spectrumPicPath = DATA_PATH + sample->index(index.row(), pathIdx).data().toString();
+    if( !QFile::exists(spectrumPicPath)){
+        ui->label_SampleSpectrum->setText("no image found.\nPlease check the file location.");
+    }else{
+        QImage spectrumPic(spectrumPicPath);
+        QImage scaledSpectrumPic = spectrumPic.scaledToHeight( maxImageSize );
+        ui->label_SampleSpectrum->setPixmap(QPixmap::fromImage(scaledSpectrumPic));
     }
 }
 

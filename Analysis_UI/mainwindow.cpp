@@ -1132,6 +1132,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent *key)
     }
 }
 
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    //Drag row-wise file and open
+}
+
 void MainWindow::PlotContourPlot(double offset)
 {
     int yIndexStart = 0;
@@ -1692,8 +1697,9 @@ void MainWindow::HelpPicNext()
 
 void MainWindow::loadConfigurationFile()
 {
-    const QString APP_PATH = QApplication::applicationDirPath();
-    QString path = APP_PATH + "/AnalysisProgram.ini";
+    //const QString APP_PATH = QApplication::applicationDirPath();
+    //QString path = APP_PATH + "/AnalysisProgram.ini";
+    QString path = DESKTOP_PATH + "/AnalysisProgram.ini";
     if( QFile::exists(path) ){
         Write2Log("Configuration file found :" + path);
     }else{

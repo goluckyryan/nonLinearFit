@@ -49,7 +49,7 @@ private slots:
     void on_checkBox_sortData_clicked();
     void on_checkBox_showChemical_clicked();
 
-    void showSampleSpectrum(const QModelIndex &index);
+    void showSamplePicture(const QModelIndex &index);
 
 private:
     Ui::DataBaseWindow *ui;
