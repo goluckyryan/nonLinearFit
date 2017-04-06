@@ -1714,7 +1714,8 @@ void MainWindow::loadConfigurationFile()
     QString line;
     QStringList lineList;
 
-    while(stream.readLineInto(&line) && line.left(1) != "#"){
+    while(stream.readLineInto(&line) ){
+        if( line.left(1) == "#" ) continue;
         lineList = line.split(" ");
         //qDebug() << lineList[0] << ", " << lineList[lineList.size()-1];
         if( lineList[0] == "DATA_PATH") DATA_PATH = lineList[lineList.size()-1];
