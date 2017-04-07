@@ -43,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(dbWindow, SIGNAL(ReturnFilePath(QString)), this, SLOT(OpenFile(QString)));
     }else{
         ui->pushButton_DataBase->setEnabled(false);
+        QMessageBox msgBox;
+        msgBox.setText("Database failed to load.");
+        msgBox.exec();
     }
 
     fitResultPlot = new FitResult(this);
