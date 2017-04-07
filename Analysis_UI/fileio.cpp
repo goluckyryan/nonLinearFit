@@ -1136,17 +1136,26 @@ int FileIO::ChangeZData(int yIndex, QVector<double> newZ)
 double FileIO::ExtractYValue(QString str, int index){
     // when index == 0; find  V, the Control voltage
     // when index == 1; find mV, the Hall voltage
+    // when index == -1; fine FUNCTIONS2.Y
+
+    QString str1 = "V";
+    QString str2 = "mV";
+    QString strN1 = "FUNCTION2.Y";
 
     QStringList strList = str.split("_");
     QString temp;
     for( int i = 0; i < strList.size(); i++){
-        if( index == 0 && strList[i].right(2) != "mV" && strList[i].right(1) == "V" ) {
+        if( index == 0 && strList[i].right(str2.length()) != str2 && strList[i].right(str1.length()) == str1 ) {
             temp = strList[i];
-            temp.chop(1);
+            temp.chop(str1.length());
         }
-        if( index == 1 && strList[i].right(2) == "mV"){
+        if( index == 1 && strList[i].right(str2.length()) == str2){
             temp = strList[i];
-            temp.chop(2);
+            temp.chop(str2.length());
+        }
+        if( index == -1 && strList[i].right(strN1.length()) == strN1){
+            temp = strList[i];
+            temp.chop(strN1.length());
         }
     }
 

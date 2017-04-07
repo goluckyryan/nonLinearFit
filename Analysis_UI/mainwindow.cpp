@@ -1151,9 +1151,36 @@ void MainWindow::keyReleaseEvent(QKeyEvent *key)
     }
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    event->accept();
+}
+
 void MainWindow::dropEvent(QDropEvent *event)
 {
-    //Drag row-wise file and open
+    const QMimeData * mimeData = event->mimeData();
+    QString filePath = mimeData->urls().at(0).toLocalFile();
+    if(filePath.right(3) == "dat"){
+        Write2Log("Open .dat file by Drag. Assume row-wise.");
+        ui->lineEdit->setText(filePath);
+        OpenFile(filePath, 0);
+        return;
+    }
+    if(filePath.right(3) == "csv"){
+        Write2Log("Open *.csv file by Drag. Assume double-X col-wise.");
+        ui->lineEdit->setText(filePath);
+        OpenFile(filePath, 1);
+        return;
+    }else{
+        Write2Log("Unrecongized file format. Drag fail.");
+        return;
+    }
+
 }
 
 void MainWindow::PlotContourPlot(double offset)

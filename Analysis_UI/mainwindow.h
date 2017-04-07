@@ -41,6 +41,8 @@ public:
 private slots:
     void keyPressEvent(QKeyEvent *key);
     void keyReleaseEvent(QKeyEvent *key);
+    void dragEnterEvent(QDragEnterEvent* event);
+    void dragLeaveEvent(QDragLeaveEvent* event);
     void dropEvent(QDropEvent* event);
 
     void Write2Log(QString str);
