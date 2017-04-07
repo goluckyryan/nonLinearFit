@@ -50,6 +50,7 @@ private slots:
     void on_checkBox_showChemical_clicked();
 
     void showSamplePicture(const QModelIndex &index);
+    void showDataPicture(const QModelIndex &index);
 
 private:
     Ui::DataBaseWindow *ui;

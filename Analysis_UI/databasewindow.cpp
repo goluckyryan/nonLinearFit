@@ -55,6 +55,12 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     data = new QSqlRelationalTableModel(ui->dataView);
     SetupDataTableView();
 
+    connect(ui->dataView->selectionModel(),
+            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this,
+            SLOT(showDataPicture(QModelIndex))
+            );
+
     //====================== Other things
     //ShowTable("Chemical");
     //ShowTable("Sample");
@@ -190,13 +196,18 @@ void DataBaseWindow::SetupDataTableView()
     int sampleIdx = data->fieldIndex("Sample");
     int laserIdx = data->fieldIndex("Laser");
     int dateIdx = data->fieldIndex("Date");
+    int repeatIdx = data->fieldIndex("repetition");
+    int acummIdx = data->fieldIndex("Average");
+    int pointIdx = data->fieldIndex("DataPoint");
+    int tempIdx = data->fieldIndex("Temperature");
+    int timeRangeIdx = data->fieldIndex("TimeRange");
 
     data->setHeaderData(laserIdx, Qt::Horizontal, "Laser");
-    data->setHeaderData(4, Qt::Horizontal, "Repeat.\nRate");
-    data->setHeaderData(5, Qt::Horizontal, "Average");
-    data->setHeaderData(6, Qt::Horizontal, "Point");
-    data->setHeaderData(7, Qt::Horizontal, "Temp.\n[K]");
-    data->setHeaderData(8, Qt::Horizontal, "Time\nRange[us]");
+    data->setHeaderData(repeatIdx, Qt::Horizontal, "Repeat.\nRate[Hz]");
+    data->setHeaderData(acummIdx, Qt::Horizontal, "Acumm.");
+    data->setHeaderData(pointIdx, Qt::Horizontal, "Point");
+    data->setHeaderData(tempIdx, Qt::Horizontal, "Temp.\n[K]");
+    data->setHeaderData(timeRangeIdx, Qt::Horizontal, "Time\nRange[us]");
 
     data->select();
 
@@ -231,7 +242,7 @@ void DataBaseWindow::SetupDataTableView()
 
 void DataBaseWindow::updateChemicalCombox(QString tableName)
 {
-    QStringList chemicalList = GetTableColEntries(tableName, 1);
+    QStringList chemicalList = GetTableColEntries(tableName, sample->fieldIndex("NAME"));
     ui->comboBox_chemical->clear();
     ui->comboBox_chemical->addItem("All");
     ui->comboBox_chemical->addItems(chemicalList);
@@ -248,9 +259,10 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
         return;
     }
 
-    QStringList nameList = GetTableColEntries("Chemical", 1);
-    QStringList formulaList = GetTableColEntries("Chemical", 2);
-    QStringList picNameList = GetTableColEntries("Chemical", 3);
+    QStringList nameList = GetTableColEntries("Chemical", sample->fieldIndex("NAME"));
+    //QStringList formulaList = GetTableColEntries("Chemical", sample->fieldIndex("FORMULA"));
+    QStringList formulaList = GetTableColEntries("Chemical", 2); // somehow fieldIndex for FORMULA does not work;
+    QStringList picNameList = GetTableColEntries("Chemical", sample->fieldIndex("PicPath"));
 
     for(int i = 0; i < nameList.size(); i ++ ){
         if( nameList[i] == arg1) {
@@ -284,7 +296,7 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
 void DataBaseWindow::on_pushButton_selectSample_clicked()
 {
     QModelIndex current = ui->sampleView->selectionModel()->currentIndex(); // the "current" item
-    QString sampleName = sample->index(current.row(), 1).data().toString();
+    QString sampleName = sample->index(current.row(), sample->fieldIndex("NAME")).data().toString();
 
     QString filter = "Sample='" + sampleName + "'";
     qDebug() << filter;
@@ -321,7 +333,7 @@ void DataBaseWindow::on_checkBox_showChemical_clicked()
 void DataBaseWindow::showSamplePicture(const QModelIndex &index)
 {
     // find the chemical picture
-    QString chemicalName = sample->index(index.row(), 2).data().toString();
+    QString chemicalName = sample->index(index.row(), sample->fieldIndex("Chemical")).data().toString();
     QSqlQuery query;
     query.exec("SELECT PicPath From Chemical WHERE Chemical.NAME = '" + chemicalName + "'");
     query.last();
@@ -367,5 +379,68 @@ void DataBaseWindow::showSamplePicture(const QModelIndex &index)
         QImage scaledSpectrumPic = spectrumPic.scaledToHeight( maxImageSize );
         ui->label_SampleSpectrum->setPixmap(QPixmap::fromImage(scaledSpectrumPic));
     }
+}
+
+void DataBaseWindow::showDataPicture(const QModelIndex &index)
+{
+    QSqlQuery query;
+
+    // find the sample picture
+    QString sampleName = data->index(index.row(), 1).data().toString();
+    query.exec("SELECT PicPath From Sample WHERE Sample.NAME = '" + sampleName + "'");
+    query.last();
+    QString samplePicPath = SAMPLE_PIC_PATH + query.value(0).toString();
+    if( !QFile::exists(samplePicPath) || samplePicPath.right(1) == "/"){
+        ui->label_SamplePic->setText("no image found.\nPlease check the file location.");
+    }else{
+        QImage samplePic(samplePicPath);
+        int imageSize = samplePic.height();
+        if( imageSize > maxImageSize ) imageSize = maxImageSize;
+        QImage scaledSamplePic = samplePic.scaledToHeight(imageSize);
+        ui->label_SamplePic->setPixmap(QPixmap::fromImage(scaledSamplePic));
+    }
+
+    // find sample spectrum;
+    query.exec("SELECT SpectrumPath From Sample WHERE Sample.NAME = '" + sampleName + "'");
+    query.last();
+    QString spectrumPicPath = SAMPLE_PIC_PATH + query.value(0).toString();
+    if( !QFile::exists(spectrumPicPath) || spectrumPicPath.right(1) == "/"){
+        ui->label_SampleSpectrum->setText("no image found.\nPlease check the file location.");
+    }else{
+        QImage spectrumPic(spectrumPicPath);
+        int imageSize = spectrumPic.height();
+        if( imageSize > maxImageSize ) imageSize = maxImageSize;
+        QImage scaledSpectrumPic = spectrumPic.scaledToHeight(imageSize);
+        ui->label_SampleSpectrum->setPixmap(QPixmap::fromImage(scaledSpectrumPic));
+    }
+
+    //find chemcial picture;
+    query.exec("SELECT Chemical From Sample WHERE Sample.NAME = '" + sampleName + "'");
+    query.last();
+    QString chemicalName = query.value(0).toString();
+    query.exec("SELECT PicPath From Chemical WHERE Chemical.NAME = '" + chemicalName + "'");
+    query.last();
+    QString chemicalPicPath = CHEMICAL_PIC_PATH + query.value(0).toString();
+    if( !QFile::exists(chemicalPicPath) || chemicalPicPath.right(1) == "/"){
+        ui->label_ChemPicture->setText("no image found.\nPlease check the file location.");
+    }else{
+        QImage chemicalPic(chemicalPicPath);
+        int imageSize = chemicalPic.height();
+        if( imageSize > maxImageSize ) imageSize = maxImageSize;
+        QImage scaledChemicalPic = chemicalPic.scaledToHeight(imageSize);
+        ui->label_ChemPicture->setPixmap(QPixmap::fromImage(scaledChemicalPic));
+    }
+
+    // set the chemical combox
+    enableChemicalFilter = false;
+    for(int i = 1; i < ui->comboBox_chemical->count(); i++ ){
+        if( ui->comboBox_chemical->itemText(i) == chemicalName ){
+            ui->comboBox_chemical->setCurrentIndex(i);
+            break;
+        }
+    }
+    enableChemicalFilter = true;
+
+
 }
 
