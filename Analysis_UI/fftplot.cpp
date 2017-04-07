@@ -169,8 +169,8 @@ void FFTPlot::SetPlots()
     yMin = file->GetfYMin();
     yMax = file->GetfYMax();
 
-    nx = file->GetDataSize();
-    ny = file->GetDataSetSize();
+    nx = file->GetXDataSize();
+    ny = file->GetYDataSize();
 
     //qDebug("x:(%f, %f) %d", xMin, xMax, nx);
     //qDebug("y:(%f, %f) %d", yMin, yMax, ny);

@@ -104,7 +104,7 @@ void FitResult::SetDataSize(FileIO *file)
 
     this->file = file;
 
-    int n = file->GetDataSetSize();
+    int n = file->GetYDataSize();
 
     dataSize = n;
     fitPar = new QVector<double> [n];

@@ -15,6 +15,8 @@ public:
     WaveletAnalysis(QVector<double> x, QVector<double> a);
     ~WaveletAnalysis();
 
+    void ClearData();
+    void SetData(QVector<double> x, QVector<double> a);
     void setWaveletPar(int waveletIndex, int waveletPar);
     void Decompose();
     void RestoreData();

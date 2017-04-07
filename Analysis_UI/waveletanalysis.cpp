@@ -37,6 +37,49 @@ WaveletAnalysis::~WaveletAnalysis(){
     if( W != NULL) delete [] W;
 }
 
+void WaveletAnalysis::ClearData()
+{
+    size = 0;
+    M = 0;
+    V0->clear();
+    W0->clear();
+    Vk->clear();
+    Wk->clear();
+    V->clear();
+    W->clear();
+    X0->clear();
+    msg.clear();
+
+    Z0.clear();
+    waveletIndex = 0;
+    numberOfKind = 0;
+    waveletPar = 0;
+}
+
+void WaveletAnalysis::SetData(QVector<double> x, QVector<double> a)
+{
+    size = a.size();
+    M = qFloor( qLn(size)/qLn(2.) )+1;
+
+    V0 = new QVector<double> [M];
+    W0 = new QVector<double> [M];
+    Vk = new QVector<int> [M];
+    Wk = new QVector<int> [M];
+    V = new QVector<double> [M];
+    W = new QVector<double> [M];
+    X0 = new QVector<double> [M];
+
+    for( int i = 0; i < size; i++){
+        V0[0].push_back(a[i]);
+        W0[0].push_back(0.);
+        X0[0].push_back(x[i]);
+        Vk[0].push_back(i);
+        Wk[0].push_back(i);
+    }
+
+    msg.sprintf("Array size = %d; Max scale = %d", size, M);
+}
+
 void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
 {
     this->waveletIndex = waveletIndex;
@@ -137,22 +180,22 @@ void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
     case 1: msg.sprintf("Daubechies wavelet %d", waveletPar); break;
     }
 
-    qDebug() << "=============== G0";
-    for( int k = 0; k < parSize ; k++){
-        qDebug() << k << " , " << G0(k);
-    }
-    qDebug() << "=============== G1";
-    for( int k = 2-parSize; k <= 1 ; k++){
-        qDebug() << k << " , " << G1(k);
-    }
-    qDebug() << "=============== H0";
-    for( int k = 1-parSize; k <= 0 ; k++){
-        qDebug() << k << " , " << H0(k);
-    }
-    qDebug() << "=============== H1";
-    for( int k = -1; k <= parSize - 2 ; k++){
-        qDebug() << k << " , " << H1(k);
-    }
+    //qDebug() << "=============== G0";
+    //for( int k = 0; k < parSize ; k++){
+    //    qDebug() << k << " , " << G0(k);
+    //}
+    //qDebug() << "=============== G1";
+    //for( int k = 2-parSize; k <= 1 ; k++){
+    //    qDebug() << k << " , " << G1(k);
+    //}
+    //qDebug() << "=============== H0";
+    //for( int k = 1-parSize; k <= 0 ; k++){
+    //    qDebug() << k << " , " << H0(k);
+    //}
+    //qDebug() << "=============== H1";
+    //for( int k = -1; k <= parSize - 2 ; k++){
+    //    qDebug() << k << " , " << H1(k);
+    //}
 
 }
 

@@ -102,6 +102,13 @@
     <item row="0" column="6" colspan="3">
      <widget class="QCustomPlot" name="plot_Voct" native="true"/>
     </item>
+    <item row="2" column="8">
+     <widget class="QPushButton" name="pushButton_ApplyToAll">
+      <property name="text">
+       <string>Apply to All</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">

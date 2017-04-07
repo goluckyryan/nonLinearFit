@@ -175,8 +175,8 @@ void MainWindow::SetupPlots()
     ui->verticalSlider_zOffset->setValue(0);
 
     colorMap->data()->clear();
-    int nx = file->GetDataSize();
-    int ny = file->GetDataSetSize();
+    int nx = file->GetXDataSize();
+    int ny = file->GetYDataSize();
     if( file->HasBackGround() ) ny = ny -1;
     colorMap->data()->setSize(nx, ny);
     //colorMap->setInterpolate(true);
@@ -218,7 +218,7 @@ void MainWindow::SetupPlots()
     //================= Plot
     timePlot->xAxis->setRange(xMin, xMax);
     timePlot->xAxis2->setVisible(true);
-    timePlot->xAxis2->setRange(0, file->GetDataSize()-1);
+    timePlot->xAxis2->setRange(0, file->GetXDataSize()-1);
     double zRange1 = qMax(fabs(zMax), fabs(zMin));
     timePlot->yAxis->setRange(-zRange1, zRange1);
     //plot->yAxis2->setRange(-zRange1, zRange1);
@@ -234,8 +234,8 @@ void MainWindow::SetupPlots()
     bFieldPlot->yAxis->setLabel(yLabel);
     bFieldPlot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
     bFieldPlot->xAxis2->setRangeReversed(file->IsYRevered());
-    bFieldPlot->xAxis2->setRange(0, file->GetDataSetSize()-1);
-    if( file->HasBackGround() ) bFieldPlot->xAxis2->setRange(1,file->GetDataSetSize()-1);
+    bFieldPlot->xAxis2->setRange(0, file->GetYDataSize()-1);
+    if( file->HasBackGround() ) bFieldPlot->xAxis2->setRange(1,file->GetYDataSize()-1);
 
     allowTimePlot = false;
     if( file->HasBackGround()){
@@ -296,7 +296,7 @@ void MainWindow::PlotBFieldPlot()
     int xEnd = ui->spinBox_x2_B->value();
 
     int nx = xdata.size();
-    int ny = file->GetDataSetSize();
+    int ny = file->GetYDataSize();
 
     if( xStart >= nx || xEnd >= nx) return;
     if( xStart > xEnd ) return;
@@ -633,13 +633,13 @@ void MainWindow::OpenFile(QString fileName, int kind)
     ui->spinBox_MovingAvg->setValue(-1);
     ui->verticalSlider_zOffset->setValue(0);
     ui->spinBox_y->setMinimum(0);
-    ui->spinBox_y->setMaximum(file->GetDataSetSize()-1);
+    ui->spinBox_y->setMaximum(file->GetYDataSize()-1);
     ui->spinBox_x->setMinimum(0);
-    ui->spinBox_x->setMaximum(file->GetDataSize()-1);
+    ui->spinBox_x->setMaximum(file->GetXDataSize()-1);
     ui->spinBox_x2->setMinimum(0);
-    ui->spinBox_x2->setMaximum(file->GetDataSize()-1);
+    ui->spinBox_x2->setMaximum(file->GetXDataSize()-1);
     ui->spinBox_BGIndex->setMinimum(0);
-    ui->spinBox_BGIndex->setMaximum(file->GetDataSetSize()-1);
+    ui->spinBox_BGIndex->setMaximum(file->GetYDataSize()-1);
 
     int xIndex = ana->FindXIndex(TIME1);
     ui->spinBox_x->setValue(xIndex);
@@ -654,9 +654,9 @@ void MainWindow::OpenFile(QString fileName, int kind)
     bPlot->SetData(file);
 
     ui->spinBox_x1_B->setMinimum(0);
-    ui->spinBox_x1_B->setMaximum(file->GetDataSize()-1);
+    ui->spinBox_x1_B->setMaximum(file->GetXDataSize()-1);
     ui->spinBox_x2_B->setMinimum(0);
-    ui->spinBox_x2_B->setMaximum(file->GetDataSize()-1);
+    ui->spinBox_x2_B->setMaximum(file->GetXDataSize()-1);
 
     allowBFieldPlot = false;
     ui->spinBox_x1_B->setValue(bPlot->FindstartIndex(-1));
@@ -962,7 +962,7 @@ void MainWindow::on_pushButton_FitAll_clicked()
 {
     if( file == NULL) return;
     statusBar()->showMessage("Fitting all data.");
-    int n = file->GetDataSetSize();
+    int n = file->GetYDataSize();
     QProgressDialog progress("Fitting...", "Abort", 0, n-1, this);
     progress.setWindowModality(Qt::WindowModal);
     QString str;
@@ -1188,8 +1188,8 @@ void MainWindow::PlotContourPlot(double offset)
     int yIndexStart = 0;
     if( file->HasBackGround()) yIndexStart = 1;
 
-    int nx = file->GetDataSize();
-    int ny = file->GetDataSetSize();
+    int nx = file->GetXDataSize();
+    int ny = file->GetYDataSize();
 
     for(int xIndex = 0; xIndex < nx; xIndex++){
         for(int yIndex = yIndexStart; yIndex < ny; yIndex++){

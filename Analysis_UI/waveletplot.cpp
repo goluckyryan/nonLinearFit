@@ -77,6 +77,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     //plot_Voct->yAxis->setTickStep(1.0);
 
     enableVerticalBar = 0;
+    enableControl = true;
 
     x1 = -20;
     x2 = 50;
@@ -144,7 +145,7 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     //wavelet decomposition
     int waveletID  = ui->comboBox_Wavelet->currentIndex();
     int waveletPar = 0;
-    if( waveletID == 1 ) waveletPar = ui->spinBox_WaveletIndex->value();
+    if( waveletID != 0 ) waveletPar = ui->spinBox_WaveletIndex->value();
     wave = new WaveletAnalysis(x, y); // 0 for Haar
     SendMsg(wave->GetMsg());
     wave->setWaveletPar(waveletID, waveletPar);
@@ -335,6 +336,7 @@ void WaveletPlot::PlotWVoctave(int octave)
 
 void WaveletPlot::on_verticalSlider_Threshold_valueChanged(int value)
 {
+    if( !enableControl ) return;
     if( enableVerticalBar){
         wave->RestoreData();
 
@@ -375,6 +377,7 @@ void WaveletPlot::on_verticalSlider_Threshold_valueChanged(int value)
 
 void WaveletPlot::on_verticalSlider_Octave_valueChanged(int value)
 {
+    if( !enableControl ) return;
     ui->lineEdit_Octave->setText(QString::number(value));
     if( value == 0) {
         ui->pushButton_Clean->setEnabled(false);
@@ -401,6 +404,46 @@ void WaveletPlot::on_pushButton_ApplyThreshold_clicked()
         msg.sprintf("Apply Hard Thresholding, level<%4s && scale>%2s", ui->lineEdit_Threshold->text().toStdString().c_str(), ui->lineEdit_Octave->text().toStdString().c_str());
         SendMsg(msg);
     }
+}
+
+void WaveletPlot::on_pushButton_ApplyToAll_clicked()
+{
+    int waveletID = ui->comboBox_Wavelet->currentIndex();
+    int waveletPar = 0;
+    if( waveletID != 0 ) waveletPar = ui->spinBox_WaveletIndex->value();
+
+    int octave = ui->verticalSlider_Octave->value();
+    double threshold = ui->verticalSlider_Threshold->value();
+
+    int yIndexStart = 0;
+    if( file->HasBackGround() ) yIndexStart = 1;
+
+    int thresholdType = ui->comboBox_Thresholding->currentIndex();
+
+    enableControl = false;
+    for(int yIndex = yIndexStart ; yIndex < file->GetYDataSize(); yIndex++){
+    //for(int yIndex = yIndexStart ; yIndex < 10; yIndex++){
+        wave->ClearData();
+        wave->SetData(file->GetDataSetX(), file->GetDataSetZ(yIndex));
+        wave->setWaveletPar(waveletID, waveletPar);
+        wave->Decompose();
+
+        if( thresholdType == 1){
+            wave->HardThresholding(threshold/100., octave, 1);
+        }else if( thresholdType == 2){
+            wave->SoftThresholding(threshold/100., octave);
+        }else{
+            wave->HardThresholding(threshold/100., octave);
+        }
+
+        wave->Reconstruct();
+        file->ChangeZData(yIndex, wave->GetVoctave(0));
+
+        qDebug() << "WT done for yIndex = " << yIndex;
+    }
+    Replot();
+    enableControl = true;
+    //this->hide();
 }
 
 void WaveletPlot::ShowMousePosition(QMouseEvent *mouse)
@@ -483,6 +526,7 @@ void WaveletPlot::on_lineEdit_Threshold_editingFinished()
 
 void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
 {
+    if( !enableControl ) return;
     if( wave == NULL) return;
     qDebug() << "combox wavelet : " << index;
 
@@ -521,6 +565,7 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
 
 void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
 {
+    if( !enableControl ) return;
     if( enableSpinBoxWaveletIndex == false ) return;
     if( wave == NULL ) return;
     int waveletID = ui->comboBox_Wavelet->currentIndex();
@@ -543,6 +588,7 @@ void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
 
 void WaveletPlot::on_comboBox_Thresholding_currentIndexChanged(int index)
 {
+    if( !enableControl ) return;
     int value = ui->verticalSlider_Threshold->value();
     on_verticalSlider_Threshold_valueChanged(value);
 }

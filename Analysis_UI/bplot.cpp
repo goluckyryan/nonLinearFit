@@ -47,7 +47,7 @@ void BPlot::SetData(FileIO *file)
 
     this->file = file;
 
-    int n = file->GetDataSize();
+    int n = file->GetXDataSize();
 
     ui->spinBox_Start->setMinimum(0);
     ui->spinBox_End->setMinimum(0);
@@ -68,7 +68,7 @@ void BPlot::SetData(FileIO *file)
 
     plot->xAxis2->setRangeReversed(file->IsYRevered());
 
-    n = file->GetDataSetSize();
+    n = file->GetYDataSize();
     plot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
     plot->xAxis2->setRange(0,n-1);
     if( file->HasBackGround() ) plot->xAxis2->setRange(1,n-1);
@@ -97,7 +97,7 @@ void BPlot::Plot()
     int xEnd = ui->spinBox_End->value();
 
     int nx = xdata.size();
-    int ny = file->GetDataSetSize();
+    int ny = file->GetYDataSize();
 
     //qDebug() << xStart << ", " << xEnd << ", " << nx ;
 

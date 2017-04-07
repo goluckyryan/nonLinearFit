@@ -27,6 +27,7 @@ public:
 signals:
     void SendMsg(QString msg);
     void Replot();
+    //void ApplyWTtoALL();
 
 private slots:
 
@@ -49,6 +50,8 @@ private slots:
     void on_lineEdit_x1_editingFinished();
     void on_lineEdit_x2_editingFinished();
 
+    void on_pushButton_ApplyToAll_clicked();
+
 private:
     Ui::WaveletPlot *ui;
 
@@ -69,6 +72,7 @@ private:
 
     bool enableVerticalBar;
     bool enableSpinBoxWaveletIndex;
+    bool enableControl;
 
     double x1, x2;
 

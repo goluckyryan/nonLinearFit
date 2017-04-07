@@ -42,8 +42,8 @@ public slots:
     QString GetFilePath(){return filePath;}
     QString GetSimFilePath(){return csvFilePath;}
     bool IsColWise(){return colwise;}
-    int GetDataSize(){ return xData.size();}
-    int GetDataSetSize() {return yData_CV.size();}
+    int GetXDataSize(){ return xData.size();}
+    int GetYDataSize() {return yData_CV.size();}
     QVector<double> GetDataSetZ(int yIndex){return zData[yIndex];}
     QVector<double> * GetData(){return zData;}
     QVector<double> * GetFFTDataA(){return fZDataA;}
