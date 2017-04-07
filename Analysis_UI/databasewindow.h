@@ -8,7 +8,7 @@
 #include <QImage>
 #include "constant.h"
 #include "dateformatdelegate.h"
-#include "openfiledelegate.h"
+//#include "openfiledelegate.h"
 
 namespace Ui {
 class DataBaseWindow;

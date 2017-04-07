@@ -15,7 +15,6 @@ QWidget *OpenFileDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     filters << "Data File (*txt *dat *csv *.*)";
     editor->setNameFilters(filters);
 
-
     return editor;
 }
 
@@ -27,7 +26,7 @@ void OpenFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
 
     if( flag == 0){
         int length = filePath.length();
-        int lengthDATA = DATA_PATH.length();
+        int lengthDATA = SAMPLE_PIC_PATH.length();// DATA_PATH.length();
         //qDebug() << length << "," << filePath ;
         //qDebug() << lengthDATA << "," << DATA_PATH ;
         //qDebug() << filePath.right(length-lengthDATA);

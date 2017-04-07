@@ -144,26 +144,30 @@ void DataBaseWindow::SetupSampleTableView()
 {
     sample->clear();
     sample->setTable("Sample");
-    sample->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    //sample->setEditStrategy(QSqlTableModel::OnManualSubmit);
     sample->select();
 
-    //set relation, so that can choose directly on the table
     int chemicalIdx = sample->fieldIndex("Chemical");
-    sample->setRelation(chemicalIdx, QSqlRelation("Chemical", "NAME", "NAME"));
     int solventIdx = sample->fieldIndex("Solvent");
-    sample->setRelation(solventIdx, QSqlRelation("Solvent", "NAME", "NAME"));
     int dateIdx = sample->fieldIndex("Date");
-    int picPathIdx = sample->fieldIndex("PicPath");
-    int specPathIdx = sample->fieldIndex("SpectrumPath");
+    //int specPathIdx = sample->fieldIndex("SpectrumPath");
+    //int picPathIdx = sample->fieldIndex("PicPath");
+
+    //set relation, so that can choose directly on the table
+    //sample->setRelation(chemicalIdx, QSqlRelation("Chemical", "NAME", "NAME"));
+    //sample->setRelation(solventIdx, QSqlRelation("Solvent", "NAME", "NAME"));
 
     ui->sampleView->setModel(sample);
     ui->sampleView->resizeColumnsToContents();
-    ui->sampleView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
-    ui->sampleView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate() );
-    ui->sampleView->setItemDelegateForColumn(picPathIdx, new OpenFileDelegate() );
-    ui->sampleView->setItemDelegateForColumn(specPathIdx, new OpenFileDelegate() );
-    //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
+    ui->sampleView->setEditTriggers( QAbstractItemView::NoEditTriggers );
+    ui->sampleView->setSelectionBehavior( QAbstractItemView::SelectRows );
     ui->sampleView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    //ui->sampleView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
+    //ui->sampleView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate() );
+    //ui->sampleView->setItemDelegateForColumn(picPathIdx, new OpenFileDelegate() );
+    //ui->sampleView->setItemDelegateForColumn(specPathIdx, new OpenFileDelegate() );
+    //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
 
     //for some unknown reasons, the column header names are needed to rename;
     sample->setHeaderData(chemicalIdx, Qt::Horizontal, "Chemical");
@@ -181,11 +185,13 @@ void DataBaseWindow::SetupDataTableView()
 {
     data->clear();
     data->setTable("Data");
-    data->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    //data->setJoinMode( QSqlRelationalTableModel::LeftJoin );
+    //data->setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-    data->setHeaderData(3, Qt::Horizontal, "Laser");
-    //data->setHeaderData(3, Qt::Horizontal, "Laser\nWaveLenght [nm]");
+    int sampleIdx = data->fieldIndex("Sample");
+    int laserIdx = data->fieldIndex("Laser");
+    int dateIdx = data->fieldIndex("Date");
+
+    data->setHeaderData(laserIdx, Qt::Horizontal, "Laser");
     data->setHeaderData(4, Qt::Horizontal, "Repeat.\nRate");
     data->setHeaderData(5, Qt::Horizontal, "Average");
     data->setHeaderData(6, Qt::Horizontal, "Point");
@@ -196,8 +202,8 @@ void DataBaseWindow::SetupDataTableView()
 
     ui->dataView->setModel(data);
     ui->dataView->resizeColumnsToContents();
-
-    int sampleIdx = data->fieldIndex("Sample");
+    ui->dataView->setEditTriggers( QAbstractItemView::NoEditTriggers );
+    ui->dataView->setSelectionBehavior( QAbstractItemView::SelectRows );
     if(ui->checkBox_showChemical->isChecked() == false){
         data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "NAME"));
         data->setHeaderData(1, Qt::Horizontal, "Sample");
@@ -205,22 +211,20 @@ void DataBaseWindow::SetupDataTableView()
         data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "Chemical"));
         data->setHeaderData(1, Qt::Horizontal, "Chemcial");
     }
-    int laserIdx = data->fieldIndex("Laser");
-    data->setRelation(laserIdx, QSqlRelation("Laser", "Name", "Name"));
 
-    int dateIdx = data->fieldIndex("Date");
-    ui->dataView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
-    ui->dataView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate());
-    ui->dataView->setItemDelegateForColumn(dataPathCol, new OpenFileDelegate());
+    //data->setRelation(laserIdx, QSqlRelation("Laser", "Name", "Name"));
+    //ui->dataView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
+    //ui->dataView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate());
+    //ui->dataView->setItemDelegateForColumn(dataPathCol, new OpenFileDelegate());
 
     ui->dataView->setColumnWidth(sampleIdx, 100);
     ui->dataView->setColumnWidth(dateIdx, 100);
     ui->dataView->setColumnWidth(laserIdx, 60);
 
     if( ui->checkBox_sortData->isChecked()) {
-        ui->dataView->sortByColumn(2, Qt::DescendingOrder);
+        ui->dataView->sortByColumn(dateIdx, Qt::DescendingOrder);
     }else{
-        ui->dataView->sortByColumn(2, Qt::AscendingOrder);
+        ui->dataView->sortByColumn(dateIdx, Qt::AscendingOrder);
     }
 
 }
@@ -344,7 +348,7 @@ void DataBaseWindow::showSamplePicture(const QModelIndex &index)
 
     // set the sample picture
     int pathIdx = sample->fieldIndex("PicPath");
-    QString samplePicPath = DATA_PATH + sample->index(index.row(), pathIdx).data().toString();
+    QString samplePicPath = SAMPLE_PIC_PATH + sample->index(index.row(), pathIdx).data().toString();
     if( !QFile::exists(samplePicPath) || samplePicPath.right(1) == "/"){
         ui->label_SamplePic->setText("no image found.\nPlease check the file location.");
     }else{
@@ -355,7 +359,7 @@ void DataBaseWindow::showSamplePicture(const QModelIndex &index)
 
     // set the sample spectrum
     pathIdx = sample->fieldIndex("SpectrumPath");
-    QString spectrumPicPath = DATA_PATH + sample->index(index.row(), pathIdx).data().toString();
+    QString spectrumPicPath = SAMPLE_PIC_PATH + sample->index(index.row(), pathIdx).data().toString();
     if( !QFile::exists(spectrumPicPath) || spectrumPicPath.right(1) == "/"){
         ui->label_SampleSpectrum->setText("no image found.\nPlease check the file location.");
     }else{
