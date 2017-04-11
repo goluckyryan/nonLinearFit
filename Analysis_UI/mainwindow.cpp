@@ -730,7 +730,8 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1)
     if( !allowTimePlot ) return;
     statusBar()->showMessage("Changed y-Index.");
 
-    //ui->spinBox_y->setValue(arg1);
+    // this is for calling
+    ui->spinBox_y->setValue(arg1);
 
     QString unitText = " V";
     double yValue = 0;
