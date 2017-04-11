@@ -34,11 +34,13 @@ public:
 
 signals:
     void SendMsg(QString str);
+    void ChangeYIndex(int yIndex);
 
 public slots:
     void on_pushButton_SavePlot_clicked();
 
 private slots:
+
     void on_checkBox_a_clicked(bool checked);
     void on_checkBox_Ta_clicked(bool checked);
     void on_checkBox_b_clicked(bool checked);
@@ -51,6 +53,7 @@ private slots:
     void on_pushButton_ResetScale_clicked();
 
     void ShowPlotValue(QMouseEvent * mouse);
+    void MouseClick(QMouseEvent * mouse);
 
     void CheckPlotComb();
 

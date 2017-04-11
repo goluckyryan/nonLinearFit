@@ -135,6 +135,7 @@ void FitResult::SetDataSize(FileIO *file)
 
     plot->disconnect();
     connect(plot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowPlotValue(QMouseEvent*)));
+    connect(plot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(MouseClick(QMouseEvent*)));
 }
 
 void FitResult::SetAvalibleData(int n)
@@ -495,6 +496,14 @@ void FitResult::ShowPlotValue(QMouseEvent *mouse)
     ui->lineEdit_Msg->setText(msg);
 }
 
+void FitResult::MouseClick(QMouseEvent *mouse)
+{
+    QPoint pt = mouse->pos();
+    double x = plot->xAxis->pixelToCoord(pt.rx());
+    int yIndex = file->GetYIndex_CV(x);
+    ChangeYIndex( yIndex);
+}
+
 void FitResult::CheckPlotComb()
 {
     plotComb = 0;
@@ -570,3 +579,4 @@ void FitResult::on_pushButton_SavePlot_clicked()
         SendMsg("Save Failed.");
     }
 }
+

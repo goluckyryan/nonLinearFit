@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     fitResultPlot = new FitResult(this);
     connect(fitResultPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
+    connect(fitResultPlot, SIGNAL(ChangeYIndex(int)), this, SLOT(on_spinBox_y_valueChanged(int)));
 
     bPlot = new BPlot(this);
     connect(bPlot, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
