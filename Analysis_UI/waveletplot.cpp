@@ -401,7 +401,10 @@ void WaveletPlot::on_pushButton_ApplyThreshold_clicked()
 
     if( changed ){
         QString msg;
-        msg.sprintf("Apply Hard Thresholding, level<%4s && scale>%2s", ui->lineEdit_Threshold->text().toStdString().c_str(), ui->lineEdit_Octave->text().toStdString().c_str());
+        msg.sprintf("Apply Hard Thresholding, level<%4s && scale>=%2s, Method: %s",
+                    ui->lineEdit_Threshold->text().toStdString().c_str(),
+                    ui->lineEdit_Octave->text().toStdString().c_str(),
+                    ui->comboBox_Thresholding->currentText().toStdString().c_str());
         SendMsg(msg);
     }
 }
@@ -421,8 +424,31 @@ void WaveletPlot::on_pushButton_ApplyToAll_clicked()
     int thresholdType = ui->comboBox_Thresholding->currentIndex();
 
     enableControl = false;
+    QString str;
+    str.sprintf("Applying WT to all Data (%s-%d), octave >= %d, threshold < %4.2f, method: %s",
+                ui->comboBox_Wavelet->currentText().toStdString().c_str(),
+                waveletPar, octave, threshold,
+                ui->comboBox_Thresholding->currentText().toStdString().c_str() );
+    SendMsg(str);
+
+    int n = file->GetYDataSize();
+    QProgressDialog progress("", "Abort", yIndexStart, n-1);
+    str.sprintf("WT to all Data ...");
+    progress.setWindowTitle(str);
+    progress.setWindowModality(Qt::WindowModal);
+
     for(int yIndex = yIndexStart ; yIndex < file->GetYDataSize(); yIndex++){
     //for(int yIndex = yIndexStart ; yIndex < 10; yIndex++){
+        str.sprintf("  Applying WT to all Data (%s-%d),       %d/%d.    ",
+                    ui->comboBox_Wavelet->currentText().toStdString().c_str(),
+                    waveletPar, yIndex, n-1);
+        progress.setLabelText(str);
+        progress.setValue(yIndex);
+        if(progress.wasCanceled()) {
+            SendMsg("=========== Aborted.");
+            break;
+        }
+
         wave->ClearData();
         wave->SetData(file->GetDataSetX(), file->GetDataSetZ(yIndex));
         wave->setWaveletPar(waveletID, waveletPar);
@@ -438,12 +464,13 @@ void WaveletPlot::on_pushButton_ApplyToAll_clicked()
 
         wave->Reconstruct();
         file->ChangeZData(yIndex, wave->GetVoctave(0));
-
-        qDebug() << "WT done for yIndex = " << yIndex;
+        //qDebug() << "WT done for yIndex = " << yIndex;
     }
+    SendMsg("=========== Finished.");
+
     Replot();
     enableControl = true;
-    //this->hide();
+    this->hide();
 }
 
 void WaveletPlot::ShowMousePosition(QMouseEvent *mouse)

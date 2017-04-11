@@ -178,6 +178,8 @@ void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
     switch (waveletIndex) {
     case 0: msg.sprintf("Haar wavelet"); break;
     case 1: msg.sprintf("Daubechies wavelet %d", waveletPar); break;
+    case 2: msg.sprintf("Symlet wavelet %d", waveletPar); break;
+    case 3: msg.sprintf("Coiflet wavelet %d", waveletPar); break;
     }
 
     //qDebug() << "=============== G0";
