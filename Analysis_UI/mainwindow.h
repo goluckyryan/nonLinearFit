@@ -122,6 +122,8 @@ private slots:
 
     int loadConfigurationFile();
 
+    void on_actionStatistics_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;

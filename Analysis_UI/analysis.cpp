@@ -70,11 +70,15 @@ void Analysis::SetData(const QVector<double> x, const QVector<double> y)
     }
 
     int x1 = FindXIndex(TIME2);
-    MeanAndvariance(0, x1);
+    QVector<double> mv = MeanAndvariance(0, x1);
+    this->mean = mv[0];
+    this->var  = mv[1];
 }
 
-void Analysis::MeanAndvariance(int index_1, int index_2)
+QVector<double> Analysis::MeanAndvariance(int index_1, int index_2)
 {
+    QVector<double> output = {0,0};
+
     if( this->n == 0 ||
         index_1 < 0 ||
         index_2 < 0 ||
@@ -83,24 +87,29 @@ void Analysis::MeanAndvariance(int index_1, int index_2)
         index_2 > this->n){
         Msg.sprintf("index Error. n = %d, range = (%d, %d)", n, index_1, index_2);
         emit SendMsg(Msg);
-        return;
+        return output;
     }
 
+    output.clear();
+
     int size = index_2 - index_1 + 1;
-    mean = 0;
+    double mean = 0;
     for( int i = index_1 ; i <= index_2 ; i++){
         mean += (this->zdata)[i];
     }
     mean = mean / size;
+    output.push_back(mean);
 
-    var = 0;
+    double var = 0;
     for( int i = index_1 ; i <= index_2 ; i++){
         var += pow((this->zdata)[i]-mean,2);
     }
     var = var / (size-1);
+    output.push_back(var);
 
     //Msg.sprintf("From index %d to %d (%d data)\nMean = %f, Variance = %f, sigma = %f", index_1, index_2, size, mean, var, sqrt(var));
     //SendMsg(Msg);
+    return output;
 
 }
 

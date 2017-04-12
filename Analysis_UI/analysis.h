@@ -29,7 +29,7 @@ public:
     void Setlambda(double l){this->lambda = l;}
     void SetTORR(double x){ torr = x;}
     void SetMaxInteration(int i){this->MaxIter = i;}
-    void MeanAndvariance(int index_1, int index_2);
+    QVector<double> MeanAndvariance(int index_1, int index_2);
 
     int Regression(QVector<double> par0);
     int LMA(QVector<double> par0, double lambda0 = 0.01);

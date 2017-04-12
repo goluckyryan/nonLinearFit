@@ -709,6 +709,7 @@
    <addaction name="actionB_Plot"/>
    <addaction name="actionFFTW_Plot"/>
    <addaction name="actionDWT_Plot"/>
+   <addaction name="actionStatistics"/>
    <addaction name="actionHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -789,6 +790,11 @@
   <action name="actionHelp">
    <property name="text">
     <string>Help</string>
+   </property>
+  </action>
+  <action name="actionStatistics">
+   <property name="text">
+    <string>Statistics</string>
    </property>
   </action>
  </widget>

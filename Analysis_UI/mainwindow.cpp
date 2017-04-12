@@ -549,13 +549,16 @@ void MainWindow::SetYIndexByMouseClickInBFieldPlot(QMouseEvent *mouse)
 
 void MainWindow::SetXIndexByMouseClick(QMouseEvent *mouse)
 {
-    QPoint pt = mouse->pos();
-    double x = timePlot->xAxis->pixelToCoord(pt.rx());
-    int xIndex = file->GetXIndex(x);
 
     if( controlPressed){
+        QPoint pt = mouse->pos();
+        double x = timePlot->xAxis->pixelToCoord(pt.rx());
+        int xIndex = file->GetXIndex(x);
         if( mouse->button() == Qt::LeftButton){
             ui->spinBox_x->setValue(xIndex);
+            if( xIndex > ui->spinBox_x2->value()){
+                ui->spinBox_x2->setValue( ui->spinBox_x2->maximum());
+            }
         }else if(mouse->button() == Qt::RightButton){
             if( xIndex < ui->spinBox_x->value()){
                 xIndex = ui->spinBox_x2->maximum();
@@ -642,10 +645,6 @@ void MainWindow::OpenFile(QString fileName, int kind)
     ui->spinBox_BGIndex->setMinimum(0);
     ui->spinBox_BGIndex->setMaximum(file->GetYDataSize()-1);
 
-    int xIndex = ana->FindXIndex(TIME1);
-    ui->spinBox_x->setValue(xIndex);
-    ui->spinBox_x2->setValue(ui->spinBox_x2->maximum());
-
     //========= Reset Data in fitResultDialog
     fitResultPlot->ClearData();
     fitResultPlot->SetDataSize(file);
@@ -678,6 +677,10 @@ void MainWindow::OpenFile(QString fileName, int kind)
     }else{
         on_checkBox_BGsub_clicked(false);
     }
+
+    int xIndex = ana->FindXIndex(TIME1);
+    ui->spinBox_x->setValue(xIndex);
+    ui->spinBox_x2->setValue(ui->spinBox_x2->maximum());
 
 }
 
@@ -773,8 +776,8 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1)
         on_pushButton_resetPars_clicked();
         on_pushButton_Fit_clicked();
     }else{
-        int xIndex = ana->FindXIndex( TIME1 );
-        ui->spinBox_x->setValue(xIndex);
+        //int xIndex = ana->FindXIndex( TIME1 );
+        //ui->spinBox_x->setValue(xIndex);
         PlotFitFuncAndXLines();
     }
 }
@@ -923,20 +926,29 @@ void MainWindow::on_pushButton_resetPars_clicked()
     double c = ana->GetSampleMean();
     ui->lineEdit_c->setText(QString::number(c));
 
-    double a = ana->GetDataYMax();
-    double b = ana->GetDataYMin();
-    a = a-c;
-    b = b-c;
-    if( fabs(a) < fabs(b)) {
-        double tmp = a;
-        a = b;
-        b = tmp;
+    double f1 = ana->GetDataYMax();
+    double fm = ana->GetDataYMin();
+    f1 = f1-c;
+    fm = fm-c;
+    if( fabs(f1) < fabs(fm)) {
+        double tmp = f1;
+        f1 = fm;
+        fm = tmp;
     }
 
-    double Ta = ana->FindXFromYAfterTZero(0);
+    double Ta = ana->FindXFromYAfterTZero(0)*2./3.;
+    QString x1str = ui->lineEdit_x->text();
+    x1str.chop(2);
+    double x1 = x1str.toDouble();
+    double a = f1 * exp(x1 / Ta);
+
+    qDebug() << "f1 = " << f1;
+    qDebug() << "Ta = " << Ta;
+    qDebug() << "fm = " << fm;
+    qDebug() << "x1 = " << x1;
 
     ui->lineEdit_a->setText(QString::number(a));
-    ui->lineEdit_b->setText(QString::number(b));
+    ui->lineEdit_b->setText(QString::number(fm*2));
     ui->lineEdit_Ta->setText(QString::number(Ta));
     ui->lineEdit_Tb->setText("80");
 
@@ -1289,6 +1301,8 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->actionSave_Contour_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_BFieldPlot_as_PDF->setEnabled(IO);
     ui->actionSave_Fit_Result_Plot_as_PDF->setEnabled(IO);
+
+    ui->actionStatistics->setEnabled(IO);
 
     ui->spinBox_x1_B->setEnabled(IO);
     ui->spinBox_x2_B->setEnabled(IO);
@@ -1809,4 +1823,46 @@ int MainWindow::loadConfigurationFile()
     //qDebug() << DB_PATH;
 
     return 0;
+}
+
+void MainWindow::on_actionStatistics_triggered()
+{
+    double sBGmean = ana->GetSampleMean();
+    double sBGvar = ana->GetSampleVariance();
+
+    int xStart = ui->spinBox_x->value();
+    int xEnd = ui->spinBox_x2->value();
+
+    QVector<double> mv = ana->MeanAndvariance(xStart, xEnd);
+
+    QVector<double> x = ana->GetData_x();
+    QVector<double> y = ana->GetData_y();
+    double integrate = 0;
+    for( int i = xStart ; i <= xEnd ; i++){
+        integrate += y[i];
+    }
+    double dx = x[xStart+1] - x[xStart];
+    integrate = integrate * dx;
+
+    QMessageBox msgBox;
+    QString msg;
+    msg.sprintf("Statistics of y-Index : %d", ui->spinBox_y->value());
+    msgBox.setWindowTitle(msg);
+    msg.sprintf("===  BG    (%4.2f, %4.2f) us\n"
+                "BG mean   : %7.3f \n"
+                "BG s.d.   : %7.3f \n"
+                "=== Sample (%4.2f, %4.2f) us\n"
+                "mean      : %7.3f \n"
+                "s.d.      : %7.3f \n"
+                "Integrate : %7.3f",
+                x[0], TIME2,
+                sBGmean, sqrt(sBGvar),
+                x[xStart], x[xEnd],
+                mv[0], sqrt(mv[1]), integrate);
+
+    QFont font("Courier New", 14);
+    msgBox.setFont(font);
+    msgBox.setText(msg);
+    msgBox.exec();
+
 }
