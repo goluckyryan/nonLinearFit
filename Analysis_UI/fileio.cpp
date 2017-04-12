@@ -417,12 +417,12 @@ void FileIO::OpenTxtData_row(){
     //============= get number of rows and cols;
     ySize = -1;
     while(stream.readLineInto(&line)){
-        if( line.left(4) == "####" ) break;
-
-        ySize ++;
-        if( ySize == 0){ // get yDatax
-            QStringList lineList = line.split(",");
-            xSize = lineList.size()-1;
+        if( line.left(1) != "#" ){
+            ySize ++;
+            if( ySize == 0){ // get yDatax
+                QStringList lineList = line.split(",");
+                xSize = lineList.size()-1;
+            }
         }
     }
 
@@ -437,10 +437,10 @@ void FileIO::OpenTxtData_row(){
     fZDataA = new QVector<double> [ySize];
     fZDataP = new QVector<double> [ySize];
 
-    myfile->seek(0);
+    myfile->seek(0); // this only work when end of file, it should not be, but I don't know why
     int rows = 0;
     int yIndex = 0;
-    while(stream.readLineInto(&line) && rows <= ySize ){
+    while(stream.readLineInto(&line) && rows <= ySize){
         rows ++;
         QStringList lineList = line.split(",");
 
