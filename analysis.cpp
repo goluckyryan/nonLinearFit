@@ -12,6 +12,10 @@ void Shift(int n,int * data){
 	}
 	data[0] = temp;
 }
+
+
+
+
  
 int main(int argc, char *argv[]){ 
 	
