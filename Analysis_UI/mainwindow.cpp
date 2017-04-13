@@ -1844,21 +1844,28 @@ void MainWindow::on_actionStatistics_triggered()
     double dx = x[xStart+1] - x[xStart];
     integrate = integrate * dx;
 
+    double yMax = ana->GetDataYMax();
+    double yMin = ana->GetDataYMin();
+
     QMessageBox msgBox;
     QString msg;
     msg.sprintf("Statistics of y-Index : %d", ui->spinBox_y->value());
     msgBox.setWindowTitle(msg);
-    msg.sprintf("===  BG    (%4.2f, %4.2f) us\n"
+    msg.sprintf("y-Max     : %7.3f \n"
+                "y-Min     : %7.3f \n"
+                "===  BG    (%6.2f, %6.2f) us\n"
                 "BG mean   : %7.3f \n"
                 "BG s.d.   : %7.3f \n"
-                "=== Sample (%4.2f, %4.2f) us\n"
+                "=== Sample (%6.2f, %6.2f) us\n"
                 "mean      : %7.3f \n"
                 "s.d.      : %7.3f \n"
                 "Integrate : %7.3f",
+                yMax, yMin,
                 x[0], TIME2,
                 sBGmean, sqrt(sBGvar),
                 x[xStart], x[xEnd],
-                mv[0], sqrt(mv[1]), integrate);
+                mv[0], sqrt(mv[1]),
+                integrate);
 
     QFont font("Courier New", 14);
     msgBox.setFont(font);
