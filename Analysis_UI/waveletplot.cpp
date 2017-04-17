@@ -57,6 +57,11 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot->graph(1)->setPen(QPen(Qt::red));
     plot->xAxis->setLabel("time [us]");
     plot->graph(0)->clearData();
+    plot->setInteraction(QCP::iRangeDrag,true);
+    plot->setInteraction(QCP::iRangeZoom,true);
+    plot->axisRect()->setRangeDrag(Qt::Horizontal);
+    plot->axisRect()->setRangeZoom(Qt::Horizontal);
+    connect(plot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(plotXAxisChanged(QCPRange)));
 
     plot_Woct = ui->plot_Woct;
     plot_Woct->addGraph();
@@ -331,6 +336,24 @@ void WaveletPlot::PlotWVoctave(int octave)
     plot_Voct->rescaleAxes();
     plot_Voct->replot();
 
+}
+
+void WaveletPlot::plotXAxisChanged(QCPRange range)
+{
+    if( file == NULL ) return;
+    double xMin = file->GetXMin();
+    double xMax = file->GetXMax();
+
+    //regulate the xAxis
+    if( range.upper > xMax){
+        plot->xAxis->setRangeUpper(xMax);
+        range = plot->xAxis->range();
+    }
+
+    if( range.lower < xMin){
+        plot->xAxis->setRangeLower(xMin);
+        range = plot->xAxis->range();
+    }
 }
 
 

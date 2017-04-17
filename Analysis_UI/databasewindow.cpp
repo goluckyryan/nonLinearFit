@@ -205,7 +205,7 @@ void DataBaseWindow::SetupDataTableView()
     data->setHeaderData(laserIdx, Qt::Horizontal, "Laser");
     data->setHeaderData(repeatIdx, Qt::Horizontal, "Repeat.\nRate[Hz]");
     data->setHeaderData(acummIdx, Qt::Horizontal, "Acumm.");
-    data->setHeaderData(pointIdx, Qt::Horizontal, "Point");
+    data->setHeaderData(pointIdx, Qt::Horizontal, "Data\nPoint");
     data->setHeaderData(tempIdx, Qt::Horizontal, "Temp.\n[K]");
     data->setHeaderData(timeRangeIdx, Qt::Horizontal, "Time\nRange[us]");
 

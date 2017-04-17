@@ -30,7 +30,7 @@ signals:
     //void ApplyWTtoALL();
 
 private slots:
-
+    void plotXAxisChanged(QCPRange range);
     void ShowMousePosition(QMouseEvent* mouse);
     void SetLineByMouseClick(QMouseEvent* mouse);
 
