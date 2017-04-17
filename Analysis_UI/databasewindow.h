@@ -52,6 +52,8 @@ private slots:
     void showSamplePicture(const QModelIndex &index);
     void showDataPicture(const QModelIndex &index);
 
+    void on_pushButton_unSelectSample_clicked();
+
 private:
     Ui::DataBaseWindow *ui;
     QSqlRelationalTableModel *sample;

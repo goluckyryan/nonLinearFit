@@ -155,15 +155,15 @@ void DataBaseWindow::SetupSampleTableView()
     sample->select();
 
     int nameIdx = sample->fieldIndex("NAME");
-    int chemicalIdx = sample->fieldIndex("Chemical");
-    int solventIdx = sample->fieldIndex("Solvent");
+    int chemicalIdx = sample->fieldIndex("ChemicalID");
+    int solventIdx = sample->fieldIndex("SolventID");
     int dateIdx = sample->fieldIndex("Date");
     //int specPathIdx = sample->fieldIndex("SpectrumPath");
     //int picPathIdx = sample->fieldIndex("PicPath");
 
     //set relation, so that can choose directly on the table
-    //sample->setRelation(chemicalIdx, QSqlRelation("Chemical", "NAME", "NAME"));
-    //sample->setRelation(solventIdx, QSqlRelation("Solvent", "NAME", "NAME"));
+    sample->setRelation(chemicalIdx, QSqlRelation("Chemical", "ID", "NAME"));
+    sample->setRelation(solventIdx, QSqlRelation("Solvent", "ID", "NAME"));
 
     ui->sampleView->setModel(sample);
     ui->sampleView->resizeColumnsToContents();
@@ -195,8 +195,8 @@ void DataBaseWindow::SetupDataTableView()
     data->setTable("Data");
     //data->setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-    int sampleIdx = data->fieldIndex("Sample");
-    int laserIdx = data->fieldIndex("Laser");
+    int sampleIdx = data->fieldIndex("SampleID");
+    int laserIdx = data->fieldIndex("LaserID");
     int dateIdx = data->fieldIndex("Date");
     int repeatIdx = data->fieldIndex("repetition");
     int acummIdx = data->fieldIndex("Average");
@@ -217,22 +217,22 @@ void DataBaseWindow::SetupDataTableView()
     ui->dataView->resizeColumnsToContents();
     ui->dataView->setEditTriggers( QAbstractItemView::NoEditTriggers );
     ui->dataView->setSelectionBehavior( QAbstractItemView::SelectRows );
-    if(ui->checkBox_showChemical->isChecked() == false){
-        data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "NAME"));
+    //if(ui->checkBox_showChemical->isChecked() == false){
+        data->setRelation(sampleIdx, QSqlRelation("Sample", "ID", "NAME"));
         data->setHeaderData(sampleIdx, Qt::Horizontal, "Sample");
-    }else{
-        data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "Chemical"));
-        data->setHeaderData(sampleIdx, Qt::Horizontal, "Pol. Agent");
-    }
+    //}else{
+        //data->setRelation(sampleIdx, QSqlRelation("Sample", "ID", "ChemicalID"));
+        //data->setHeaderData(sampleIdx, Qt::Horizontal, "Pol. Agent");
+    //}
 
-    //data->setRelation(laserIdx, QSqlRelation("Laser", "Name", "Name"));
+    data->setRelation(laserIdx, QSqlRelation("Laser", "ID", "Name"));
     //ui->dataView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
     //ui->dataView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate());
     //ui->dataView->setItemDelegateForColumn(dataPathCol, new OpenFileDelegate());
 
-    ui->dataView->setColumnWidth(sampleIdx, 100);
+    ui->dataView->setColumnWidth(sampleIdx, 150);
     ui->dataView->setColumnWidth(dateIdx, 100);
-    ui->dataView->setColumnWidth(laserIdx, 60);
+    ui->dataView->setColumnWidth(laserIdx, 120);
 
     if( ui->checkBox_sortData->isChecked()) {
         ui->dataView->sortByColumn(dateIdx, Qt::DescendingOrder);
@@ -264,6 +264,7 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
     QSqlTableModel chemical;
     chemical.setTable("Chemical");
 
+    QStringList idList = GetTableColEntries("Chemical", chemical.fieldIndex("ID"));
     QStringList nameList = GetTableColEntries("Chemical", chemical.fieldIndex("NAME"));
     QStringList formulaList = GetTableColEntries("Chemical", chemical.fieldIndex("FORMULA"));
     QStringList picNameList = GetTableColEntries("Chemical", chemical.fieldIndex("PicPath"));
@@ -271,8 +272,12 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
 
     chemical.clear();
 
+    int correctID = -1;
+
     for(int i = 0; i < nameList.size(); i ++ ){
         if( nameList[i] == arg1) {
+            QString idStr = idList[i];
+            correctID = idStr.toInt();
             ui->lineEdit_ChemicalFormula->setText(formulaList[i]);
             ui->lineEdit_ChemicalComment->setText(commentList[i]);
             if( !enableChemicalFilter ) break;
@@ -292,8 +297,8 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
 
     if( !enableChemicalFilter ) return;
     //select sample
-    QString filter = "Chemical='" + arg1 + "'";
-    //qDebug() << filter  ;
+    QString filter = "ChemicalID=" + QString::number(correctID) + "";
+    qDebug() << filter  ;
     sample->setFilter(filter);
     ui->label_SamplePic->clear();
     ui->label_SamplePic->setText("Sample Picture.");
@@ -303,11 +308,16 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
 void DataBaseWindow::on_pushButton_selectSample_clicked()
 {
     QModelIndex current = ui->sampleView->selectionModel()->currentIndex(); // the "current" item
-    QString sampleName = sample->index(current.row(), sample->fieldIndex("NAME")).data().toString();
+    QString sampleID = sample->index(current.row(), sample->fieldIndex("ID")).data().toString();
 
-    QString filter = "Sample='" + sampleName + "'";
+    QString filter = "SampleID='" + sampleID + "'";
     qDebug() << filter;
     data->setFilter(filter);
+}
+
+void DataBaseWindow::on_pushButton_unSelectSample_clicked()
+{
+    data->setFilter("");
 }
 
 void DataBaseWindow::on_pushButton_open_clicked()
@@ -340,9 +350,12 @@ void DataBaseWindow::on_checkBox_showChemical_clicked()
 void DataBaseWindow::showSamplePicture(const QModelIndex &index)
 {
     // find the chemical picture
-    QString chemicalName = sample->index(index.row(), sample->fieldIndex("Chemical")).data().toString();
+    QSqlTableModel temp;
+    temp.setTable("Sample");
+    // after QSqlRealtion, the ChemicalID changed to Chemical Name
+    QString chemicalName = sample->index(index.row(), temp.fieldIndex("ChemicalID")).data().toString();
     QSqlQuery query;
-    query.exec("SELECT PicPath From Chemical WHERE Chemical.NAME = '" + chemicalName + "'");
+    query.exec("SELECT PicPath From Chemical WHERE Chemical.Name = '" + chemicalName + "'");
     query.last();
     QString chemicalPicPath = CHEMICAL_PIC_PATH + query.value(0).toString();
     if( !QFile::exists(chemicalPicPath) || chemicalPicPath.right(1) == "/"){
@@ -423,10 +436,10 @@ void DataBaseWindow::showDataPicture(const QModelIndex &index)
     }
 
     //find chemcial picture;
-    query.exec("SELECT Chemical From Sample WHERE Sample.NAME = '" + sampleName + "'");
+    query.exec("SELECT ChemicalID From Sample WHERE Sample.NAME = '" + sampleName + "'");
     query.last();
-    QString chemicalName = query.value(0).toString();
-    query.exec("SELECT PicPath From Chemical WHERE Chemical.NAME = '" + chemicalName + "'");
+    QString chemicalID = query.value(0).toString();
+    query.exec("SELECT PicPath From Chemical WHERE Chemical.ID = '" + chemicalID + "'");
     query.last();
     QString chemicalPicPath = CHEMICAL_PIC_PATH + query.value(0).toString();
     if( !QFile::exists(chemicalPicPath) || chemicalPicPath.right(1) == "/"){
@@ -442,7 +455,7 @@ void DataBaseWindow::showDataPicture(const QModelIndex &index)
     // set the chemical combox
     enableChemicalFilter = false;
     for(int i = 1; i < ui->comboBox_chemical->count(); i++ ){
-        if( ui->comboBox_chemical->itemText(i) == chemicalName ){
+        if( ui->comboBox_chemical->itemText(i) == chemicalID ){
             ui->comboBox_chemical->setCurrentIndex(i);
             break;
         }
