@@ -1822,6 +1822,8 @@ int MainWindow::loadConfigurationFile()
     //qDebug() << LOG_PATH;
     //qDebug() << DB_PATH;
 
+    configFile.close();
+
     return 0;
 }
 
@@ -1871,5 +1873,27 @@ void MainWindow::on_actionStatistics_triggered()
     msgBox.setFont(font);
     msgBox.setText(msg);
     msgBox.exec();
+
+}
+
+void MainWindow::on_actionSave_Message_triggered()
+{
+    QString filePath = QFileDialog::getSaveFileName(this,
+                                                  "Save Message to TXT",
+                                                  DESKTOP_PATH,
+                                                  "TEXT (*.txt)");
+
+    QFile file(filePath);
+    if(!file.open(QIODevice::WriteOnly)){
+        QMessageBox msgBox;
+        msgBox.setText("Fail to open file:\n" + filePath);
+        msgBox.exec();
+        return;
+    }
+
+    QTextStream stream(&file);
+    stream << ui->textEdit->toPlainText();
+
+    file.close();
 
 }

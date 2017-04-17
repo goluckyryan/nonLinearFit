@@ -124,6 +124,8 @@ private slots:
 
     void on_actionStatistics_triggered();
 
+    void on_actionSave_Message_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;

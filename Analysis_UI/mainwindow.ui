@@ -604,6 +604,12 @@
       <property name="verticalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOn</enum>
       </property>
+      <property name="undoRedoEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
     <item row="6" column="2" colspan="4">
@@ -688,6 +694,7 @@
      <string>File</string>
     </property>
     <addaction name="actionSave_data"/>
+    <addaction name="actionSave_Message"/>
     <addaction name="separator"/>
     <addaction name="actionSave_as_Single_X_CSV"/>
     <addaction name="actionSave_as_Double_X_CSV"/>
@@ -795,6 +802,11 @@
   <action name="actionStatistics">
    <property name="text">
     <string>Statistics</string>
+   </property>
+  </action>
+  <action name="actionSave_Message">
+   <property name="text">
+    <string>Save Message</string>
    </property>
   </action>
  </widget>

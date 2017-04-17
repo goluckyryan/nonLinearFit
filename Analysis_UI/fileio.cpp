@@ -55,6 +55,9 @@ void FileIO::Initialize(){
 }
 
 FileIO::~FileIO(){
+    myfile->close();
+    outfile->close();
+    hallParFile->close();
     SendMsg("release mem.");
     delete myfile;
     if( outfile != NULL ) delete outfile;
@@ -596,6 +599,8 @@ void FileIO::SaveFitResult(Analysis *ana)
     SendMsg("fit result saved.");
     SendMsg(text);
     stream << text;
+
+    outfile->close();
 }
 
 void FileIO::SaveCSV(bool doubleX, bool origin)
@@ -674,6 +679,8 @@ void FileIO::SaveCSV(bool doubleX, bool origin)
     SendMsg(msg);
     SendMsg(csvFilePath);
 
+    out.close();
+
 }
 
 void FileIO::SaveTxtData_row()
@@ -718,6 +725,8 @@ void FileIO::SaveTxtData_row()
     msg.sprintf("Saved modified data as :");
     SendMsg(msg);
     SendMsg(fileName);
+
+    out.close();
 }
 
 void FileIO::ManipulateData(int id, int bgIndex, int n)
