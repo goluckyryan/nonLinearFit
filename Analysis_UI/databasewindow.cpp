@@ -217,10 +217,10 @@ void DataBaseWindow::SetupDataTableView()
     ui->dataView->setSelectionBehavior( QAbstractItemView::SelectRows );
     if(ui->checkBox_showChemical->isChecked() == false){
         data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "NAME"));
-        data->setHeaderData(1, Qt::Horizontal, "Sample");
+        data->setHeaderData(sampleIdx, Qt::Horizontal, "Sample");
     }else{
         data->setRelation(sampleIdx, QSqlRelation("Sample", "NAME", "Chemical"));
-        data->setHeaderData(1, Qt::Horizontal, "Chemcial");
+        data->setHeaderData(sampleIdx, Qt::Horizontal, "Pol. Agent");
     }
 
     //data->setRelation(laserIdx, QSqlRelation("Laser", "Name", "Name"));
@@ -386,7 +386,8 @@ void DataBaseWindow::showDataPicture(const QModelIndex &index)
     QSqlQuery query;
 
     // find the sample picture
-    QString sampleName = data->index(index.row(), 1).data().toString();
+    int nameIdx = data->fieldIndex("NAME");
+    QString sampleName = data->index(index.row(), nameIdx).data().toString();
     query.exec("SELECT PicPath From Sample WHERE Sample.NAME = '" + sampleName + "'");
     query.last();
     QString samplePicPath = SAMPLE_PIC_PATH + query.value(0).toString();
