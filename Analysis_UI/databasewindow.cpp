@@ -69,7 +69,8 @@ DataBaseWindow::DataBaseWindow(QWidget *parent) :
     updateChemicalCombox("Chemical");
 
     ui->checkBox_sortData->setChecked(true);
-    ui->dataView->sortByColumn(2, Qt::DescendingOrder);
+    int dateIdx = data->fieldIndex("Date");
+    ui->dataView->sortByColumn(dateIdx, Qt::DescendingOrder);
 
     enableChemicalFilter = true;
 
@@ -153,6 +154,7 @@ void DataBaseWindow::SetupSampleTableView()
     //sample->setEditStrategy(QSqlTableModel::OnManualSubmit);
     sample->select();
 
+    int nameIdx = sample->fieldIndex("NAME");
     int chemicalIdx = sample->fieldIndex("Chemical");
     int solventIdx = sample->fieldIndex("Solvent");
     int dateIdx = sample->fieldIndex("Date");
@@ -179,7 +181,7 @@ void DataBaseWindow::SetupSampleTableView()
     sample->setHeaderData(chemicalIdx, Qt::Horizontal, "Pol. Agent");
     sample->setHeaderData(solventIdx, Qt::Horizontal, "Solvent");
 
-    ui->sampleView->setColumnWidth(1, 100);
+    ui->sampleView->setColumnWidth(nameIdx, 100);
     ui->sampleView->setColumnWidth(chemicalIdx, 100);
     ui->sampleView->setColumnWidth(solventIdx, 100);
     ui->sampleView->setColumnWidth(dateIdx, 100);
@@ -259,14 +261,20 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
         return;
     }
 
-    QStringList nameList = GetTableColEntries("Chemical", sample->fieldIndex("NAME"));
-    //QStringList formulaList = GetTableColEntries("Chemical", sample->fieldIndex("FORMULA"));
-    QStringList formulaList = GetTableColEntries("Chemical", 2); // somehow fieldIndex for FORMULA does not work;
-    QStringList picNameList = GetTableColEntries("Chemical", sample->fieldIndex("PicPath"));
+    QSqlTableModel chemical;
+    chemical.setTable("Chemical");
+
+    QStringList nameList = GetTableColEntries("Chemical", chemical.fieldIndex("NAME"));
+    QStringList formulaList = GetTableColEntries("Chemical", chemical.fieldIndex("FORMULA"));
+    QStringList picNameList = GetTableColEntries("Chemical", chemical.fieldIndex("PicPath"));
+    QStringList commentList = GetTableColEntries("Chemical", chemical.fieldIndex("Comment"));
+
+    chemical.clear();
 
     for(int i = 0; i < nameList.size(); i ++ ){
         if( nameList[i] == arg1) {
             ui->lineEdit_ChemicalFormula->setText(formulaList[i]);
+            ui->lineEdit_ChemicalComment->setText(commentList[i]);
             if( !enableChemicalFilter ) break;
             QString picPath = CHEMICAL_PIC_PATH + picNameList[i];
             if( QFile::exists(picPath)){
@@ -290,7 +298,6 @@ void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1
     ui->label_SamplePic->clear();
     ui->label_SamplePic->setText("Sample Picture.");
 
-    //showSampleSpectrum(ui->sampleView->model()->index(0,1));
 }
 
 void DataBaseWindow::on_pushButton_selectSample_clicked()
