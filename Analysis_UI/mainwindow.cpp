@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
     file(NULL)
 {
     ui->setupUi(this);
+    QDateTime date;
+    ui->textEdit->append("### Date : " + date.currentDateTime().toString("yyyy-MM-dd HH:mm:ss"));
+
     //this->showMaximized();
     int configFileFlag  = loadConfigurationFile();
 
