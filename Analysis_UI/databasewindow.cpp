@@ -176,7 +176,7 @@ void DataBaseWindow::SetupSampleTableView()
     //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
 
     //for some unknown reasons, the column header names are needed to rename;
-    sample->setHeaderData(chemicalIdx, Qt::Horizontal, "Chemical");
+    sample->setHeaderData(chemicalIdx, Qt::Horizontal, "Pol. Agent");
     sample->setHeaderData(solventIdx, Qt::Horizontal, "Solvent");
 
     ui->sampleView->setColumnWidth(1, 100);
