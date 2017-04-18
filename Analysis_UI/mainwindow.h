@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QVector>
 #include <QKeyEvent>
+#include <QCloseEvent>
 #include "matrix.h"
 #include "analysis.h"
 #include "qcustomplot.h"
@@ -39,6 +40,7 @@ public:
     void UpdateLineTextParameters(QVector<double> par, QVector<double> epar);
 
 private slots:
+    void closeEvent(QCloseEvent * event);
     void keyPressEvent(QKeyEvent *key);
     void keyReleaseEvent(QKeyEvent *key);
     void dragEnterEvent(QDragEnterEvent* event);

@@ -1139,6 +1139,12 @@ void MainWindow::UpdateLineTextParameters(QVector<double> par, QVector<double> e
 
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QApplication::closeAllWindows();
+    event->accept();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *key)
 {
     if(key->key() == Qt::Key_Shift ){
