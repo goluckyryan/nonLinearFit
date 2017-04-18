@@ -173,6 +173,18 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>comboBox_chemical</tabstop>
+  <tabstop>sampleView</tabstop>
+  <tabstop>pushButton_selectSample</tabstop>
+  <tabstop>pushButton_unSelectSample</tabstop>
+  <tabstop>checkBox_sortData</tabstop>
+  <tabstop>dataView</tabstop>
+  <tabstop>pushButton_open</tabstop>
+  <tabstop>lineEdit_ChemicalFormula</tabstop>
+  <tabstop>lineEdit_ChemicalComment</tabstop>
+  <tabstop>checkBox_showChemical</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

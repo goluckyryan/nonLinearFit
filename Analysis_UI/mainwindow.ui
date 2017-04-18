@@ -820,8 +820,8 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>lineEdit</tabstop>
-  <tabstop>spinBox_x</tabstop>
+  <tabstop>pushButton_OpenFile</tabstop>
+  <tabstop>pushButton_DataBase</tabstop>
   <tabstop>lineEdit_a</tabstop>
   <tabstop>lineEdit_Ta</tabstop>
   <tabstop>lineEdit_b</tabstop>
@@ -842,6 +842,30 @@
   <tabstop>lineEdit_eTb</tabstop>
   <tabstop>lineEdit_ec</tabstop>
   <tabstop>lineEdit_eP</tabstop>
+  <tabstop>spinBox_x2</tabstop>
+  <tabstop>lineEdit_x2</tabstop>
+  <tabstop>lineEdit_lambda</tabstop>
+  <tabstop>lineEdit_MaxIter</tabstop>
+  <tabstop>lineEdit_TORR</tabstop>
+  <tabstop>spinBox_y</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>pushButton_RestoreData</tabstop>
+  <tabstop>spinBox_BGIndex</tabstop>
+  <tabstop>lineEdit_y</tabstop>
+  <tabstop>checkBox_GunFit</tabstop>
+  <tabstop>checkBox_MeanCorr</tabstop>
+  <tabstop>lineEdit_yName</tabstop>
+  <tabstop>checkBox_AutoFit</tabstop>
+  <tabstop>spinBox_x</tabstop>
+  <tabstop>spinBox_MovingAvg</tabstop>
+  <tabstop>comboBox_yLabelType</tabstop>
+  <tabstop>checkBox_BGsub</tabstop>
+  <tabstop>verticalSlider_zOffset</tabstop>
+  <tabstop>verticalSlider_z</tabstop>
+  <tabstop>spinBox_x1_B</tabstop>
+  <tabstop>lineEdit_x1_B</tabstop>
+  <tabstop>spinBox_x2_B</tabstop>
+  <tabstop>lineEdit_x2_B</tabstop>
  </tabstops>
  <resources/>
  <connections/>

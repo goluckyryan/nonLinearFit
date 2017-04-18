@@ -152,7 +152,6 @@ void DataBaseWindow::SetupSampleTableView()
     sample->clear();
     sample->setTable("Sample");
     //sample->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    sample->select();
 
     int nameIdx = sample->fieldIndex("NAME");
     int chemicalIdx = sample->fieldIndex("ChemicalID");
@@ -164,6 +163,11 @@ void DataBaseWindow::SetupSampleTableView()
     //set relation, so that can choose directly on the table
     sample->setRelation(chemicalIdx, QSqlRelation("Chemical", "ID", "NAME"));
     sample->setRelation(solventIdx, QSqlRelation("Solvent", "ID", "NAME"));
+
+    //for some unknown reasons, the column header names are needed to rename;
+    sample->setHeaderData(chemicalIdx, Qt::Horizontal, "Pol. Agent");
+    sample->setHeaderData(solventIdx, Qt::Horizontal, "Solvent");
+    sample->select();
 
     ui->sampleView->setModel(sample);
     ui->sampleView->resizeColumnsToContents();
@@ -177,11 +181,7 @@ void DataBaseWindow::SetupSampleTableView()
     //ui->sampleView->setItemDelegateForColumn(specPathIdx, new OpenFileDelegate() );
     //ui->sampleView->setColumnHidden(sample->fieldIndex("ID"), true);
 
-    //for some unknown reasons, the column header names are needed to rename;
-    sample->setHeaderData(chemicalIdx, Qt::Horizontal, "Pol. Agent");
-    sample->setHeaderData(solventIdx, Qt::Horizontal, "Solvent");
-
-    ui->sampleView->setColumnWidth(nameIdx, 100);
+    ui->sampleView->setColumnWidth(nameIdx, 150);
     ui->sampleView->setColumnWidth(chemicalIdx, 100);
     ui->sampleView->setColumnWidth(solventIdx, 100);
     ui->sampleView->setColumnWidth(dateIdx, 100);
@@ -205,11 +205,20 @@ void DataBaseWindow::SetupDataTableView()
     int timeRangeIdx = data->fieldIndex("TimeRange");
 
     data->setHeaderData(laserIdx, Qt::Horizontal, "Laser");
-    data->setHeaderData(repeatIdx, Qt::Horizontal, "Repeat.\nRate[Hz]");
+    data->setHeaderData(repeatIdx, Qt::Horizontal, "Trig.\nRate[Hz]");
     data->setHeaderData(acummIdx, Qt::Horizontal, "Acumm.");
     data->setHeaderData(pointIdx, Qt::Horizontal, "Data\nPoint");
     data->setHeaderData(tempIdx, Qt::Horizontal, "Temp.\n[K]");
     data->setHeaderData(timeRangeIdx, Qt::Horizontal, "Time\nRange[us]");
+    data->setHeaderData(sampleIdx, Qt::Horizontal, "Sample");
+
+    data->setRelation(laserIdx, QSqlRelation("Laser", "ID", "Name"));
+    data->setRelation(sampleIdx, QSqlRelation("Sample", "ID", "NAME"));
+    //if(ui->checkBox_showChemical->isChecked() == false){
+    //}else{
+        //data->setRelation(sampleIdx, QSqlRelation("Sample", "ID", "ChemicalID"));
+        //data->setHeaderData(sampleIdx, Qt::Horizontal, "Pol. Agent");
+    //}
 
     data->select();
 
@@ -217,15 +226,7 @@ void DataBaseWindow::SetupDataTableView()
     ui->dataView->resizeColumnsToContents();
     ui->dataView->setEditTriggers( QAbstractItemView::NoEditTriggers );
     ui->dataView->setSelectionBehavior( QAbstractItemView::SelectRows );
-    //if(ui->checkBox_showChemical->isChecked() == false){
-        data->setRelation(sampleIdx, QSqlRelation("Sample", "ID", "NAME"));
-        data->setHeaderData(sampleIdx, Qt::Horizontal, "Sample");
-    //}else{
-        //data->setRelation(sampleIdx, QSqlRelation("Sample", "ID", "ChemicalID"));
-        //data->setHeaderData(sampleIdx, Qt::Horizontal, "Pol. Agent");
-    //}
 
-    data->setRelation(laserIdx, QSqlRelation("Laser", "ID", "Name"));
     //ui->dataView->setItemDelegate(new QSqlRelationalDelegate(ui->sampleView));
     //ui->dataView->setItemDelegateForColumn(dateIdx, new DateFormatDelegate());
     //ui->dataView->setItemDelegateForColumn(dataPathCol, new OpenFileDelegate());
@@ -248,6 +249,7 @@ void DataBaseWindow::updateChemicalCombox(QString tableName)
     ui->comboBox_chemical->clear();
     ui->comboBox_chemical->addItem("All");
     ui->comboBox_chemical->addItems(chemicalList);
+    qDebug() << chemicalList;
 }
 
 void DataBaseWindow::on_comboBox_chemical_currentTextChanged(const QString &arg1)
@@ -454,14 +456,9 @@ void DataBaseWindow::showDataPicture(const QModelIndex &index)
 
     // set the chemical combox
     enableChemicalFilter = false;
-    for(int i = 1; i < ui->comboBox_chemical->count(); i++ ){
-        if( ui->comboBox_chemical->itemText(i) == chemicalID ){
-            ui->comboBox_chemical->setCurrentIndex(i);
-            break;
-        }
-    }
+    //when there is a skipped ID in table "Chemical", error occur;
+    ui->comboBox_chemical->setCurrentIndex(chemicalID.toInt());
     enableChemicalFilter = true;
-
 
 }
 

@@ -425,6 +425,33 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>pushButton_CalFFT</tabstop>
+  <tabstop>checkBox_RemoveConstant</tabstop>
+  <tabstop>lineEdit_XfreqH</tabstop>
+  <tabstop>lineEdit_XfreqL</tabstop>
+  <tabstop>pushButton_ApplyFilter</tabstop>
+  <tabstop>pushButton_FFTWBackward</tabstop>
+  <tabstop>checkBox_MovingAvg</tabstop>
+  <tabstop>spinBox_MovingAvg</tabstop>
+  <tabstop>checkBox_Reverse</tabstop>
+  <tabstop>checkBox_EnableY</tabstop>
+  <tabstop>radioButton_LowPassSharp</tabstop>
+  <tabstop>radioButton_LowPass</tabstop>
+  <tabstop>radioButton_BandPassSharp</tabstop>
+  <tabstop>radioButton_Guassian</tabstop>
+  <tabstop>lineEdit_YfreqH</tabstop>
+  <tabstop>lineEdit_YfreqL</tabstop>
+  <tabstop>checkBox_toAP</tabstop>
+  <tabstop>checkBox_LogY</tabstop>
+  <tabstop>pushButton_ResetPlot</tabstop>
+  <tabstop>verticalSlider_freqH</tabstop>
+  <tabstop>verticalSlider_freqL</tabstop>
+  <tabstop>horizontalSlider_freqH</tabstop>
+  <tabstop>horizontalSlider_freqL</tabstop>
+  <tabstop>lineEdit_freqResol</tabstop>
+  <tabstop>lineEdit_Msg</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

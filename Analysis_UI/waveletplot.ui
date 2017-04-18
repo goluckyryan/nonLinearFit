@@ -131,6 +131,20 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>comboBox_Wavelet</tabstop>
+  <tabstop>spinBox_WaveletIndex</tabstop>
+  <tabstop>comboBox_Thresholding</tabstop>
+  <tabstop>lineEdit_Octave</tabstop>
+  <tabstop>lineEdit_Threshold</tabstop>
+  <tabstop>pushButton_ApplyThreshold</tabstop>
+  <tabstop>lineEdit_x1</tabstop>
+  <tabstop>lineEdit_x2</tabstop>
+  <tabstop>pushButton_Clean</tabstop>
+  <tabstop>verticalSlider_Octave</tabstop>
+  <tabstop>verticalSlider_Threshold</tabstop>
+  <tabstop>pushButton_ApplyToAll</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

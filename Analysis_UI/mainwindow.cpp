@@ -39,7 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
 
-    dbWindow = new DataBaseWindow();
+    dbWindow = new DataBaseWindow(this);
+    dbWindow->setWindowModality(Qt::WindowModal);
     Write2Log(dbWindow->GetMsg());
     if( dbWindow->IsDBOpened() ){
         connect(dbWindow, SIGNAL(SendMsg(QString)), this, SLOT(Write2Log(QString)));
