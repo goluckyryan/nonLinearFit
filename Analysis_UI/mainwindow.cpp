@@ -988,10 +988,14 @@ void MainWindow::on_pushButton_FitAll_clicked()
         yStartIndex = 1;
     }
 
+
+    QVector<QString> badFitdSSR;
+    badFitdSSR.clear();
+
     for( int yIndex = yStartIndex; yIndex < n ; yIndex ++){
     //for( int yIndex = 100; yIndex < 300 ; yIndex ++){
         on_pushButton_resetPars_clicked();
-        on_spinBox_y_valueChanged(yIndex);
+        ui->spinBox_y->setValue(yIndex);
         on_pushButton_Fit_clicked();
         PlotFitFuncAndXLines();
         //Sleep(500);
@@ -999,6 +1003,24 @@ void MainWindow::on_pushButton_FitAll_clicked()
         progress.setLabelText(str);
         progress.setValue(yIndex);
         if(progress.wasCanceled()) break;
+
+        QVector<double> gradSSR = ana->GetSSRgrad();
+        bool redFlag = 0; // reset redFlag
+        for(int i = 0 ; i < gradSSR.size(); i++){
+            redFlag |= std::abs(gradSSR[i]) > 0.02;
+        }
+        if( ana->GetFitFlag() !=0 || redFlag){
+            int size = gradSSR.size();
+            QString msg, tmp;
+            msg.sprintf("%4d | dSSR : [ ", yIndex);
+            for(int i = 0; i < size - 1; i++){
+                tmp.sprintf(" %7.3f,", gradSSR[i]);
+                msg += tmp;
+            }
+            tmp.sprintf(" %7.3f]", gradSSR[size-1]);
+            msg += tmp;
+            badFitdSSR.push_back(msg);
+        }
 
         //double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
 
@@ -1016,6 +1038,12 @@ void MainWindow::on_pushButton_FitAll_clicked()
         //    Write2Log("reduced chi-sq > 2 and p-value(s) > 0.3, not save fitting.");
         //}
     }
+
+    Write2Log("======== Possible Bad Fit y-Index:");
+    for(int i = 0; i < badFitdSSR.size(); i++ ){
+        Write2Log(badFitdSSR[i]);
+    }
+    Write2Log("=================== End of Fit ALL.");
 }
 
 void MainWindow::on_checkBox_b_Tb_clicked(bool checked)
