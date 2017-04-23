@@ -40,6 +40,7 @@ signals:
 public slots:
 
     QString GetFilePath(){return filePath;}
+    QString GetFileDirectory(){return fileDirectory;}
     QString GetSimFilePath(){return csvFilePath;}
     bool IsColWise(){return colwise;}
     int GetXDataSize(){ return xData.size();}
@@ -154,6 +155,7 @@ private:
 
     QFile * myfile;
     QFile * outfile;
+    QString fileDirectory;
     QString filePath, csvFilePath;
 
     QFile * hallParFile;

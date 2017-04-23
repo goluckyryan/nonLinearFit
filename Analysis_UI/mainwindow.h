@@ -128,6 +128,8 @@ private slots:
 
     void on_actionSave_Message_triggered();
 
+    void on_actionOpen_in_File_Explorer_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;

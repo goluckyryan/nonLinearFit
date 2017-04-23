@@ -13,6 +13,11 @@ FileIO::FileIO(QString filePath){
     myfile = new QFile(filePath);
     myfile->open(QIODevice::ReadOnly);
 
+    QStringList list = filePath.split("/");
+    QString fileName = list[list.length()-1];
+
+    filePath.chop(fileName.length());
+    fileDirectory = filePath;
 }
 
 void FileIO::Initialize(){
@@ -55,9 +60,6 @@ void FileIO::Initialize(){
 }
 
 FileIO::~FileIO(){
-    myfile->close();
-    outfile->close();
-    hallParFile->close();
     SendMsg("release mem.");
     delete myfile;
     if( outfile != NULL ) delete outfile;

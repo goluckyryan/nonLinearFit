@@ -693,6 +693,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOpen_in_File_Explorer"/>
+    <addaction name="separator"/>
     <addaction name="actionSave_data"/>
     <addaction name="actionSave_Message"/>
     <addaction name="separator"/>
@@ -807,6 +809,11 @@
   <action name="actionSave_Message">
    <property name="text">
     <string>Save Message</string>
+   </property>
+  </action>
+  <action name="actionOpen_in_File_Explorer">
+   <property name="text">
+    <string>Open in File Explorer</string>
    </property>
   </action>
  </widget>

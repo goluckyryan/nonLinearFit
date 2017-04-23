@@ -157,11 +157,7 @@ MainWindow::~MainWindow(){
 
     if( file != NULL) delete file;
     if( ana != NULL) delete ana;
-
-    delete dbWindow;
-
-    delete HelpLabel;
-    delete helpDialog;
+    if( dbWindow!=NULL) delete dbWindow;
 }
 
 void MainWindow::SetupPlots()
@@ -1906,4 +1902,13 @@ void MainWindow::on_actionSave_Message_triggered()
 
     file.close();
 
+}
+
+void MainWindow::on_actionOpen_in_File_Explorer_triggered()
+{
+    if( file != NULL ) {
+        QDesktopServices::openUrl(file->GetFileDirectory());
+    }else{
+        QDesktopServices::openUrl( DATA_PATH );
+    }
 }
