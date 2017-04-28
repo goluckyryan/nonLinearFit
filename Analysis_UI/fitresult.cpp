@@ -184,7 +184,7 @@ void FitResult::SetAvalibleData(int n)
 void FitResult::FillData(Analysis *ana)
 {
     if( ana->GetFitFlag() != 0){
-        SendMsg("fit not good.");
+        //SendMsg("fit not good.");
         return;
     }
 

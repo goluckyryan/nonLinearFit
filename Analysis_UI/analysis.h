@@ -88,10 +88,6 @@ public slots:
     void PrintMatrix(Matrix mat, QString str);
     void PrintCoVarMatrix();
 
-    void MsgConnector(QString msg){
-        emit SendMsg(msg);
-    }
-
     int FindXIndex(double goal);
     double FindXFromYAfterTZero(double y);
 

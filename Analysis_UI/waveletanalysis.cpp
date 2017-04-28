@@ -352,7 +352,7 @@ void WaveletAnalysis::HardThresholding(double threshold, int octave, int type)
     if( octave == 0 ) return;
     if( threshold <= 0.0) return;
     for( int s = 1 ;  s <= qAbs(octave) ; s++){
-        for( int k = 0; k <= W[s].size(); k++){
+        for( int k = 0; k < W[s].size(); k++){
             if( type == 0 && qAbs(W[s][k]) < threshold ) {
                 W[s][k] = 0.;
             }
@@ -370,7 +370,7 @@ void WaveletAnalysis::SoftThresholding(double threshold, int octave)
     if( threshold <= 0.0) return;
 
     for( int s = 1 ;  s <= qAbs(octave) ; s++){
-        for( int k = 0; k <= W[s].size(); k++){
+        for( int k = 0; k < W[s].size(); k++){
             if( qAbs(W[s][k]) < threshold ) {
                 W[s][k] = 0.;
             }else{

@@ -21,6 +21,7 @@ extern QString DB_PATH ;
 extern double TORRGRAD ;
 extern double TIME1 ;
 extern double TIME2 ;
+extern double FITWARNINGTHRESHOLD;
 
 #endif // CONSTANT_H
 

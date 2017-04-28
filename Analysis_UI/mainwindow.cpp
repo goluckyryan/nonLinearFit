@@ -881,16 +881,10 @@ void MainWindow::on_pushButton_Fit_clicked(){
     //display result
     ana->PrintVector(ana->GetParameters(), "sol");
     ana->PrintVector(ana->GetParError(), "error");
-    //ana->PrintVector(ana->GetParPValue(), "p-Value");
-    QVector<double> gradSSR = ana->GetSSRgrad();
 
-    bool redFlag = 0; // reset redFlag
-    for(int i = 0 ; i < gradSSR.size(); i++){
-        redFlag |= std::abs(gradSSR[i]) > 0.02;
-    }
-    if( redFlag) ui->textEdit->setTextColor(QColor(255,0,0,255));
+    if( ana->GetFitFlag() == 4) ui->textEdit->setTextColor(QColor(255,0,0,255));
     ana->PrintVector(ana->GetSSRgrad(), "SSR grad");
-    if( redFlag) ui->textEdit->setTextColor(QColor(0,0,0,255));
+    ui->textEdit->setTextColor(QColor(0,0,0,255)); // reset to red, no matter what.
 
     ana->PrintCoVarMatrix();
 
@@ -1005,14 +999,10 @@ void MainWindow::on_pushButton_FitAll_clicked()
         if(progress.wasCanceled()) break;
 
         QVector<double> gradSSR = ana->GetSSRgrad();
-        bool redFlag = 0; // reset redFlag
-        for(int i = 0 ; i < gradSSR.size(); i++){
-            redFlag |= std::abs(gradSSR[i]) > 0.02;
-        }
-        if( ana->GetFitFlag() !=0 || redFlag){
+        if( ana->GetFitFlag() !=0){
             int size = gradSSR.size();
             QString msg, tmp;
-            msg.sprintf("%4d | dSSR : [ ", yIndex);
+            msg.sprintf("%4d | fitFlag: %1d | dSSR : [ ", yIndex, ana->GetFitFlag());
             for(int i = 0; i < size - 1; i++){
                 tmp.sprintf(" %7.3f,", gradSSR[i]);
                 msg += tmp;
@@ -1022,21 +1012,9 @@ void MainWindow::on_pushButton_FitAll_clicked()
             badFitdSSR.push_back(msg);
         }
 
-        //double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
-
-        //bool pcheck = 1;
-        //QVector<double> pValue = ana->GetParPValue();
-        //for( int p = 0; p < pValue.size(); p++){
-        //    pcheck &= std::abs(pValue[p]) < 0.3;
-        //}
-
         file->OpenSaveFileforFit();
         file->SaveFitResult(ana);
         count ++;
-        //if( std::abs(chisq-1) < 0.5 && pcheck){
-        //}else{
-        //    Write2Log("reduced chi-sq > 2 and p-value(s) > 0.3, not save fitting.");
-        //}
     }
 
     Write2Log("======== Possible Bad Fit y-Index:");
@@ -1266,11 +1244,6 @@ void MainWindow::PlotContourPlot(double offset)
                 double zn = file->GetDataZ(xIndex, yIndex+1) + offset;
                 colorMap->data()->setData(x, y+dy/2, (z + zn)/2);
             }
-            //if( file->IsYRevered()){
-            //    colorMap->data()->setCell(xIndex, ny-yIndex-1, z);
-            //}else{
-            //    colorMap->data()->setCell(xIndex, yIndex, z); // fill data
-            //}
         }
     }
 

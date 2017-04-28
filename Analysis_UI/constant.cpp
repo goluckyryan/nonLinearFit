@@ -14,3 +14,4 @@ QString DB_PATH;
 double TORRGRAD = 1e-1; //torrenlence for grad of SSR
 double TIME1 = 5.0;  // start fitting time
 double TIME2 = -3.0; // end time of sample mean and variance
+double FITWARNINGTHRESHOLD = 0.02; // gradSSR threshold for warning.

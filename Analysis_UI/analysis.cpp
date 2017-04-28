@@ -407,6 +407,13 @@ int Analysis::NonLinearFit(QVector<double> par0, bool gnufit)
     }
     //Print();
 
+    bool redFlag = 0; // reset redFlag
+    for(int i = 0 ; i < gradSSR.size(); i++){
+        redFlag |= std::abs(gradSSR[i]) > 0.02;
+    }
+
+    if( redFlag ) fitFlag = 4;
+
     return 0;
 }
 
