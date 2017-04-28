@@ -101,12 +101,12 @@
         </widget>
        </item>
        <item row="2" column="3">
-        <widget class="QPushButton" name="pushButton_resetPars">
+        <widget class="QPushButton" name="pushButton_guessPars">
          <property name="statusTip">
           <string>Estimate the fit paramters.</string>
          </property>
          <property name="text">
-          <string>Reset Par.</string>
+          <string>Guess Par.</string>
          </property>
         </widget>
        </item>
@@ -280,7 +280,7 @@
       <zorder>pushButton_Fit</zorder>
       <zorder>lineEdit_x</zorder>
       <zorder>spinBox_x</zorder>
-      <zorder>pushButton_resetPars</zorder>
+      <zorder>pushButton_guessPars</zorder>
       <zorder>label_2</zorder>
       <zorder>label_4</zorder>
       <zorder>label_5</zorder>
@@ -836,7 +836,7 @@
   <tabstop>lineEdit_c</tabstop>
   <tabstop>lineEdit_P</tabstop>
   <tabstop>pushButton_save</tabstop>
-  <tabstop>pushButton_resetPars</tabstop>
+  <tabstop>pushButton_guessPars</tabstop>
   <tabstop>checkBox_b_Tb</tabstop>
   <tabstop>checkBox_c</tabstop>
   <tabstop>pushButton_FitAll</tabstop>

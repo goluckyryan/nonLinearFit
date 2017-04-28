@@ -773,7 +773,7 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1)
     ui->horizontalScrollBar->setSingleStep(1);
 
     if( ui->checkBox_AutoFit->isChecked()) {
-        on_pushButton_resetPars_clicked();
+        on_pushButton_guessPars_clicked();
         on_pushButton_Fit_clicked();
     }else{
         //int xIndex = ana->FindXIndex( TIME1 );
@@ -912,7 +912,7 @@ void MainWindow::on_pushButton_Fit_clicked(){
 
 }
 
-void MainWindow::on_pushButton_resetPars_clicked()
+void MainWindow::on_pushButton_guessPars_clicked()
 {
     if( file == NULL) return;
     statusBar()->showMessage("Reset parameters to default values.");
@@ -988,7 +988,7 @@ void MainWindow::on_pushButton_FitAll_clicked()
 
     for( int yIndex = yStartIndex; yIndex < n ; yIndex ++){
     //for( int yIndex = 100; yIndex < 300 ; yIndex ++){
-        on_pushButton_resetPars_clicked();
+        on_pushButton_guessPars_clicked();
         ui->spinBox_y->setValue(yIndex);
         on_pushButton_Fit_clicked();
         PlotFitFuncAndXLines();
@@ -1284,7 +1284,7 @@ void MainWindow::setEnabledPlanel(bool IO)
 
     ui->pushButton_Fit->setEnabled(IO);
     ui->pushButton_FitAll->setEnabled(IO);
-    ui->pushButton_resetPars->setEnabled(IO);
+    ui->pushButton_guessPars->setEnabled(IO);
     ui->pushButton_save->setEnabled(IO);
     ui->pushButton_RestoreData->setEnabled(IO);
     ui->spinBox_y->setEnabled(IO);

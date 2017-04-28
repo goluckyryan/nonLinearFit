@@ -81,7 +81,7 @@ private slots:
     void on_lineEdit_c_returnPressed();
 
     void on_pushButton_Fit_clicked();
-    void on_pushButton_resetPars_clicked();
+    void on_pushButton_guessPars_clicked();
     void on_pushButton_save_clicked();
     void on_pushButton_FitAll_clicked();
 
