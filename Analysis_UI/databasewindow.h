@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QMessageBox>
 #include <QImage>
+#include <QDesktopServices>
 #include "constant.h"
 #include "dateformatdelegate.h"
 //#include "openfiledelegate.h"
@@ -53,6 +54,8 @@ private slots:
     void showDataPicture(const QModelIndex &index);
 
     void on_pushButton_unSelectSample_clicked();
+
+    void on_pushButton_openFolder_clicked();
 
 private:
     Ui::DataBaseWindow *ui;

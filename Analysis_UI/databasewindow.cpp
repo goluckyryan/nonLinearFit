@@ -462,3 +462,21 @@ void DataBaseWindow::showDataPicture(const QModelIndex &index)
 
 }
 
+
+void DataBaseWindow::on_pushButton_openFolder_clicked()
+{
+    QModelIndex current = ui->dataView->selectionModel()->currentIndex(); // the "current" item
+    QString dataPath = data->index(current.row(), dataPathCol).data().toString();
+
+    //check is it absolute path or relativePath
+    QStringList dataNameList = dataPath.split("/");
+    int size = dataNameList.size();
+
+    QString folderPath = DATA_PATH + "/";
+    for( int i = 0; i < size - 1; i++){
+        folderPath += dataNameList[i];
+        folderPath += "/";
+    }
+
+    QDesktopServices::openUrl( folderPath );
+}

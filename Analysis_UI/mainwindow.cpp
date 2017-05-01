@@ -230,9 +230,9 @@ void MainWindow::SetupPlots()
     if( multi == 3) yLabel = "Voltage [mV]";
     if( multi == 6) yLabel = "Voltage [uV]";
     if( multi == 9) yLabel = "Voltage [nV]";
-    timePlot->yAxis->setLabel("Integrated " + yLabel);
+    timePlot->yAxis->setLabel( yLabel);
 
-    bFieldPlot->yAxis->setLabel(yLabel);
+    bFieldPlot->yAxis->setLabel( "Integrated " + yLabel);
     bFieldPlot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
     bFieldPlot->xAxis2->setRangeReversed(file->IsYRevered());
     bFieldPlot->xAxis2->setRange(0, file->GetYDataSize()-1);
