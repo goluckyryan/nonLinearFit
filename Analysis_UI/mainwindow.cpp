@@ -1856,6 +1856,13 @@ void MainWindow::on_actionStatistics_triggered()
     double yMax = ana->GetDataYMax();
     double yMin = ana->GetDataYMin();
 
+    //cal absolute max of BG data
+    int xBG = ana->FindXIndex(TIME2);
+    double bgMax = 0;
+    for(int i = 0; i < xBG; i++){
+        if( qAbs(y[i]) > bgMax) bgMax = qAbs(y[i]);
+    }
+
     QMessageBox msgBox;
     QString msg;
     msg.sprintf("Statistics of y-Index : %d", ui->spinBox_y->value());
@@ -1865,13 +1872,14 @@ void MainWindow::on_actionStatistics_triggered()
                 "===  BG    (%6.2f, %6.2f) us\n"
                 "BG mean   : %7.3f \n"
                 "BG s.d.   : %7.3f \n"
+                "BG |max|  : %7.3f \n"
                 "=== Sample (%6.2f, %6.2f) us\n"
                 "mean      : %7.3f \n"
                 "s.d.      : %7.3f \n"
                 "Integrate : %7.3f",
                 yMax, yMin,
                 x[0], TIME2,
-                sBGmean, sqrt(sBGvar),
+                sBGmean, sqrt(sBGvar), bgMax,
                 x[xStart], x[xEnd],
                 mv[0], sqrt(mv[1]),
                 integrate);
