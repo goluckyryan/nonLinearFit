@@ -23,6 +23,7 @@ public:
     void PlotWV();
     void PlotReconstructedData(bool Original = 0);
     void PlotWVoctave(int octave);
+    void PlotEnergy();
 
 signals:
     void SendMsg(QString msg);
@@ -66,6 +67,7 @@ private:
     QCustomPlot * plot;
     QCustomPlot * plot_Woct;
     QCustomPlot * plot_Voct;
+    QCustomPlot * plot_energy;
 
     WaveletAnalysis * wave;
 

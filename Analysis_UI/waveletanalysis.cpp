@@ -357,23 +357,29 @@ void WaveletAnalysis::Reconstruct(){
 void WaveletAnalysis::CalculateEnergy(bool originEnergyFlag)
 {
     TotalEnergy = 0;
+    energy.clear();
     for(int s = 1; s < MaxScale ; s ++){
-        int sizeW = W0[s].size();
+        int sizeW = W[s].size();
         double en = 0;
         for( int i = 0; i < sizeW ; i ++ ){
-            en += W0[s][i]*W0[s][i];
+            en += W[s][i]*W[s][i] * qPow(sqrt(2.)/normFactor, 2*s);
         }
         energy.push_back(en);
         TotalEnergy += en;
     }
 
-    int sizeV = V0[MaxScale-1].size();
+    int sizeV = V[MaxScale-1].size();
     double en = 0;
     for( int i = 0; i < sizeV ; i ++ ){
-        en += V0[s][i]*V0[s][i];
+        en += V[MaxScale-1][i]*V[MaxScale-1][i] * qPow(sqrt(2.)/normFactor,2*MaxScale-2);
     }
     energy.push_back(en);
     TotalEnergy += en;
+
+    //qDebug() << "TotalEnergy 0 : " << TotalEnergy0;
+    //qDebug() << energy0;
+    //qDebug() << "TotalEnergy   : " << TotalEnergy;
+    //qDebug() << energy;
 
     if( originEnergyFlag ){
         TotalEnergy0 = TotalEnergy;

@@ -82,6 +82,24 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     //plot_Voct->yAxis->setAutoTickStep(false);
     //plot_Voct->yAxis->setTickStep(1.0);
 
+    plot_energy = ui->plot_energy;
+    plot_energy->addGraph(plot_energy->yAxis, plot_energy->xAxis);
+    plot_energy->graph(0)->setPen(QPen(Qt::blue));
+    plot_energy->addGraph(plot_energy->yAxis, plot_energy->xAxis);
+    plot_energy->graph(1)->setPen(QPen(Qt::red));
+    plot_energy->xAxis->setLabel("FoE [%]");
+    plot_energy->yAxis->setLabel("octave");
+    //plot_energy->graph(0)->setLineStyle(QCPGraph::lsLine);
+    plot_energy->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+    plot_energy->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+    plot_energy->xAxis->setAutoTickStep(false);
+    plot_energy->yAxis->setAutoTickStep(false);
+    plot_energy->xAxis->setTickStep(20.);
+    plot_energy->yAxis->setTickStep(1.);
+    plot_energy->yAxis->setLabelPadding(0);
+    plot_energy->graph(0)->clearData();
+    plot_energy->graph(1)->clearData();
+
     enableVerticalBar = 0;
     enableControl = true;
 
@@ -174,6 +192,7 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     colorMap_V->data()->setSize(nx, ny+1);
 
     PlotWV();
+    PlotEnergy();
 
     //set lines;
     QVector<double> xline_y, xline_x1, xline_x2;
@@ -347,6 +366,36 @@ void WaveletPlot::PlotWVoctave(int octave)
 
 }
 
+void WaveletPlot::PlotEnergy()
+{
+    if( wave == NULL) return;
+
+    plot_energy->graph(0)->clearData();
+    plot_energy->graph(1)->clearData();
+
+    QVector<double> energy0 = wave->GetEnergy0();
+    double totalEnergy0 = wave->GetTotalEnergy0();
+
+    QVector<double> energy = wave->GetEnergy();
+    double totalEnergy = wave->GetTotalEnergy();
+
+    QVector<double> octave;
+    for( int i = 0;  i < energy0.size(); i++){
+        octave.push_back(-i-1);
+        energy0[i] = energy0[i]/totalEnergy0*100.;
+        energy[i] = energy[i]/totalEnergy*100.;
+    }
+
+    ui->lineEdit_totalEnergy0->setText("" + QString::number(totalEnergy0));
+    ui->lineEdit_totalEnergy->setText("" + QString::number(totalEnergy));
+
+    plot_energy->graph(0)->addData(octave, energy0);
+    plot_energy->graph(1)->addData(octave, energy);
+    plot_energy->xAxis->setRange(-10, 50);
+    plot_energy->yAxis->setRange(-wave->GetMaxScale(), 0);
+    plot_energy->replot();
+}
+
 void WaveletPlot::plotXAxisChanged(QCPRange range)
 {
     if( file == NULL ) return;
@@ -387,11 +436,12 @@ void WaveletPlot::on_verticalSlider_Threshold_valueChanged(int value)
                 wave->SoftThresholding(value/100., sLimit);
             }
             //SendMsg(wave->GetMsg());
-
             wave->Reconstruct();
             //SendMsg(wave->GetMsg());
+            wave->CalculateEnergy(0);
 
             PlotWV();
+            PlotEnergy();
             PlotWVoctave(ui->verticalSlider_Octave->value());
             PlotReconstructedData();
 
@@ -399,7 +449,9 @@ void WaveletPlot::on_verticalSlider_Threshold_valueChanged(int value)
 
         if( value == 0 || sLimit == 0){
             //wave->Reconstruct();
+            wave->CalculateEnergy();
             PlotWV();
+            PlotEnergy();
             PlotReconstructedData(1);
         }
 
@@ -593,6 +645,7 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
     SendMsg(wave->GetMsg());
     wave->Decompose();
     SendMsg(wave->GetMsg());
+    wave->CalculateEnergy();
     wave->Reconstruct();
 
     enableSpinBoxWaveletIndex = false;
@@ -618,6 +671,7 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
     enableVerticalBar = true;
 
     PlotWV();
+    PlotEnergy();
     PlotWVoctave(ui->verticalSlider_Octave->value());
     PlotReconstructedData();
 }
@@ -632,7 +686,7 @@ void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
     SendMsg(wave->GetMsg());
     wave->Decompose();
     SendMsg(wave->GetMsg());
-
+    wave->CalculateEnergy();
     wave->Reconstruct();
 
     enableVerticalBar = false;
@@ -641,6 +695,7 @@ void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
     enableVerticalBar = true;
 
     PlotWV();
+    PlotEnergy();
     PlotWVoctave(ui->verticalSlider_Octave->value());
     PlotReconstructedData();
 }
@@ -690,13 +745,24 @@ void WaveletPlot::on_checkBox_normalized_clicked(bool checked)
 {
     if(checked ) {
         wave->setNormFactor( sqrt(2.));
+        SendMsg("Set normalized wavelet Transform.");
     }else{
         wave->setNormFactor(1.);
+        SendMsg("Set uneven wavelet Transform.");
     }
     wave->Decompose();
+    wave->CalculateEnergy();
     wave->Reconstruct();
 
+    enableVerticalBar = false;
+    int zMax = qCeil(wave->GetWAbsMax())*100;
+    ui->verticalSlider_Threshold->setSingleStep(1);
+    ui->verticalSlider_Threshold->setRange(0, zMax);
+    ui->verticalSlider_Threshold->setValue(0);
+    enableVerticalBar = true;
+
     PlotWV();
+    PlotEnergy();
     PlotWVoctave(ui->verticalSlider_Octave->value());
     PlotReconstructedData();
 }

@@ -44,8 +44,8 @@ public:
     QVector<double> GetV0octave(int s) { return V0[s]; }
     QVector<double> GetEnergy0() { return energy0; }
     QVector<double> GetEnergy() { return energy; }
-    QVector<double> GetTotalEnergy0() { return TotalEnergy0; }
-    QVector<double> GetTotalEnergy() { return TotalEnergy; }
+    double GetTotalEnergy0() { return TotalEnergy0; }
+    double GetTotalEnergy() { return TotalEnergy; }
     int GetMaxScale() {return MaxScale;}
     int GetSize() {return size;}
     QString GetMsg() {return msg;}
