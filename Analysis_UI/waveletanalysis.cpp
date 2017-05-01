@@ -4,15 +4,15 @@
 WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
 {
     size = a.size();
-    M = qFloor( qLn(size)/qLn(2.) )+1;
+    MaxScale = qFloor( qLn(size)/qLn(2.) )+1;
 
-    V0 = new QVector<double> [M];
-    W0 = new QVector<double> [M];
-    Vk = new QVector<int> [M];
-    Wk = new QVector<int> [M];
-    V = new QVector<double> [M];
-    W = new QVector<double> [M];
-    X0 = new QVector<double> [M];
+    V0 = new QVector<double> [MaxScale];
+    W0 = new QVector<double> [MaxScale];
+    Vk = new QVector<int> [MaxScale];
+    Wk = new QVector<int> [MaxScale];
+    V = new QVector<double> [MaxScale];
+    W = new QVector<double> [MaxScale];
+    X0 = new QVector<double> [MaxScale];
 
     for( int i = 0; i < size; i++){
         V0[0].push_back(a[i]);
@@ -22,7 +22,9 @@ WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
         Wk[0].push_back(i);
     }
 
-    msg.sprintf("Array size = %d; Max scale = %d", size, M);
+    msg.sprintf("Array size = %d; Max scale = %d", size, MaxScale);
+
+    normFactor = 1;
 
 }
 
@@ -40,7 +42,7 @@ WaveletAnalysis::~WaveletAnalysis(){
 void WaveletAnalysis::ClearData()
 {
     size = 0;
-    M = 0;
+    MaxScale = 0;
     V0->clear();
     W0->clear();
     Vk->clear();
@@ -59,15 +61,15 @@ void WaveletAnalysis::ClearData()
 void WaveletAnalysis::SetData(QVector<double> x, QVector<double> a)
 {
     size = a.size();
-    M = qFloor( qLn(size)/qLn(2.) )+1;
+    MaxScale = qFloor( qLn(size)/qLn(2.) )+1;
 
-    V0 = new QVector<double> [M];
-    W0 = new QVector<double> [M];
-    Vk = new QVector<int> [M];
-    Wk = new QVector<int> [M];
-    V = new QVector<double> [M];
-    W = new QVector<double> [M];
-    X0 = new QVector<double> [M];
+    V0 = new QVector<double> [MaxScale];
+    W0 = new QVector<double> [MaxScale];
+    Vk = new QVector<int> [MaxScale];
+    Wk = new QVector<int> [MaxScale];
+    V = new QVector<double> [MaxScale];
+    W = new QVector<double> [MaxScale];
+    X0 = new QVector<double> [MaxScale];
 
     for( int i = 0; i < size; i++){
         V0[0].push_back(a[i]);
@@ -77,7 +79,7 @@ void WaveletAnalysis::SetData(QVector<double> x, QVector<double> a)
         Wk[0].push_back(i);
     }
 
-    msg.sprintf("Array size = %d; Max scale = %d", size, M);
+    msg.sprintf("Array size = %d; Max scale = %d", size, MaxScale);
 }
 
 void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
@@ -206,7 +208,8 @@ void WaveletAnalysis::Decompose()
     //qDebug() << "=========================== Decompose";
     int s;
     WAbsMax = 0;
-    for( s = 0; s < M-1 ; s++){
+    VAbsMax = 0;
+    for( s = 0; s < MaxScale-1 ; s++){
 
         int sizeV = V0[s].size();
         if( sizeV == 0) return;
@@ -229,9 +232,12 @@ void WaveletAnalysis::Decompose()
             }
             if( sum != 0 ) startStore = 1;
             if( startStore){
+                sum = sum * normFactor;
                 Vk[s+1].push_back(k);
                 V0[s+1].push_back(sum);
             }
+
+            if( VAbsMax < qAbs(sum)) VAbsMax = qAbs(sum);
         }
 
         //qDebug("calculate hight pass filter bank");
@@ -245,6 +251,7 @@ void WaveletAnalysis::Decompose()
             }
             if( sum != 0) startStore = 1;
             if( startStore){
+                sum = sum * normFactor;
                 Wk[s+1].push_back(k);
                 W0[s+1].push_back(sum);
             }
@@ -290,7 +297,7 @@ void WaveletAnalysis::Decompose()
 void WaveletAnalysis::RestoreData()
 {
     //qDebug() << "=========================== RestoreData";
-    for(int s = 1; s < M ; s++){
+    for(int s = 1; s < MaxScale ; s++){
 
         V[s].clear();
         W[s].clear();
@@ -316,7 +323,7 @@ void WaveletAnalysis::Reconstruct(){
 
     //qDebug() << "======================== Reconstruct";
 
-    for( int s = M-1; s > 0; s--){
+    for( int s = MaxScale-1; s > 0; s--){
         //qDebug() << "---------- " << s;
         V[s-1].clear();
 
@@ -337,7 +344,7 @@ void WaveletAnalysis::Reconstruct(){
                 sum += g1*W[s][k];
 
             }
-            V[s-1].push_back(sum);
+            V[s-1].push_back(sum /  normFactor);
         }
 
         //PrintArray(V[s-1], "V", s-1);
@@ -345,6 +352,33 @@ void WaveletAnalysis::Reconstruct(){
     }
 
     msg.sprintf("Reconstructed.");
+}
+
+void WaveletAnalysis::CalculateEnergy(bool originEnergyFlag)
+{
+    TotalEnergy = 0;
+    for(int s = 1; s < MaxScale ; s ++){
+        int sizeW = W0[s].size();
+        double en = 0;
+        for( int i = 0; i < sizeW ; i ++ ){
+            en += W0[s][i]*W0[s][i];
+        }
+        energy.push_back(en);
+        TotalEnergy += en;
+    }
+
+    int sizeV = V0[MaxScale-1].size();
+    double en = 0;
+    for( int i = 0; i < sizeV ; i ++ ){
+        en += V0[s][i]*V0[s][i];
+    }
+    energy.push_back(en);
+    TotalEnergy += en;
+
+    if( originEnergyFlag ){
+        TotalEnergy0 = TotalEnergy;
+        energy0 = energy;
+    }
 }
 
 void WaveletAnalysis::HardThresholding(double threshold, int octave, int type)

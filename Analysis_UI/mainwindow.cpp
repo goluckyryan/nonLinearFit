@@ -96,6 +96,8 @@ MainWindow::MainWindow(QWidget *parent) :
     bFieldPlot->graph(0)->setPen(QPen(Qt::blue));
     bFieldPlot->addGraph();
     bFieldPlot->graph(1)->setPen(QPen(Qt::gray));
+    bFieldPlot->addGraph();
+    bFieldPlot->graph(2)->setPen(QPen(Qt::darkGreen)); // the y-index
 
     contourPlot = ui->customPlot_CT;
     contourPlot->axisRect()->setupFullAxesBox(true);
@@ -780,6 +782,16 @@ void MainWindow::on_spinBox_y_valueChanged(int arg1)
         //ui->spinBox_x->setValue(xIndex);
         PlotFitFuncAndXLines();
     }
+
+    // draw vertical line for y-index;
+    bFieldPlot->graph(2)->clearData();
+    QVector<double> line_x, line_y;
+    line_x.push_back(yValue);
+    line_x.push_back(yValue);
+    line_y.push_back(bFieldPlot->yAxis->range().lower);
+    line_y.push_back(bFieldPlot->yAxis->range().upper);
+    bFieldPlot->graph(2)->addData(line_x,line_y);
+    bFieldPlot->replot();
 }
 
 void MainWindow::on_spinBox_x_valueChanged(int arg1){

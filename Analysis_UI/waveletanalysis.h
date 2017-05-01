@@ -18,9 +18,11 @@ public:
     void ClearData();
     void SetData(QVector<double> x, QVector<double> a);
     void setWaveletPar(int waveletIndex, int waveletPar);
+    void setNormFactor(double f){ normFactor = f;}
     void Decompose();
     void RestoreData();
     void Reconstruct();
+    void CalculateEnergy(bool originEnergyFlag = true);
     void HardThresholding(double threshold, int octave, int type = 0);
     void SoftThresholding(double threshold, int octave);
     void CleanOutsider(double x1, double x2, int octave);
@@ -40,11 +42,17 @@ public:
     QVector<double>* GetV0() { return V0; }
     QVector<double> GetW0octave(int s) { return W0[s]; }
     QVector<double> GetV0octave(int s) { return V0[s]; }
-    int GetM() {return M;}
+    QVector<double> GetEnergy0() { return energy0; }
+    QVector<double> GetEnergy() { return energy; }
+    QVector<double> GetTotalEnergy0() { return TotalEnergy0; }
+    QVector<double> GetTotalEnergy() { return TotalEnergy; }
+    int GetMaxScale() {return MaxScale;}
     int GetSize() {return size;}
     QString GetMsg() {return msg;}
     double GetWAbsMax() {return WAbsMax;}
+    double GetVAbsMax() {return VAbsMax;}
     int GetWaveletNumberOfKind() {return numberOfKind;}
+    double GetNormFactor() {return normFactor;}
 
 //signals:
 
@@ -79,21 +87,27 @@ private:
     QVector<int> *Vk; // the k-value of v
     QVector<double> *X0; // the x-position
 
+    QVector<double> energy0;
+    QVector<double> energy;
+    double TotalEnergy0;
+    double TotalEnergy;
+
     //gated copy
     QVector<double> *V;
     QVector<double> *W;
 
     QVector<double> Z0;
 
+    double normFactor;
 
     int waveletIndex;
     int numberOfKind;
     int waveletPar;
     int parSize;
     int size;
-    int M; // max scale
+    int MaxScale; // max scale
 
-    double WAbsMax;
+    double WAbsMax, VAbsMax;
 
 
 };

@@ -17,6 +17,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_W->yAxis->setTickStep(1.);
     connect(plot_W, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(ShowMousePosition(QMouseEvent*)));
     connect(plot_W, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(SetLineByMouseClick(QMouseEvent*)));
+    //plot_W->setInteraction(QCP::iRangeZoom, true);
 
     plot_V = ui->plot_V;
     plot_V->xAxis->setLabel("time [us]");
@@ -155,12 +156,18 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     SendMsg(wave->GetMsg());
     wave->setWaveletPar(waveletID, waveletPar);
     SendMsg(wave->GetMsg());
+    if( ui->checkBox_normalized->isChecked() ) {
+        wave->setNormFactor( sqrt(2.));
+    }else{
+        wave->setNormFactor(1.);
+    }
     wave->Decompose();
     SendMsg(wave->GetMsg());
+    wave->CalculateEnergy();
 
     //setPlot
     int nx = wave->GetSize();
-    int ny = wave->GetM();
+    int ny = wave->GetMaxScale();
     colorMap_W->data()->setRange(QCPRange(x[0],x[nx-1]), QCPRange(0,-ny));
     colorMap_W->data()->setSize(nx, ny+1);
     colorMap_V->data()->setRange(QCPRange(x[0],x[nx-1]), QCPRange(0,-ny));
@@ -211,7 +218,7 @@ void WaveletPlot::PlotWV()
     QVector<int> * vk = wave->GetVk();
 
     int size = wave->GetSize();
-    int ny = wave->GetM();
+    int ny = wave->GetMaxScale();
 
     //plot
     QVector<double> temp_W, temp_V;
@@ -247,10 +254,12 @@ void WaveletPlot::PlotWV()
 
     colorMap_W->rescaleDataRange();
     colorMap_W->rescaleAxes();
+    colorMap_W->setDataRange(QCPRange(0,wave->GetWAbsMax()*1.2));
     plot_W->replot();
 
     colorMap_V->rescaleDataRange();
     colorMap_V->rescaleAxes();
+    colorMap_V->setDataRange(QCPRange(0,wave->GetVAbsMax()*1.2));
     plot_V->replot();
 
     w = NULL;
@@ -503,7 +512,7 @@ void WaveletPlot::ShowMousePosition(QMouseEvent *mouse)
     double y = plot_W->yAxis->pixelToCoord(pt.ry());
 
     int xIndex = file->GetXIndex(x);
-    int s =  qFloor( wave->GetM()+ y + 0.5) ;
+    int s =  qFloor( wave->GetMaxScale()+ y + 0.5) ;
     double z = colorMap_W->data()->cell(xIndex, s );
 
     QString msg;
@@ -517,7 +526,7 @@ void WaveletPlot::SetLineByMouseClick(QMouseEvent *mouse)
     double x = plot_W->xAxis->pixelToCoord(pt.rx());
 
     QVector<double> xline_y, xline_x1, xline_x2;
-    xline_y.push_back(-wave->GetM());
+    xline_y.push_back(-wave->GetMaxScale());
     xline_y.push_back(0);
 
     if( mouse->button() == Qt::LeftButton){
@@ -647,7 +656,7 @@ void WaveletPlot::on_lineEdit_x1_editingFinished()
 {
     double x = ui->lineEdit_x1->text().toDouble();
     QVector<double> xline_y, xline_x1;
-    xline_y.push_back(-wave->GetM());
+    xline_y.push_back(-wave->GetMaxScale());
     xline_y.push_back(0);
 
     x1 = x;
@@ -664,7 +673,7 @@ void WaveletPlot::on_lineEdit_x2_editingFinished()
 {
     double x = ui->lineEdit_x2->text().toDouble();
     QVector<double> xline_y, xline_x2;
-    xline_y.push_back(-wave->GetM());
+    xline_y.push_back(-wave->GetMaxScale());
     xline_y.push_back(0);
 
     x2 = x;
@@ -675,4 +684,19 @@ void WaveletPlot::on_lineEdit_x2_editingFinished()
     plot_W->graph(1)->addData(xline_x2, xline_y);
 
     plot_W->replot();
+}
+
+void WaveletPlot::on_checkBox_normalized_clicked(bool checked)
+{
+    if(checked ) {
+        wave->setNormFactor( sqrt(2.));
+    }else{
+        wave->setNormFactor(1.);
+    }
+    wave->Decompose();
+    wave->Reconstruct();
+
+    PlotWV();
+    PlotWVoctave(ui->verticalSlider_Octave->value());
+    PlotReconstructedData();
 }

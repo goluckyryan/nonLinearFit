@@ -52,6 +52,8 @@ private slots:
 
     void on_pushButton_ApplyToAll_clicked();
 
+    void on_checkBox_normalized_clicked(bool checked);
+
 private:
     Ui::WaveletPlot *ui;
 
