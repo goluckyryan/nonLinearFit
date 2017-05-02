@@ -220,6 +220,13 @@
       </property>
      </widget>
     </item>
+    <item row="6" column="4">
+     <widget class="QPushButton" name="pushButton_saveDWTResult">
+      <property name="text">
+       <string>Save DWT result</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">

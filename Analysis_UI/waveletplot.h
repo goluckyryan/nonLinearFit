@@ -57,6 +57,8 @@ private slots:
 
     void on_pushButton_PlotID_clicked();
 
+    void on_pushButton_saveDWTResult_clicked();
+
 private:
     Ui::WaveletPlot *ui;
 

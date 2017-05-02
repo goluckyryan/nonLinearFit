@@ -4,7 +4,7 @@
 WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
 {
     size = a.size();
-    MaxScale = qFloor( qLn(size)/qLn(2.) )+1;
+    MaxScale = qFloor( qLn(size)/qLn(2.) );
 
     V0 = new QVector<double> [MaxScale];
     W0 = new QVector<double> [MaxScale];
@@ -90,10 +90,12 @@ void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
     if( waveletIndex == 0){ // Haar
         Z0 = {1,1};
         numberOfKind = 1;
+        waveletName = "Haar";
     }
 
     if( waveletIndex == 1){ // Daubechies
         numberOfKind = 12;
+        waveletName = "Daubechies";
         switch (waveletPar) {
         case 1: Z0 = { 1, 1}; break;
         case 2: Z0 = {-0.183013, 0.316987, 1.18301, 0.683013}; break;
@@ -128,6 +130,7 @@ void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
 
     if( waveletIndex == 2){ // Symlet
         numberOfKind = 10;
+        waveletName = "Symlet";
         switch (waveletPar) {
         case 1: Z0 = { 1, 1}; break;
         case 2: Z0 = {0.683013, 1.18301, 0.316987, -0.183013}; break;
@@ -162,6 +165,7 @@ void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
 
     if( waveletIndex == 3){ // Coiflet
         numberOfKind = 3;
+        waveletName = "Coiflet";
         switch (waveletPar) {
         case 1: Z0 = {-0.102859, 0.477859, 1.20572, 0.544281, -0.102859, -0.0221405}; break;
         case 2: Z0 = {0.0231752, -0.0586403, -0.0952792, 0.546042, 1.14936, 0.589734, \
@@ -447,4 +451,90 @@ void WaveletAnalysis::CleanOutsider(double x1, double x2, int octave)
 void WaveletAnalysis::PrintArray(QVector<double> y, QString str, int octave)
 {
     qDebug() << str << "(" << octave << "," << y.size() <<")" << y;
+}
+
+void WaveletAnalysis::SaveCoefficients(QString fileName, int yIndex)
+{
+    QFile savefile(fileName);
+
+    savefile.open(QIODevice::WriteOnly);
+
+    QTextStream stream(&savefile);
+
+    QString lineout, tmp;
+
+    lineout.sprintf("yIndex = %4d, Total Number of Data : %5d; %12s-%02d\n", yIndex, this->size, this->waveletName.toStdString().c_str(), this->waveletPar);
+    stream << lineout;
+
+    for( int s = 1; s < MaxScale ; s++){
+        int size = Wk[s].size();
+        lineout.sprintf("   Wk[%2d], %4d, ", s, size);
+        for(int k = 0; k < size ; k++){
+            tmp.sprintf("%10d, ", Wk[s][k]);
+            lineout += tmp;
+        }
+        stream << lineout;
+        stream << "\n";
+
+        size = W0[s].size();
+        lineout.sprintf("    W[%2d], %4d, ", s, size);
+        for(int k = 0; k < size ; k++){
+            tmp.sprintf("%10.5f, ", W0[s][k]);
+            lineout += tmp;
+        }
+        stream << lineout;
+        stream << "\n";
+
+    }
+
+    int size = Vk[MaxScale-1].size();
+    lineout.sprintf("   Vk[%2d], %4d, ", MaxScale-1, size);
+    for(int k = 0; k < size ; k++){
+        tmp.sprintf("%10d, ", Vk[MaxScale-1][k]);
+        lineout += tmp;
+    }
+    stream << lineout;
+    stream << "\n";
+
+    size = V0[MaxScale-1].size();
+    lineout.sprintf("    V[%2d], %4d, ", MaxScale-1, size);
+    for(int k = 0; k < size ; k++){
+        tmp.sprintf("%10.5f, ", V0[MaxScale-1][k]);
+        lineout += tmp;
+    }
+    stream << lineout;
+    stream << "\n";
+
+    stream << "==================== Origin Data \n";
+
+    size = Vk[0].size();
+    lineout.sprintf("   Vk[%2d], %4d, ", 0, size);
+    for(int k = 0; k < size ; k++){
+        tmp.sprintf("%10d, ", Vk[0][k]);
+        lineout += tmp;
+    }
+    stream << lineout;
+    stream << "\n";
+
+    size = X0[0].size();
+    lineout.sprintf("   X0[%2d], %4d, ", 0, size);
+    for(int k = 0; k < size ; k++){
+        tmp.sprintf("%10.4f, ", X0[0][k]);
+        lineout += tmp;
+    }
+    stream << lineout;
+    stream << "\n";
+
+    size = V0[0].size();
+    lineout.sprintf("    V[%2d], %4d, ", 0, size);
+    for(int k = 0; k < size ; k++){
+        tmp.sprintf("%10.5f, ", V0[0][k]);
+        lineout += tmp;
+    }
+    stream << lineout;
+    stream << "\n";
+
+    stream << "=============== End of File.\n";
+
+    savefile.close();
 }

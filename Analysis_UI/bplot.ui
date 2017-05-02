@@ -106,7 +106,7 @@
    <item row="3" column="0">
     <widget class="QPushButton" name="pushButton_Print">
      <property name="text">
-      <string>Print as pdf</string>
+      <string>Print as pdf/png</string>
      </property>
      <property name="autoDefault">
       <bool>false</bool>

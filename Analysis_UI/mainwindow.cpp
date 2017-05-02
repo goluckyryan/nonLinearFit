@@ -1972,7 +1972,6 @@ void MainWindow::on_actionSave_Time_Plot_w_o_lines_triggered()
     }else{
         if( fileName.right(4) != ".png" ) fileName.append(".png");
         ok = timePlot->savePng(fileName, pw, ph );
-
     }
 
     if( ok ){

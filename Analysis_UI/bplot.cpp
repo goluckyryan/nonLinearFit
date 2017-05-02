@@ -536,7 +536,8 @@ void BPlot::AddArrows()
 void BPlot::on_pushButton_Print_clicked()
 {
     QFileDialog fileDialog(this);
-    fileDialog.setNameFilter("pdf (*pdf)");
+    QStringList nameFilterList = {"pdf (*.pdf)", "PNG (*.png)"};
+    fileDialog.setNameFilters(nameFilterList);
     fileDialog.setDirectory(DESKTOP_PATH);
     fileDialog.setReadOnly(0);
     QString fileName;
@@ -544,15 +545,19 @@ void BPlot::on_pushButton_Print_clicked()
         fileName = fileDialog.selectedFiles()[0];
     }
 
-    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
-
+    bool ok = false;
     int ph = plot->geometry().height();
     int pw = plot->geometry().width();
-
     //Clean the line
     plot->graph(1)->clearData();
 
-    bool ok = plot->savePdf(fileName, pw, ph );
+    if( fileDialog.selectedNameFilter() == nameFilterList[0]){
+        if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+        ok = plot->savePdf(fileName, pw, ph );
+    }else{
+        if( fileName.right(4) != ".png" ) fileName.append(".png");
+        ok = plot->savePng(fileName, pw, ph );
+    }
 
     if( ok ){
         SendMsg("Saved B-Plot as " + fileName);

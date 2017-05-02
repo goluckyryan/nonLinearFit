@@ -929,3 +929,23 @@ void WaveletPlot::on_pushButton_PlotID_clicked()
     listPlotDialog->show();
 
 }
+
+void WaveletPlot::on_pushButton_saveDWTResult_clicked()
+{
+    //QFileDialog fileDialog(this);
+    //QStringList nameFilterList = {"Text (*.txt)"};
+    //fileDialog.setNameFilters(nameFilterList);
+    //fileDialog.setDirectory(DESKTOP_PATH);
+    //fileDialog.setReadOnly(0);
+    //QString fileName;
+    //if( fileDialog.exec()){
+    //    fileName = fileDialog.selectedFiles()[0];
+    //}
+
+    QString fileName = file->GetFilePath();
+    fileName.chop(4);
+    fileName += "_DWTcoef.txt";
+    wave->SaveCoefficients(fileName, this->yIndex);
+    SendMsg("Saved wavelet coefficients to " + fileName);
+
+}

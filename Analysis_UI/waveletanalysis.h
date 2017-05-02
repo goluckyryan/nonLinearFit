@@ -6,6 +6,7 @@
 #include <QString>
 #include <QtMath>
 #include <QDebug>
+#include <QFile>
 
 class WaveletAnalysis //: public QObject
 {
@@ -28,6 +29,7 @@ public:
     void CleanOutsider(double x1, double x2, int octave);
 
     void PrintArray(QVector<double> y, QString str, int octave);
+    void SaveCoefficients(QString fileName, int yIndex);
 
     QVector<double>* GetW() { return W; }
     QVector<double>* GetV() { return V; }
@@ -49,6 +51,7 @@ public:
     int GetMaxScale() {return MaxScale;}
     int GetSize() {return size;}
     int GetParSize() {return parSize;}
+    QString GetWaveletName() {return waveletName;}
     QString GetMsg() {return msg;}
     double GetWAbsMax() {return WAbsMax;}
     double GetVAbsMax() {return VAbsMax;}
@@ -102,6 +105,7 @@ private:
     double normFactor;
 
     int waveletIndex;
+    QString waveletName;
     int numberOfKind;
     int waveletPar;
     int parSize;

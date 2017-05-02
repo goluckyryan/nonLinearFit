@@ -564,7 +564,8 @@ QVector<double> FitResult::ReSizeVector(QVector<double> vec){
 void FitResult::on_pushButton_SavePlot_clicked()
 {
     QFileDialog fileDialog(this);
-    fileDialog.setNameFilter("pdf (*pdf)");
+    QStringList nameFilterList = {"pdf (*.pdf)", "PNG (*.png)"};
+    fileDialog.setNameFilters(nameFilterList);
     fileDialog.setDirectory(DESKTOP_PATH);
     fileDialog.setReadOnly(0);
     QString fileName;
@@ -572,12 +573,17 @@ void FitResult::on_pushButton_SavePlot_clicked()
         fileName = fileDialog.selectedFiles()[0];
     }
 
-    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
-
+    bool ok = false;
     int ph = plot->geometry().height();
     int pw = plot->geometry().width();
 
-    bool ok = plot->savePdf(fileName, pw, ph );
+    if( fileDialog.selectedNameFilter() == nameFilterList[0]){
+        if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+        ok = plot->savePdf(fileName, pw, ph );
+    }else{
+        if( fileName.right(4) != ".png" ) fileName.append(".png");
+        ok = plot->savePng(fileName, pw, ph );
+    }
 
     if( ok ){
         SendMsg("Saved Fit-Result Plot as " + fileName);
