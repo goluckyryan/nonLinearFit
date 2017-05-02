@@ -776,9 +776,15 @@ void WaveletPlot::on_checkBox_normalized_clicked(bool checked)
 void WaveletPlot::on_pushButton_PlotID_clicked()
 {
     if( wave == NULL ) return;
+
+    int bottomMargin = 40;
+    int rightMargin = 10;
+    int leftMargin = 30;
+    int plotLenght = 900;
+
     QDialog * listPlotDialog = new QDialog(this);
 
-    listPlotDialog->resize(500,900);
+    listPlotDialog->resize(500, plotLenght);
     listPlotDialog->setWindowTitle("ID plot");
 
     //QWidget * plotID = new QWidget(listPlotDialog);
@@ -792,27 +798,37 @@ void WaveletPlot::on_pushButton_PlotID_clicked()
         plotID->plotLayout()->addElement(i,0, axisRect[i]);
     }
 
+
     plotID->plotLayout()->setAutoMargins(QCP::msNone);
-    plotID->plotLayout()->setMargins(QMargins(0,20,10,0));
+    plotID->plotLayout()->setMargins(QMargins(0,0,rightMargin,0));
     plotID->plotLayout()->setRowSpacing(0);
     QList<double> factor;
     for( int i = 0; i < numPlot-1; i++){
         factor.push_back(1.0);
     }
-    factor.push_back(1.5);
+    factor.push_back(1.0 + bottomMargin*1.0/(plotLenght-bottomMargin)*numPlot);
     const QList<double> sf = factor;
     plotID->plotLayout()->setRowStretchFactors( sf );
 
+    QCPPlotTitle * plotTitle = new QCPPlotTitle(plotID, "title");
+    plotTitle->setText(ui->comboBox_Wavelet->currentText() + "-" + QString::number(ui->spinBox_WaveletIndex->value()));
+    plotTitle->setFont(QFont("sans", 16, QFont::Bold));
+    plotID->plotLayout()->insertRow(0);
+    plotID->plotLayout()->addElement(0,0, plotTitle);
+
     //fill data
     QVector<double> x = file->GetDataSetX();
-    int leftMargin = 30;
     for( int i = 0; i < numPlot; i++){
 
         plotID->addGraph(axisRect[i]->axis(QCPAxis::atBottom), axisRect[i]->axis(QCPAxis::atLeft) );
         //plotID->graph(i)->setPen(QPen(Qt::blue));
         axisRect[i]->setAutoMargins(QCP::msNone);
         axisRect[i]->setMargins(QMargins(leftMargin,0,0,0));
-        if( i == numPlot -1 ) axisRect[i]->setMargins(QMargins(leftMargin,0,0,40));
+        axisRect[i]->axis(QCPAxis::atTop)->setVisible(true);
+        axisRect[i]->axis(QCPAxis::atTop)->setTickLabels(false);
+        axisRect[i]->axis(QCPAxis::atRight)->setVisible(true);
+        axisRect[i]->axis(QCPAxis::atRight)->setTickLabels(false);
+        if( i == numPlot -1 ) axisRect[i]->setMargins(QMargins(leftMargin,0,0,bottomMargin));
         if( i < numPlot -1 ) {
             axisRect[i]->axis(QCPAxis::atBottom)->setTickLabels(false);
         }else{
@@ -850,6 +866,7 @@ void WaveletPlot::on_pushButton_PlotID_clicked()
 
         plotID->graph(i)->clearData();
         plotID->graph(i)->addData(x, wy);
+
     }
     plotID->rescaleAxes();
 
@@ -858,17 +875,43 @@ void WaveletPlot::on_pushButton_PlotID_clicked()
         double l = axisRect[i]->axis(QCPAxis::atLeft)->range().lower;
         double u = axisRect[i]->axis(QCPAxis::atLeft)->range().upper;
 
-        if(!ui->checkBox_normalized->isChecked()) {
+        axisRect[i]->axis(QCPAxis::atTop)->setRange(axisRect[i]->axis(QCPAxis::atBottom)->range());
+
+        if(!ui->checkBox_sameYrange->isChecked()) {
             axisRect[i]->axis(QCPAxis::atLeft)->setRange(l *1.2, u*1.2);
+            axisRect[i]->axis(QCPAxis::atRight)->setRange(l*1.2, u*1.2);
         }
         if( l < lowest) lowest = l;
         if( u > uppest) uppest = u;
+
     }
 
-    if( ui->checkBox_normalized->isChecked() ){
+    if( ui->checkBox_sameYrange->isChecked() ){
         for( int i = 0; i < numPlot ; i++){
             axisRect[i]->axis(QCPAxis::atLeft)->setRange(lowest *1.2, uppest*1.2);
+            axisRect[i]->axis(QCPAxis::atRight)->setRange(lowest *1.2, uppest*1.2);
         }
+    }
+
+    QCPItemText ** textLabel = new QCPItemText* [numPlot];
+    for(int i = 0; i < numPlot; i++){
+
+        textLabel[i] = new QCPItemText(plotID);
+        plotID->addItem(textLabel[i]);
+
+        textLabel[i]->setClipToAxisRect(false);
+        textLabel[i]->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
+        textLabel[i]->position->setType( QCPItemPosition::ptAxisRectRatio);
+        textLabel[i]->position->setAxisRect(axisRect[i]);
+        //textLabel[i]->position->setAxes(axisRect[i]->axis(QCPAxis::atBottom), axisRect[i]->axis(QCPAxis::atLeft));
+        textLabel[i]->position->setCoords(1.0,0.);
+        if( i < numPlot -1 ){
+            textLabel[i]->setText("W"+QString::number(i+1));
+        }else{
+            textLabel[i]->setText("V"+QString::number(i));
+        }
+        textLabel[i]->setFont(QFont(font().family(), 16)); // make font a bit larger
+        textLabel[i]->setPen(QPen(Qt::black));
     }
 
     plotID->replot();
