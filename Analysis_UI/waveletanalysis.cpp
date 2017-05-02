@@ -319,11 +319,12 @@ void WaveletAnalysis::RestoreData()
 
 }
 
-void WaveletAnalysis::Reconstruct(){
+void WaveletAnalysis::Reconstruct(int octave){
 
     //qDebug() << "======================== Reconstruct";
 
-    for( int s = MaxScale-1; s > 0; s--){
+    //for( int s = MaxScale-1; s > 0; s--){
+    for( int s = octave; s > 0; s--){
         //qDebug() << "---------- " << s;
         V[s-1].clear();
 

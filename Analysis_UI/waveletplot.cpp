@@ -87,7 +87,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_energy->graph(0)->setPen(QPen(Qt::blue));
     plot_energy->addGraph(plot_energy->yAxis, plot_energy->xAxis);
     plot_energy->graph(1)->setPen(QPen(Qt::red));
-    plot_energy->xAxis->setLabel("FoE [%]");
+    plot_energy->xAxis->setLabel("Fraction of Energy [%]");
     plot_energy->yAxis->setLabel("octave");
     //plot_energy->graph(0)->setLineStyle(QCPGraph::lsLine);
     plot_energy->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
@@ -391,7 +391,8 @@ void WaveletPlot::PlotEnergy()
 
     plot_energy->graph(0)->addData(octave, energy0);
     plot_energy->graph(1)->addData(octave, energy);
-    plot_energy->xAxis->setRange(-10, 50);
+    plot_energy->xAxis->setRange(-5, 50);
+    //plot_energy->rescaleAxes();
     plot_energy->yAxis->setRange(-wave->GetMaxScale(), 0);
     plot_energy->replot();
 }
@@ -423,6 +424,7 @@ void WaveletPlot::on_verticalSlider_Threshold_valueChanged(int value)
 
         ui->lineEdit_Threshold->setText(QString::number(value/100.));
         int sLimit = ui->verticalSlider_Octave->value();
+        int octave = qAbs(ui->verticalSlider_Octave->value());
 
         if( !(sLimit == 0 || value == 0)){
             //qDebug() << "cal." << sLimit << "," << value/100.;
@@ -436,7 +438,7 @@ void WaveletPlot::on_verticalSlider_Threshold_valueChanged(int value)
                 wave->SoftThresholding(value/100., sLimit);
             }
             //SendMsg(wave->GetMsg());
-            wave->Reconstruct();
+            wave->Reconstruct(octave+1);
             //SendMsg(wave->GetMsg());
             wave->CalculateEnergy(0);
 
@@ -546,7 +548,7 @@ void WaveletPlot::on_pushButton_ApplyToAll_clicked()
             wave->HardThresholding(threshold/100., octave);
         }
 
-        wave->Reconstruct();
+        wave->Reconstruct(qAbs(octave)+1);
         file->ChangeZData(yIndex, wave->GetVoctave(0));
         //qDebug() << "WT done for yIndex = " << yIndex;
     }
@@ -611,7 +613,8 @@ void WaveletPlot::on_pushButton_Clean_clicked()
         wave->CleanOutsider(x2, x1, sLimit);
     }
 
-    wave->Reconstruct();
+    int octave = qAbs(ui->verticalSlider_Octave->value());
+    wave->Reconstruct(octave+1);
 
     QVector<double> v0 = wave->GetVoctave(0);
 
@@ -646,7 +649,7 @@ void WaveletPlot::on_comboBox_Wavelet_currentIndexChanged(int index)
     wave->Decompose();
     SendMsg(wave->GetMsg());
     wave->CalculateEnergy();
-    wave->Reconstruct();
+    wave->Reconstruct(1);
 
     enableSpinBoxWaveletIndex = false;
     int numberOfKind = wave->GetWaveletNumberOfKind();
@@ -687,7 +690,7 @@ void WaveletPlot::on_spinBox_WaveletIndex_valueChanged(int arg1)
     wave->Decompose();
     SendMsg(wave->GetMsg());
     wave->CalculateEnergy();
-    wave->Reconstruct();
+    wave->Reconstruct(1);
 
     enableVerticalBar = false;
     ui->verticalSlider_Threshold->setValue(0);
@@ -752,7 +755,7 @@ void WaveletPlot::on_checkBox_normalized_clicked(bool checked)
     }
     wave->Decompose();
     wave->CalculateEnergy();
-    wave->Reconstruct();
+    wave->Reconstruct(1);
 
     enableVerticalBar = false;
     int zMax = qCeil(wave->GetWAbsMax())*100;
@@ -765,4 +768,17 @@ void WaveletPlot::on_checkBox_normalized_clicked(bool checked)
     PlotEnergy();
     PlotWVoctave(ui->verticalSlider_Octave->value());
     PlotReconstructedData();
+}
+
+void WaveletPlot::on_pushButton_PlotID_clicked()
+{
+    if( wave == NULL ) return;
+    QDialog * listPlotDialog = new QDialog(this);
+
+    listPlotDialog->resize(400,600);
+    listPlotDialog->setWindowTitle("ID plot");
+
+
+    listPlotDialog->show();
+
 }

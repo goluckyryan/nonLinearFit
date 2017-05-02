@@ -21,7 +21,7 @@ public:
     void setNormFactor(double f){ normFactor = f;}
     void Decompose();
     void RestoreData();
-    void Reconstruct();
+    void Reconstruct(int octave);
     void CalculateEnergy(bool originEnergyFlag = true);
     void HardThresholding(double threshold, int octave, int type = 0);
     void SoftThresholding(double threshold, int octave);

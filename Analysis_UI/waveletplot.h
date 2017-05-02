@@ -55,6 +55,8 @@ private slots:
 
     void on_checkBox_normalized_clicked(bool checked);
 
+    void on_pushButton_PlotID_clicked();
+
 private:
     Ui::WaveletPlot *ui;
 
