@@ -14,67 +14,24 @@
    <string>Wavelet Analysis</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" rowstretch="2,3,1,1,1,1,1" columnstretch="2,2,1,1,2,2,1,1,3,1,2">
-    <item row="2" column="5">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>octave</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="2">
-     <widget class="QLineEdit" name="lineEdit_x1"/>
-    </item>
-    <item row="3" column="8">
-     <widget class="QComboBox" name="comboBox_Thresholding"/>
-    </item>
-    <item row="3" column="5">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Threshold</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="6" colspan="2">
+   <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,1,3,1,1,1,1,1" columnstretch="2,2,1,1,2,2,1,1,3,1,2">
+    <item row="5" column="6" colspan="2">
      <widget class="QLineEdit" name="lineEdit_Octave"/>
     </item>
-    <item row="1" column="7">
-     <widget class="QSlider" name="verticalSlider_Threshold">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="10">
-     <widget class="QPushButton" name="pushButton_ApplyThreshold">
+    <item row="5" column="4">
+     <widget class="QCheckBox" name="checkBox_normalized">
       <property name="text">
-       <string>Apply Thresholding</string>
+       <string>Normalized</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="8">
-     <widget class="QComboBox" name="comboBox_Wavelet"/>
-    </item>
-    <item row="3" column="6" colspan="2">
+    <item row="6" column="6" colspan="2">
      <widget class="QLineEdit" name="lineEdit_Threshold"/>
     </item>
-    <item row="2" column="9">
-     <widget class="QSpinBox" name="spinBox_WaveletIndex"/>
+    <item row="6" column="3">
+     <widget class="QLineEdit" name="lineEdit_x2"/>
     </item>
-    <item row="2" column="2" colspan="2">
-     <widget class="QPushButton" name="pushButton_Clean">
-      <property name="text">
-       <string>Clean outside</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="6">
+    <item row="4" column="6">
      <widget class="QSlider" name="verticalSlider_Octave">
       <property name="minimum">
        <number>0</number>
@@ -84,64 +41,21 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="3">
-     <widget class="QLineEdit" name="lineEdit_x2"/>
-    </item>
-    <item row="2" column="4">
-     <widget class="QCheckBox" name="checkBox_normalized">
+    <item row="5" column="2" colspan="2">
+     <widget class="QPushButton" name="pushButton_Clean">
       <property name="text">
-       <string>Normalized</string>
+       <string>Clean outside</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="10">
+    <item row="5" column="10">
      <widget class="QPushButton" name="pushButton_ApplyToAll">
       <property name="text">
        <string>Apply to All</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
-     <widget class="QLineEdit" name="lineEdit_totalEnergy">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QLineEdit" name="lineEdit_totalEnergy0">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="8" colspan="3">
-     <widget class="QCustomPlot" name="plot_V" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>300</width>
-        <height>0</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="8" colspan="3">
-     <widget class="QCustomPlot" name="plot_Voct" native="true"/>
-    </item>
-    <item row="0" column="2" colspan="4">
-     <widget class="QCustomPlot" name="plot_Woct" native="true"/>
-    </item>
-    <item row="1" column="2" colspan="4">
-     <widget class="QCustomPlot" name="plot_W" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>300</width>
-        <height>0</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
+    <item row="6" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
        <string>Energy(gated)</string>
@@ -151,7 +65,7 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
+    <item row="5" column="0">
      <widget class="QLabel" name="label_3">
       <property name="text">
        <string>Energy</string>
@@ -161,7 +75,135 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="2">
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="lineEdit_totalEnergy0">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QLineEdit" name="lineEdit_totalEnergy">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>octave</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QSpinBox" name="spinBox_octave"/>
+    </item>
+    <item row="5" column="9">
+     <widget class="QSpinBox" name="spinBox_WaveletIndex"/>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <widget class="QPushButton" name="pushButton_PlotID">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Show Reconstruction Coeff.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="8">
+     <widget class="QComboBox" name="comboBox_Thresholding"/>
+    </item>
+    <item row="5" column="5">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>octave</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="2">
+     <widget class="QLineEdit" name="lineEdit_x1"/>
+    </item>
+    <item row="5" column="8">
+     <widget class="QComboBox" name="comboBox_Wavelet"/>
+    </item>
+    <item row="6" column="5">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Threshold</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="7">
+     <widget class="QSlider" name="verticalSlider_Threshold">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="10">
+     <widget class="QPushButton" name="pushButton_ApplyThreshold">
+      <property name="text">
+       <string>Apply Thresholding</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="2" colspan="4">
+     <widget class="QCustomPlot" name="plot_W" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>0</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="8" rowspan="4" colspan="3">
+     <widget class="QCustomPlot" name="plot_Voct" native="true"/>
+    </item>
+    <item row="4" column="8" colspan="3">
+     <widget class="QCustomPlot" name="plot_V" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>0</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" rowspan="3" colspan="11">
+     <widget class="QCustomPlot" name="plot" native="true"/>
+    </item>
+    <item row="0" column="2" rowspan="4" colspan="4">
+     <widget class="QCustomPlot" name="plot_Woct" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="2">
      <widget class="QCustomPlot" name="plot_energy" native="true">
       <property name="minimumSize">
        <size>
@@ -171,19 +213,10 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0" rowspan="3" colspan="11">
-     <widget class="QCustomPlot" name="plot" native="true"/>
-    </item>
-    <item row="0" column="0">
-     <widget class="QPushButton" name="pushButton_PlotID">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
+    <item row="2" column="1">
+     <widget class="QCheckBox" name="checkBox_sameYrange">
       <property name="text">
-       <string>PushButton</string>
+       <string>same Y-range</string>
       </property>
      </widget>
     </item>

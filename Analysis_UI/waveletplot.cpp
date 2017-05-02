@@ -191,6 +191,9 @@ void WaveletPlot::SetData(FileIO *file, int yIndex)
     colorMap_V->data()->setRange(QCPRange(x[0],x[nx-1]), QCPRange(0,-ny));
     colorMap_V->data()->setSize(nx, ny+1);
 
+    ui->spinBox_octave->setMinimum(-ny+1);
+    ui->spinBox_octave->setMaximum(-1);
+    ui->spinBox_octave->setValue(-ny+1);
     PlotWV();
     PlotEnergy();
 
@@ -775,9 +778,108 @@ void WaveletPlot::on_pushButton_PlotID_clicked()
     if( wave == NULL ) return;
     QDialog * listPlotDialog = new QDialog(this);
 
-    listPlotDialog->resize(400,600);
+    listPlotDialog->resize(500,900);
     listPlotDialog->setWindowTitle("ID plot");
 
+    //QWidget * plotID = new QWidget(listPlotDialog);
+    QCustomPlot * plotID = new QCustomPlot();
+    plotID->plotLayout()->clear();
+    //const int numPlot = wave->GetMaxScale() ;
+    const int numPlot = qAbs(ui->spinBox_octave->value()) + 1 ;
+    QCPAxisRect * * axisRect = new QCPAxisRect* [numPlot];
+    for( int i = 0; i < numPlot; i++){
+        axisRect[i] = new QCPAxisRect(plotID);
+        plotID->plotLayout()->addElement(i,0, axisRect[i]);
+    }
+
+    plotID->plotLayout()->setAutoMargins(QCP::msNone);
+    plotID->plotLayout()->setMargins(QMargins(0,20,10,0));
+    plotID->plotLayout()->setRowSpacing(0);
+    QList<double> factor;
+    for( int i = 0; i < numPlot-1; i++){
+        factor.push_back(1.0);
+    }
+    factor.push_back(1.5);
+    const QList<double> sf = factor;
+    plotID->plotLayout()->setRowStretchFactors( sf );
+
+    //fill data
+    QVector<double> x = file->GetDataSetX();
+    int leftMargin = 30;
+    for( int i = 0; i < numPlot; i++){
+
+        plotID->addGraph(axisRect[i]->axis(QCPAxis::atBottom), axisRect[i]->axis(QCPAxis::atLeft) );
+        //plotID->graph(i)->setPen(QPen(Qt::blue));
+        axisRect[i]->setAutoMargins(QCP::msNone);
+        axisRect[i]->setMargins(QMargins(leftMargin,0,0,0));
+        if( i == numPlot -1 ) axisRect[i]->setMargins(QMargins(leftMargin,0,0,40));
+        if( i < numPlot -1 ) {
+            axisRect[i]->axis(QCPAxis::atBottom)->setTickLabels(false);
+        }else{
+            axisRect[i]->axis(QCPAxis::atBottom)->setLabel("time [us]");
+        }
+
+        QVector<double> w ;
+        QVector<int> wk;
+
+        int octave;
+        if( i < numPlot - 1) {
+            octave = i+1;
+            w = wave->GetWoctave(octave);
+            wk = wave->GetWkoctave(octave);
+        }else{
+            octave = i;
+            w = wave->GetVoctave(octave);
+            wk = wave->GetWkoctave(octave);
+        }
+
+        QVector<double> wy;
+        int n = x.size();
+
+        int count = 0;
+        for( int k = 0; k < w.size(); k++){
+            if( wk[k] < 0 ) continue;
+
+            for( int d = 0; d < qPow(2,octave); d++){
+                wy.push_back( w[k] );
+                count ++;
+            }
+
+            if( count >= n) break;
+        }
+
+        plotID->graph(i)->clearData();
+        plotID->graph(i)->addData(x, wy);
+    }
+    plotID->rescaleAxes();
+
+    double lowest = 0, uppest = 0;
+    for( int i = 0; i < numPlot ; i++){
+        double l = axisRect[i]->axis(QCPAxis::atLeft)->range().lower;
+        double u = axisRect[i]->axis(QCPAxis::atLeft)->range().upper;
+
+        if(!ui->checkBox_normalized->isChecked()) {
+            axisRect[i]->axis(QCPAxis::atLeft)->setRange(l *1.2, u*1.2);
+        }
+        if( l < lowest) lowest = l;
+        if( u > uppest) uppest = u;
+    }
+
+    if( ui->checkBox_normalized->isChecked() ){
+        for( int i = 0; i < numPlot ; i++){
+            axisRect[i]->axis(QCPAxis::atLeft)->setRange(lowest *1.2, uppest*1.2);
+        }
+    }
+
+    plotID->replot();
+
+    //QPushButton * closeButton = new QPushButton("Close");
+    //connect( closeButton, SIGNAL(clicked(bool)), listPlotDialog, SLOT(close())  );
+
+    QVBoxLayout * mainLayout = new QVBoxLayout;
+    mainLayout->addWidget(plotID);
+    //mainLayout->addWidget(closeButton);
+    listPlotDialog->setLayout(mainLayout);
 
     listPlotDialog->show();
 
