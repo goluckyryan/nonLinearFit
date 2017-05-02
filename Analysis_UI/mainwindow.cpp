@@ -1319,6 +1319,7 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->actionSave_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_Contour_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_BFieldPlot_as_PDF->setEnabled(IO);
+    ui->actionSave_Time_Plot_w_o_lines->setEnabled(IO);
 
     ui->actionStatistics->setEnabled(IO);
 
