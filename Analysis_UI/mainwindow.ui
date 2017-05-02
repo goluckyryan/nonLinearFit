@@ -698,6 +698,7 @@
      <string>Plots</string>
     </property>
     <addaction name="actionSave_Plot_as_PDF"/>
+    <addaction name="actionSave_Time_Plot_w_o_lines"/>
     <addaction name="actionSave_Contour_Plot_as_PDF"/>
     <addaction name="actionSave_BFieldPlot_as_PDF"/>
    </widget>
@@ -780,22 +781,26 @@
   </action>
   <action name="actionSave_BFieldPlot_as_PDF">
    <property name="text">
-    <string>Save B-Field-Plot as PDF</string>
+    <string>Save B-Field-Plot</string>
    </property>
-  </action>
-  <action name="actionSave_Fit_Result_Plot_as_PDF">
-   <property name="text">
-    <string>Save Fit Result Plot as PDF</string>
+   <property name="toolTip">
+    <string>Save B-Field-Plot as PDF/PNG</string>
    </property>
   </action>
   <action name="actionSave_Contour_Plot_as_PDF">
    <property name="text">
-    <string>Save Contour-Plot as PDF</string>
+    <string>Save Contour-Plot</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Contour-Plot as PDF/PNG</string>
    </property>
   </action>
   <action name="actionSave_Plot_as_PDF">
    <property name="text">
-    <string>Save Time-Plot as PDF</string>
+    <string>Save Time-Plot</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Time-Plot as PDF/PNG</string>
    </property>
   </action>
   <action name="actionSave_data">
@@ -826,6 +831,11 @@
   <action name="actionOpen_in_File_Explorer">
    <property name="text">
     <string>Open in File Explorer</string>
+   </property>
+  </action>
+  <action name="actionSave_Time_Plot_w_o_lines">
+   <property name="text">
+    <string>Save Time-Plot w/o lines</string>
    </property>
   </action>
  </widget>

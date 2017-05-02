@@ -1319,7 +1319,6 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->actionSave_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_Contour_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_BFieldPlot_as_PDF->setEnabled(IO);
-    ui->actionSave_Fit_Result_Plot_as_PDF->setEnabled(IO);
 
     ui->actionStatistics->setEnabled(IO);
 
@@ -1496,7 +1495,8 @@ void MainWindow::on_actionConvert_Origin_Data_as_Double_X_CVS_triggered()
 void MainWindow::on_actionSave_Plot_as_PDF_triggered()
 {
     QFileDialog fileDialog(this);
-    fileDialog.setNameFilter("pdf (*pdf)");
+    QStringList nameFilterList = {"pdf (*.pdf)", "PNG (*.png)"};
+    fileDialog.setNameFilters(nameFilterList);
     fileDialog.setDirectory(DESKTOP_PATH);
     fileDialog.setReadOnly(0);
     QString fileName;
@@ -1504,16 +1504,17 @@ void MainWindow::on_actionSave_Plot_as_PDF_triggered()
         fileName = fileDialog.selectedFiles()[0];
     }
 
-    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
-
+    bool ok = false;
     int ph = timePlot->geometry().height();
     int pw = timePlot->geometry().width();
+    if( fileDialog.selectedNameFilter() == nameFilterList[0]){
+        if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+        ok = timePlot->savePdf(fileName, pw, ph );
+    }else{
+        if( fileName.right(4) != ".png" ) fileName.append(".png");
+        ok = timePlot->savePng(fileName, pw, ph );
 
-    //plot->graph(1)->clearData();
-    //plot->graph(2)->clearData();
-    //plot->graph(3)->clearData();
-
-    bool ok = timePlot->savePdf(fileName, pw, ph );
+    }
 
     if( ok ){
         Write2Log("Saved Time-Plot as " + fileName);
@@ -1525,7 +1526,8 @@ void MainWindow::on_actionSave_Plot_as_PDF_triggered()
 void MainWindow::on_actionSave_Contour_Plot_as_PDF_triggered()
 {
     QFileDialog fileDialog(this);
-    fileDialog.setNameFilter("pdf (*pdf)");
+    QStringList nameFilterList = {"pdf (*.pdf)", "PNG (*.png)"};
+    fileDialog.setNameFilters(nameFilterList);
     fileDialog.setDirectory(DESKTOP_PATH);
     fileDialog.setReadOnly(0);
     QString fileName;
@@ -1533,16 +1535,20 @@ void MainWindow::on_actionSave_Contour_Plot_as_PDF_triggered()
         fileName = fileDialog.selectedFiles()[0];
     }
 
-    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
-
+    bool ok = false;
     int ph = contourPlot->geometry().height();
     int pw = contourPlot->geometry().width();
-
     //clear the lines;
     contourPlot->graph(0)->clearData();
     contourPlot->graph(1)->clearData();
 
-    bool ok = contourPlot->savePdf(fileName, pw, ph );
+    if( fileDialog.selectedNameFilter() == nameFilterList[0]){
+        if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+        ok = contourPlot->savePdf(fileName, pw, ph );
+    }else{
+        if( fileName.right(4) != ".png" ) fileName.append(".png");
+        ok = contourPlot->savePng(fileName, pw, ph );
+    }
 
     if( ok ){
         Write2Log("Saved Contour-Plot as " + fileName);
@@ -1699,7 +1705,8 @@ void MainWindow::on_spinBox_x2_B_valueChanged(int arg1)
 void MainWindow::on_actionSave_BFieldPlot_as_PDF_triggered()
 {
     QFileDialog fileDialog(this);
-    fileDialog.setNameFilter("pdf (*pdf)");
+    QStringList nameFilterList = {"pdf (*.pdf)", "PNG (*.png)"};
+    fileDialog.setNameFilters(nameFilterList);
     fileDialog.setDirectory(DESKTOP_PATH);
     fileDialog.setReadOnly(0);
     QString fileName;
@@ -1707,15 +1714,21 @@ void MainWindow::on_actionSave_BFieldPlot_as_PDF_triggered()
         fileName = fileDialog.selectedFiles()[0];
     }
 
-    if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
 
+    bool ok = false;
     int ph = bFieldPlot->geometry().height();
     int pw = bFieldPlot->geometry().width();
-
     //clear the lines;
     bFieldPlot->graph(1)->clearData();
+    bFieldPlot->graph(2)->clearData();
 
-    bool ok = bFieldPlot->savePdf(fileName, pw, ph );
+    if( fileDialog.selectedNameFilter() == nameFilterList[0]){
+        if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+        ok = bFieldPlot->savePdf(fileName, pw, ph );
+    }else{
+        if( fileName.right(4) != ".png" ) fileName.append(".png");
+        ok = bFieldPlot->savePng(fileName, pw, ph );
+    }
 
     if( ok ){
         Write2Log("Saved B-field Plot as " + fileName);
@@ -1931,5 +1944,39 @@ void MainWindow::on_actionOpen_in_File_Explorer_triggered()
         QDesktopServices::openUrl(file->GetFileDirectory());
     }else{
         QDesktopServices::openUrl( DATA_PATH );
+    }
+}
+
+void MainWindow::on_actionSave_Time_Plot_w_o_lines_triggered()
+{
+    QFileDialog fileDialog(this);
+    QStringList nameFilterList = {"pdf (*.pdf)", "PNG (*.png)"};
+    fileDialog.setNameFilters(nameFilterList);
+    fileDialog.setDirectory(DESKTOP_PATH);
+    fileDialog.setReadOnly(0);
+    QString fileName;
+    if( fileDialog.exec()){
+        fileName = fileDialog.selectedFiles()[0];
+    }
+
+    bool ok = false;
+    int ph = timePlot->geometry().height();
+    int pw = timePlot->geometry().width();
+    timePlot->graph(1)->clearData();
+    timePlot->graph(2)->clearData();
+    timePlot->graph(3)->clearData();
+    if( fileDialog.selectedNameFilter() == nameFilterList[0]){
+        if( fileName.right(4) != ".pdf" ) fileName.append(".pdf");
+        ok = timePlot->savePdf(fileName, pw, ph );
+    }else{
+        if( fileName.right(4) != ".png" ) fileName.append(".png");
+        ok = timePlot->savePng(fileName, pw, ph );
+
+    }
+
+    if( ok ){
+        Write2Log("Saved Time-Plot as " + fileName);
+    }else{
+        Write2Log("Save Failed.");
     }
 }

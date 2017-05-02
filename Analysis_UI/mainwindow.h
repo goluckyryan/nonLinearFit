@@ -130,6 +130,8 @@ private slots:
 
     void on_actionOpen_in_File_Explorer_triggered();
 
+    void on_actionSave_Time_Plot_w_o_lines_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
