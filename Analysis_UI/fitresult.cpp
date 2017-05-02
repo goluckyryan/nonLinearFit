@@ -110,6 +110,7 @@ void FitResult::SetDataSize(FileIO *file)
     fitPar = new QVector<double> [n];
     fitParError = new QVector<double> [n];
     chisq = new double [n];
+    fitFlag = new int [n];
     plot->xAxis->setRange(file->GetYMin_CV(), file->GetYMax_CV());
     plot->xAxis2->setRange(0,n-1);
     if( file->HasBackGround()) plot->xAxis2->setRange(1,n-1);
@@ -127,6 +128,7 @@ void FitResult::SetDataSize(FileIO *file)
         fitPar[i] = temp;
         fitParError[i] = temp;
         chisq[i] = 0;
+        fitFlag[i] = 9;
     }
 
     QString msg;
@@ -183,10 +185,10 @@ void FitResult::SetAvalibleData(int n)
 
 void FitResult::FillData(Analysis *ana)
 {
-    if( ana->GetFitFlag() != 0){
-        //SendMsg("fit not good.");
-        return;
-    }
+    //if( ana->GetFitFlag() != 0){
+    //    //SendMsg("fit not good.");
+    //    return;
+    //}
 
     int yIndex = ana->GetYIndex();
     this->parSize = ana->GetParametersSize(); // safty
@@ -194,6 +196,7 @@ void FitResult::FillData(Analysis *ana)
     fitParError[yIndex] = ReSizeVector(ana->GetParError());
     int nDF = ana->GetNDF();
     chisq[yIndex] = ana->GetSSR()/nDF/ana->GetSampleVariance();
+    fitFlag[yIndex] = ana->GetFitFlag();
 
 }
 
@@ -421,7 +424,7 @@ void FitResult::on_pushButton_Save_clicked()
     QString lineout, tmp;
 
     //1st line
-    lineout.sprintf("%10s, ", "y-index");
+    lineout.sprintf("%10s, %10s, %10s, %5s, ", "y-index", "y-Value", "Hall.Vol.", "fitID");
     tmp.sprintf("%10s, %10s, %10s, %10s, %10s, ", "a", "Ta", "b", "Tb", "c");
     lineout += tmp;
     tmp.sprintf("%10s, %10s, %10s, %10s, %10s, ", "s(a)", "s(Ta)", "s(b)", "s(Tb)", "s(c)");
@@ -433,7 +436,10 @@ void FitResult::on_pushButton_Save_clicked()
 
     //data
     for(int i = 0 ; i < dataSize ; i++){
-        lineout.sprintf("%10d, ", i);
+
+        double xtemp = file->GetDataY_CV(i);
+        double xtemp2 = file->GetDataY_HV(i);
+        lineout.sprintf("%10d, %10.3f, %10.3f, %5d,", i, xtemp, xtemp2, fitFlag[i]);
 
         for(int j = 0; j < 5; j++){
             tmp.sprintf("%10.3f, ", fitPar[i][j]); lineout += tmp;

@@ -67,6 +67,8 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_Woct = ui->plot_Woct;
     plot_Woct->addGraph();
     plot_Woct->graph(0)->setPen(QPen(Qt::blue));
+    plot_Woct->graph(0)->setLineStyle(QCPGraph::lsLine);
+    //plot_Woct->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
     plot_Woct->xAxis->setLabel("time [us]");
     plot_Woct->yAxis->setLabel("Volatge [a.u.]");
     plot_Woct->graph(0)->clearData();
@@ -76,6 +78,7 @@ WaveletPlot::WaveletPlot(QWidget *parent) :
     plot_Voct = ui->plot_Voct;
     plot_Voct->addGraph();
     plot_Voct->graph(0)->setPen(QPen(Qt::blue));
+    plot_Voct->graph(0)->setLineStyle(QCPGraph::lsLine);
     plot_Voct->xAxis->setLabel("time [us]");
     plot_Voct->yAxis->setLabel("Volatge [a.u.]");
     plot_Voct->graph(0)->clearData();
@@ -260,7 +263,6 @@ void WaveletPlot::PlotWV()
         }
 
         //if( s == 1) qDebug() << temp_W.size() << "--" << temp_W;
-
         for( int k = 0; k < v[s].size(); k++){
             if( vk[s][k] < 0 ) continue;
             for( int d = 0; d < qPow(2,s); d++){

@@ -48,6 +48,7 @@ public:
     double GetTotalEnergy() { return TotalEnergy; }
     int GetMaxScale() {return MaxScale;}
     int GetSize() {return size;}
+    int GetParSize() {return parSize;}
     QString GetMsg() {return msg;}
     double GetWAbsMax() {return WAbsMax;}
     double GetVAbsMax() {return VAbsMax;}

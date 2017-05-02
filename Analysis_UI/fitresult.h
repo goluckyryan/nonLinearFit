@@ -68,6 +68,7 @@ private:
     QVector<double> *fitPar;
     QVector<double> *fitParError;
     double *chisq;
+    int *fitFlag;
 
     int plotComb;
 

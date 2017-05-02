@@ -564,7 +564,7 @@ void FileIO::SaveFitResult(Analysis *ana)
     //set header
     if( outfile->pos() == 0){
 
-        text.sprintf("%5s, %8s,","yIndex", "yValue");
+        text.sprintf("%6s, %8s, %8s, %8s,","yIndex", "yValue", "Hall.V.", "FitID");
         for( int i = 0; i <p ; i++){
             tmp.sprintf(" %8s,", header[i].toStdString().c_str());
             text.append(tmp);
@@ -578,11 +578,11 @@ void FileIO::SaveFitResult(Analysis *ana)
         stream << text;
     }
 
-    tmp.sprintf("%5d, %8.4f, ", ana->GetYIndex(), ana->GetDataYValue());
+    //save
+    double xtemp = this->GetDataY_HV(ana->GetYIndex());
+    tmp.sprintf("%6d, %8.4f, %8.4f, %8d,", ana->GetYIndex(), ana->GetDataYValue(), xtemp, ana->GetFitFlag());
     text = tmp;
-
     QVector<double> sol = ana->GetParameters();
-
     for( int i = 0; i < p ; i++){
         tmp.sprintf("%8.4f, ", sol[i]);
         text += tmp;
@@ -598,11 +598,12 @@ void FileIO::SaveFitResult(Analysis *ana)
     tmp.sprintf("%8.4e, %5d, %8.5f \n", ana->GetSSR(), ana->GetNDF(), chisq);
     text += tmp;
 
-    SendMsg("fit result saved.");
-    SendMsg(text);
+    SendMsg("fit result saved. y-Index = " + QString::number(ana->GetYIndex()));
+    //SendMsg(text);
     stream << text;
 
-    outfile->close();
+    //if close, not append
+    //outfile->close();
 }
 
 void FileIO::SaveCSV(bool doubleX, bool origin)
