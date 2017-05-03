@@ -3,29 +3,7 @@
 //WaveletAnalysis::WaveletAnalysis(QObject *parent) : QObject(parent)
 WaveletAnalysis::WaveletAnalysis(QVector<double> x, QVector<double> a)
 {
-    size = a.size();
-    MaxScale = qFloor( qLn(size)/qLn(2.) );
-
-    V0 = new QVector<double> [MaxScale];
-    W0 = new QVector<double> [MaxScale];
-    Vk = new QVector<int> [MaxScale];
-    Wk = new QVector<int> [MaxScale];
-    V = new QVector<double> [MaxScale];
-    W = new QVector<double> [MaxScale];
-    X0 = new QVector<double> [MaxScale];
-
-    for( int i = 0; i < size; i++){
-        V0[0].push_back(a[i]);
-        W0[0].push_back(0.);
-        X0[0].push_back(x[i]);
-        Vk[0].push_back(i);
-        Wk[0].push_back(i);
-    }
-
-    msg.sprintf("Array size = %d; Max scale = %d", size, MaxScale);
-
-    normFactor = 1;
-
+    SetData(x,a);
 }
 
 WaveletAnalysis::~WaveletAnalysis(){
@@ -54,14 +32,21 @@ void WaveletAnalysis::ClearData()
 
     Z0.clear();
     waveletIndex = 0;
+    waveletName = "";
     numberOfKind = 0;
     waveletPar = 0;
+    normFactor = 1;
+
+    TotalEnergy = 0;
+    TotalEnergy0 = 0;
+    energy.clear();
+    energy0.clear();
 }
 
 void WaveletAnalysis::SetData(QVector<double> x, QVector<double> a)
 {
     size = a.size();
-    MaxScale = qFloor( qLn(size)/qLn(2.) )+1;
+    MaxScale = qFloor( qLn(size)/qLn(2.) );
 
     V0 = new QVector<double> [MaxScale];
     W0 = new QVector<double> [MaxScale];
@@ -71,15 +56,21 @@ void WaveletAnalysis::SetData(QVector<double> x, QVector<double> a)
     W = new QVector<double> [MaxScale];
     X0 = new QVector<double> [MaxScale];
 
+    TotalEnergy0 = 0;
+    TotalEnergy = 0;
+    energy.clear();
+    energy0.clear();
     for( int i = 0; i < size; i++){
         V0[0].push_back(a[i]);
         W0[0].push_back(0.);
         X0[0].push_back(x[i]);
         Vk[0].push_back(i);
         Wk[0].push_back(i);
+        TotalEnergy0 += a[i]*a[i];
     }
 
-    msg.sprintf("Array size = %d; Max scale = %d", size, MaxScale);
+    msg.sprintf("Array size = %d; Max scale = %d; Total Energy = %f [mV^2]", size, MaxScale, TotalEnergy0);
+    normFactor = 1;
 }
 
 void WaveletAnalysis::setWaveletPar(int waveletIndex, int waveletPar)
@@ -387,7 +378,7 @@ void WaveletAnalysis::CalculateEnergy(bool originEnergyFlag)
     //qDebug() << energy;
 
     if( originEnergyFlag ){
-        TotalEnergy0 = TotalEnergy;
+        //TotalEnergy0 = TotalEnergy;
         energy0 = energy;
     }
 }

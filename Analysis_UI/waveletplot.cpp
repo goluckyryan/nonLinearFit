@@ -391,8 +391,8 @@ void WaveletPlot::PlotEnergy()
         energy[i] = energy[i]/totalEnergy*100.;
     }
 
-    ui->lineEdit_totalEnergy0->setText("" + QString::number(totalEnergy0));
-    ui->lineEdit_totalEnergy->setText("" + QString::number(totalEnergy));
+    ui->lineEdit_totalEnergy0->setText(QString::number(totalEnergy0) + "[mV^2]");
+    ui->lineEdit_totalEnergy->setText(QString::number(totalEnergy) + "[mV^2]");
 
     plot_energy->graph(0)->addData(octave, energy0);
     plot_energy->graph(1)->addData(octave, energy);
