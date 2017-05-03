@@ -132,6 +132,8 @@ private slots:
 
     void on_actionSave_Time_Plot_w_o_lines_triggered();
 
+    void on_actionSave_all_Plot_triggered();
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;

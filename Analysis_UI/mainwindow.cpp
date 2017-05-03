@@ -1320,6 +1320,7 @@ void MainWindow::setEnabledPlanel(bool IO)
     ui->actionSave_Contour_Plot_as_PDF->setEnabled(IO);
     ui->actionSave_BFieldPlot_as_PDF->setEnabled(IO);
     ui->actionSave_Time_Plot_w_o_lines->setEnabled(IO);
+    ui->actionSave_all_Plot->setEnabled(IO);
 
     ui->actionStatistics->setEnabled(IO);
 
@@ -1979,4 +1980,95 @@ void MainWindow::on_actionSave_Time_Plot_w_o_lines_triggered()
     }else{
         Write2Log("Save Failed.");
     }
+
+}
+
+void MainWindow::on_actionSave_all_Plot_triggered()
+{
+    // Plot all plots in a Dialog
+    QDialog * testDialog = new QDialog(this);
+    testDialog->resize(600,400);
+
+    QCustomPlot * allPlots = new QCustomPlot();
+    allPlots->plotLayout()->clear();
+    allPlots->setInteraction(QCP::iRangeZoom,true);
+    allPlots->setInteraction(QCP::iRangeDrag,true);
+
+    QCPAxisRect * bPlot = new QCPAxisRect(allPlots);
+    allPlots->plotLayout()->addElement(0,0,bPlot);
+    bPlot->setupFullAxesBox(true);
+    bPlot->axis(QCPAxis::atBottom)->setRangeReversed(true);
+    bPlot->axis(QCPAxis::atLeft)->setTickLabels(false);
+    //bPlot->axis(QCPAxis::atRight)->setTickLabels(true);
+
+    QCPAxisRect * cPlot = new QCPAxisRect(allPlots);
+    QCPColorMap * cMap = new QCPColorMap(cPlot->axis(QCPAxis::atBottom), cPlot->axis(QCPAxis::atLeft));
+    //cPlot->setupFullAxesBox(true);
+    allPlots->plotLayout()->addElement(0,1,cPlot);
+
+    qDebug() << cPlot->layer()->children();
+
+    int size = cPlot->layer()->children().size();
+    qDebug() << cPlot->layer()->children().at(size-1);
+    qDebug() << cPlot->layer()->children().at(size-1)->parentLayerable();
+
+    //allPlots->moveLayer(cPlot->layer()->children().at(1)->layer(), cMap->layer());
+    //cPlot->setLayer(cPlot->layer()->children().at(1)->layer());
+
+    //cPlot->axis(QCPAxis::atBottom)->setLabel("time [us]");
+    //cPlot->axis(QCPAxis::atLeft)->setLabel("Ctrl. Vol. [V]");
+
+    QCPAxisRect * tPlot = new QCPAxisRect(allPlots);
+    allPlots->plotLayout()->addElement(1,1,tPlot);
+    tPlot->setupFullAxesBox(true);
+
+    //add Graph
+    allPlots->addGraph(bPlot->axis(QCPAxis::atLeft), bPlot->axis(QCPAxis::atBottom));
+    allPlots->addGraph(tPlot->axis(QCPAxis::atBottom), tPlot->axis(QCPAxis::atLeft));
+    allPlots->addGraph(cPlot->axis(QCPAxis::atBottom), cPlot->axis(QCPAxis::atLeft));
+
+
+    // set color Scale
+    QCPColorScale *colorScale = new QCPColorScale(allPlots);
+    allPlots->plotLayout()->addElement(0, 2, colorScale); // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    cMap->setColorScale(colorScale); // associate the color map with the color scale
+    QCPColorGradient colorGrad;
+    colorGrad.clearColorStops();
+    colorGrad.setColorStopAt(0, QColor(0,0,255));
+    colorGrad.setColorStopAt(0.5, QColor(255,255,255));
+    colorGrad.setColorStopAt(1, QColor(255,0,0));
+    colorGrad.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    cMap->setGradient( colorGrad ); //color scheme
+
+    //set margin
+    QCPMarginGroup * group = new QCPMarginGroup(allPlots);
+    bPlot->setMarginGroup(QCP::msLeft|QCP::msRight, group);
+    cPlot->setMarginGroup(QCP::msLeft|QCP::msRight|QCP::msTop|QCP::msBottom, group);
+    tPlot->setMarginGroup(QCP::msTop|QCP::msBottom, group);
+
+    //fill data
+    allPlots->graph(0)->setData(bFieldPlot->graph(0)->data(), true);
+    allPlots->graph(1)->setData(timePlot->graph(0)->data(), true);
+    cMap->setData(colorMap->data(),true);
+
+    //rescale axis
+    cMap->rescaleDataRange();
+    cMap->rescaleAxes();
+
+    allPlots->rescaleAxes();
+    allPlots->replot();
+
+    //add to Dialog
+    QVBoxLayout * mainLayout = new QVBoxLayout;
+    mainLayout->addWidget(allPlots);
+    //mainLayout->addWidget(closeButton);
+    testDialog->setLayout(mainLayout);
+    testDialog->show();
+
+    //show message, ask for save
+
+    // open file Dialog
+
+    // save
 }

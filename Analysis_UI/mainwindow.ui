@@ -701,6 +701,7 @@
     <addaction name="actionSave_Time_Plot_w_o_lines"/>
     <addaction name="actionSave_Contour_Plot_as_PDF"/>
     <addaction name="actionSave_BFieldPlot_as_PDF"/>
+    <addaction name="actionSave_all_Plot"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -836,6 +837,11 @@
   <action name="actionSave_Time_Plot_w_o_lines">
    <property name="text">
     <string>Save Time-Plot w/o lines</string>
+   </property>
+  </action>
+  <action name="actionSave_all_Plot">
+   <property name="text">
+    <string>Save all Plot</string>
    </property>
   </action>
  </widget>
