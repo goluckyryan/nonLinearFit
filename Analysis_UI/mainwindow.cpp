@@ -891,28 +891,42 @@ void MainWindow::on_pushButton_Fit_clicked(){
     ana->NonLinearFit(par, gnu);
 
     //display result
+    ana->PrintCoVarMatrix();
+    Msg.sprintf("last Lambda : %e", ana->GetLambda());
+    Write2Log(Msg);
+    Write2Log("===============================");
     ana->PrintVector(ana->GetParameters(), "sol");
     ana->PrintVector(ana->GetParError(), "error");
 
-    if( ana->GetFitFlag() == 4) ui->textEdit->setTextColor(QColor(255,0,0,255));
+    if( ana->GetFitFlag() & 4) ui->textEdit->setTextColor(QColor(255,0,0,255));
     ana->PrintVector(ana->GetSSRgrad(), "SSR grad");
-    ui->textEdit->setTextColor(QColor(0,0,0,255)); // reset to red, no matter what.
+    ui->textEdit->setTextColor(QColor(0,0,0,255)); // reset to black, no matter what.
 
-    ana->PrintCoVarMatrix();
+    if( ana->GetFitFlag() & 8) ui->textEdit->setTextColor(QColor(255,0,0,255));
+    ana->PrintVector(ana->GetParPValue(), "p-Value");
+    ui->textEdit->setTextColor(QColor(0,0,0,255)); // reset to black, no matter what.
 
-    Msg.sprintf("last Lambda : %e", ana->GetLambda());
-    Write2Log(Msg);
+
     Msg.sprintf("DF : %d, SSR: %f, delta: %e", ana->GetNDF(), ana->GetSSR(), ana->GetDelta() );
     Write2Log(Msg);
     double chisq = ana->GetFitVariance()/ana->GetSampleVariance();
-    Msg.sprintf("Fit Variance : %f, Sample Variance : %f, Chi-sq/ndf : %f", ana->GetFitVariance(), ana->GetSampleVariance(), chisq);
+    Msg.sprintf("Fit Variance : %f, Sample Variance : %f, Chi-sq/ndf : %5.3f", ana->GetFitVariance(), ana->GetSampleVariance(), chisq);
     Write2Log(Msg);
 
     if( ana->GetFitFlag() != 0) {
         ui->textEdit->setTextColor(QColor(255,0,0,255));
-        Write2Log("!!!!!!!!!!!!!! fit not good.");
-        ui->textEdit->setTextColor(QColor(0,0,0,255));
+        Msg.sprintf("!!!!!!!!!!!!!! fit not good. Fit-Flag = %d.", ana->GetFitFlag());
+        Write2Log(Msg);
+        if( ana->GetFitFlag() & 4) {
+            Write2Log(" ---- Grad(SSR) is too large.");
+        }
+        if( ana->GetFitFlag() & 8) {
+            Write2Log(" ---- p-Value(s) is too large.");
+        }
     }
+    ui->textEdit->setTextColor(QColor(0,0,0,255));
+
+    //Write2Log(ana->GetFitMsg());
 
     // update the parameter
     UpdateLineTextParameters(ana->GetParameters(), ana->GetParError());

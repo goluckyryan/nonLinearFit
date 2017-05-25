@@ -39,6 +39,8 @@ void Analysis::Initialize(){
     startIndex = 0;
     endIndex = 0;
 
+    fitMsg = "";
+
 }
 
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
@@ -117,6 +119,7 @@ int Analysis::Regression(QVector<double> par0)
 {
     //Levenberg-Marquardt Algorithm
     fitFlag = 0;
+    fitMsg = "";
     int xStart = this->startIndex;
     //int xEnd = this->n - 1;
     int xEnd = this->endIndex;
@@ -164,6 +167,7 @@ int Analysis::Regression(QVector<double> par0)
         this->CoVar = (FtF + DI).Inverse();
     }catch( Exception err){
         fitFlag = 1;
+        fitMsg += "fitFlag += 0001; Fail to calculate covariance. \n";
         return 0; // return 1 when covariance cannot be compute.
     }
 
@@ -215,6 +219,7 @@ int Analysis::Regression(QVector<double> par0)
         this->CoVar = (Fn.Transpose()*Fn).Inverse();
     }catch( Exception err){
         fitFlag = 1;
+        fitMsg += "fitFlag += 0001; Fail to calculate covariance. \n";
         return 0; // return 0 when covariance cannot be compute.
     }
 
@@ -243,6 +248,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         nIter ++;
         if( nIter >= MaxIter ) {
             fitFlag = 2; // fitFlag = 2 when iteration too many
+            fitMsg += "fitFlag += 0010; Fail to converge. \n";
             break;
         }
         bool converge = 0;
@@ -262,6 +268,7 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
     Msg += tmp;
     if( fitFlag == 0) {
         Msg += "| End Normally.";
+        fitMsg += "fitFlag += 0000; Fit ended. Covariance OK. Converged.\n";
     }else if(fitFlag == 1){
         Msg += "| Terminated. Covariance fail to cal.";
     }else if(fitFlag == 2){
@@ -409,10 +416,20 @@ int Analysis::NonLinearFit(QVector<double> par0, bool gnufit)
 
     bool redFlag = 0; // reset redFlag
     for(int i = 0 ; i < gradSSR.size(); i++){
-        redFlag |= std::abs(gradSSR[i]) > 0.02;
+        redFlag |= std::abs(gradSSR[i]) > 0.01;
     }
-
-    if( redFlag ) fitFlag = 4;
+    if( redFlag ) {
+        fitFlag += 4;
+        fitMsg += "fitFlag += 0100; Grad(SSR) > 0.02. \n";
+    }
+    redFlag = 0; // reset redFlag
+    for(int i = 0 ; i < gradSSR.size(); i++){
+        redFlag |= std::abs(pValue[i]) > 0.05;
+    }
+    if( redFlag ) {
+        fitFlag += 8;
+        fitMsg += "fitFlag += 1000; p-Value(s) > 5%. \n";
+    }
 
     return 0;
 }

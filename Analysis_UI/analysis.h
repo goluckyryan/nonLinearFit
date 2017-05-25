@@ -44,6 +44,7 @@ signals:
 
 public slots:
     int GetFitFlag(){return fitFlag;}
+    QString GetFitMsg(){return fitMsg;}
     int GetDataSize(){ return n;}
     int GetStartFitIndex(){return startIndex;}
     int GetEndFitIndex(){return endIndex;}
@@ -93,6 +94,7 @@ public slots:
 
 private:
     QString Msg;
+    QString fitMsg;
 
     QVector<double> xdata, zdata;
     QVector<double> fydata;
