@@ -344,7 +344,7 @@
           <string>Maximum number of iteration.</string>
          </property>
          <property name="text">
-          <string>300</string>
+          <string>350</string>
          </property>
         </widget>
        </item>
@@ -354,7 +354,7 @@
           <string>Fitting tolerance or accuracy of the SSR.</string>
          </property>
          <property name="text">
-          <string>-6</string>
+          <string>-8</string>
          </property>
         </widget>
        </item>

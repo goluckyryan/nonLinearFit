@@ -83,6 +83,14 @@ void FileIO::OpenSaveFileforFit(){
     isOutFileOpened = 1;
 }
 
+void FileIO::CloseSaveFileforFit()
+{
+    if( openState == 0) return;
+    if( isOutFileOpened == 0 ) return;
+    outfile->close();
+    isOutFileOpened = 0;
+}
+
 
 void FileIO::OpenHV2MagParametersFile()
 {

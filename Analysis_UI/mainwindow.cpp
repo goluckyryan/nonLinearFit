@@ -946,6 +946,7 @@ void MainWindow::on_pushButton_guessPars_clicked()
     double c = ana->GetSampleMean();
     ui->lineEdit_c->setText(QString::number(c));
 
+    double sBGvar = ana->GetSampleVariance();
     double f1 = ana->GetDataYMax();
     double fm = ana->GetDataYMin();
     f1 = f1-c;
@@ -956,7 +957,9 @@ void MainWindow::on_pushButton_guessPars_clicked()
         fm = tmp;
     }
 
-    double Ta = ana->FindXFromYAfterTZero(0)*2./3.;
+    fm = fm + sqrt(sBGvar);
+
+    double Ta = ana->FindXFromYAfterTZero(0)*1./2.;
     QString x1str = ui->lineEdit_x->text();
     x1str.chop(2);
     double x1 = x1str.toDouble();
@@ -989,7 +992,7 @@ void MainWindow::on_pushButton_save_clicked()
     statusBar()->showMessage("Save fitted parameters.");
     file->OpenSaveFileforFit();
     file->SaveFitResult(ana);
-
+    file->CloseSaveFileforFit();
 }
 
 void MainWindow::on_pushButton_FitAll_clicked()
@@ -1011,6 +1014,8 @@ void MainWindow::on_pushButton_FitAll_clicked()
 
     QVector<QString> badFitdSSR;
     badFitdSSR.clear();
+
+    file->OpenSaveFileforFit();
 
     for( int yIndex = yStartIndex; yIndex < n ; yIndex ++){
     //for( int yIndex = 100; yIndex < 300 ; yIndex ++){
@@ -1038,15 +1043,20 @@ void MainWindow::on_pushButton_FitAll_clicked()
             badFitdSSR.push_back(msg);
         }
 
-        file->OpenSaveFileforFit();
+
         file->SaveFitResult(ana);
         count ++;
     }
+
+    file->CloseSaveFileforFit();
 
     Write2Log("======== Possible Bad Fit y-Index:");
     for(int i = 0; i < badFitdSSR.size(); i++ ){
         Write2Log(badFitdSSR[i]);
     }
+    QString msg;
+    msg.sprintf("======== number of bad fit : %d.", badFitdSSR.size());
+    Write2Log(msg);
     Write2Log("=================== End of Fit ALL.");
 }
 

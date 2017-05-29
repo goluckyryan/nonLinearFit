@@ -23,6 +23,7 @@ public:
 
     void OpenHV2MagParametersFile();
     void OpenSaveFileforFit();
+    void CloseSaveFileforFit();
     void OpenDoubleXCSVData();
     void OpenTxtData_col();
     void OpenTxtData_row();

@@ -522,11 +522,11 @@ void Analysis::PrintCoVarMatrix(){
             double xy = CoVar(i,j);
             double x  = CoVar(i,i);
             double y  = CoVar(j,j);
-            mat(i,j) =  pow(xy,2) / x / y;
+            mat(i,j) =  xy / sqrt(x) / sqrt(y);
         }
     }
 
-    PrintMatrix(mat, "CoVaraince");
+    PrintMatrix(mat, "Correlation Matrix");
 }
 
 int Analysis::FindXIndex(double goal){

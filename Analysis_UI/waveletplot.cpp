@@ -507,7 +507,14 @@ void WaveletPlot::on_pushButton_ApplyToAll_clicked()
     if( waveletID != 0 ) waveletPar = ui->spinBox_WaveletIndex->value();
 
     int octave = ui->verticalSlider_Octave->value();
-    double threshold = ui->verticalSlider_Threshold->value();
+    //double threshold = ui->verticalSlider_Threshold->value();
+    double threshold = ui->lineEdit_Threshold->text().toDouble();
+    double normFactor = 1;
+    QString normStr = "un-normalized";
+    if( ui->checkBox_normalized->isChecked()) {
+        normFactor = sqrt(2.);
+        normStr = "normalized";
+    }
 
     int yIndexStart = 0;
     if( file->HasBackGround() ) yIndexStart = 1;
@@ -516,9 +523,9 @@ void WaveletPlot::on_pushButton_ApplyToAll_clicked()
 
     enableControl = false;
     QString str;
-    str.sprintf("Applying WT to all Data (%s-%d), octave >= %d, threshold < %4.2f, method: %s",
+    str.sprintf("Applying WT to all Data (%s-%d), %s, octave >= %d, threshold < %4.2f, method: %s",
                 ui->comboBox_Wavelet->currentText().toStdString().c_str(),
-                waveletPar, octave, threshold,
+                waveletPar, normStr.toStdString().c_str(), octave, threshold,
                 ui->comboBox_Thresholding->currentText().toStdString().c_str() );
     SendMsg(str);
 
@@ -542,15 +549,16 @@ void WaveletPlot::on_pushButton_ApplyToAll_clicked()
 
         wave->ClearData();
         wave->SetData(file->GetDataSetX(), file->GetDataSetZ(yIndex));
+        wave->setNormFactor(normFactor);
         wave->setWaveletPar(waveletID, waveletPar);
         wave->Decompose();
 
         if( thresholdType == 1){
-            wave->HardThresholding(threshold/100., octave, 1);
+            wave->HardThresholding(threshold, octave, 1);
         }else if( thresholdType == 2){
-            wave->SoftThresholding(threshold/100., octave);
+            wave->SoftThresholding(threshold, octave);
         }else{
-            wave->HardThresholding(threshold/100., octave);
+            wave->HardThresholding(threshold, octave);
         }
 
         wave->Reconstruct(qAbs(octave)+1);
