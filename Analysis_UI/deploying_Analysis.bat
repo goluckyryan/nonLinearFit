@@ -8,20 +8,21 @@ echo =====================================================
 
 set /p bit="  32-bit or 64-bit Application? (32/64)"
 set /p version="   version? (5_7_0)"
+set /p qt_bin=" Qt bin? (5.7)"
 
 Set name=Analysis_UI.exe
 Set source=%Desktop%\nonLinearFit\Analysis_UI
 IF "%bit%"=="64" (
 	Set fftwLib=libfftw3-3_x64.dll
 	Set origin=%Desktop%\nonLinearFit\build-Analysis_UI-Desktop_Qt_%version%_MSVC2015_64bit-Release\release
-	Set compiler=C:\Qt\5.7\msvc2015_64\bin\
+	Set compiler=C:\Qt\%qt_bin%\msvc2015_64\bin\
 	Set destination=%Desktop%\Analysis_Release_64
 )
 
 IF "%bit%"=="32" (
 	Set fftwLib=libfftw3-3.dll
 	Set origin=%Desktop%\nonLinearFit\build-Analysis_UI-Desktop_Qt_%version%_MinGW_32bit-Release\release
-	Set compiler=C:\Qt\5.7\mingw53_32\bin\
+	Set compiler=C:\Qt\%qt_bin%\mingw53_32\bin\
 	Set destination=%Desktop%\Analysis_Release_32
 )
 
