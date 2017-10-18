@@ -22,6 +22,8 @@ public:
 
     void Initialize();
 
+    void setFunctionType(int fitFuncID);
+
     void SetY(int yIndex, double Bfield){ this->yIndex = yIndex; this->yValue = Bfield;}
     void SetData(const QVector<double> x, const QVector<double> y);
     void SetStartFitIndex(int index){ this->startIndex = index;}
@@ -104,6 +106,8 @@ private:
     QVector<double> pValue;
     QVector<double> gradSSR;
 
+    int fitFuncID;
+
     Matrix CoVar;
 
     double zMin, zMax;
@@ -126,30 +130,50 @@ private:
         return 1/(1+exp(-x/0.6));
     }
 
-    double FitFunc(double x, QVector<double> par){
+    double FitFunc(double x, QVector<double> par, int fitFuncID){
         double fit = 0;
-        fit = par[0] * exp(-x/par[1]);          // when a*Exp[t/Ta]
-        if( par.size() == 3) fit += par[2];     // when a*Exp[t/Ta] + c
-        if( par.size() == 4) fit += par[2] * exp(-x/par[3]); // when a*Exp[t/Ta] + b*Exp[t/Tb]
-        if( par.size() == 5) fit += par[2] * exp(-x/par[3]) + par[4];     // when a*Exp[t/Ta] + b*Exp[t/Ta] + c
+        if(fitFuncID == 0){
+            fit = par[0] * exp(-x/par[1]);          // when a*Exp[t/Ta]
+            if( par.size() == 3) fit += par[2];     // when a*Exp[t/Ta] + c
+            if( par.size() == 4) fit += par[2] * exp(-x/par[3]); // when a*Exp[t/Ta] + b*Exp[t/Tb]
+            if( par.size() == 5) fit += par[2] * exp(-x/par[3]) + par[4];     // when a*Exp[t/Ta] + b*Exp[t/Ta] + c
+        }
+
+        if(fitFuncID == 1){
+//            fit = par[0] * exp(-x/par[1]);          // when a*Exp[t/Ta]
+//            if( par.size() == 3) fit += par[2];     // when a*Exp[t/Ta] + c
+//            if( par.size() == 4) fit = par[0] * exp(-x/par[1]) * sin(2*PI*x/par[3]) + par[3]; // when a*Exp[t/Ta]*sin[2 pi t/Tb] + c
+            fit = par[0] * exp(-x/par[1]) * sin(par[2] + 2* PI *x/par[3] ) + par[4];     // when a*Exp[t/Ta] + b*Exp[t/Ta] + c
+        }
+
         return fit;
     }
 
-    QVector<double> GradFitFunc(double x, QVector<double> par){
+    QVector<double> GradFitFunc(double x, QVector<double> par, int fitFuncID){
         QVector<double> gradFit;
 
-        gradFit.push_back(exp(-x/par[1]));
-        gradFit.push_back(par[0] * x* exp(-x/par[1])/par[1]/par[1]);
-        if(par.size() == 3) gradFit.push_back(1); // in case of c
+        if( fitFuncID == 0){
+            gradFit.push_back(exp(-x/par[1]));
+            gradFit.push_back(par[0] * x* exp(-x/par[1])/par[1]/par[1]);
+            if(par.size() == 3) gradFit.push_back(1); // in case of c
 
-        if( par.size() == 4){
-            gradFit.push_back(exp(-x/par[3]));
-            gradFit.push_back(par[2] * x* exp(-x/par[3])/par[3]/par[3]);
+            if( par.size() == 4){
+                gradFit.push_back(exp(-x/par[3]));
+                gradFit.push_back(par[2] * x* exp(-x/par[3])/par[3]/par[3]);
+            }
+            if( par.size() == 5) {
+                gradFit.push_back(exp(-x/par[3]));
+                gradFit.push_back(par[2] * x* exp(-x/par[3])/par[3]/par[3]);
+                gradFit.push_back(1); // in case of c
+            }
         }
-        if( par.size() == 5) {
-            gradFit.push_back(exp(-x/par[3]));
-            gradFit.push_back(par[2] * x* exp(-x/par[3])/par[3]/par[3]);
-            gradFit.push_back(1); // in case of c
+
+        if( fitFuncID == 1){
+            gradFit.push_back(exp(-x/par[1])*sin(par[2] + 2 * PI * x/par[3] ) );
+            gradFit.push_back(par[0] * x * exp(-x/par[1]) * sin(2*PI*x/par[3] + par[2]) / par[1] /par[1]);
+            gradFit.push_back(par[0] * exp(-x/par[1]) * cos(2*PI*x/par[3] + par[2]));
+            gradFit.push_back((-2) * PI * x * par[0] * exp(-x/par[1]) * cos(2*PI*x/par[3] + par[2])/par[3]/par[3]);
+            gradFit.push_back(1);
         }
         return gradFit;
     }

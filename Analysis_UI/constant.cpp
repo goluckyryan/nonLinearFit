@@ -11,6 +11,7 @@ QString HALL_PATH;
 QString LOG_PATH;
 QString DB_PATH;
 
+double PI = 3.141592654;
 double TORRGRAD = 0.1; //torrenlence for grad of SSR
 double TIME1 = 5.0;  // start fitting time
 double TIME2 = -3.0; // end time of sample mean and variance

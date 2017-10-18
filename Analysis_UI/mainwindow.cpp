@@ -38,7 +38,6 @@ MainWindow::MainWindow(QWidget *parent) :
         msgBox.exec();
     }
 
-
     dbWindow = new DataBaseWindow(this);
     dbWindow->setWindowModality(Qt::WindowModal);
     Write2Log(dbWindow->GetMsg());
@@ -143,6 +142,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QVBoxLayout *mainLayout = new QVBoxLayout(helpDialog);
     mainLayout->addWidget(HelpLabel);
     mainLayout->addWidget(next);
+
+    ui->comboBox_fitFunctionType->addItem("exp + exp");
+    ui->comboBox_fitFunctionType->addItem("exp * sin");
+    ui->comboBox_fitFunctionType->setCurrentIndex(0);
+
 }
 
 MainWindow::~MainWindow(){
@@ -2096,4 +2100,22 @@ void MainWindow::on_actionSave_all_Plot_triggered()
     // open file Dialog
 
     // save
+}
+
+void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
+{
+    if(ana == NULL) return;
+    ana->setFunctionType(index);
+    if( index == 0){
+        ui->checkBox_b_Tb->setEnabled(true);
+        ui->checkBox_c->setEnabled(true);
+        Write2Log("Set fitting function be : a * Exp(-x/Ta) + b * Exp(-x/Tb) + c");
+    }else if( index == 1){
+        ui->checkBox_b_Tb->setChecked(true);
+        ui->checkBox_b_Tb->setEnabled(false);
+        ui->checkBox_c->setChecked(true);
+        ui->checkBox_c->setEnabled(false);
+        fitResultPlot->SetAvalibleData(5);
+        Write2Log("Set fitting function be : a * Exp(-x/Ta) * sin(b + 2*pi * x/Tb) + c");
+    }
 }

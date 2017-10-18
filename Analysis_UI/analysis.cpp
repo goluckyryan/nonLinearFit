@@ -41,6 +41,13 @@ void Analysis::Initialize(){
 
     fitMsg = "";
 
+    fitFuncID = 0;
+
+}
+
+void Analysis::setFunctionType(int fitFuncID)
+{
+    this->fitFuncID = fitFuncID;
 }
 
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
@@ -136,8 +143,8 @@ int Analysis::Regression(QVector<double> par0)
     for(int i = 1; i <= fitSize ; i++) {
         Y(i,1) = zdata[i + xStart - 1];
         double x = xdata[i + xStart - 1];
-        f(i,1) = FitFunc(x, par0);
-        QVector<double> gradf = GradFitFunc(x, par0);
+        f(i,1) = FitFunc(x, par0, fitFuncID);
+        QVector<double> gradf = GradFitFunc(x, par0, fitFuncID);
         for(int j = 1; j <= this->p; j++){
             F(i,j) = gradf[j-1];
         }
@@ -185,8 +192,8 @@ int Analysis::Regression(QVector<double> par0)
     Matrix Fn(fitSize, p);
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i + xStart - 1];
-        fn(i,1) = FitFunc(x, par_new);
-        QVector<double> gradf = GradFitFunc(x, par_new);
+        fn(i,1) = FitFunc(x, par_new, fitFuncID);
+        QVector<double> gradf = GradFitFunc(x, par_new, fitFuncID);
         for(int j = 1; j <= p; j++){
             Fn(i,j) = gradf[j-1];
         }
@@ -386,14 +393,14 @@ int Analysis::GnuFit(QVector<double> par)
     Matrix fn(fitSize,1);
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i + xStart - 1];
-        fn(i,1) = FitFunc(x, this->sol);
+        fn(i,1) = FitFunc(x, this->sol, fitFuncID);
     }
     Matrix dYn = fn-Y;
 
     Matrix F(fitSize,p); // F = grad(f)
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i - 1 + xStart];
-        QVector<double> gradf = GradFitFunc(x, this->sol);
+        QVector<double> gradf = GradFitFunc(x, this->sol, fitFuncID);
         for(int j = 1; j <= p; j++){
             F(i,j) = gradf[j-1];
         }
@@ -438,7 +445,7 @@ void Analysis::CalFitData(QVector<double> par){
     fydata.clear();
     for ( int i = 0; i < this->n; i++){
         double x = xdata[i];
-        fydata.push_back( FitFunc(x, par) );
+        fydata.push_back( FitFunc(x, par, fitFuncID) );
     }
 }
 

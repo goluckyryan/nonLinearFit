@@ -39,7 +39,7 @@
        <string>Fit</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="4" column="1" colspan="2">
+       <item row="5" column="1" colspan="2">
         <widget class="QLineEdit" name="lineEdit_Ta">
          <property name="text">
           <string>20</string>
@@ -50,6 +50,30 @@
         <widget class="QSpinBox" name="spinBox_x">
          <property name="statusTip">
           <string>Set the start-fit-index.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QPushButton" name="pushButton_save">
+         <property name="statusTip">
+          <string>Save fit paramters.</string>
+         </property>
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QLineEdit" name="lineEdit_eTa">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLineEdit" name="lineEdit_ea">
+         <property name="enabled">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -66,34 +90,24 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="3">
-        <widget class="QPushButton" name="pushButton_save">
-         <property name="statusTip">
-          <string>Save fit paramters.</string>
-         </property>
+       <item row="4" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_a">
          <property name="text">
-          <string>Save</string>
+          <string>20</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="3">
-        <widget class="QLineEdit" name="lineEdit_ea">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3">
-        <widget class="QLineEdit" name="lineEdit_eTa">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_4">
+       <item row="6" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_b">
          <property name="text">
-          <string>a</string>
+          <string>-10</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_Ta">
+         <property name="text">
+          <string>Ta</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -110,46 +124,39 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_a">
-         <property name="text">
-          <string>20</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="3">
-        <widget class="QLineEdit" name="lineEdit_eb">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_b">
-         <property name="text">
-          <string>-10</string>
-         </property>
-        </widget>
-       </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="label_a">
          <property name="text">
-          <string>Ta</string>
+          <string>a</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="6" column="1" colspan="2">
+       <item row="6" column="3">
+        <widget class="QLineEdit" name="lineEdit_eb">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="3">
+        <widget class="QLineEdit" name="lineEdit_ec">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1" colspan="2">
         <widget class="QLineEdit" name="lineEdit_Tb">
          <property name="text">
           <string>80</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_7">
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_Tb">
          <property name="text">
           <string>Tb</string>
          </property>
@@ -158,14 +165,7 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="3">
-        <widget class="QLineEdit" name="lineEdit_ec">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="1" colspan="2">
+       <item row="8" column="1" colspan="2">
         <widget class="QLineEdit" name="lineEdit_c">
          <property name="enabled">
           <bool>true</bool>
@@ -175,34 +175,14 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="3">
+       <item row="7" column="3">
         <widget class="QLineEdit" name="lineEdit_eTb">
          <property name="enabled">
           <bool>false</bool>
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
-        <widget class="QCheckBox" name="checkBox_c">
-         <property name="text">
-          <string>c</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="0" colspan="3">
-        <widget class="QPushButton" name="pushButton_FitAll">
-         <property name="statusTip">
-          <string>Fit all data set.</string>
-         </property>
-         <property name="text">
-          <string>Fit All</string>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="1" colspan="2">
+       <item row="10" column="1" colspan="2">
         <widget class="QLineEdit" name="lineEdit_P">
          <property name="statusTip">
           <string>Polarization</string>
@@ -212,7 +192,24 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="3">
+       <item row="10" column="3">
+        <widget class="QLineEdit" name="lineEdit_eP">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QCheckBox" name="checkBox_c">
+         <property name="text">
+          <string>c</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="3">
         <widget class="QPushButton" name="pushButton_Fit">
          <property name="statusTip">
           <string>Fit this single data set.</string>
@@ -222,14 +219,24 @@
          </property>
         </widget>
        </item>
-       <item row="9" column="3">
-        <widget class="QLineEdit" name="lineEdit_eP">
-         <property name="enabled">
-          <bool>false</bool>
+       <item row="9" column="0" colspan="3">
+        <widget class="QPushButton" name="pushButton_FitAll">
+         <property name="statusTip">
+          <string>Fit all data set.</string>
+         </property>
+         <property name="text">
+          <string>Fit All</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="0">
+       <item row="0" column="0" rowspan="2" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>x-Index</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
         <widget class="QLabel" name="label_11">
          <property name="text">
           <string>Pol.</string>
@@ -239,7 +246,17 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="1" column="3">
+        <widget class="QLineEdit" name="lineEdit_x2">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QSpinBox" name="spinBox_x2"/>
+       </item>
+       <item row="6" column="0">
         <widget class="QCheckBox" name="checkBox_b_Tb">
          <property name="text">
           <string>b</string>
@@ -255,22 +272,8 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="2">
-        <widget class="QSpinBox" name="spinBox_x2"/>
-       </item>
-       <item row="0" column="0" rowspan="2" colspan="2">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>x-Index</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLineEdit" name="lineEdit_x2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
+       <item row="3" column="0" colspan="4">
+        <widget class="QComboBox" name="comboBox_fitFunctionType"/>
        </item>
       </layout>
       <zorder>lineEdit_a</zorder>
@@ -282,9 +285,9 @@
       <zorder>spinBox_x</zorder>
       <zorder>pushButton_guessPars</zorder>
       <zorder>label_2</zorder>
-      <zorder>label_4</zorder>
-      <zorder>label_5</zorder>
-      <zorder>label_7</zorder>
+      <zorder>label_a</zorder>
+      <zorder>label_Ta</zorder>
+      <zorder>label_Tb</zorder>
       <zorder>pushButton_save</zorder>
       <zorder>pushButton_FitAll</zorder>
       <zorder>lineEdit_c</zorder>
@@ -300,6 +303,7 @@
       <zorder>checkBox_b_Tb</zorder>
       <zorder>spinBox_x2</zorder>
       <zorder>lineEdit_x2</zorder>
+      <zorder>comboBox_fitFunctionType</zorder>
      </widget>
     </item>
     <item row="0" column="7" rowspan="4" colspan="3">

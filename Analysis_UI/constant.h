@@ -1,7 +1,7 @@
 #ifndef CONSTANT_H
 #define CONSTANT_H
 
-#include "constant.h"
+//#include "constant.h"
 #include <QString>
 #include <QStandardPaths>
 
@@ -22,6 +22,7 @@ extern double TORRGRAD ;
 extern double TIME1 ;
 extern double TIME2 ;
 extern double FITWARNINGTHRESHOLD;
+extern double PI;
 
 #endif // CONSTANT_H
 

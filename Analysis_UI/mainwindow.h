@@ -134,6 +134,8 @@ private slots:
 
     void on_actionSave_all_Plot_triggered();
 
+    void on_comboBox_fitFunctionType_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
