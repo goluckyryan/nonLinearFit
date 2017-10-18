@@ -178,10 +178,11 @@ void MainWindow::SetupPlots()
     ui->verticalSlider_zOffset->setValue(0);
 
     colorMap->data()->clear();
-    int nx = file->GetXDataSize();
-    int ny = file->GetYDataSize();
+    int nx = qMin(file->GetXDataSize(), 1000); // limit the grid size.
+    int ny = qMin(file->GetYDataSize(), 1000);
     if( file->HasBackGround() ) ny = ny -1;
     colorMap->data()->setSize(nx, ny);
+
     //colorMap->setInterpolate(true);
     //colorMap->setTightBoundary(false);
     //colorMap->setAntialiased(true);
