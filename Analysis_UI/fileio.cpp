@@ -712,7 +712,7 @@ void FileIO::SaveTxtData_row()
     for(int i = 0; i < xSize - 1 ; i++){
         tmp.sprintf("%11.4e,", xData[i]); str += tmp;
     }
-    tmp.sprintf("10e\n", xData[xSize-1]); str += tmp;
+    tmp.sprintf("%10e\n", xData[xSize-1]); str += tmp;
     stream << str;
 
     // Set data

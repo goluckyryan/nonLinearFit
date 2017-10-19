@@ -951,34 +951,45 @@ void MainWindow::on_pushButton_guessPars_clicked()
     double c = ana->GetSampleMean();
     ui->lineEdit_c->setText(QString::number(c));
 
-    double sBGvar = ana->GetSampleVariance();
+    int funcType = ui->comboBox_fitFunctionType->currentIndex();
+
     double f1 = ana->GetDataYMax();
     double fm = ana->GetDataYMin();
-    f1 = f1-c;
-    fm = fm-c;
-    if( fabs(f1) < fabs(fm)) {
-        double tmp = f1;
-        f1 = fm;
-        fm = tmp;
+    if( funcType == 0){
+        double sBGvar = ana->GetSampleVariance();
+        f1 = f1-c;
+        fm = fm-c;
+        if( fabs(f1) < fabs(fm)) {
+            double tmp = f1;
+            f1 = fm;
+            fm = tmp;
+        }
+
+        fm = fm + sqrt(sBGvar);
+
+        double Ta = ana->FindXFromYAfterTZero(0)*1./2.;
+        QString x1str = ui->lineEdit_x->text();
+        x1str.chop(2);
+        double x1 = x1str.toDouble();
+        double a = f1 * exp(x1 / Ta);
+
+        qDebug() << "f1 = " << f1;
+        qDebug() << "Ta = " << Ta;
+        qDebug() << "fm = " << fm;
+        qDebug() << "x1 = " << x1;
+
+        ui->lineEdit_a->setText(QString::number(a));
+        ui->lineEdit_b->setText(QString::number(fm*2));
+        ui->lineEdit_Ta->setText(QString::number(Ta));
+        ui->lineEdit_Tb->setText("80");
+
+    }else if (funcType == 1){
+
+        ui->lineEdit_a->setText(QString::number((f1-fm)/2));
+        ui->lineEdit_b->setText("3");
+        ui->lineEdit_Ta->setText("50");
+        ui->lineEdit_Tb->setText("80");
     }
-
-    fm = fm + sqrt(sBGvar);
-
-    double Ta = ana->FindXFromYAfterTZero(0)*1./2.;
-    QString x1str = ui->lineEdit_x->text();
-    x1str.chop(2);
-    double x1 = x1str.toDouble();
-    double a = f1 * exp(x1 / Ta);
-
-    qDebug() << "f1 = " << f1;
-    qDebug() << "Ta = " << Ta;
-    qDebug() << "fm = " << fm;
-    qDebug() << "x1 = " << x1;
-
-    ui->lineEdit_a->setText(QString::number(a));
-    ui->lineEdit_b->setText(QString::number(fm*2));
-    ui->lineEdit_Ta->setText(QString::number(Ta));
-    ui->lineEdit_Tb->setText("80");
 
     ui->lineEdit_ea->setText("");
     ui->lineEdit_eTa->setText("");
@@ -2110,6 +2121,9 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
         ui->checkBox_b_Tb->setEnabled(true);
         ui->checkBox_c->setEnabled(true);
         Write2Log("Set fitting function be : a * Exp(-x/Ta) + b * Exp(-x/Tb) + c");
+        ui->lineEdit_P->setText("");
+        ui->lineEdit_eP->setText("");
+        ui->lineEdit_P->setEnabled(true);
     }else if( index == 1){
         ui->checkBox_b_Tb->setChecked(true);
         ui->checkBox_b_Tb->setEnabled(false);
@@ -2117,5 +2131,10 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
         ui->checkBox_c->setEnabled(false);
         fitResultPlot->SetAvalibleData(5);
         Write2Log("Set fitting function be : a * Exp(-x/Ta) * sin(b + 2*pi * x/Tb) + c");
+        ui->lineEdit_P->setText("NaN");
+        ui->lineEdit_eP->setText("NaN");
+        ui->lineEdit_P->setEnabled(false);
+
+        on_pushButton_guessPars_clicked();
     }
 }
