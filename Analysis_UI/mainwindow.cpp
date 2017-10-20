@@ -2235,14 +2235,25 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
         qDebug() << funGrad_exp_str;
 
         //convert to function;
-        QString function_str = "(function(x) {return " + expression_str + ";})";
+        QString varList = "x, ";
+        for(int i = 0; i < parNumber-1; i++){
+            varList += "p";
+            varList += QString::number(i);
+            varList += ", ";
+        }
+        varList += "p";
+        varList += QString::number(parNumber-1);
+
+        QString function_str = "(function(" + varList +") {return " + expression_str + ";})";
         for(int i = 0; i < parNumber; i++){
-            QString temp_str = "(function(x) {return " + funGrad_exp_str.at(i) + ";})";
+            QString temp_str = "(function(" + varList +") {return " + funGrad_exp_str.at(i) + ";})";
             funGrad_str.push_back(temp_str);
         }
 
         ana->setFunctionExpression(function_str);
         ana->setFunctionGradExpression(funGrad_str);
+
+        qDebug() << funGrad_str;
 
         PlotFitFuncAndXLines();
     }

@@ -156,17 +156,17 @@ private:
         }
 
         if(fitFuncID == 2){
-            //repalce parameter
+
+            QScriptValueList args;
+            args << x;
             for( int i = 0; i < par.size() ; i++ ){
-                QString pX = "p" + QString::number(i);
-                function_str.replace(pX, QString::number(par[i]));
+                args << par[i];
             }
 
             QScriptEngine expression;
-            QScriptValue fun = expression.evaluate(function_str);
-            QScriptValueList args;
-            args << x;
-            QScriptValue ans = fun.call(QScriptValue(), args);
+            QScriptValue function = expression.evaluate(function_str);
+
+            QScriptValue ans = function.call(QScriptValue(), args);
             fit = ans.toNumber();
             //qDebug() << x  << ", " << fit;
         }
@@ -202,23 +202,22 @@ private:
         }
 
         if( fitFuncID == 2){
-            //repalce parameter
+
+            QScriptValueList args;
+            args << x;
+            for( int i = 0; i < par.size() ; i++ ){
+                args << i;
+            }
+
             for( int p = 0; p < par.size() ; p++ ){
                 QString gradFunction = function_grad_str.at(p);
-                for( int i = 0; i < par.size() ; i++ ){
-                    QString pX = "p" + QString::number(i);
-                    gradFunction.replace(pX, QString::number(par[i]));
-                }
-
-
                 QScriptEngine expression;
                 QScriptValue fun = expression.evaluate(gradFunction);
-                QScriptValueList args;
-                args << x;
                 QScriptValue ans = fun.call(QScriptValue(), args);
                 gradFit.push_back(ans.toNumber());
 
-                //qDebug() << x << ", " << gradFunction << ", " << ans.toNumber();
+                //Why the ans becomes nan for finite par?
+                qDebug() << x << "," << gradFunction << ", " << ans.toNumber();
             }
 
             //qDebug() << x << gradFit;

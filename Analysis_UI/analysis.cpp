@@ -278,7 +278,8 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         //if( this->lambda < 1e-5) this->lambda = 1e+5;
         //if( this->lambda > 1e+10) this->lambda = 1e-4;
         contFlag = fitFlag == 0 && ( !converge );
-
+        qDebug() << "Number of Iteration : " << QString::number(nIter);
+        qDebug() << par;
     }while(contFlag);
 
     tmp.sprintf(" %d", nIter);
