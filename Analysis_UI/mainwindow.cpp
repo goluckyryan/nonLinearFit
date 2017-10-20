@@ -819,6 +819,9 @@ void MainWindow::PlotFitFuncAndXLines(){
     if( file == NULL) return;
 
     QVector<double> par = GetParametersFromLineText();
+    if( ui->comboBox_fitFunctionType->currentIndex() == 2){
+        par = ana->GetParameters();
+    }
 
     ana->CalFitData(par);
     PlotTimePlot(1, ana->GetData_x(), ana->GetFitData_y());
@@ -2234,28 +2237,14 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
         qDebug() << expression_str;
         qDebug() << funGrad_exp_str;
 
-        //convert to function;
-        QString varList = "x, ";
-        for(int i = 0; i < parNumber-1; i++){
-            varList += "p";
-            varList += QString::number(i);
-            varList += ", ";
-        }
-        varList += "p";
-        varList += QString::number(parNumber-1);
+        ana->setFunctionExpression((expression_str));
+        ana->setFunctionGradExpression(funGrad_exp_str);
 
-        QString function_str = "(function(" + varList +") {return " + expression_str + ";})";
-        for(int i = 0; i < parNumber; i++){
-            QString temp_str = "(function(" + varList +") {return " + funGrad_exp_str.at(i) + ";})";
-            funGrad_str.push_back(temp_str);
-        }
+        //qDebug() << funGrad_str;
 
-        ana->setFunctionExpression(function_str);
-        ana->setFunctionGradExpression(funGrad_str);
-
-        qDebug() << funGrad_str;
-
-        PlotFitFuncAndXLines();
+        ana->CalFitData(par);
+        PlotTimePlot(1, ana->GetData_x(), ana->GetFitData_y());
+        //PlotFitFuncAndXLines();
     }
 }
 
@@ -2265,8 +2254,8 @@ QString MainWindow::replaceMathExpression(QString func)
 
     new_func.replace("exp", "Math.exp", Qt::CaseSensitive);
     new_func.replace("sin", "Math.sin", Qt::CaseSensitive);
-    new_func.replace("cos", "Math.sin", Qt::CaseSensitive);
-    new_func.replace("tan", "Math.sin", Qt::CaseSensitive);
+    new_func.replace("cos", "Math.cos", Qt::CaseSensitive);
+    new_func.replace("tan", "Math.tan", Qt::CaseSensitive);
     new_func.replace("sqrt", "Math.sqrt", Qt::CaseSensitive);
     new_func.replace("pow", "Math.pow", Qt::CaseSensitive);
 

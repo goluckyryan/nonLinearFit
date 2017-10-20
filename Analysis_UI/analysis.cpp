@@ -60,6 +60,16 @@ void Analysis::setFunctionGradExpression(QStringList str_list)
     this->function_grad_str = str_list;
 }
 
+void Analysis::setEngineParameter(QVector<double> par)
+{
+    for(int i = 0; i < par.size(); i++){
+        QString py = "p" + QString::number(i);
+        engine.globalObject().setProperty(py, par[i]);
+
+        //qDebug() << engine.globalObject().property(py).toNumber();
+    }
+}
+
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
 {
     if( x.size() != y.size() ){
@@ -150,6 +160,7 @@ int Analysis::Regression(QVector<double> par0)
     Matrix Y(fitSize,1);
     Matrix f(fitSize,1);
     Matrix F(fitSize,p); // F = grad(f)
+    if(fitFuncID == 2) setEngineParameter(par0);
     for(int i = 1; i <= fitSize ; i++) {
         Y(i,1) = zdata[i + xStart - 1];
         double x = xdata[i + xStart - 1];
@@ -200,6 +211,7 @@ int Analysis::Regression(QVector<double> par0)
 
     Matrix fn(fitSize, 1);
     Matrix Fn(fitSize, p);
+    if(fitFuncID == 2) setEngineParameter(par_new);
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i + xStart - 1];
         fn(i,1) = FitFunc(x, par_new, fitFuncID);
@@ -280,6 +292,8 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         contFlag = fitFlag == 0 && ( !converge );
         qDebug() << "Number of Iteration : " << QString::number(nIter);
         qDebug() << par;
+        qDebug() << this->delta;
+        qDebug() << this->gradSSR;
     }while(contFlag);
 
     tmp.sprintf(" %d", nIter);
@@ -402,6 +416,7 @@ int Analysis::GnuFit(QVector<double> par)
     }
 
     Matrix fn(fitSize,1);
+    if(fitFuncID == 2) setEngineParameter(this->sol);
     for(int i = 1; i <= fitSize ; i++) {
         double x = xdata[i + xStart - 1];
         fn(i,1) = FitFunc(x, this->sol, fitFuncID);
@@ -454,6 +469,7 @@ int Analysis::NonLinearFit(QVector<double> par0, bool gnufit)
 
 void Analysis::CalFitData(QVector<double> par){
     fydata.clear();
+    if(fitFuncID == 2) setEngineParameter(par);
     for ( int i = 0; i < this->n; i++){
         double x = xdata[i];
         fydata.push_back( FitFunc(x, par, fitFuncID) );

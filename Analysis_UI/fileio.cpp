@@ -397,10 +397,15 @@ void FileIO::OpenTxtData_col()
     yMax_HV = FindMax(newYData_HV);
     yMin_HV = FindMin(newYData_HV);
 
-    yStep_CV = fabs(yData_CV[ySize-1]- yData_CV[ySize-2]);
-    yStep_HV = fabs(yData_HV[ySize-1]- yData_HV[ySize-2]);
-
-    if(newYData_HV[0] > newYData_HV[1]) yRevered = 1;
+    if( ySize > 2){
+        yStep_CV = fabs(yData_CV[ySize-1]- yData_CV[ySize-2]);
+        yStep_HV = fabs(yData_HV[ySize-1]- yData_HV[ySize-2]);
+        if(newYData_HV[0] > newYData_HV[1]) yRevered = 1;
+    }else{
+        yStep_CV = 0;
+        yStep_HV = 0;
+        yRevered = 0;
+    }
 
     openState = 1;
 

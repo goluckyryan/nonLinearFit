@@ -27,6 +27,7 @@ public:
     void setFunctionType(int fitFuncID);
     void setFunctionExpression(QString str);
     void setFunctionGradExpression(QStringList str_list);
+    void setEngineParameter(QVector<double> par);
 
     void SetY(int yIndex, double Bfield){ this->yIndex = yIndex; this->yValue = Bfield;}
     void SetData(const QVector<double> x, const QVector<double> y);
@@ -103,6 +104,7 @@ private:
     QString fitMsg;
     QString function_str; // for custom function
     QStringList function_grad_str;
+    QScriptEngine engine;
 
     QScriptValue cumstomFunction;
     QVector<QScriptValue> cumstomFunGrad;
@@ -157,17 +159,9 @@ private:
 
         if(fitFuncID == 2){
 
-            QScriptValueList args;
-            args << x;
-            for( int i = 0; i < par.size() ; i++ ){
-                args << par[i];
-            }
+            engine.globalObject().setProperty("x", x);
+            fit = engine.evaluate(function_str).toNumber();
 
-            QScriptEngine expression;
-            QScriptValue function = expression.evaluate(function_str);
-
-            QScriptValue ans = function.call(QScriptValue(), args);
-            fit = ans.toNumber();
             //qDebug() << x  << ", " << fit;
         }
 
@@ -203,22 +197,32 @@ private:
 
         if( fitFuncID == 2){
 
-            QScriptValueList args;
-            args << x;
-            for( int i = 0; i < par.size() ; i++ ){
-                args << i;
-            }
+            engine.globalObject().setProperty("x", x);
 
             for( int p = 0; p < par.size() ; p++ ){
                 QString gradFunction = function_grad_str.at(p);
-                QScriptEngine expression;
-                QScriptValue fun = expression.evaluate(gradFunction);
-                QScriptValue ans = fun.call(QScriptValue(), args);
-                gradFit.push_back(ans.toNumber());
+                double fit = engine.evaluate(gradFunction).toNumber();
+                gradFit.push_back(fit);
 
-                //Why the ans becomes nan for finite par?
-                qDebug() << x << "," << gradFunction << ", " << ans.toNumber();
+                //qDebug() << x << "," << gradFunction << ", " << fit;
             }
+
+            //QScriptValueList args;
+            //args << x;
+            //for( int i = 0; i < par.size() ; i++ ){
+            //    args << i;
+            //}
+            //
+            //for( int p = 0; p < par.size() ; p++ ){
+            //    QString gradFunction = function_grad_str.at(p);
+            //    QScriptEngine expression;
+            //    QScriptValue fun = expression.evaluate(gradFunction);
+            //    QScriptValue ans = fun.call(QScriptValue(), args);
+            //    gradFit.push_back(ans.toNumber());
+            //
+            //    //Why the ans becomes nan for finite par?
+            //    qDebug() << x << "," << gradFunction << ", " << ans.toNumber();
+            //}
 
             //qDebug() << x << gradFit;
 
