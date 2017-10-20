@@ -50,6 +50,16 @@ void Analysis::setFunctionType(int fitFuncID)
     this->fitFuncID = fitFuncID;
 }
 
+void Analysis::setFunctionExpression(QString str)
+{
+    this->function_str = str;
+}
+
+void Analysis::setFunctionGradExpression(QStringList str_list)
+{
+    this->function_grad_str = str_list;
+}
+
 void Analysis::SetData(const QVector<double> x, const QVector<double> y)
 {
     if( x.size() != y.size() ){

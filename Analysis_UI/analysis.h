@@ -8,6 +8,8 @@
 #include <math.h>
 #include <QCoreApplication>
 #include <QDir>
+#include <QScriptValue>
+#include <QScriptEngine>
 #include "constant.h"
 #include "matrix.h"
 
@@ -23,6 +25,8 @@ public:
     void Initialize();
 
     void setFunctionType(int fitFuncID);
+    void setFunctionExpression(QString str);
+    void setFunctionGradExpression(QStringList str_list);
 
     void SetY(int yIndex, double Bfield){ this->yIndex = yIndex; this->yValue = Bfield;}
     void SetData(const QVector<double> x, const QVector<double> y);
@@ -97,6 +101,11 @@ public slots:
 private:
     QString Msg;
     QString fitMsg;
+    QString function_str; // for custom function
+    QStringList function_grad_str;
+
+    QScriptValue cumstomFunction;
+    QVector<QScriptValue> cumstomFunGrad;
 
     QVector<double> xdata, zdata;
     QVector<double> fydata;
@@ -146,6 +155,22 @@ private:
             fit = par[0] * exp(-x/par[1]) * sin(par[2] + 2* PI *x/par[3] ) + par[4];     // when a*Exp[t/Ta] + b*Exp[t/Ta] + c
         }
 
+        if(fitFuncID == 2){
+            //repalce parameter
+            for( int i = 0; i < par.size() ; i++ ){
+                QString pX = "p" + QString::number(i);
+                function_str.replace(pX, QString::number(par[i]));
+            }
+
+            QScriptEngine expression;
+            QScriptValue fun = expression.evaluate(function_str);
+            QScriptValueList args;
+            args << x;
+            QScriptValue ans = fun.call(QScriptValue(), args);
+            fit = ans.toNumber();
+            //qDebug() << x  << ", " << fit;
+        }
+
         return fit;
     }
 
@@ -174,6 +199,30 @@ private:
             gradFit.push_back(par[0] * exp(-x/par[1]) * cos(2*PI*x/par[3] + par[2]));
             gradFit.push_back((-2) * PI * x * par[0] * exp(-x/par[1]) * cos(2*PI*x/par[3] + par[2])/par[3]/par[3]);
             gradFit.push_back(1);
+        }
+
+        if( fitFuncID == 2){
+            //repalce parameter
+            for( int p = 0; p < par.size() ; p++ ){
+                QString gradFunction = function_grad_str.at(p);
+                for( int i = 0; i < par.size() ; i++ ){
+                    QString pX = "p" + QString::number(i);
+                    gradFunction.replace(pX, QString::number(par[i]));
+                }
+
+
+                QScriptEngine expression;
+                QScriptValue fun = expression.evaluate(gradFunction);
+                QScriptValueList args;
+                args << x;
+                QScriptValue ans = fun.call(QScriptValue(), args);
+                gradFit.push_back(ans.toNumber());
+
+                //qDebug() << x << ", " << gradFunction << ", " << ans.toNumber();
+            }
+
+            //qDebug() << x << gradFit;
+
         }
         return gradFit;
     }

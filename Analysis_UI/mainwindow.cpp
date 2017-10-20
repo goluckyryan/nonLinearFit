@@ -145,6 +145,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->comboBox_fitFunctionType->addItem("exp + exp");
     ui->comboBox_fitFunctionType->addItem("exp * sin");
+    ui->comboBox_fitFunctionType->addItem("load from file");
     ui->comboBox_fitFunctionType->setCurrentIndex(0);
 
 }
@@ -1126,14 +1127,19 @@ void MainWindow::on_checkBox_c_clicked(bool checked)
 QVector<double> MainWindow::GetParametersFromLineText()
 {
     QVector<double> par;
-    par.push_back(ui->lineEdit_a->text().toDouble());
-    par.push_back(ui->lineEdit_Ta->text().toDouble());
-    if( ui->checkBox_b_Tb->isChecked()){
-        par.push_back(ui->lineEdit_b->text().toDouble());
-        par.push_back(ui->lineEdit_Tb->text().toDouble());
-    }
-    if( ui->checkBox_c->isChecked()){
-        par.push_back(ui->lineEdit_c->text().toDouble());
+
+    if(ui->comboBox_fitFunctionType->currentIndex() != 2){
+        par.push_back(ui->lineEdit_a->text().toDouble());
+        par.push_back(ui->lineEdit_Ta->text().toDouble());
+        if( ui->checkBox_b_Tb->isChecked()){
+            par.push_back(ui->lineEdit_b->text().toDouble());
+            par.push_back(ui->lineEdit_Tb->text().toDouble());
+        }
+        if( ui->checkBox_c->isChecked()){
+            par.push_back(ui->lineEdit_c->text().toDouble());
+        }
+    }else if(ui->comboBox_fitFunctionType->currentIndex() == 2){
+        par = this->par;
     }
 
     return par;
@@ -2124,6 +2130,8 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
         ui->lineEdit_P->setText("");
         ui->lineEdit_eP->setText("");
         ui->lineEdit_P->setEnabled(true);
+
+        on_pushButton_guessPars_clicked();
     }else if( index == 1){
         ui->checkBox_b_Tb->setChecked(true);
         ui->checkBox_b_Tb->setEnabled(false);
@@ -2136,5 +2144,120 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
         ui->lineEdit_P->setEnabled(false);
 
         on_pushButton_guessPars_clicked();
+    }else if( index == 2 ){
+
+        //disable lineEdit;
+
+        //disable some plots;
+
+        // Open file
+        QString fileName = QFileDialog::getOpenFileName(this, "Open function definition file");
+        QString expression_str = "";
+        QStringList funGrad_temp, funGrad_exp_str, funGrad_str;
+        int parNumber = 0;
+        par.clear();
+
+        Write2Log("set custom fit function: ");
+
+        QFile file(fileName);
+        if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            Write2Log(" --- cancelled.");
+            ui->comboBox_fitFunctionType->setCurrentIndex(0);
+            return;
+        }
+
+        QTextStream in(&file);
+        while (!in.atEnd()){
+            QString line = in.readLine();
+
+            if(line.left(1)== "#") continue;
+
+            // function definition
+            if(line.left(8) == "function"){
+                int n = line.indexOf("=") + 1;
+                expression_str = line.remove(0,n);
+
+                //Checking parameter in function is same as par
+                for( int i = 0; i <= 9; i++){
+                    QString pX = "p" + QString::number(i);
+                    if( expression_str.indexOf(pX) >= 0 ) {
+                        parNumber ++;
+                    }else{
+                        break;
+                    }
+                }
+
+                continue;
+            }
+
+            // parameter
+            if(line.left(1) == "p"){
+                if( par.size() == parNumber ) continue;
+                int n = line.indexOf("=") + 1;
+                par.push_back( line.remove(0,n).toDouble());
+            }
+
+            // gradiant
+            if(line.left(1) == "g"){
+                if( funGrad_temp.size() == parNumber ) break;
+                int n = line.indexOf("=") + 1;
+                funGrad_temp.push_back( line.remove(0,n) );
+            }
+
+        }
+
+        file.close();
+
+        Write2Log("  function = " + expression_str);
+        fitResultPlot->SetAvalibleData(par.size());
+        //Write2Log("parameter size : " + QString::number(parNumber));
+        QString msg = "Initial parameter : (";
+        for(int i = 0; i < parNumber - 1; i++){
+            msg += QString::number(par[i]);
+            msg += ", ";
+        }
+        msg += QString::number(par[parNumber-1]);
+        msg += ")";
+        Write2Log(msg);
+        Write2Log("Gradient functions :");
+        for(int i = 0; i < parNumber ; i++){
+            QString gy = "g" + QString::number(i) + " = ";
+            Write2Log( gy  + funGrad_temp.at(i));
+        }
+
+        //replace math expression
+        expression_str = replaceMathExpression(expression_str);
+        for(int i = 0; i < parNumber; i++){
+            funGrad_exp_str.push_back( replaceMathExpression(funGrad_temp.at(i)));
+        }
+
+        qDebug() << expression_str;
+        qDebug() << funGrad_exp_str;
+
+        //convert to function;
+        QString function_str = "(function(x) {return " + expression_str + ";})";
+        for(int i = 0; i < parNumber; i++){
+            QString temp_str = "(function(x) {return " + funGrad_exp_str.at(i) + ";})";
+            funGrad_str.push_back(temp_str);
+        }
+
+        ana->setFunctionExpression(function_str);
+        ana->setFunctionGradExpression(funGrad_str);
+
+        PlotFitFuncAndXLines();
     }
+}
+
+QString MainWindow::replaceMathExpression(QString func)
+{
+    QString new_func = func;
+
+    new_func.replace("exp", "Math.exp", Qt::CaseSensitive);
+    new_func.replace("sin", "Math.sin", Qt::CaseSensitive);
+    new_func.replace("cos", "Math.sin", Qt::CaseSensitive);
+    new_func.replace("tan", "Math.sin", Qt::CaseSensitive);
+    new_func.replace("sqrt", "Math.sqrt", Qt::CaseSensitive);
+    new_func.replace("pow", "Math.pow", Qt::CaseSensitive);
+
+    return new_func;
 }

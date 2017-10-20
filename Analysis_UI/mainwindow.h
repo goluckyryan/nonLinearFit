@@ -136,6 +136,9 @@ private slots:
 
     void on_comboBox_fitFunctionType_currentIndexChanged(int index);
 
+
+    QString replaceMathExpression(QString func);
+
 private:
     Ui::MainWindow *ui;
     FitResult * fitResultPlot;
@@ -162,6 +165,8 @@ private:
     QDialog * helpDialog;
     int picNumber;
     QLabel * HelpLabel;
+
+    QVector<double> par; //only use
 
 };
 
