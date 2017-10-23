@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QScriptValue>
 #include <QScriptEngine>
+#include <QTimer>
 #include "constant.h"
 #include "matrix.h"
 

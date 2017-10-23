@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QKeyEvent>
 #include <QCloseEvent>
+#include <QSysInfo>
 #include "matrix.h"
 #include "analysis.h"
 #include "qcustomplot.h"
@@ -138,6 +139,8 @@ private slots:
 
 
     QString replaceMathExpression(QString func);
+
+    void on_comboBox_fitFunctionType_activated(int index);
 
 private:
     Ui::MainWindow *ui;

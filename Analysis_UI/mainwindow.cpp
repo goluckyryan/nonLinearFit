@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
     file(NULL)
 {
     ui->setupUi(this);
+
+    this->setWindowTitle("Analysis " + QSysInfo::buildCpuArchitecture());
+
     QDateTime date;
     ui->textEdit->append("### Date : " + date.currentDateTime().toString("yyyy-MM-dd HH:mm:ss"));
 
@@ -938,13 +941,13 @@ void MainWindow::on_pushButton_Fit_clicked(){
     //Write2Log(ana->GetFitMsg());
 
     // update the parameter
-    UpdateLineTextParameters(ana->GetParameters(), ana->GetParError());
+    if(ui->comboBox_fitFunctionType->currentIndex() != 2){
+        UpdateLineTextParameters(ana->GetParameters(), ana->GetParError());
+        fitResultPlot->FillData(ana);
+        fitResultPlot->PlotData();
+    }
 
     PlotFitFuncAndXLines();
-
-    fitResultPlot->FillData(ana);
-    fitResultPlot->PlotData();
-
 }
 
 void MainWindow::on_pushButton_guessPars_clicked()
@@ -1375,6 +1378,8 @@ void MainWindow::setEnabledPlanel(bool IO)
 
     ui->spinBox_x1_B->setEnabled(IO);
     ui->spinBox_x2_B->setEnabled(IO);
+
+    ui->comboBox_fitFunctionType->setEnabled(IO);
 }
 
 void MainWindow::on_checkBox_MeanCorr_clicked(bool checked)
@@ -2127,6 +2132,12 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
     if(ana == NULL) return;
     ana->setFunctionType(index);
     if( index == 0){
+        ui->lineEdit_a->setEnabled( true);
+        ui->lineEdit_Ta->setEnabled(true);
+        ui->lineEdit_b->setEnabled( true);
+        ui->lineEdit_Tb->setEnabled(true);
+        ui->lineEdit_c->setEnabled( true);
+
         ui->checkBox_b_Tb->setEnabled(true);
         ui->checkBox_c->setEnabled(true);
         Write2Log("Set fitting function be : a * Exp(-x/Ta) + b * Exp(-x/Tb) + c");
@@ -2136,6 +2147,12 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
 
         on_pushButton_guessPars_clicked();
     }else if( index == 1){
+        ui->lineEdit_a->setEnabled( true);
+        ui->lineEdit_Ta->setEnabled(true);
+        ui->lineEdit_b->setEnabled( true);
+        ui->lineEdit_Tb->setEnabled(true);
+        ui->lineEdit_c->setEnabled( true);
+
         ui->checkBox_b_Tb->setChecked(true);
         ui->checkBox_b_Tb->setEnabled(false);
         ui->checkBox_c->setChecked(true);
@@ -2148,10 +2165,47 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
 
         on_pushButton_guessPars_clicked();
     }else if( index == 2 ){
+        // see on_comboBox_fitFunctionType_activated();
+    }
+}
 
-        //disable lineEdit;
+QString MainWindow::replaceMathExpression(QString func)
+{
+    QString new_func = func;
+
+    new_func.replace("exp", "Math.exp", Qt::CaseSensitive);
+    new_func.replace("sin", "Math.sin", Qt::CaseSensitive);
+    new_func.replace("cos", "Math.cos", Qt::CaseSensitive);
+    new_func.replace("tan", "Math.tan", Qt::CaseSensitive);
+    new_func.replace("sqrt", "Math.sqrt", Qt::CaseSensitive);
+    new_func.replace("pow", "Math.pow", Qt::CaseSensitive);
+
+    return new_func;
+}
+
+void MainWindow::on_comboBox_fitFunctionType_activated(int index)
+{
+    if(ana == NULL) return;
+    if(index == 2){
+        ana->setFunctionType(index);
+
+        //disable lineEdit for parameter;
+        ui->lineEdit_a->setEnabled(false);
+        ui->lineEdit_Ta->setEnabled(false);
+        ui->lineEdit_b->setEnabled(false);
+        ui->lineEdit_Tb->setEnabled(false);
+        ui->lineEdit_c->setEnabled(false);
+        ui->checkBox_b_Tb->setEnabled(false);
+        ui->checkBox_c->setEnabled(false);
+
+        ui->lineEdit_a->setText("---");
+        ui->lineEdit_Ta->setText("---");
+        ui->lineEdit_b->setText("---");
+        ui->lineEdit_Tb->setText("---");
+        ui->lineEdit_c->setText("---");
 
         //disable some plots;
+        ui->actionFit_Result->setEnabled(false);
 
         // Open file
         QString fileName = QFileDialog::getOpenFileName(this, "Open function definition file");
@@ -2212,7 +2266,7 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
         file.close();
 
         Write2Log("  function = " + expression_str);
-        fitResultPlot->SetAvalibleData(par.size());
+        fitResultPlot->SetAvalibleData(par.size()); //TODO , already stop the filling of fit result
         //Write2Log("parameter size : " + QString::number(parNumber));
         QString msg = "Initial parameter : (";
         for(int i = 0; i < parNumber - 1; i++){
@@ -2246,18 +2300,4 @@ void MainWindow::on_comboBox_fitFunctionType_currentIndexChanged(int index)
         PlotTimePlot(1, ana->GetData_x(), ana->GetFitData_y());
         //PlotFitFuncAndXLines();
     }
-}
-
-QString MainWindow::replaceMathExpression(QString func)
-{
-    QString new_func = func;
-
-    new_func.replace("exp", "Math.exp", Qt::CaseSensitive);
-    new_func.replace("sin", "Math.sin", Qt::CaseSensitive);
-    new_func.replace("cos", "Math.cos", Qt::CaseSensitive);
-    new_func.replace("tan", "Math.tan", Qt::CaseSensitive);
-    new_func.replace("sqrt", "Math.sqrt", Qt::CaseSensitive);
-    new_func.replace("pow", "Math.pow", Qt::CaseSensitive);
-
-    return new_func;
 }

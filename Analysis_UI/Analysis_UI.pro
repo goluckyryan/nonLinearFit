@@ -14,18 +14,17 @@ TEMPLATE = app
 RC_ICONS += icon.ico
 
 win32 {
-
     ## Windows common build here
 
     !contains(QMAKE_TARGET.arch, x86_64) {
-        message("x86 build")
-        LIBS += "$$PWD/libfftw3-3.dll"
         ## Windows x86 (32bit) specific build here
+        LIBS += "$$PWD/libfftw3-3.dll"
+        message("x86 build")
 
     } else {
-        message("x86_64 build")
-        LIBS += "$$PWD/libfftw3-3_x64.lib"
         ## Windows x64 (64bit) specific build here
+        LIBS += "$$PWD/libfftw3-3_x64.lib"
+        message("x86_64 build")
 
     }
 }

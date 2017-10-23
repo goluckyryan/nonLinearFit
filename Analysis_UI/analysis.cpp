@@ -269,9 +269,9 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
 
     nIter = 0;
     QVector<double> par = par0;
-    bool contFlag;
+    bool contFlag = true;
     Msg.sprintf(" === Start fit using Levenberg-Marquardt Algorithm: ");
-    do{
+    while(contFlag){
         Regression(par);
         par = this->sol;
         nIter ++;
@@ -290,11 +290,17 @@ int Analysis::LMA( QVector<double> par0, double lambda0){
         //if( this->lambda < 1e-5) this->lambda = 1e+5;
         //if( this->lambda > 1e+10) this->lambda = 1e-4;
         contFlag = fitFlag == 0 && ( !converge );
-        qDebug() << "Number of Iteration : " << QString::number(nIter);
+        if( fitFuncID == 2){
+            QEventLoop eventloop;
+            QTimer::singleShot(10, &eventloop, SLOT(quit()));
+            SendMsg("Number of Iteration : " + QString::number(nIter));
+            eventloop.exec();
+        }
+        //qDebug() << "Number of Iteration : " << QString::number(nIter);
         qDebug() << par;
         qDebug() << this->delta;
         qDebug() << this->gradSSR;
-    }while(contFlag);
+    };
 
     tmp.sprintf(" %d", nIter);
     Msg += tmp;

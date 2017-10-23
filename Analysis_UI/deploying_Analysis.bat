@@ -7,8 +7,8 @@ echo Desktop PATH: %Desktop%
 echo =====================================================
 
 set /p bit="  32-bit or 64-bit Application? (32/64)"
-set /p version="   version? (5_7_0)"
-set /p qt_bin=" Qt bin? (5.7)"
+set /p version="   version? (5_9_2)"
+set /p qt_bin=" Qt bin? (5.9.2)"
 
 Set name=Analysis_UI.exe
 Set source=%Desktop%\nonLinearFit\Analysis_UI

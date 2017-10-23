@@ -240,11 +240,13 @@ void FileIO::OpenDoubleXCSVData(){
 
     //if Control volatge == 0 V, it is bg
     bgIndex = -1;
-    for( int i = 0; i < ySize; i++){
-        if( yData_CV[i] == 0 ) {
-            bgIndex = i;
-        }else{
-            break;
+    if( ySize > 1){
+        for( int i = 0; i < ySize; i++){
+            if( yData_CV[i] == 0 ) {
+                bgIndex = i;
+            }else{
+                break;
+            }
         }
     }
 
@@ -378,11 +380,13 @@ void FileIO::OpenTxtData_col()
 
     //if control voltage == 0 V it is bg
     bgIndex = -1;
-    for( int i = 0; i < ySize; i++){
-        if( yData_CV[i] == 0){
-            bgIndex = i;
-        }else{
-            break;
+    if( ySize > 1){
+        for( int i = 0; i < ySize; i++){
+            if( yData_CV[i] == 0){
+                bgIndex = i;
+            }else{
+                break;
+            }
         }
     }
 
@@ -506,11 +510,13 @@ void FileIO::OpenTxtData_row(){
 
     //if Control volatge == 0 V, it is bg
     bgIndex = -1;
-    for( int i = 0; i < ySize; i++){
-        if( yData_CV[i] == 0 ) {
-            bgIndex = i;
-        }else{
-            break;
+    if(ySize > 1){
+        for( int i = 0; i < ySize; i++){
+            if( yData_CV[i] == 0 ) {
+                bgIndex = i;
+            }else{
+                break;
+            }
         }
     }
 
