@@ -112,6 +112,7 @@ public:
 
   // assignment operator
   Matrix(const Matrix& a){
+    if( this == &a) return ; // check for self-assignment
     rows = a.rows;
     cols = a.cols;
     p = new double*[a.rows];
