@@ -52,7 +52,7 @@ int getData(char* filename){
   double stepY = valY[1]-valY[0];
   sizeY = yIndex + 1 ;
 	
-	printf(" %d, %f \n", sizeY, stepY);
+	printf("sizeY: %d, stepY: %f \n", sizeY, stepY);
 
   //------------ get number of Row
   file.seekg(0);
@@ -64,7 +64,7 @@ int getData(char* filename){
   sizeX = sizeX - 2 ;
   file.close();
   
-  printf(" %d\n", sizeX);
+  printf("sizeX: %d\n", sizeX);
   
   
   //------------ get data  
@@ -96,7 +96,7 @@ int getData(char* filename){
    // get data
    if( cols % 2 == 0){
 	   double Zval = atof(val.c_str())*pow(10,multi_Z); // multiplied by 10^6 times
-	   data[yIndex][xIndex] = Zval;
+	   allData[yIndex][xIndex] = Zval;
 	   if( Zval > maxZ) maxZ = Zval;
 	   if( Zval < minZ) minZ = Zval;
 	   ///printf("*%10d, %3d, %3d, %s, %f\n", cols, cols% numCol, yIndex, val.c_str(), data[yIndex][xIndex]);
@@ -138,7 +138,7 @@ int output(char* filename){
 	for (int i = 0; i < sizeX; i++){
 		fprintf(file, "%10.3f,", valX[i]);
 		for (int j = 0; j < sizeY; j++){
-			fprintf(file, "%10.2f,", data[j][i]);
+			fprintf(file, "%10.2f,", allData[j][i]);
 		} 
 		fprintf(file, "\n");
 	}

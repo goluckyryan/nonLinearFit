@@ -17,7 +17,7 @@ using namespace std;
 
 double valX [2000];      // val of X or time
 double valY [4000];       // val of Y or B-field
-double data [4000][2000]; // val of data
+double allData [4000][2000]; // val of data
 int sizeX, sizeY;
 int errFlag;  //err
 
@@ -52,14 +52,14 @@ void MeanVariance(int yIndex){
 	//find mean
 	sMean = 0;
 	for( int i = 0; i < xEnd ; i++){
-		sMean += data[yIndex][i];
+		sMean += allData[yIndex][i];
 	} 
 	sMean = sMean/xEnd;
 	
 	//find variance
 	sVar = 0;
 	for( int i = 0; i < xEnd ; i++){
-		sVar += pow(data[yIndex][i] - sMean,2);
+		sVar += pow(allData[yIndex][i] - sMean,2);
 	} 
 	sVar = sVar/(xEnd-1);
 	
@@ -104,8 +104,9 @@ int regression(int yIndex, Matrix par, int info){
 	Matrix Y(n,1);
 	Matrix f(n,1);
 	Matrix F(n,p);
+
 	for(int i = 1; i <= n ; i++) {
-		Y(i,1) = data[yIndex][i - 1 + xStart];
+		Y(i,1) = allData[yIndex][i - 1 + xStart];
 		double x = valX[i - 1 +xStart];
 		f(i,1) = FitFunction(x, par);
 		Matrix Frow = GradFitFunction(x, par);

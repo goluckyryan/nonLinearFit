@@ -13,32 +13,8 @@ void Shift(int n,int * data){
 	data[0] = temp;
 }
 
-
-
-
- 
 int main(int argc, char *argv[]){ 
-	
-	const int n = 10;
-	int * data = new int [n];
-	for(int i = 0; i < n; i++){
-		data[i] = i;
-	}
-	
-	for(int i = 0; i < n; i++){
-		printf("%d, ", data[i]);
-	}
-	printf("\n");
-	
-	Shift(n, data);
-	
-	for(int i = 0; i < n; i++){
-		printf("%d, ", data[i]);
-	}
-	printf("\n");
-	
-	return 0;
-	
+		
 	if( argc != 3 && argc != 5 && argc != 7 && argc != 8){
 		printf("usage: ./analaysis fileName yindex (a Ta b Tb lambda)\n");
 		printf("     yIndex = -1 ; loop all, minimum massage. \n");
@@ -100,6 +76,7 @@ int main(int argc, char *argv[]){
 			SaveFitResult(savefile, i);
 		}
 	}else{
+		// for( int i = 0; i < sizeY; i++) printf(" %3d, %7.3f \n", i, valY[i]);
 		NonLinearFit(yIndex, 4, par0);
 		SaveFitResult(savefile_single, yIndex);
 	}
